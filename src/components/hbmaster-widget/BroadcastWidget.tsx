@@ -10,16 +10,28 @@ interface BroadcastWidgetProps {
   position?: "bottom-right" | "bottom-left";
 }
 
-const BROADCASTS = [
-  { text: "Cold Store: 1.247 boeketten verwerkt. Tempo +12% vs gisteren.", source: "Productie", severity: "success" as const },
-  { text: "Lijn 3 draait onder capaciteit — 2 posities onbezet.", source: "Lijnbezetting", severity: "warning" as const },
-  { text: "Kwaliteitsindex orchideeën: 94.2% — stabiel.", source: "Quality", severity: "info" as const },
-  { text: "Order forecast morgen: 3.800 boeketten. Hoge druk verwacht.", source: "Planning", severity: "warning" as const },
-  { text: "Kenya farm: 12.000 stems geoogst vandaag. Grade A: 96%.", source: "Kenya Ops", severity: "success" as const },
-  { text: "APU lijn 1: gemiddeld 142 boeketten/uur. Top performance.", source: "Analytics", severity: "success" as const },
-  { text: "Watervoorraad koelcel 2 laag — bijvullen aanbevolen.", source: "Facilities", severity: "warning" as const },
-  { text: "Nieuwe klantorder binnenkomst: Bloemenveiling 480 stuks.", source: "Orders", severity: "info" as const },
-];
+const BROADCASTS: Record<string, { text: string; source: string; severity: "success" | "warning" | "info" }[]> = {
+  default: [
+    { text: "Cold Store: 1.247 boeketten verwerkt. Tempo +12% vs gisteren.", source: "Productie", severity: "success" },
+    { text: "Lijn 3 draait onder capaciteit — 2 posities onbezet.", source: "Lijnbezetting", severity: "warning" },
+    { text: "Kwaliteitsindex orchideeën: 94.2% — stabiel.", source: "Quality", severity: "info" },
+    { text: "Order forecast morgen: 3.800 boeketten. Hoge druk verwacht.", source: "Planning", severity: "warning" },
+    { text: "Kenya farm: 12.000 stems geoogst vandaag. Grade A: 96%.", source: "Kenya Ops", severity: "success" },
+    { text: "APU lijn 1: gemiddeld 142 boeketten/uur. Top performance.", source: "Analytics", severity: "success" },
+    { text: "Watervoorraad koelcel 2 laag — bijvullen aanbevolen.", source: "Facilities", severity: "warning" },
+    { text: "Nieuwe klantorder binnenkomst: Bloemenveiling 480 stuks.", source: "Orders", severity: "info" },
+  ],
+  realestate: [
+    { text: "Alle woningen van HBM Real Estate zijn SNF-gecertificeerd.", source: "Certificering", severity: "success" },
+    { text: "Inspectie Regio Aalsmeer afgerond — alle woningen goedgekeurd.", source: "Inspectie", severity: "success" },
+    { text: "ABU-conformiteit garandeert eerlijke huisvestingsvoorwaarden.", source: "Compliance", severity: "info" },
+    { text: "Onderhoudsmeldingen worden binnen 24 uur in behandeling genomen.", source: "Onderhoud", severity: "info" },
+    { text: "Brandveiligheid gecontroleerd — alle installaties gecertificeerd.", source: "Veiligheid", severity: "success" },
+    { text: "Gemeentelijke vergunningen Haarlemmermeer verlengd tot 2027.", source: "Vergunningen", severity: "success" },
+    { text: "HBM Real Estate investeert continu in verduurzaming van vastgoed.", source: "Duurzaamheid", severity: "info" },
+    { text: "Halfjaarlijkse SNF-inspectie gepland voor volgende maand.", source: "Planning", severity: "warning" },
+  ],
+};
 
 const BroadcastWidget = ({ theme, position = "bottom-left" }: BroadcastWidgetProps) => {
   const [current, setCurrent] = useState(0);
@@ -30,14 +42,15 @@ const BroadcastWidget = ({ theme, position = "bottom-left" }: BroadcastWidgetPro
     const interval = setInterval(() => {
       setFadeIn(false);
       setTimeout(() => {
-        setCurrent(prev => (prev + 1) % BROADCASTS.length);
+        setCurrent(prev => (prev + 1) % (BROADCASTS[theme] || BROADCASTS.default).length);
         setFadeIn(true);
       }, 400);
     }, 6000);
     return () => clearInterval(interval);
   }, []);
 
-  const msg = BROADCASTS[current];
+  const msgs = BROADCASTS[theme] || BROADCASTS.default;
+  const msg = msgs[current % msgs.length];
   const sevColor = msg.severity === "success" ? "155 55% 42%" : msg.severity === "warning" ? "40 90% 50%" : accent.hsl;
 
   return (
