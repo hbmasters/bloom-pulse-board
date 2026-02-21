@@ -11,6 +11,7 @@ export interface ActiveProduct {
   id: number;
   name: string;
   image: string;
+  customer?: string;
   startTime: string;
   expectedEndTime: string;
   people: number;
@@ -90,6 +91,21 @@ export const activeProducts: ActiveProduct[] = [
     piecesPerHour: 88,
     plannedPiecesPerHour: 85,
     status: "on-schedule",
+  },
+  {
+    id: 4,
+    name: "BQ Spring Mix",
+    image: "",
+    customer: "HBM WS",
+    startTime: "09:30",
+    expectedEndTime: "14:00",
+    people: 2,
+    produced: 95,
+    target: 300,
+    minutesActive: 60,
+    piecesPerHour: 95,
+    plannedPiecesPerHour: 90,
+    status: "faster",
   },
 ];
 

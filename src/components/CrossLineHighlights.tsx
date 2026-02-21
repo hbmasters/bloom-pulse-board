@@ -1,9 +1,9 @@
 import { crossLineAlerts } from "@/data/mockData";
 
-const lineLeaders: Record<string, { name: string; initials: string }> = {
-  "Hand Line 3": { name: "Marta", initials: "MA" },
-  "Belt Line 2": { name: "Jolanta", initials: "JO" },
-  "Hand Line 5": { name: "Renata", initials: "RE" },
+const lineLeaders: Record<string, { name: string; initials: string; initials2: string }> = {
+  "Hand Line 3": { name: "Marta", initials: "MA", initials2: "EL" },
+  "Belt Line 2": { name: "Jolanta", initials: "JO", initials2: "KA" },
+  "Hand Line 5": { name: "Renata", initials: "RE", initials2: "DA" },
 };
 
 const CrossLineHighlights = () => {
@@ -19,8 +19,13 @@ const CrossLineHighlights = () => {
           const leader = lineLeaders[alert.line];
           return (
             <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-border/60 bg-card/60">
-              <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 shadow-sm">
-                <span className="text-[9px] font-black text-primary-foreground">{leader ? leader.initials : (i === 0 ? "?" : "?")}</span>
+              <div className="flex items-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center shadow-sm border-2 border-card z-10">
+                  <span className="text-[9px] font-black text-primary-foreground">{leader ? leader.initials : "?"}</span>
+                </div>
+                <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center shadow-sm border-2 border-card -ml-2.5">
+                  <span className="text-[9px] font-black text-primary-foreground">{leader ? leader.initials2 : "?"}</span>
+                </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-bold text-foreground/80 truncate">

@@ -24,8 +24,9 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
         {product.image ? (
           <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-secondary">
-            <Package className="w-12 h-12 text-muted-foreground/30" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-secondary gap-1">
+            <span className="text-lg font-black text-foreground/60">{product.customer || product.name}</span>
+            <span className="text-[10px] text-muted-foreground">{product.customer ? product.name : ""}</span>
           </div>
         )}
         <div className="absolute top-2 left-2">
@@ -68,7 +69,7 @@ const ActiveProduction = () => {
         <div className="w-2 h-2 rounded-full bg-accent animate-pulse-slow" />
         <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">In Production</h2>
       </div>
-      <div className="grid grid-cols-3 gap-3 flex-1 min-h-0 auto-rows-fr">
+      <div className="grid grid-cols-4 gap-3 flex-1 min-h-0 auto-rows-fr">
         {activeProducts.map((product) => (
           <ActiveProductCard key={product.id} product={product} />
         ))}

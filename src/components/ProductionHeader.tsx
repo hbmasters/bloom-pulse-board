@@ -37,13 +37,6 @@ const ProductionHeader = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 px-5 py-2 rounded-xl border border-accent/30 bg-accent/8 glow-success ml-2">
-          <div className="leading-none text-center">
-            <div className="text-[9px] text-accent uppercase tracking-wider font-bold">APU</div>
-            <div className="text-4xl font-mono font-black text-accent text-glow-success leading-none">{lineStats.currentPiecesPerHour}</div>
-          </div>
-        </div>
-
         <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-accent/20 bg-accent/5">
           <TrendingUp className="w-4 h-4 text-accent" />
           <div className="leading-none">
