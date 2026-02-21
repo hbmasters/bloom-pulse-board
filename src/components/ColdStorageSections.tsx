@@ -31,6 +31,7 @@ const SectionHeader = ({
   totalPcs,
   color,
   progress,
+  onIconClick,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -39,11 +40,17 @@ const SectionHeader = ({
   totalPcs: number;
   color: string;
   progress?: number;
+  onIconClick?: () => void;
 }) => (
   <div className="mb-1.5 shrink-0">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1.5">
-        <div className={`w-5 h-5 rounded-md flex items-center justify-center ${color}`}>{icon}</div>
+        <div
+          className={`w-5 h-5 rounded-md flex items-center justify-center ${color} ${onIconClick ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+          onClick={onIconClick}
+        >
+          {icon}
+        </div>
         <h3 className="text-[10px] font-bold text-foreground uppercase tracking-wider">{title}</h3>
         <span className="text-[9px] font-mono font-bold text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full">
           {count}
@@ -287,7 +294,7 @@ const FastestPickerPanel = () => (
 
 const ColdStorageSections = () => {
   const [selectedOrder, setSelectedOrder] = useState<ColdStorageOrder | PickedOrder | null>(null);
-  const [leftHovered, setLeftHovered] = useState(false);
+  const [printedOpen, setPrintedOpen] = useState(false);
   const gridCols = getPickedGridCols(pickedOrders.length);
   const gridRows = getPickedGridRows(pickedOrders.length);
 
@@ -295,29 +302,41 @@ const ColdStorageSections = () => {
     <>
       <div
         className="grid gap-3 h-full transition-all duration-300"
-        style={{ gridTemplateColumns: leftHovered ? '1fr 2fr 1fr' : '0.6fr 2fr 1fr' }}
+        style={{ gridTemplateColumns: printedOpen ? '1fr 2fr 1.2fr' : '40px 2fr 1.2fr' }}
       >
-        {/* Left: Printed + Fastest Picker — narrow by default, expands on hover */}
-        <div
-          className="flex flex-col min-h-0 overflow-hidden"
-          onMouseEnter={() => setLeftHovered(true)}
-          onMouseLeave={() => setLeftHovered(false)}
-        >
-          <div className="flex-1 flex flex-col min-h-0">
-            <SectionHeader
-              icon={<Printer className="w-3 h-3 text-primary-foreground" />}
-              title="Printed"
-              count={printedOrders.length}
-              totalMinutes={getTotalMinutes(printedOrders)}
-              totalPcs={getTotalQuantity(printedOrders)}
-              color="bg-bloom-sky"
-            />
-            <div className="flex-1 min-h-0 overflow-auto space-y-1 pr-1">
-              {printedOrders.map((order) => (
-                <PrintedOrderRow key={order.id} order={order} onClick={() => setSelectedOrder(order)} />
-              ))}
+        {/* Left: Printed — collapsed by default, toggle via printer icon */}
+        <div className="flex flex-col min-h-0 overflow-hidden transition-all duration-300">
+          {printedOpen ? (
+            <div className="flex-1 flex flex-col min-h-0">
+              <SectionHeader
+                icon={<Printer className="w-3 h-3 text-primary-foreground" />}
+                title="Printed"
+                count={printedOrders.length}
+                totalMinutes={getTotalMinutes(printedOrders)}
+                totalPcs={getTotalQuantity(printedOrders)}
+                color="bg-bloom-sky"
+                onIconClick={() => setPrintedOpen(false)}
+              />
+              <div className="flex-1 min-h-0 overflow-auto space-y-1 pr-1">
+                {printedOrders.map((order) => (
+                  <PrintedOrderRow key={order.id} order={order} onClick={() => setSelectedOrder(order)} />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center pt-1 gap-2">
+              <button
+                onClick={() => setPrintedOpen(true)}
+                className="w-8 h-8 rounded-lg bg-bloom-sky flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm"
+                title="Toon Printed orders"
+              >
+                <Printer className="w-4 h-4 text-primary-foreground" />
+              </button>
+              <span className="text-[9px] font-mono font-bold text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full">
+                {printedOrders.length}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Center: Picked */}
