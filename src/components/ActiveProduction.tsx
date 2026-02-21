@@ -19,8 +19,8 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
   const speedDiff = Math.round(((product.piecesPerHour - product.plannedPiecesPerHour) / product.plannedPiecesPerHour) * 100);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col shadow-sm">
-      <div className="relative w-full overflow-hidden bg-secondary" style={{ paddingBottom: "100%" }}>
+    <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full shadow-sm">
+      <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary">
         <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute top-2 left-2">
           <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md border ${status.className}`}>
