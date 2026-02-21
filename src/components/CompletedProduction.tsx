@@ -1,3 +1,4 @@
+import { CalendarDays } from "lucide-react";
 import { completedProducts } from "@/data/mockData";
 
 const getBadge = (planned: number, actual: number) => {
@@ -25,8 +26,9 @@ const CompletedProduction = () => {
                     {badge.label}
                   </span>
                 </div>
-                <div className="text-[9px] text-muted-foreground mt-0.5">
-                  {item.completedAt} · {item.actualMinutes}min (plan: {item.plannedMinutes}min)
+                <div className="flex items-center gap-2 text-[9px] text-muted-foreground mt-0.5">
+                  <span className="flex items-center gap-0.5"><CalendarDays className="w-2.5 h-2.5" />{item.departureDate}</span>
+                  <span>{item.completedAt} · {item.actualMinutes}min (plan: {item.plannedMinutes}min)</span>
                 </div>
               </div>
               <div className="text-right shrink-0">

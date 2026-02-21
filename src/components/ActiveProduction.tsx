@@ -1,4 +1,4 @@
-import { Clock, Users, Zap, Rocket, ThumbsUp, Package } from "lucide-react";
+import { CalendarDays, Users, Zap, Rocket, ThumbsUp, Package } from "lucide-react";
 import { activeProducts, type ActiveProduct } from "@/data/mockData";
 
 const statusConfig = {
@@ -43,6 +43,7 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
         <h3 className="text-sm font-bold text-foreground truncate mb-1">{product.name}</h3>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-1.5">
           <span className="flex items-center gap-1 font-semibold text-foreground/80"><Users className="w-3 h-3 text-primary" />{product.people} people</span>
+          <span className="flex items-center gap-1 font-semibold text-foreground/80"><CalendarDays className="w-3 h-3 text-primary" />{product.departureDate}</span>
           <span className="flex items-center gap-1 font-semibold text-accent"><Zap className="w-3 h-3" />{product.piecesPerHour} APU{speedDiff > 0 && <span className="text-[8px] font-bold ml-0.5">+{speedDiff}%</span>}</span>
         </div>
         <div className="flex justify-between text-[9px] mb-0.5">

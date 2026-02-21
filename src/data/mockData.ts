@@ -12,6 +12,7 @@ export interface ActiveProduct {
   name: string;
   image: string;
   customer?: string;
+  departureDate: string;
   startTime: string;
   expectedEndTime: string;
   people: number;
@@ -27,6 +28,7 @@ export interface CompletedProduct {
   id: number;
   name: string;
   quantity: number;
+  departureDate: string;
   plannedMinutes: number;
   actualMinutes: number;
   completedAt: string;
@@ -54,6 +56,7 @@ export const activeProducts: ActiveProduct[] = [
     id: 1,
     name: "BQ Field L",
     image: productFieldL,
+    departureDate: "21 feb",
     startTime: "07:00",
     expectedEndTime: "11:30",
     people: 3,
@@ -68,6 +71,7 @@ export const activeProducts: ActiveProduct[] = [
     id: 2,
     name: "BQ Elegance",
     image: productElegance,
+    departureDate: "22 feb",
     startTime: "07:15",
     expectedEndTime: "12:00",
     people: 2,
@@ -82,6 +86,7 @@ export const activeProducts: ActiveProduct[] = [
     id: 3,
     name: "BQ Charme XL",
     image: productCharmeXL,
+    departureDate: "21 feb",
     startTime: "08:00",
     expectedEndTime: "13:00",
     people: 2,
@@ -97,6 +102,7 @@ export const activeProducts: ActiveProduct[] = [
     name: "BQ Spring Mix",
     image: "",
     customer: "HBM WS",
+    departureDate: "23 feb",
     startTime: "09:30",
     expectedEndTime: "14:00",
     people: 2,
@@ -110,9 +116,9 @@ export const activeProducts: ActiveProduct[] = [
 ];
 
 export const completedProducts: CompletedProduct[] = [
-  { id: 1, name: "BQ de Luxe", quantity: 350, plannedMinutes: 240, actualMinutes: 210, completedAt: "08:45" },
-  { id: 2, name: "BQ Lovely", quantity: 200, plannedMinutes: 180, actualMinutes: 180, completedAt: "09:30" },
-  { id: 3, name: "BQ Chique", quantity: 150, plannedMinutes: 120, actualMinutes: 105, completedAt: "11:00" },
+  { id: 1, name: "BQ de Luxe", quantity: 350, departureDate: "21 feb", plannedMinutes: 240, actualMinutes: 210, completedAt: "08:45" },
+  { id: 2, name: "BQ Lovely", quantity: 200, departureDate: "22 feb", plannedMinutes: 180, actualMinutes: 180, completedAt: "09:30" },
+  { id: 3, name: "BQ Chique", quantity: 150, departureDate: "21 feb", plannedMinutes: 120, actualMinutes: 105, completedAt: "11:00" },
 ];
 
 export const hbMasterMessages = [
