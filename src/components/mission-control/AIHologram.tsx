@@ -28,7 +28,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
   const createParticle = useCallback((cx: number, cy: number): Particle => {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 30 + Math.random() * 90;
+    const dist = 40 + Math.random() * 130;
     const type = Math.random() < 0.4 ? "petal" : Math.random() < 0.7 ? "leaf" : "sparkle";
     return {
       x: cx + Math.cos(angle) * dist,
@@ -53,7 +53,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const size = compact ? 160 : 260;
+    const size = compact ? 200 : 380;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = size * dpr;
     canvas.height = size * dpr;
@@ -61,7 +61,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     const cx = size / 2;
     const cy = size / 2;
 
-    particlesRef.current = Array.from({ length: compact ? 18 : 35 }, () => createParticle(cx, cy));
+    particlesRef.current = Array.from({ length: compact ? 25 : 55 }, () => createParticle(cx, cy));
 
     let animId: number;
     const draw = () => {
@@ -73,7 +73,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // Soft outer rings using brand blue
       const ringCount = compact ? 2 : 3;
       for (let i = 0; i < ringCount; i++) {
-        const r = 30 + i * 20 + Math.sin(t * (0.8 + i * 0.2)) * 3;
+        const r = 45 + i * 28 + Math.sin(t * (0.8 + i * 0.2)) * 5;
         const rot = t * (0.2 + i * 0.1) * (i % 2 === 0 ? 1 : -1);
         ctx.save();
         ctx.translate(cx, cy);
@@ -88,7 +88,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       }
 
       // Core glow — brand primary
-      const coreRadius = compact ? 20 : 30;
+      const coreRadius = compact ? 25 : 45;
       const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 12);
       gradient.addColorStop(0, `hsla(228, 50%, 55%, ${0.2 * pulseBase})`);
       gradient.addColorStop(0.6, `hsla(228, 45%, 72%, ${0.08 * pulseBase})`);
@@ -122,16 +122,16 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       // HB letters
-      ctx.font = `900 ${compact ? 14 : 20}px 'Inter', sans-serif`;
+      ctx.font = `900 ${compact ? 16 : 28}px 'Inter', sans-serif`;
       ctx.fillStyle = `hsla(228, 50%, 45%, ${0.7 + pulseBase * 0.3})`;
       ctx.shadowColor = `hsla(228, 50%, 55%, ${pulseBase * 0.3})`;
-      ctx.shadowBlur = 8;
-      ctx.fillText("HBMaster", cx, cy - (compact ? 2 : 4));
+      ctx.shadowBlur = 12;
+      ctx.fillText("HBMaster", cx, cy - (compact ? 2 : 6));
       ctx.shadowBlur = 0;
       // Subtitle
-      ctx.font = `500 ${compact ? 7 : 9}px 'Inter', sans-serif`;
+      ctx.font = `500 ${compact ? 8 : 11}px 'Inter', sans-serif`;
       ctx.fillStyle = `hsla(228, 30%, 55%, ${0.4 + pulseBase * 0.2})`;
-      ctx.fillText("Mission Control", cx, cy + (compact ? 10 : 14));
+      ctx.fillText("Mission Control", cx, cy + (compact ? 12 : 20));
       ctx.restore();
 
       // Bloom energy on responding
@@ -209,7 +209,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     return () => cancelAnimationFrame(animId);
   }, [state, compact, createParticle]);
 
-  const canvasSize = compact ? 160 : 260;
+  const canvasSize = compact ? 200 : 380;
 
   return (
     <div className="relative flex flex-col items-center justify-center">
