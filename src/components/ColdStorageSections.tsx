@@ -185,11 +185,6 @@ const PrintedOrderRow = ({ order, onClick }: { order: ColdStorageOrder; onClick:
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-1.5">
         <span className="text-[10px] font-bold text-foreground truncate">{order.name}</span>
-        {order.category && (
-          <span className={`text-[7px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${categoryColors[order.category] || "bg-secondary text-muted-foreground border-border"}`}>
-            {order.category}
-          </span>
-        )}
       </div>
       <span className="text-[8px] text-muted-foreground">{order.departureDate}</span>
       <div className="hidden group-hover/row:flex items-center gap-1.5 mt-0.5">
