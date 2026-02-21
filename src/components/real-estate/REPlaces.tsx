@@ -37,8 +37,8 @@ const REPlaces = () => {
         <div className="text-center mb-16">
           <p className="text-xs font-semibold tracking-[0.2em] text-[#3d8b9c] uppercase mb-3">Locaties</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Onze regio's</h2>
-          <p className="text-slate-400 max-w-xl mx-auto">
-            HBM Real Estate beheert vastgoed in meerdere regio's, allemaal volledig vergund en gecertificeerd.
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            Vergund en gecertificeerd vastgoed in vier regio's.
           </p>
         </div>
 

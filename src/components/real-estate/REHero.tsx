@@ -37,13 +37,12 @@ const REHero = () => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-            Kwalitatieve en gecertificeerde woningen,{" "}
+            Gecertificeerde woningen,{" "}
             <span className="text-[#3d8b9c]">professioneel beheerd.</span>
           </h1>
 
-          <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-xl">
-            HBM Real Estate BV verhuurt vastgoed aan Antenna Groep en biedt veilige, 
-            goed onderhouden huisvesting voor bewoners verbonden aan Hoorn Bloommasters.
+          <p className="text-base text-slate-400 leading-relaxed mb-8 max-w-lg">
+            Veilige huisvesting voor bewoners verbonden aan Hoorn Bloommasters.
           </p>
 
           <div className="flex flex-wrap gap-3 mb-12">

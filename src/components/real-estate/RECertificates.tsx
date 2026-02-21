@@ -36,8 +36,8 @@ const RECertificates = () => {
         <div className="text-center mb-16">
           <p className="text-xs font-semibold tracking-[0.2em] text-[#3d8b9c] uppercase mb-3">Certificeringen</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Compliance & kwaliteit</h2>
-          <p className="text-slate-400 max-w-xl mx-auto">
-            SNF, ABU en gemeentelijke vergunningen — volledig compliant vastgoedbeheer.
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            SNF, ABU en gemeentelijke vergunningen.
           </p>
         </div>
 

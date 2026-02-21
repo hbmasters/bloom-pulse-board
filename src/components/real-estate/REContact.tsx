@@ -21,8 +21,8 @@ const REContact = () => {
           <div className="lg:col-span-2">
             <p className="text-xs font-semibold tracking-[0.2em] text-[#3d8b9c] uppercase mb-3">Contact</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Neem contact op</h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">
-              Heeft u vragen over onze woningen, certificeringen of samenwerking? Wij staan voor u klaar.
+            <p className="text-sm text-slate-400 mb-8">
+              Vragen? Wij staan voor u klaar.
             </p>
 
             <div className="space-y-4">
