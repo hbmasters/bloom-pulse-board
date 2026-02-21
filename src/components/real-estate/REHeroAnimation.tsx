@@ -140,69 +140,110 @@ const REHeroAnimation = ({ onTooltip }: HeroAnimationProps) => {
       const cx = b.x + b.w / 2;
       const baseY = ground;
       const topY = ground - b.h;
-      const shaftW = b.w * 0.35;
-      const tankW = b.w * 1.2;
-      const tankH = b.h * 0.3;
-      const tankY = topY + b.h * 0.05;
 
-      // Shaft (narrow column)
-      const shGrad = ctx.createLinearGradient(cx - shaftW / 2, baseY, cx + shaftW / 2, baseY);
-      shGrad.addColorStop(0, hovered ? "#2a4a64" : "#1a3450");
-      shGrad.addColorStop(0.5, hovered ? "#3a5a74" : "#243e58");
-      shGrad.addColorStop(1, hovered ? "#2a4a64" : "#1a3450");
-      ctx.fillStyle = shGrad;
-      ctx.fillRect(cx - shaftW / 2, tankY + tankH, shaftW, baseY - tankY - tankH);
+      // The real Aalsmeer watertoren is a tall slender Art Deco tower
+      // Proportions: width ~1:5 height, no separate tank, continuous column
+      const bodyW = b.w * 0.85;
+      const halfW = bodyW / 2;
 
-      // Tank (wider top section with rounded shape)
-      const tGrad = ctx.createLinearGradient(cx - tankW / 2, tankY, cx - tankW / 2, tankY + tankH);
-      tGrad.addColorStop(0, hovered ? "#2e5068" : "#1e3a52");
-      tGrad.addColorStop(1, hovered ? "#243e58" : "#162d45");
-      ctx.fillStyle = tGrad;
+      // Main body colors (brick tones adapted to dark theme)
+      const brickDark = hovered ? "#2a3d4e" : "#1c2e3e";
+      const brickLight = hovered ? "#334a5c" : "#243848";
+      const pilasterColor = hovered ? "#3a5568" : "#2a4558";
+
+      // Main tower body
+      const bodyGrad = ctx.createLinearGradient(cx - halfW, topY, cx + halfW, topY);
+      bodyGrad.addColorStop(0, brickDark);
+      bodyGrad.addColorStop(0.15, brickLight);
+      bodyGrad.addColorStop(0.35, brickDark);
+      bodyGrad.addColorStop(0.5, brickLight);
+      bodyGrad.addColorStop(0.65, brickDark);
+      bodyGrad.addColorStop(0.85, brickLight);
+      bodyGrad.addColorStop(1, brickDark);
+      ctx.fillStyle = bodyGrad;
+      ctx.fillRect(cx - halfW, topY, bodyW, b.h);
+
+      // Vertical pilasters (Art Deco columns on the facade)
+      const pilasterW = 3 * s;
+      const pilasters = [-halfW, -halfW * 0.5, 0, halfW * 0.5, halfW - pilasterW];
+      for (const px of pilasters) {
+        ctx.fillStyle = pilasterColor;
+        ctx.fillRect(cx + px, topY, pilasterW, b.h);
+      }
+
+      // Stepped horizontal bands (Art Deco detail) at ~25% and ~75% height
+      for (const frac of [0.2, 0.45, 0.7]) {
+        const bandY = topY + b.h * frac;
+        ctx.fillStyle = pilasterColor;
+        ctx.fillRect(cx - halfW - 2 * s, bandY, bodyW + 4 * s, 2 * s);
+      }
+
+      // Central vertical decorative band (narrower, darker)
+      const centralW = 6 * s;
+      ctx.fillStyle = brickDark;
+      ctx.fillRect(cx - centralW / 2, topY + b.h * 0.15, centralW, b.h * 0.75);
+
+      // Keyhole/arch shape at base (distinctive feature)
+      const archW = 10 * s;
+      const archH = 25 * s;
+      const archY = baseY - archH;
       ctx.beginPath();
-      ctx.moveTo(cx - tankW / 2, tankY + tankH);
-      ctx.lineTo(cx - tankW / 2 + 4 * s, tankY + 8 * s);
-      ctx.quadraticCurveTo(cx - tankW / 2 + 4 * s, tankY, cx, tankY);
-      ctx.quadraticCurveTo(cx + tankW / 2 - 4 * s, tankY, cx + tankW / 2 - 4 * s, tankY + 8 * s);
-      ctx.lineTo(cx + tankW / 2, tankY + tankH);
+      ctx.moveTo(cx - archW / 2, baseY);
+      ctx.lineTo(cx - archW / 2, archY + 5 * s);
+      ctx.quadraticCurveTo(cx - archW / 2, archY, cx, archY);
+      ctx.quadraticCurveTo(cx + archW / 2, archY, cx + archW / 2, archY + 5 * s);
+      ctx.lineTo(cx + archW / 2, baseY);
       ctx.closePath();
+      ctx.fillStyle = hovered ? "rgba(15,30,50,0.9)" : "rgba(10,22,40,0.9)";
       ctx.fill();
-
-      // Tank outline
-      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.6)" : "rgba(61,139,156,0.15)";
-      ctx.lineWidth = hovered ? 1.5 : 0.8;
+      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.3)" : "rgba(61,139,156,0.08)";
+      ctx.lineWidth = 0.8;
       ctx.stroke();
 
-      // Shaft outline
-      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.4)" : "rgba(61,139,156,0.1)";
-      ctx.strokeRect(cx - shaftW / 2, tankY + tankH, shaftW, baseY - tankY - tankH);
+      // Small windows (narrow vertical slits, Art Deco style)
+      const windowSlots = [0.25, 0.38, 0.52, 0.65];
+      for (let i = 0; i < windowSlots.length; i++) {
+        const wy = topY + b.h * windowSlots[i];
+        const ww = 3 * s;
+        const wh = 5 * s;
+        const lit = Math.sin(t * 0.5 + i * 4) > 0;
+        ctx.fillStyle = lit
+          ? `rgba(245,217,138,${0.4 + Math.sin(t * 0.8 + i) * 0.15})`
+          : "rgba(15,25,40,0.7)";
+        ctx.fillRect(cx - ww / 2 - 8 * s, wy, ww, wh);
+        ctx.fillRect(cx - ww / 2 + 8 * s, wy, ww, wh);
+      }
 
-      // Decorative ring on tank
+      // Green/copper pyramidal roof cap (the distinctive green top)
+      const roofH = 30 * s;
+      const roofBaseW = halfW + 3 * s;
+      const roofGrad = ctx.createLinearGradient(cx, topY - roofH, cx, topY);
+      roofGrad.addColorStop(0, hovered ? "rgba(100,180,140,0.7)" : "rgba(70,140,110,0.5)");
+      roofGrad.addColorStop(0.5, hovered ? "rgba(80,160,120,0.6)" : "rgba(55,120,90,0.4)");
+      roofGrad.addColorStop(1, hovered ? "rgba(60,130,100,0.5)" : "rgba(40,100,75,0.35)");
       ctx.beginPath();
-      ctx.moveTo(cx - tankW / 2 + 2 * s, tankY + tankH * 0.5);
-      ctx.lineTo(cx + tankW / 2 - 2 * s, tankY + tankH * 0.5);
-      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.4)" : "rgba(61,139,156,0.1)";
+      ctx.moveTo(cx - roofBaseW, topY);
+      ctx.lineTo(cx, topY - roofH);
+      ctx.lineTo(cx + roofBaseW, topY);
+      ctx.closePath();
+      ctx.fillStyle = roofGrad;
+      ctx.fill();
+      ctx.strokeStyle = hovered ? "rgba(100,180,140,0.5)" : "rgba(70,140,110,0.2)";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Small windows on tank
-      for (let i = 0; i < 3; i++) {
-        const wx = cx - 8 * s + i * 8 * s;
-        const wy = tankY + tankH * 0.3;
-        const lit = Math.sin(t * 0.5 + i * 5) > 0;
-        ctx.fillStyle = lit ? "rgba(245,217,138,0.5)" : "rgba(20,40,60,0.5)";
-        ctx.fillRect(wx, wy, 4 * s, 5 * s);
-      }
-
-      // Pointed cap on top
+      // Spire/antenna on top
       ctx.beginPath();
-      ctx.moveTo(cx - 6 * s, tankY);
-      ctx.lineTo(cx, tankY - 15 * s);
-      ctx.lineTo(cx + 6 * s, tankY);
-      ctx.fillStyle = hovered ? "#2e5068" : "#1e3a52";
-      ctx.fill();
-      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.5)" : "rgba(61,139,156,0.12)";
-      ctx.lineWidth = 0.8;
+      ctx.moveTo(cx, topY - roofH);
+      ctx.lineTo(cx, topY - roofH - 12 * s);
+      ctx.strokeStyle = hovered ? "rgba(180,200,220,0.6)" : "rgba(140,160,180,0.3)";
+      ctx.lineWidth = 1;
       ctx.stroke();
+
+      // Tower outline
+      ctx.strokeStyle = hovered ? "rgba(61,139,156,0.5)" : "rgba(61,139,156,0.1)";
+      ctx.lineWidth = hovered ? 1.5 : 0.5;
+      ctx.strokeRect(cx - halfW, topY, bodyW, b.h);
 
       // Hover glow
       if (hovered) {
@@ -210,13 +251,7 @@ const REHeroAnimation = ({ onTooltip }: HeroAnimationProps) => {
         ctx.shadowBlur = 20;
         ctx.strokeStyle = "rgba(61,139,156,0.3)";
         ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cx - tankW / 2, tankY + tankH);
-        ctx.lineTo(cx - tankW / 2 + 4 * s, tankY + 8 * s);
-        ctx.quadraticCurveTo(cx - tankW / 2 + 4 * s, tankY, cx, tankY);
-        ctx.quadraticCurveTo(cx + tankW / 2 - 4 * s, tankY, cx + tankW / 2 - 4 * s, tankY + 8 * s);
-        ctx.lineTo(cx + tankW / 2, tankY + tankH);
-        ctx.stroke();
+        ctx.strokeRect(cx - halfW - 2 * s, topY - roofH, bodyW + 4 * s, b.h + roofH);
         ctx.shadowBlur = 0;
       }
     };
