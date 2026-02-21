@@ -55,17 +55,17 @@ const Index = () => {
             <CrossLineHighlights />
           </div>
           {/* Team Leaders bottom-right */}
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-3">
             {teamLeaders.map((leader) => (
-              <div key={leader.name} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/20 bg-primary/5 flex-1">
-                <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center shadow-sm shrink-0">
-                  <span className="text-xs font-black text-primary-foreground">{leader.initials}</span>
+              <div key={leader.name} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 flex-1">
+                <div className="w-11 h-11 rounded-full bg-gradient-brand flex items-center justify-center shadow-sm shrink-0">
+                  <span className="text-sm font-black text-primary-foreground">{leader.initials}</span>
                 </div>
                 <div className="leading-none min-w-0">
-                  <div className="text-sm font-bold text-foreground truncate">{leader.name}</div>
-                  <div className="flex items-center gap-0.5">
-                    <Star className="w-2.5 h-2.5 text-bloom-warm fill-bloom-warm" />
-                    <span className="text-[8px] text-muted-foreground uppercase tracking-wider font-semibold">{leader.role}</span>
+                  <div className="text-base font-bold text-foreground truncate">{leader.name}</div>
+                  <div className="flex items-center gap-0.5 mt-0.5">
+                    <Star className="w-3 h-3 text-bloom-warm fill-bloom-warm" />
+                    <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">{leader.role}</span>
                   </div>
                 </div>
               </div>

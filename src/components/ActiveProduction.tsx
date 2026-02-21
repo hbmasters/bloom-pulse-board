@@ -1,4 +1,4 @@
-import { Clock, Users, Zap, Rocket, ThumbsUp } from "lucide-react";
+import { Clock, Users, Zap, Rocket, ThumbsUp, Package } from "lucide-react";
 import { activeProducts, type ActiveProduct } from "@/data/mockData";
 
 const statusConfig = {
@@ -21,7 +21,13 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full shadow-sm">
       <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary">
-        <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-secondary">
+            <Package className="w-12 h-12 text-muted-foreground/30" />
+          </div>
+        )}
         <div className="absolute top-2 left-2">
           <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md border ${status.className}`}>
             {status.icon}{status.label}
