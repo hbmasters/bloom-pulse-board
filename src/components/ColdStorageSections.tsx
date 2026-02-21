@@ -448,25 +448,14 @@ const ColdStorageSections = () => {
 
         {/* Center: Picked */}
         <div className="flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-1.5 shrink-0">
-            <div className="flex-1">
-              <SectionHeader
-                icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
-                title="Picked"
-                count={pickedOrders.length}
-                totalMinutes={getTotalMinutes(pickedOrders)}
-                totalPcs={getTotalQuantity(pickedOrders)}
-                color="bg-accent"
-              />
-            </div>
-            <button
-              onClick={() => setScanInOrder(pickedOrders[0])}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent/15 border border-accent/25 text-accent hover:bg-accent/25 transition-colors text-[9px] font-bold uppercase tracking-wider"
-            >
-              <ScanLine className="w-3 h-3" />
-              Scan In
-            </button>
-          </div>
+          <SectionHeader
+            icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
+            title="Picked"
+            count={pickedOrders.length}
+            totalMinutes={getTotalMinutes(pickedOrders)}
+            totalPcs={getTotalQuantity(pickedOrders)}
+            color="bg-accent"
+          />
           <div className={`flex-1 min-h-0 grid ${gridCols} gap-2 overflow-auto`} style={{ gridTemplateRows: `repeat(${gridRows}, 1fr)` }}>
             {pickedOrders.map((order) => (
               <PickedOrderCard key={order.id} order={order} onClick={() => setSelectedOrder(order)} />

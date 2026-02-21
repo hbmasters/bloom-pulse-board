@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Snowflake, Trophy, Zap } from "lucide-react";
+import { Users, Snowflake, Trophy, Zap, Thermometer, Droplets } from "lucide-react";
 import { coldStorageStats, fastestPicker } from "@/data/coldStorageData";
 
 const LiveClock = () => {
@@ -54,6 +54,22 @@ const ColdStorageHeader = () => {
                 {fastestPicker.ordersCompleted}
               </span>
             </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-bloom-sky/30 bg-bloom-sky/5">
+          <Thermometer className="w-4 h-4 text-bloom-sky" />
+          <div className="leading-none">
+            <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Temperatuur</div>
+            <div className="text-lg font-mono font-black text-foreground">4.2°C</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/25 bg-primary/5">
+          <Droplets className="w-4 h-4 text-primary" />
+          <div className="leading-none">
+            <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Luchtvochtigheid</div>
+            <div className="text-lg font-mono font-black text-foreground">82%</div>
           </div>
         </div>
 
