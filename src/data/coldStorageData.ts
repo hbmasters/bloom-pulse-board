@@ -1,3 +1,7 @@
+import productTulpen from "@/assets/product-tulpen.jpg";
+import productSpringBouquet from "@/assets/product-spring-bouquet.jpg";
+import productMoederdag from "@/assets/product-moederdag.jpg";
+
 export interface ColdStorageOrder {
   id: number;
   name: string;
@@ -8,7 +12,8 @@ export interface ColdStorageOrder {
 export interface PickedOrder extends ColdStorageOrder {
   picker: string;
   startTime: string;
-  progress: number; // percentage
+  progress: number;
+  image: string;
 }
 
 export const printedOrders: ColdStorageOrder[] = [
@@ -19,9 +24,9 @@ export const printedOrders: ColdStorageOrder[] = [
 ];
 
 export const pickedOrders: PickedOrder[] = [
-  { id: 5, name: "BQ Tulpen", quantity: 350, estimatedMinutes: 160, picker: "Anna", startTime: "07:15", progress: 65 },
-  { id: 6, name: "BQ Spring Bouquet", quantity: 200, estimatedMinutes: 100, picker: "Mark", startTime: "08:00", progress: 40 },
-  { id: 7, name: "BQ Moederdag", quantity: 280, estimatedMinutes: 140, picker: "Sophie", startTime: "08:30", progress: 20 },
+  { id: 5, name: "BQ Tulpen", quantity: 350, estimatedMinutes: 160, picker: "Anna", startTime: "07:15", progress: 65, image: productTulpen },
+  { id: 6, name: "BQ Spring Bouquet", quantity: 200, estimatedMinutes: 100, picker: "Mark", startTime: "08:00", progress: 40, image: productSpringBouquet },
+  { id: 7, name: "BQ Moederdag", quantity: 280, estimatedMinutes: 140, picker: "Sophie", startTime: "08:30", progress: 20, image: productMoederdag },
 ];
 
 export const waitingForHandOrders: ColdStorageOrder[] = [

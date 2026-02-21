@@ -58,37 +58,39 @@ const OrderRow = ({ order }: { order: ColdStorageOrder }) => (
   </div>
 );
 
-const PickedOrderRow = ({ order }: { order: PickedOrder }) => (
-  <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-accent/25 bg-accent/5">
-    <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center shrink-0">
-      <span className="text-[10px] font-black text-primary-foreground">{order.picker.charAt(0)}</span>
-    </div>
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-1.5">
-        <span className="text-[11px] font-bold text-foreground truncate">{order.name}</span>
-        <span className="text-[9px] font-semibold text-accent">· {order.picker}</span>
+const PickedOrderCard = ({ order }: { order: PickedOrder }) => (
+  <div className="bg-card rounded-xl border border-accent/25 overflow-hidden flex flex-col h-full shadow-sm">
+    <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary">
+      <img src={order.image} alt={order.name} className="absolute inset-0 w-full h-full object-cover" />
+      <div className="absolute top-2 left-2">
+        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md border bg-accent/15 text-accent-foreground border-accent/25">
+          <UserCheck className="w-3 h-3" />{order.picker}
+        </span>
       </div>
-      <div className="flex items-center gap-2 mt-0.5">
-        <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+      <div className="absolute bottom-2 right-2 bg-card/95 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-border shadow-md">
+        <div className="text-base font-mono font-black text-foreground leading-none">{order.quantity}</div>
+        <div className="text-[8px] text-muted-foreground">pcs</div>
+      </div>
+    </div>
+    <div className="p-2.5">
+      <h3 className="text-sm font-bold text-foreground truncate mb-1">{order.name}</h3>
+      <div className="text-[9px] text-muted-foreground mb-1.5">Start {order.startTime} · {formatHours(order.estimatedMinutes)}</div>
+      <div className="flex items-center gap-2 mb-0.5">
+        <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
           <div
             className="h-full rounded-full bg-gradient-success transition-all duration-1000"
             style={{ width: `${order.progress}%` }}
           />
         </div>
-        <span className="text-[9px] font-mono font-bold text-foreground">{order.progress}%</span>
+        <span className="text-[10px] font-mono font-bold text-foreground">{order.progress}%</span>
       </div>
-      <span className="text-[9px] text-muted-foreground">Start {order.startTime} · {formatHours(order.estimatedMinutes)}</span>
-    </div>
-    <div className="text-right shrink-0">
-      <div className="text-base font-mono font-black text-foreground leading-none">{order.quantity}</div>
-      <div className="text-[8px] text-muted-foreground">pcs</div>
     </div>
   </div>
 );
 
 const ColdStorageSections = () => {
   return (
-    <div className="grid grid-cols-4 gap-3 h-full">
+    <div className="grid grid-cols-3 gap-3 h-full" style={{ gridTemplateColumns: "1fr 2fr 1fr" }}>
       {/* Printed */}
       <div className="flex flex-col min-h-0">
         <SectionHeader
@@ -105,7 +107,7 @@ const ColdStorageSections = () => {
         </div>
       </div>
 
-      {/* Picked */}
+      {/* Picked - with photos */}
       <div className="flex flex-col min-h-0">
         <SectionHeader
           icon={<UserCheck className="w-3.5 h-3.5 text-primary-foreground" />}
@@ -114,42 +116,42 @@ const ColdStorageSections = () => {
           totalMinutes={getTotalMinutes(pickedOrders)}
           color="bg-accent"
         />
-        <div className="flex-1 min-h-0 space-y-1 overflow-auto">
+        <div className="flex-1 min-h-0 grid grid-cols-3 gap-2 auto-rows-fr overflow-auto">
           {pickedOrders.map((order) => (
-            <PickedOrderRow key={order.id} order={order} />
+            <PickedOrderCard key={order.id} order={order} />
           ))}
         </div>
       </div>
 
-      {/* Waiting for Hand */}
-      <div className="flex flex-col min-h-0">
-        <SectionHeader
-          icon={<Hand className="w-3.5 h-3.5 text-primary-foreground" />}
-          title="Waiting Hand"
-          count={waitingForHandOrders.length}
-          totalMinutes={getTotalMinutes(waitingForHandOrders)}
-          color="bg-bloom-warm"
-        />
-        <div className="flex-1 min-h-0 space-y-1 overflow-auto">
-          {waitingForHandOrders.map((order) => (
-            <OrderRow key={order.id} order={order} />
-          ))}
+      {/* Waiting for Hand + Band stacked */}
+      <div className="flex flex-col min-h-0 gap-3">
+        <div className="flex-1 flex flex-col min-h-0">
+          <SectionHeader
+            icon={<Hand className="w-3.5 h-3.5 text-primary-foreground" />}
+            title="Waiting Hand"
+            count={waitingForHandOrders.length}
+            totalMinutes={getTotalMinutes(waitingForHandOrders)}
+            color="bg-bloom-warm"
+          />
+          <div className="flex-1 min-h-0 space-y-1 overflow-auto">
+            {waitingForHandOrders.map((order) => (
+              <OrderRow key={order.id} order={order} />
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Waiting for Band */}
-      <div className="flex flex-col min-h-0">
-        <SectionHeader
-          icon={<Cog className="w-3.5 h-3.5 text-primary-foreground" />}
-          title="Waiting Band"
-          count={waitingForBandOrders.length}
-          totalMinutes={getTotalMinutes(waitingForBandOrders)}
-          color="bg-primary"
-        />
-        <div className="flex-1 min-h-0 space-y-1 overflow-auto">
-          {waitingForBandOrders.map((order) => (
-            <OrderRow key={order.id} order={order} />
-          ))}
+        <div className="flex-1 flex flex-col min-h-0">
+          <SectionHeader
+            icon={<Cog className="w-3.5 h-3.5 text-primary-foreground" />}
+            title="Waiting Band"
+            count={waitingForBandOrders.length}
+            totalMinutes={getTotalMinutes(waitingForBandOrders)}
+            color="bg-primary"
+          />
+          <div className="flex-1 min-h-0 space-y-1 overflow-auto">
+            {waitingForBandOrders.map((order) => (
+              <OrderRow key={order.id} order={order} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
