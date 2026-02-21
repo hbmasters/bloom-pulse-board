@@ -254,7 +254,10 @@ const PickedOrderCard = ({ order, onClick }: { order: PickedOrder; onClick: () =
       {order.image ? (
         <img src={order.image} alt={order.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
-        <span className="text-2xl font-black text-muted-foreground/30">{order.name.charAt(0)}</span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-lg font-black text-foreground/60">{order.customer || order.name}</span>
+          <span className="text-[10px] text-muted-foreground">{order.name}</span>
+        </div>
       )}
       {/* Picker + start time top-right */}
       <div className="absolute top-1.5 right-1.5 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm rounded-full px-2 py-1 border border-border shadow-sm">

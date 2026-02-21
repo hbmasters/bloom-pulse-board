@@ -22,6 +22,7 @@ export interface ColdStorageOrder {
   accountManager?: string;
   progress?: number;
   finishedTime?: string;
+  customer?: string;
 }
 
 export interface PickedOrder extends ColdStorageOrder {
@@ -46,12 +47,12 @@ export const printedOrders: ColdStorageOrder[] = [
 ];
 
 export const pickedOrders: PickedOrder[] = [
-  { id: 5, name: "BQ Field L", quantity: 350, estimatedMinutes: 160, picker: "Anna", startTime: "07:15", image: hbmFieldL, departureDate: "21 Feb" },
-  { id: 6, name: "BQ de Luxe", quantity: 200, estimatedMinutes: 100, picker: "Mark", startTime: "08:00", image: hbmDeLuxe, departureDate: "21 Feb" },
-  { id: 7, name: "BQ Elegance", quantity: 280, estimatedMinutes: 140, picker: "Sophie", startTime: "08:30", image: hbmElegance, departureDate: "22 Feb" },
-  { id: 15, name: "BQ Field M", quantity: 220, estimatedMinutes: 110, picker: "Daan", startTime: "07:45", image: "", departureDate: "21 Feb" },
-  { id: 16, name: "BQ Chique", quantity: 180, estimatedMinutes: 95, picker: "Lisa", startTime: "08:15", image: "", departureDate: "22 Feb" },
-  { id: 17, name: "BQ Charme XL", quantity: 300, estimatedMinutes: 145, picker: "Tom", startTime: "09:00", image: hbmCharmeXL, departureDate: "23 Feb" },
+  { id: 5, name: "BQ Field L", quantity: 350, estimatedMinutes: 160, picker: "Anna", startTime: "07:15", image: hbmFieldL, departureDate: "21 Feb", customer: "HBM WS" },
+  { id: 6, name: "BQ de Luxe", quantity: 200, estimatedMinutes: 100, picker: "Mark", startTime: "08:00", image: hbmDeLuxe, departureDate: "21 Feb", customer: "FloraHolland" },
+  { id: 7, name: "BQ Elegance", quantity: 280, estimatedMinutes: 140, picker: "Sophie", startTime: "08:30", image: hbmElegance, departureDate: "22 Feb", customer: "Bloemen Direct" },
+  { id: 15, name: "BQ Field M", quantity: 220, estimatedMinutes: 110, picker: "Daan", startTime: "07:45", image: "", departureDate: "21 Feb", customer: "HBM WS" },
+  { id: 16, name: "BQ Chique", quantity: 180, estimatedMinutes: 95, picker: "Lisa", startTime: "08:15", image: "", departureDate: "22 Feb", customer: "Green Plaza" },
+  { id: 17, name: "BQ Charme XL", quantity: 300, estimatedMinutes: 145, picker: "Tom", startTime: "09:00", image: hbmCharmeXL, departureDate: "23 Feb", customer: "HBM WS" },
 ];
 
 export const waitingForHandOrders: ColdStorageOrder[] = [
