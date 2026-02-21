@@ -109,7 +109,14 @@ const ForceScanPopup = ({
   </div>
 );
 
-// Printed order row with account manager icon, printer and departure
+// Category color map
+const categoryColors: Record<string, string> = {
+  Hand: "bg-bloom-warm/15 text-bloom-warm border-bloom-warm/25",
+  Band: "bg-primary/15 text-primary border-primary/25",
+  Others: "bg-bloom-sky/15 text-bloom-sky border-bloom-sky/25",
+};
+
+// Printed order row with account manager icon, category badge, printer and departure
 const PrintedOrderRow = ({ order, onClick }: { order: ColdStorageOrder; onClick: () => void }) => (
   <div
     className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border bg-card cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors"
@@ -121,7 +128,14 @@ const PrintedOrderRow = ({ order, onClick }: { order: ColdStorageOrder; onClick:
       </div>
     )}
     <div className="flex-1 min-w-0">
-      <span className="text-[10px] font-bold text-foreground truncate block">{order.name}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] font-bold text-foreground truncate">{order.name}</span>
+        {order.category && (
+          <span className={`text-[7px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${categoryColors[order.category] || "bg-secondary text-muted-foreground border-border"}`}>
+            {order.category}
+          </span>
+        )}
+      </div>
       <div className="flex items-center gap-1.5 mt-0.5">
         <User className="w-2.5 h-2.5 text-muted-foreground" />
         <span className="text-[8px] text-muted-foreground">{order.printedBy}</span>
@@ -249,9 +263,9 @@ const ColdStorageSections = () => {
 
   return (
     <>
-      <div className="grid gap-3 h-full" style={{ gridTemplateColumns: "1fr 2fr 1fr" }}>
-        {/* Left: Printed + Fastest Picker */}
-        <div className="flex flex-col min-h-0 gap-3">
+      <div className="grid gap-3 h-full grid-cols-[0.6fr_2fr_1fr] hover:[grid-template-columns:1fr_2fr_1fr] transition-all duration-300 group/grid">
+        {/* Left: Printed + Fastest Picker — narrow by default, expands on hover */}
+        <div className="flex flex-col min-h-0 gap-3 overflow-hidden">
           <div className="flex-1 flex flex-col min-h-0">
             <SectionHeader
               icon={<Printer className="w-3 h-3 text-primary-foreground" />}

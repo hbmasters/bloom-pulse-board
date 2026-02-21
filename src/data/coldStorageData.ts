@@ -30,18 +30,18 @@ export interface PickedOrder extends ColdStorageOrder {
 }
 
 export const printedOrders: ColdStorageOrder[] = [
-  { id: 1, name: "BQ Field L", quantity: 400, estimatedMinutes: 180, printedBy: "Jan", departureDate: "21 Feb", accountManager: "Peter" },
-  { id: 2, name: "BQ de Luxe", quantity: 250, estimatedMinutes: 120, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra" },
-  { id: 3, name: "BQ Elegance", quantity: 300, estimatedMinutes: 150, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter" },
-  { id: 4, name: "BQ Charme XL", quantity: 180, estimatedMinutes: 90, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra" },
-  { id: 18, name: "BQ Lovely", quantity: 220, estimatedMinutes: 110, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter" },
-  { id: 19, name: "BQ Trend", quantity: 150, estimatedMinutes: 75, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra" },
-  { id: 20, name: "BQ Charme", quantity: 350, estimatedMinutes: 170, printedBy: "Jan", departureDate: "23 Feb", accountManager: "Peter" },
-  { id: 21, name: "BQ Field M", quantity: 280, estimatedMinutes: 140, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra" },
-  { id: 22, name: "BQ Chique", quantity: 200, estimatedMinutes: 100, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter" },
-  { id: 23, name: "BQ Coffee S", quantity: 320, estimatedMinutes: 160, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra" },
-  { id: 24, name: "BQ Field L", quantity: 180, estimatedMinutes: 90, printedBy: "Jan", departureDate: "23 Feb", accountManager: "Peter" },
-  { id: 25, name: "BQ de Luxe", quantity: 150, estimatedMinutes: 80, printedBy: "Pieter", departureDate: "22 Feb", accountManager: "Sandra" },
+  { id: 1, name: "BQ Field L", quantity: 400, estimatedMinutes: 180, printedBy: "Jan", departureDate: "21 Feb", accountManager: "Peter", category: "Hand" },
+  { id: 2, name: "BQ de Luxe", quantity: 250, estimatedMinutes: 120, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra", category: "Band" },
+  { id: 3, name: "BQ Elegance", quantity: 300, estimatedMinutes: 150, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter", category: "Hand" },
+  { id: 4, name: "BQ Charme XL", quantity: 180, estimatedMinutes: 90, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra", category: "Band" },
+  { id: 18, name: "BQ Lovely", quantity: 220, estimatedMinutes: 110, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter", category: "Hand" },
+  { id: 19, name: "BQ Trend", quantity: 150, estimatedMinutes: 75, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra", category: "Band" },
+  { id: 20, name: "BQ Charme", quantity: 350, estimatedMinutes: 170, printedBy: "Jan", departureDate: "23 Feb", accountManager: "Peter", category: "Others" },
+  { id: 21, name: "BQ Field M", quantity: 280, estimatedMinutes: 140, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra", category: "Hand" },
+  { id: 22, name: "BQ Chique", quantity: 200, estimatedMinutes: 100, printedBy: "Jan", departureDate: "22 Feb", accountManager: "Peter", category: "Band" },
+  { id: 23, name: "BQ Coffee S", quantity: 320, estimatedMinutes: 160, printedBy: "Pieter", departureDate: "21 Feb", accountManager: "Sandra", category: "Band" },
+  { id: 24, name: "BQ Field L", quantity: 180, estimatedMinutes: 90, printedBy: "Jan", departureDate: "23 Feb", accountManager: "Peter", category: "Hand" },
+  { id: 25, name: "BQ de Luxe", quantity: 150, estimatedMinutes: 80, printedBy: "Pieter", departureDate: "22 Feb", accountManager: "Sandra", category: "Others" },
 ];
 
 export const pickedOrders: PickedOrder[] = [
