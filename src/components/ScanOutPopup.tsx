@@ -50,16 +50,16 @@ const ScanOutPopup = ({ product, onClose }: ScanOutPopupProps) => {
         </button>
 
         {/* Product image hero */}
-        <div className="relative h-48 bg-secondary overflow-hidden">
+        <div className="relative h-72 bg-secondary overflow-hidden">
           {product.image ? (
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover scale-105" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <span className="text-3xl font-black text-foreground/40">{product.customer || product.name}</span>
+              <span className="text-4xl font-black text-foreground/40">{product.customer || product.name}</span>
               {product.customer && <span className="text-sm text-muted-foreground mt-1">{product.name}</span>}
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
           <div className="absolute bottom-3 left-0 right-0 text-center">
             <h3 className="text-xl font-black text-foreground drop-shadow-sm">{product.name}</h3>
           </div>
