@@ -8,6 +8,7 @@ import ColdStorage from "./pages/ColdStorage";
 import Auth from "./pages/Auth";
 import Lijnbezetting from "./pages/Lijnbezetting";
 import MissionControl from "./pages/MissionControl";
+import HBMasterWidgetDemo from "./pages/HBMasterWidgetDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/lijnbezetting" element={<Lijnbezetting />} />
           <Route path="/hbmaster" element={<MissionControl />} />
+          <Route path="/hbmaster-widget" element={<HBMasterWidgetDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
