@@ -198,8 +198,12 @@ const PickedOrderCard = ({ order, onClick }: { order: PickedOrder; onClick: () =
     className="bg-card rounded-xl border border-accent/25 overflow-hidden flex flex-col h-full shadow-sm cursor-pointer hover:border-accent/50 transition-colors"
     onClick={onClick}
   >
-    <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary">
-      <img src={order.image} alt={order.name} className="absolute inset-0 w-full h-full object-cover" />
+    <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary flex items-center justify-center">
+      {order.image ? (
+        <img src={order.image} alt={order.name} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <span className="text-2xl font-black text-muted-foreground/30">{order.name.charAt(0)}</span>
+      )}
       {/* Picker top-right */}
       <div className="absolute top-1.5 right-1.5 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm rounded-full px-2 py-1 border border-border shadow-sm">
         <div className="w-5 h-5 rounded-full bg-gradient-brand flex items-center justify-center">
