@@ -7,27 +7,31 @@ import CrossLinePopup from "@/components/CrossLinePopup";
 import DayStartPopup from "@/components/DayStartPopup";
 import HBMasterPanel from "@/components/HBMasterPanel";
 import ScanOutPopup from "@/components/ScanOutPopup";
-import { Star } from "lucide-react";
-import { teamLeaders } from "@/data/mockData";
+import { Star, ScanLine } from "lucide-react";
+import { teamLeaders, activeProducts } from "@/data/mockData";
 
 const Index = () => {
   const showDayStart = false;
   const [scanOutProduct, setScanOutProduct] = useState<null | {
     name: string;
+    image?: string;
+    customer?: string;
     produced: number;
     target: number;
     piecesPerHour: number;
     plannedPiecesPerHour: number;
   }>(null);
 
-  // Demo: click handler to simulate scan-out (can be wired to real scan event)
-  const handleDemoScanOut = () => {
+  const handleScanOut = () => {
+    const product = activeProducts[0];
     setScanOutProduct({
-      name: "BQ Field L",
-      produced: 400,
-      target: 400,
-      piecesPerHour: 88,
-      plannedPiecesPerHour: 80,
+      name: product.name,
+      image: product.image,
+      customer: product.customer,
+      produced: product.target,
+      target: product.target,
+      piecesPerHour: product.piecesPerHour,
+      plannedPiecesPerHour: product.plannedPiecesPerHour,
     });
   };
 
@@ -41,8 +45,17 @@ const Index = () => {
           <div className="flex-1 min-h-0">
             <ActiveProduction />
           </div>
-          <div className="shrink-0">
-            <HBMasterPanel />
+          <div className="shrink-0 flex items-center gap-3">
+            <div className="flex-1">
+              <HBMasterPanel />
+            </div>
+            <button
+              onClick={handleScanOut}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-brand text-primary-foreground font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95 shrink-0"
+            >
+              <ScanLine className="w-5 h-5" />
+              Scan Uit
+            </button>
           </div>
         </div>
 
