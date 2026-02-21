@@ -7,6 +7,7 @@ import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import InsightPanel from "./InsightPanel";
 import MiniHologram from "./MiniHologram";
+import HexAvatar from "./HexAvatar";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hbmaster-chat`;
 
@@ -145,7 +146,7 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen, userName }: Ch
         style={{ background: `hsl(${accentHsl} / 0.04)` }}
       >
         <div className="flex items-center gap-2.5">
-          <MiniHologram state={isStreaming ? "speaking" : "idle"} accentHsl={accentHsl} size={40} />
+          <HexAvatar accentHsl={accentHsl} size={36} animate={true} />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold tracking-wide">HBMaster</span>
