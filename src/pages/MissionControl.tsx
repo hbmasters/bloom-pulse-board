@@ -10,7 +10,7 @@ type MCView = "chat" | "kanban" | "history" | "settings";
 
 const MissionControl = () => {
   const [view, setView] = useState<MCView>("chat");
-  const [aiState, setAiState] = useState<"idle" | "thinking" | "responding">("idle");
+  const [aiState, setAiState] = useState<"idle" | "thinking" | "responding" | "loading">("idle");
   const [messageCount, setMessageCount] = useState(0);
 
   return (

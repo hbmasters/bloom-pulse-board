@@ -105,8 +105,7 @@ export const drawSunflower = (ctx: CanvasRenderingContext2D, s: number, alpha: n
   ctx.beginPath(); ctx.arc(0, 0, s * 0.28, 0, Math.PI * 2);
   ctx.fillStyle = `hsla(30, 60%, 25%, ${alpha * 0.85})`; ctx.fill();
   for (let i = 0; i < 12; i++) {
-    const a = i * 2.399;
-    const r = s * 0.05 * Math.sqrt(i);
+    const a = i * 2.399; const r = s * 0.05 * Math.sqrt(i);
     ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r, s * 0.025, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(40, 70%, 40%, ${alpha * 0.5})`; ctx.fill();
   }
@@ -215,23 +214,18 @@ export const drawBabyBreath = (ctx: CanvasRenderingContext2D, s: number, alpha: 
   }
 };
 
-// === NEW FLOWER TYPES ===
-
 export const drawIris = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // 3 upright petals (standards)
   for (let i = 0; i < 3; i++) {
     const a = (Math.PI * 2 / 3) * i - Math.PI / 2;
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.2, Math.sin(a) * s * 0.2, s * 0.18, s * 0.38, a, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(255, 60%, 55%, ${alpha * 0.6})`; ctx.fill();
   }
-  // 3 drooping petals (falls)
   for (let i = 0; i < 3; i++) {
     const a = (Math.PI * 2 / 3) * i + Math.PI / 6;
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.35, Math.sin(a) * s * 0.35, s * 0.22, s * 0.1, a + 0.3, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(265, 50%, 65%, ${alpha * 0.5})`; ctx.fill();
-    // Yellow beard
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.25, Math.sin(a) * s * 0.25, s * 0.06, s * 0.02, a, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(50, 80%, 60%, ${alpha * 0.7})`; ctx.fill();
@@ -239,7 +233,6 @@ export const drawIris = (ctx: CanvasRenderingContext2D, s: number, alpha: number
 };
 
 export const drawDahlia = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Many layered pointed petals
   for (let layer = 5; layer >= 0; layer--) {
     const petals = 8 + layer * 2;
     const r = s * (0.08 + layer * 0.09);
@@ -259,20 +252,12 @@ export const drawDahlia = (ctx: CanvasRenderingContext2D, s: number, alpha: numb
 };
 
 export const drawMagnolia = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Large waxy petals
   for (let i = 0; i < 6; i++) {
     const a = (Math.PI * 2 / 6) * i;
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(
-      Math.cos(a - 0.3) * s * 0.3, Math.sin(a - 0.3) * s * 0.3,
-      Math.cos(a) * s * 0.7, Math.sin(a) * s * 0.7,
-      Math.cos(a + 0.15) * s * 0.5, Math.sin(a + 0.15) * s * 0.5
-    );
-    ctx.bezierCurveTo(
-      Math.cos(a + 0.3) * s * 0.3, Math.sin(a + 0.3) * s * 0.3,
-      0, 0, 0, 0
-    );
+    ctx.bezierCurveTo(Math.cos(a - 0.3) * s * 0.3, Math.sin(a - 0.3) * s * 0.3, Math.cos(a) * s * 0.7, Math.sin(a) * s * 0.7, Math.cos(a + 0.15) * s * 0.5, Math.sin(a + 0.15) * s * 0.5);
+    ctx.bezierCurveTo(Math.cos(a + 0.3) * s * 0.3, Math.sin(a + 0.3) * s * 0.3, 0, 0, 0, 0);
     ctx.fillStyle = `hsla(340, 15%, ${88 - i * 2}%, ${alpha * 0.7})`; ctx.fill();
     ctx.strokeStyle = `hsla(340, 20%, 80%, ${alpha * 0.2})`; ctx.lineWidth = 0.4; ctx.stroke();
   }
@@ -281,7 +266,6 @@ export const drawMagnolia = (ctx: CanvasRenderingContext2D, s: number, alpha: nu
 };
 
 export const drawCherryBlossom = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // 5 heart-shaped petals
   for (let i = 0; i < 5; i++) {
     const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
     const px = Math.cos(a) * s * 0.3;
@@ -292,12 +276,9 @@ export const drawCherryBlossom = (ctx: CanvasRenderingContext2D, s: number, alph
     ctx.bezierCurveTo(px + Math.cos(a - 0.5) * s * 0.25, py + Math.sin(a - 0.5) * s * 0.25, px * 1.4, py * 1.4, px * 1.4, py * 1.4);
     ctx.fillStyle = `hsla(340, 55%, 82%, ${alpha * 0.75})`; ctx.fill();
   }
-  // Stamens
   for (let i = 0; i < 6; i++) {
     const a = (Math.PI * 2 / 6) * i;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(Math.cos(a) * s * 0.15, Math.sin(a) * s * 0.15);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * 0.15, Math.sin(a) * s * 0.15);
     ctx.strokeStyle = `hsla(340, 40%, 65%, ${alpha * 0.4})`; ctx.lineWidth = 0.4; ctx.stroke();
     ctx.beginPath(); ctx.arc(Math.cos(a) * s * 0.15, Math.sin(a) * s * 0.15, s * 0.02, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(45, 80%, 55%, ${alpha * 0.7})`; ctx.fill();
@@ -305,17 +286,14 @@ export const drawCherryBlossom = (ctx: CanvasRenderingContext2D, s: number, alph
 };
 
 export const drawAnemone = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // 6 rounded petals
   for (let i = 0; i < 6; i++) {
     const a = (Math.PI * 2 / 6) * i;
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.32, Math.sin(a) * s * 0.32, s * 0.28, s * 0.18, a, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(0, 50%, 92%, ${alpha * 0.75})`; ctx.fill();
   }
-  // Dark center
   ctx.beginPath(); ctx.arc(0, 0, s * 0.18, 0, Math.PI * 2);
   ctx.fillStyle = `hsla(260, 30%, 18%, ${alpha * 0.85})`; ctx.fill();
-  // Stamens ring
   for (let i = 0; i < 10; i++) {
     const a = (Math.PI * 2 / 10) * i;
     ctx.beginPath(); ctx.arc(Math.cos(a) * s * 0.12, Math.sin(a) * s * 0.12, s * 0.015, 0, Math.PI * 2);
@@ -324,7 +302,6 @@ export const drawAnemone = (ctx: CanvasRenderingContext2D, s: number, alpha: num
 };
 
 export const drawRanunculus = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Tightly packed spiral petals
   for (let layer = 6; layer >= 0; layer--) {
     const petals = 6 + layer;
     const r = s * (0.06 + layer * 0.065);
@@ -338,7 +315,6 @@ export const drawRanunculus = (ctx: CanvasRenderingContext2D, s: number, alpha: 
 };
 
 export const drawProtea = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Outer bracts (pointed)
   for (let i = 0; i < 12; i++) {
     const a = (Math.PI * 2 / 12) * i;
     ctx.beginPath();
@@ -349,7 +325,6 @@ export const drawProtea = (ctx: CanvasRenderingContext2D, s: number, alpha: numb
     ctx.closePath();
     ctx.fillStyle = `hsla(345, 50%, ${55 + i % 3 * 8}%, ${alpha * 0.6})`; ctx.fill();
   }
-  // Fuzzy center dome
   ctx.beginPath(); ctx.arc(0, 0, s * 0.2, 0, Math.PI * 2);
   ctx.fillStyle = `hsla(30, 40%, 75%, ${alpha * 0.7})`; ctx.fill();
   for (let i = 0; i < 8; i++) {
@@ -360,32 +335,27 @@ export const drawProtea = (ctx: CanvasRenderingContext2D, s: number, alpha: numb
 };
 
 export const drawLotus = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Back petals
   for (let i = 0; i < 5; i++) {
     const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.4, Math.sin(a) * s * 0.4, s * 0.25, s * 0.45, a, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(340, 40%, 82%, ${alpha * 0.45})`; ctx.fill();
   }
-  // Front petals
   for (let i = 0; i < 5; i++) {
     const a = (Math.PI * 2 / 5) * i + 0.3 - Math.PI / 2;
     ctx.beginPath();
     ctx.ellipse(Math.cos(a) * s * 0.25, Math.sin(a) * s * 0.25, s * 0.2, s * 0.35, a, 0, Math.PI * 2);
     ctx.fillStyle = `hsla(335, 45%, 78%, ${alpha * 0.6})`; ctx.fill();
   }
-  // Center pod
   ctx.beginPath(); ctx.arc(0, 0, s * 0.12, 0, Math.PI * 2);
   ctx.fillStyle = `hsla(55, 65%, 60%, ${alpha * 0.75})`; ctx.fill();
 };
 
 export const drawEucalyptus = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-  // Winding stem
   ctx.beginPath();
   ctx.moveTo(0, s * 0.9);
   ctx.bezierCurveTo(-s * 0.1, s * 0.3, s * 0.1, -s * 0.3, 0, -s * 0.9);
   ctx.strokeStyle = `hsla(160, 25%, 55%, ${alpha * 0.5})`; ctx.lineWidth = 0.8; ctx.stroke();
-  // Round leaves along stem
   for (let i = 0; i < 6; i++) {
     const t = i / 5;
     const x = Math.sin(t * Math.PI * 2) * s * 0.08;
@@ -397,6 +367,235 @@ export const drawEucalyptus = (ctx: CanvasRenderingContext2D, s: number, alpha: 
   }
 };
 
+// === 15 NEW FLOWER TYPES ===
+
+export const drawCarnation = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let layer = 4; layer >= 0; layer--) {
+    const petals = 10 + layer * 3;
+    const r = s * (0.08 + layer * 0.08);
+    for (let i = 0; i < petals; i++) {
+      const a = (Math.PI * 2 / petals) * i + layer * 0.25;
+      ctx.beginPath();
+      const px = Math.cos(a) * r, py = Math.sin(a) * r;
+      ctx.moveTo(px * 0.5, py * 0.5);
+      ctx.lineTo(px + Math.cos(a + 0.2) * s * 0.06, py + Math.sin(a + 0.2) * s * 0.06);
+      ctx.lineTo(px * 1.2, py * 1.2);
+      ctx.lineTo(px + Math.cos(a - 0.2) * s * 0.06, py + Math.sin(a - 0.2) * s * 0.06);
+      ctx.closePath();
+      ctx.fillStyle = `hsla(${340 + layer * 5}, 65%, ${60 + layer * 6}%, ${alpha * (0.6 - layer * 0.06)})`; ctx.fill();
+    }
+  }
+};
+
+export const drawGerbera = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let ring = 1; ring >= 0; ring--) {
+    const petals = ring === 0 ? 20 : 16;
+    const rDist = s * (0.25 + ring * 0.18);
+    for (let i = 0; i < petals; i++) {
+      const a = (Math.PI * 2 / petals) * i + ring * 0.15;
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(a) * rDist, Math.sin(a) * rDist, s * (0.18 - ring * 0.03), s * 0.06, a, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(15, 85%, ${55 + ring * 12}%, ${alpha * (0.7 - ring * 0.1)})`; ctx.fill();
+    }
+  }
+  ctx.beginPath(); ctx.arc(0, 0, s * 0.14, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(30, 50%, 30%, ${alpha * 0.85})`; ctx.fill();
+};
+
+export const drawFreesia = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  ctx.beginPath(); ctx.moveTo(0, s * 0.6); ctx.quadraticCurveTo(s * 0.15, 0, -s * 0.1, -s * 0.6);
+  ctx.strokeStyle = `hsla(130, 35%, 48%, ${alpha * 0.45})`; ctx.lineWidth = 0.9; ctx.stroke();
+  for (let i = 0; i < 5; i++) {
+    const y = -s * 0.5 + i * s * 0.22;
+    const openness = 1 - i * 0.15;
+    for (let p = 0; p < 5; p++) {
+      const a = (Math.PI * 2 / 5) * p - Math.PI / 2;
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(a) * s * 0.1 * openness, y + Math.sin(a) * s * 0.1 * openness, s * 0.08 * openness, s * 0.04 * openness, a, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(55, 85%, ${60 + i * 4}%, ${alpha * (0.7 - i * 0.08)})`; ctx.fill();
+    }
+  }
+};
+
+export const drawPoppySeed = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 4; i++) {
+    const a = (Math.PI / 2) * i + 0.3;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * s * 0.25, Math.sin(a) * s * 0.25, s * 0.35, s * 0.22, a, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(5, 80%, 50%, ${alpha * 0.7})`; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(0, 0, s * 0.14, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(120, 20%, 15%, ${alpha * 0.8})`; ctx.fill();
+  for (let i = 0; i < 8; i++) {
+    const a = (Math.PI * 2 / 8) * i;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * 0.12, Math.sin(a) * s * 0.12);
+    ctx.strokeStyle = `hsla(0, 0%, 20%, ${alpha * 0.5})`; ctx.lineWidth = 0.5; ctx.stroke();
+  }
+};
+
+export const drawWisteria = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  ctx.beginPath(); ctx.moveTo(0, -s * 0.8); ctx.quadraticCurveTo(s * 0.2, 0, 0, s * 0.8);
+  ctx.strokeStyle = `hsla(130, 25%, 50%, ${alpha * 0.4})`; ctx.lineWidth = 0.7; ctx.stroke();
+  for (let i = 0; i < 10; i++) {
+    const y = -s * 0.6 + i * s * 0.14;
+    const spread = Math.sin((i / 9) * Math.PI) * s * 0.2;
+    for (let j = -1; j <= 1; j += 2) {
+      ctx.beginPath();
+      ctx.ellipse(j * spread * 0.4, y, s * 0.06, s * 0.04, j * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(270, 50%, ${60 + i * 2}%, ${alpha * (0.7 - i * 0.04)})`; ctx.fill();
+    }
+  }
+};
+
+export const drawBirdOfParadise = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  // Green spathe
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.4, s * 0.1); ctx.quadraticCurveTo(0, -s * 0.2, s * 0.5, s * 0.05);
+  ctx.quadraticCurveTo(0, s * 0.1, -s * 0.4, s * 0.1);
+  ctx.fillStyle = `hsla(150, 50%, 35%, ${alpha * 0.6})`; ctx.fill();
+  // Orange/blue petals
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 0.1 * i, -s * 0.5, s * (-0.1 + i * 0.15), -s * 0.7);
+    ctx.strokeStyle = `hsla(${25 + i * 10}, 90%, 55%, ${alpha * 0.7})`; ctx.lineWidth = 2; ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(s * 0.1, -s * 0.1);
+  ctx.quadraticCurveTo(s * 0.3, -s * 0.5, s * 0.15, -s * 0.65);
+  ctx.strokeStyle = `hsla(220, 70%, 55%, ${alpha * 0.65})`; ctx.lineWidth = 2.5; ctx.stroke();
+};
+
+export const drawLilac = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 20; i++) {
+    const x = (Math.random() - 0.5) * s * 0.7;
+    const y = (Math.random() - 0.5) * s * 0.9;
+    for (let p = 0; p < 4; p++) {
+      const a = (Math.PI / 2) * p;
+      ctx.beginPath();
+      ctx.ellipse(x + Math.cos(a) * s * 0.03, y + Math.sin(a) * s * 0.03, s * 0.035, s * 0.02, a, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(280, 45%, ${65 + Math.random() * 10}%, ${alpha * 0.55})`; ctx.fill();
+    }
+  }
+};
+
+export const drawClematis = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 8; i++) {
+    const a = (Math.PI * 2 / 8) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(Math.cos(a - 0.2) * s * 0.2, Math.sin(a - 0.2) * s * 0.2, Math.cos(a) * s * 0.55, Math.sin(a) * s * 0.55, Math.cos(a + 0.1) * s * 0.4, Math.sin(a + 0.1) * s * 0.4);
+    ctx.bezierCurveTo(Math.cos(a + 0.2) * s * 0.2, Math.sin(a + 0.2) * s * 0.2, 0, 0, 0, 0);
+    ctx.fillStyle = `hsla(270, 55%, 60%, ${alpha * 0.6})`; ctx.fill();
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = (Math.PI * 2 / 12) * i;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * 0.15, Math.sin(a) * s * 0.15);
+    ctx.strokeStyle = `hsla(55, 70%, 60%, ${alpha * 0.5})`; ctx.lineWidth = 0.6; ctx.stroke();
+    ctx.beginPath(); ctx.arc(Math.cos(a) * s * 0.15, Math.sin(a) * s * 0.15, s * 0.02, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(55, 80%, 55%, ${alpha * 0.7})`; ctx.fill();
+  }
+};
+
+export const drawAmaryllis = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI * 2 / 6) * i;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * s * 0.35, Math.sin(a) * s * 0.35, s * 0.35, s * 0.15, a, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(355, 75%, 55%, ${alpha * 0.65})`; ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * s * 0.1, Math.sin(a) * s * 0.1);
+    ctx.lineTo(Math.cos(a) * s * 0.5, Math.sin(a) * s * 0.5);
+    ctx.strokeStyle = `hsla(0, 0%, 95%, ${alpha * 0.3})`; ctx.lineWidth = 0.4; ctx.stroke();
+  }
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 / 5) * i + 0.3;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * 0.2, Math.sin(a) * s * 0.2);
+    ctx.strokeStyle = `hsla(50, 70%, 60%, ${alpha * 0.5})`; ctx.lineWidth = 1; ctx.lineCap = "round"; ctx.stroke();
+    ctx.beginPath(); ctx.arc(Math.cos(a) * s * 0.2, Math.sin(a) * s * 0.2, s * 0.025, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(45, 80%, 55%, ${alpha * 0.7})`; ctx.fill();
+  }
+  ctx.lineCap = "butt";
+};
+
+export const drawHellebore = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * s * 0.3, Math.sin(a) * s * 0.3, s * 0.3, s * 0.2, a, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(150, 25%, 75%, ${alpha * 0.6})`; ctx.fill();
+  }
+  for (let i = 0; i < 8; i++) {
+    const a = (Math.PI * 2 / 8) * i;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * 0.12, Math.sin(a) * s * 0.12);
+    ctx.strokeStyle = `hsla(90, 40%, 50%, ${alpha * 0.4})`; ctx.lineWidth = 0.8; ctx.lineCap = "round"; ctx.stroke();
+  }
+  ctx.lineCap = "butt";
+  ctx.beginPath(); ctx.arc(0, 0, s * 0.08, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(80, 50%, 55%, ${alpha * 0.7})`; ctx.fill();
+};
+
+export const drawScabiosa = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 40; i++) {
+    const a = i * 2.399;
+    const r = s * 0.04 * Math.sqrt(i);
+    ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r, s * 0.025, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(260, 30%, 40%, ${alpha * 0.6})`; ctx.fill();
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = (Math.PI * 2 / 10) * i;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * s * 0.4, Math.sin(a) * s * 0.4, s * 0.15, s * 0.06, a, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(280, 40%, 72%, ${alpha * 0.5})`; ctx.fill();
+  }
+};
+
+export const drawJasmine = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * s * 0.25, Math.sin(a) * s * 0.25, s * 0.2, s * 0.1, a, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(0, 0%, 98%, ${alpha * 0.8})`; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(0, 0, s * 0.08, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(55, 80%, 60%, ${alpha * 0.85})`; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0, s * 0.2); ctx.lineTo(0, s * 0.55);
+  ctx.strokeStyle = `hsla(130, 30%, 50%, ${alpha * 0.4})`; ctx.lineWidth = 0.7; ctx.stroke();
+};
+
+export const drawBougainvillea = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  for (let i = 0; i < 3; i++) {
+    const a = (Math.PI * 2 / 3) * i - Math.PI / 6;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a - 0.25) * s * 0.15, Math.sin(a - 0.25) * s * 0.15);
+    ctx.lineTo(Math.cos(a) * s * 0.55, Math.sin(a) * s * 0.55);
+    ctx.lineTo(Math.cos(a + 0.25) * s * 0.15, Math.sin(a + 0.25) * s * 0.15);
+    ctx.closePath();
+    ctx.fillStyle = `hsla(320, 70%, 55%, ${alpha * 0.65})`; ctx.fill();
+  }
+  for (let i = 0; i < 3; i++) {
+    const a = (Math.PI * 2 / 3) * i - Math.PI / 6;
+    ctx.beginPath(); ctx.arc(Math.cos(a) * s * 0.35, Math.sin(a) * s * 0.35, s * 0.03, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(0, 0%, 98%, ${alpha * 0.7})`; ctx.fill();
+  }
+};
+
+export const drawStarFlower = (ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
+  // 6-pointed star flower
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI * 2 / 6) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a - 0.15) * s * 0.12, Math.sin(a - 0.15) * s * 0.12);
+    ctx.lineTo(Math.cos(a) * s * 0.5, Math.sin(a) * s * 0.5);
+    ctx.lineTo(Math.cos(a + 0.15) * s * 0.12, Math.sin(a + 0.15) * s * 0.12);
+    ctx.closePath();
+    ctx.fillStyle = `hsla(200, 55%, 70%, ${alpha * 0.6})`; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(0, 0, s * 0.1, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(50, 70%, 65%, ${alpha * 0.8})`; ctx.fill();
+};
+
 // Map of all flower types
 export const flowerDrawers: Record<string, (ctx: CanvasRenderingContext2D, s: number, alpha: number) => void> = {
   lily: drawLily, tulip: drawTulip, cosmos: drawCosmos, craspedia: drawCraspedia,
@@ -404,41 +603,61 @@ export const flowerDrawers: Record<string, (ctx: CanvasRenderingContext2D, s: nu
   rose: drawRose, sunflower: drawSunflower, daisy: drawDaisy, orchid: drawOrchid,
   hydrangea: drawHydrangea, lavender: drawLavender, peony: drawPeony,
   fern: drawFern, babybreath: drawBabyBreath,
-  // New types
   iris: drawIris, dahlia: drawDahlia, magnolia: drawMagnolia,
   cherryblossom: drawCherryBlossom, anemone: drawAnemone,
   ranunculus: drawRanunculus, protea: drawProtea, lotus: drawLotus,
   eucalyptus: drawEucalyptus,
+  // 15 new types
+  carnation: drawCarnation, gerbera: drawGerbera, freesia: drawFreesia,
+  poppyseed: drawPoppySeed, wisteria: drawWisteria, birdofparadise: drawBirdOfParadise,
+  lilac: drawLilac, clematis: drawClematis, amaryllis: drawAmaryllis,
+  hellebore: drawHellebore, scabiosa: drawScabiosa, jasmine: drawJasmine,
+  bougainvillea: drawBougainvillea, starflower: drawStarFlower,
 };
 
 export type FlowerType = keyof typeof flowerDrawers;
 export const FLOWER_TYPES: FlowerType[] = Object.keys(flowerDrawers);
 
-// Weighted probabilities
+// Weighted probabilities (must sum to ~1.0)
 export const FLOWER_WEIGHTS: number[] = [
-  0.06, // lily
-  0.06, // tulip
-  0.04, // cosmos
-  0.04, // craspedia
-  0.04, // calla
-  0.04, // darkleaf
-  0.03, // whitebranch
-  0.07, // rose
-  0.05, // sunflower
-  0.04, // daisy
-  0.05, // orchid
-  0.04, // hydrangea
-  0.04, // lavender
-  0.05, // peony
+  0.04, // lily
+  0.04, // tulip
+  0.03, // cosmos
+  0.03, // craspedia
+  0.03, // calla
+  0.03, // darkleaf
+  0.02, // whitebranch
+  0.05, // rose
+  0.04, // sunflower
+  0.03, // daisy
+  0.04, // orchid
+  0.03, // hydrangea
+  0.03, // lavender
+  0.04, // peony
   0.02, // fern
   0.02, // babybreath
-  0.05, // iris
-  0.05, // dahlia
-  0.04, // magnolia
-  0.05, // cherryblossom
-  0.04, // anemone
-  0.04, // ranunculus
-  0.03, // protea
-  0.03, // lotus
-  0.03, // eucalyptus
+  0.03, // iris
+  0.04, // dahlia
+  0.03, // magnolia
+  0.04, // cherryblossom
+  0.03, // anemone
+  0.03, // ranunculus
+  0.02, // protea
+  0.02, // lotus
+  0.02, // eucalyptus
+  // new
+  0.03, // carnation
+  0.03, // gerbera
+  0.02, // freesia
+  0.02, // poppyseed
+  0.02, // wisteria
+  0.02, // birdofparadise
+  0.02, // lilac
+  0.02, // clematis
+  0.02, // amaryllis
+  0.02, // hellebore
+  0.01, // scabiosa
+  0.02, // jasmine
+  0.02, // bougainvillea
+  0.02, // starflower
 ];
