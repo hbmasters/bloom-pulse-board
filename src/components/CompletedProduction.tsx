@@ -9,38 +9,38 @@ const getBadge = (planned: number, actual: number) => {
 
 const CompletedProduction = () => {
   return (
-    <section className="flex flex-col h-full">
-      <h2 className="text-sm font-bold text-foreground uppercase tracking-wider mb-2 shrink-0">
-        Vandaag Afgerond
-      </h2>
-      <div className="flex-1 min-h-0 space-y-1.5 overflow-hidden">
+    <div className="flex flex-col h-full">
+      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1.5 shrink-0">
+        Afgerond Vandaag
+      </h3>
+      <div className="flex-1 min-h-0 space-y-1 overflow-hidden">
         {completedProducts.map((item) => {
           const badge = getBadge(item.plannedMinutes, item.actualMinutes);
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-card shadow-sm"
+              className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-border bg-card"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-foreground truncate">{item.name}</span>
-                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${badge.className}`}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-foreground truncate">{item.name}</span>
+                  <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${badge.className}`}>
                     {badge.label}
                   </span>
                 </div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">
-                  Klaar om {item.completedAt} · {item.actualMinutes}min (plan: {item.plannedMinutes}min)
+                <div className="text-[9px] text-muted-foreground mt-0.5">
+                  {item.completedAt} · {item.actualMinutes}min (plan: {item.plannedMinutes}min)
                 </div>
               </div>
               <div className="text-right shrink-0">
                 <div className="text-base font-mono font-black text-foreground leading-none">{item.quantity}</div>
-                <div className="text-[9px] text-muted-foreground mt-0.5">stuks</div>
+                <div className="text-[8px] text-muted-foreground">stuks</div>
               </div>
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 };
 

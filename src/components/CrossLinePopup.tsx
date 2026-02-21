@@ -13,7 +13,6 @@ const CrossLinePopup = () => {
       setCurrentAlert(alertIndex);
       setIsExiting(false);
 
-      // Hide after 12 seconds
       setTimeout(() => {
         setIsExiting(true);
         setTimeout(() => {
@@ -23,12 +22,11 @@ const CrossLinePopup = () => {
       }, 12000);
     };
 
-    // Show first alert after 20 seconds, then every 45 seconds
     const initialTimer = setTimeout(() => {
       showAlert();
       const interval = setInterval(showAlert, 45000);
       return () => clearInterval(interval);
-    }, 20000);
+    }, 25000);
 
     return () => clearTimeout(initialTimer);
   }, []);
@@ -38,13 +36,13 @@ const CrossLinePopup = () => {
   const alert = crossLineAlerts[currentAlert];
 
   return (
-    <div className={`fixed top-20 right-6 z-50 ${isExiting ? "animate-slide-out" : "animate-slide-in"}`}>
-      <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/20 shadow-lg glow-primary">
+    <div className={`fixed top-20 right-5 z-50 ${isExiting ? "animate-slide-out" : "animate-slide-in"}`}>
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-primary/20 shadow-lg glow-primary">
         <Trophy className="w-5 h-5 text-primary shrink-0" />
         <div>
-          <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Cross-line update</div>
+          <div className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">Cross-line</div>
           <p className="text-sm font-semibold text-foreground">
-            <span className="text-primary">{alert.line}</span> {alert.message}
+            <span className="text-primary">{alert.line}</span> — {alert.message}
           </p>
         </div>
       </div>

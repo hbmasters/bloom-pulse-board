@@ -1,11 +1,11 @@
-import productSpringBouquet from "@/assets/product-spring-bouquet.jpg";
-import productMoederdag from "@/assets/product-moederdag.jpg";
-import productTulpen from "@/assets/product-tulpen.jpg";
-import productPastel from "@/assets/product-pastel.jpg";
-import productZonnebloem from "@/assets/product-zonnebloem.jpg";
-import productRoos from "@/assets/product-roos.jpg";
-import productOrchidee from "@/assets/product-orchidee.jpg";
-import productZomermix from "@/assets/product-zomermix.jpg";
+import productFieldL from "@/assets/product-field-l.jpg";
+import productDeLuxe from "@/assets/product-de-luxe.jpg";
+import productFieldM from "@/assets/product-field-m.jpg";
+import productElegance from "@/assets/product-elegance.jpg";
+import productCharmeXL from "@/assets/product-charme-xl.jpg";
+import productLovely from "@/assets/product-lovely.jpg";
+import productChique from "@/assets/product-chique.jpg";
+import productTrend from "@/assets/product-trend.jpg";
 
 export interface ActiveProduct {
   id: number;
@@ -18,6 +18,7 @@ export interface ActiveProduct {
   target: number;
   minutesActive: number;
   piecesPerHour: number;
+  plannedPiecesPerHour: number;
   status: "op-schema" | "sneller" | "hoog-tempo";
 }
 
@@ -30,12 +31,29 @@ export interface CompletedProduct {
   completedAt: string;
 }
 
+export interface CrossLineAlert {
+  line: string;
+  product: string;
+  message: string;
+  metric: string;
+}
+
+export interface YesterdayStats {
+  totalProduced: number;
+  avgPcsPerHour: number;
+  peakHourPcsPerHour: number;
+  avgPeople: number;
+  bestOrder: string;
+  bestOrderPcs: number;
+  performanceVsPlanned: number;
+}
+
 // Hand Line 1 active production orders
 export const activeProducts: ActiveProduct[] = [
   {
     id: 1,
-    name: "Luxe Voorjaarsboeket",
-    image: productSpringBouquet,
+    name: "BQ Field L",
+    image: productFieldL,
     startTime: "07:00",
     expectedEndTime: "11:30",
     people: 3,
@@ -43,12 +61,13 @@ export const activeProducts: ActiveProduct[] = [
     target: 400,
     minutesActive: 195,
     piecesPerHour: 88,
-    status: "op-schema",
+    plannedPiecesPerHour: 80,
+    status: "sneller",
   },
   {
     id: 2,
-    name: "Moederdag Arrangement",
-    image: productMoederdag,
+    name: "BQ Elegance",
+    image: productElegance,
     startTime: "07:15",
     expectedEndTime: "12:00",
     people: 2,
@@ -56,12 +75,13 @@ export const activeProducts: ActiveProduct[] = [
     target: 400,
     minutesActive: 180,
     piecesPerHour: 119,
-    status: "sneller",
+    plannedPiecesPerHour: 100,
+    status: "hoog-tempo",
   },
   {
     id: 3,
-    name: "Seizoens Mix Pastel",
-    image: productPastel,
+    name: "BQ Charme XL",
+    image: productCharmeXL,
     startTime: "08:00",
     expectedEndTime: "13:00",
     people: 2,
@@ -69,37 +89,51 @@ export const activeProducts: ActiveProduct[] = [
     target: 350,
     minutesActive: 135,
     piecesPerHour: 88,
-    status: "hoog-tempo",
+    plannedPiecesPerHour: 85,
+    status: "op-schema",
   },
 ];
 
 // Hand Line 1 completed today
 export const completedProducts: CompletedProduct[] = [
-  { id: 1, name: "Lenteweelde Boeket", quantity: 350, plannedMinutes: 240, actualMinutes: 210, completedAt: "08:45" },
-  { id: 2, name: "Premium Roos Arrangement", quantity: 200, plannedMinutes: 180, actualMinutes: 180, completedAt: "09:30" },
-  { id: 3, name: "Orchidee Deluxe", quantity: 150, plannedMinutes: 120, actualMinutes: 105, completedAt: "11:00" },
+  { id: 1, name: "BQ de Luxe", quantity: 350, plannedMinutes: 240, actualMinutes: 210, completedAt: "08:45" },
+  { id: 2, name: "BQ Lovely", quantity: 200, plannedMinutes: 180, actualMinutes: 180, completedAt: "09:30" },
+  { id: 3, name: "BQ Chique", quantity: 150, plannedMinutes: 120, actualMinutes: 105, completedAt: "11:00" },
 ];
 
 export const hbMasterMessages = [
-  "Sterk tempo dit uur — blijf pushen.",
-  "Snelheid met 7% gestegen t.o.v. vorig uur.",
-  "Jullie liggen voor op planning — excellent werk.",
-  "Nog 5% erbij en jullie zetten een nieuw dagrecord.",
-  "Mooi momentum — houd dit vast, Hand Lijn 1.",
-  "De kwaliteit en snelheid liggen perfect in balans.",
+  { text: "Sterk tempo dit uur — +6% boven planning.", mode: "flow" as const },
+  { text: "Output per persoon stijgt. Sterke lijn.", mode: "flow" as const },
+  { text: "Nog 4% voor een nieuw dagrecord.", mode: "flow" as const },
+  { text: "Nieuwe order gestart: BQ Charme XL. Bouw tempo gecontroleerd op.", mode: "stabilisatie" as const },
+  { text: "Jullie liggen voor op planning — excellent werk.", mode: "flow" as const },
+  { text: "Snelheid stabiel rond planning. Solide productie.", mode: "stabilisatie" as const },
 ];
 
-export const crossLineAlerts = [
-  { line: "Handlijn 3", message: "heeft zojuist 12% boven planning bereikt." },
-  { line: "Bandlijn 2", message: "zette een nieuw uurrecord neer." },
-  { line: "Handlijn 5", message: "versnelde met 9% dit uur." },
+export const crossLineAlerts: CrossLineAlert[] = [
+  { line: "Handlijn 3", product: "BQ Field M", message: "+12% boven planning", metric: "112%" },
+  { line: "Bandlijn 2", product: "BQ Trend", message: "Nieuw uurrecord: 1.480 PCS/H", metric: "Record" },
+  { line: "Handlijn 5", product: "BQ Coffee S", message: "+9% versnelling dit uur", metric: "+9%" },
 ];
 
 export const lineStats = {
-  lineName: "HANDLIJN 1",
+  lineName: "HAND LINE 1",
   totalPeople: 7,
-  totalProduced: 991,
+  totalProduced: 1.541,
   plannedPiecesPerHour: 80,
   currentPiecesPerHour: 88,
-  performanceVsPlanned: 110, // percentage
+  performanceVsPlanned: 110,
+  outputPerPerson: 12.6,
+  efficiencyScore: 94,
+  peopleLastUpdated: 12, // minutes ago
+};
+
+export const yesterdayStats: YesterdayStats = {
+  totalProduced: 4820,
+  avgPcsPerHour: 86,
+  peakHourPcsPerHour: 1320,
+  avgPeople: 7,
+  bestOrder: "BQ Field L",
+  bestOrderPcs: 680,
+  performanceVsPlanned: 106,
 };
