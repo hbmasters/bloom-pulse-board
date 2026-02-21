@@ -269,6 +269,9 @@ const ColdStorageSections = () => {
       <div className="grid gap-3 h-full grid-cols-[0.6fr_2fr_1fr] hover:[grid-template-columns:1fr_2fr_1fr] transition-all duration-300 group/grid">
         {/* Left: Printed + Fastest Picker — narrow by default, expands on hover */}
         <div className="flex flex-col min-h-0 gap-3 overflow-hidden">
+          <div className="shrink-0">
+            <FastestPickerPanel />
+          </div>
           <div className="flex-1 flex flex-col min-h-0">
             <SectionHeader
               icon={<Printer className="w-3 h-3 text-primary-foreground" />}
@@ -283,9 +286,6 @@ const ColdStorageSections = () => {
                 <PrintedOrderRow key={order.id} order={order} onClick={() => setSelectedOrder(order)} />
               ))}
             </div>
-          </div>
-          <div className="shrink-0">
-            <FastestPickerPanel />
           </div>
         </div>
 
