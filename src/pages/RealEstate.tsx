@@ -23,7 +23,7 @@ const RealEstate = () => {
         <REContact />
       </main>
       <REFooter />
-      <BroadcastWidget theme="realestate" position="bottom-left" />
+      <BroadcastWidget theme="realestate" position="bottom-right" />
       <REBackToTop />
     </div>
   );

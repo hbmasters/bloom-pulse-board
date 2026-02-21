@@ -22,14 +22,9 @@ const BROADCASTS: Record<string, { text: string; source: string; severity: "succ
     { text: "Nieuwe klantorder binnenkomst: Bloemenveiling 480 stuks.", source: "Orders", severity: "info" },
   ],
   realestate: [
-    { text: "Alle woningen van HBM Real Estate zijn SNF-gecertificeerd.", source: "Certificering", severity: "success" },
-    { text: "Inspectie Regio Aalsmeer afgerond — alle woningen goedgekeurd.", source: "Inspectie", severity: "success" },
-    { text: "Gemeentelijk Convenant garandeert eerlijke huisvestingsvoorwaarden.", source: "Compliance", severity: "info" },
-    { text: "Onderhoudsmeldingen worden binnen 24 uur in behandeling genomen.", source: "Onderhoud", severity: "info" },
-    { text: "Brandveiligheid gecontroleerd — alle installaties gecertificeerd.", source: "Veiligheid", severity: "success" },
-    { text: "Gemeentelijke vergunningen Haarlemmermeer verlengd tot 2027.", source: "Vergunningen", severity: "success" },
-    { text: "HBM Real Estate investeert continu in verduurzaming van vastgoed.", source: "Duurzaamheid", severity: "info" },
-    { text: "Halfjaarlijkse SNF-inspectie gepland voor volgende maand.", source: "Planning", severity: "warning" },
+    { text: "10 nieuwe veranderingen van personen afgelopen maand.", source: "Huisvesting", severity: "info" },
+    { text: "Controle brandveiligheid gehaald op de Legmeerdijk afgelopen maand.", source: "Veiligheid", severity: "success" },
+    { text: "513 personen in onze huisvesting.", source: "Bezetting", severity: "success" },
   ],
 };
 
