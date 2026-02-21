@@ -89,68 +89,76 @@ const ForceScanPopup = ({
   order: ColdStorageOrder | PickedOrder;
   onClose: () => void;
   onConfirm: () => void;
-}) => (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-    <div
-      className="bg-card rounded-2xl border border-border shadow-2xl p-6 max-w-md w-full mx-4 animate-slide-in"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-foreground">Force Uitscannen</h2>
-        <button onClick={onClose} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-muted transition-colors">
-          <X className="w-4 h-4 text-muted-foreground" />
-        </button>
-      </div>
+}) => {
+  const personName = ("picker" in order && order.picker) || order.pickedBy || order.printedBy;
 
-      {/* Product image */}
-      <div className="rounded-xl overflow-hidden mb-4 bg-secondary aspect-[16/9] flex items-center justify-center">
-        {"image" in order && order.image ? (
-          <img src={order.image} alt={order.name} className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-4xl font-black text-muted-foreground/20">{order.name.charAt(0)}</span>
-        )}
-      </div>
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
+      <div
+        className="bg-card rounded-2xl border border-border shadow-2xl p-6 max-w-md w-full mx-4 animate-slide-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground">Force Uitscannen</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-muted transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
 
-      <div className="bg-secondary rounded-xl p-4 mb-4">
-        {/* Person avatar + name */}
-        {(() => {
-          const personName = ("picker" in order && order.picker) || order.pickedBy || order.printedBy;
-          return personName ? (
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center">
-                <span className="text-[10px] font-black text-primary-foreground">{personName.charAt(0)}</span>
-              </div>
-              <span className="text-xs font-bold text-foreground">{personName}</span>
+        {/* Product section */}
+        <div className="rounded-xl border border-border overflow-hidden mb-4">
+          <div className="bg-secondary aspect-[16/9] flex items-center justify-center">
+            {"image" in order && order.image ? (
+              <img src={order.image} alt={order.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-4xl font-black text-muted-foreground/20">{order.name.charAt(0)}</span>
+            )}
+          </div>
+          <div className="px-3 py-2 bg-card">
+            <div className="text-[8px] text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">Product</div>
+            <div className="text-sm font-bold text-foreground">{order.name}</div>
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-0.5">
+              <span className="font-mono font-bold">{order.quantity} pcs</span>
+              <span>{formatHours(order.estimatedMinutes)}</span>
+              {order.departureDate && <span>Vertrek: {order.departureDate}</span>}
             </div>
-          ) : null;
-        })()}
-        <div className="text-sm font-bold text-foreground mb-1">{order.name}</div>
-        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-          <span className="font-mono font-bold">{order.quantity} pcs</span>
-          <span>{formatHours(order.estimatedMinutes)}</span>
-          {order.departureDate && <span>Vertrek: {order.departureDate}</span>}
+          </div>
+        </div>
+
+        {/* Person section */}
+        {personName && (
+          <div className="rounded-xl border border-accent/25 bg-accent/5 p-3 mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0">
+              <span className="text-sm font-black text-primary-foreground">{personName.charAt(0)}</span>
+            </div>
+            <div>
+              <div className="text-[8px] text-muted-foreground uppercase tracking-wider font-semibold">Medewerker</div>
+              <div className="text-sm font-bold text-foreground">{personName}</div>
+            </div>
+          </div>
+        )}
+
+        <p className="text-sm text-muted-foreground mb-5">
+          Weet je zeker dat je deze productie order handmatig wilt uitscannen?
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
+          >
+            Annuleren
+          </button>
+          <button
+            onClick={() => { onConfirm(); onClose(); }}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-md hover:opacity-90 transition-opacity"
+          >
+            Uitscannen
+          </button>
         </div>
       </div>
-      <p className="text-sm text-muted-foreground mb-5">
-        Weet je zeker dat je deze productie order handmatig wilt uitscannen?
-      </p>
-      <div className="flex gap-3">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
-        >
-          Annuleren
-        </button>
-        <button
-          onClick={() => { onConfirm(); onClose(); }}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-md hover:opacity-90 transition-opacity"
-        >
-          Uitscannen
-        </button>
-      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Category color map
 const categoryColors: Record<string, string> = {
@@ -471,14 +479,25 @@ const ColdStorageSections = () => {
 
         {/* Center: Picked */}
         <div className="flex flex-col min-h-0">
-          <SectionHeader
-            icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
-            title="Picked"
-            count={pickedOrders.length}
-            totalMinutes={getTotalMinutes(pickedOrders)}
-            totalPcs={getTotalQuantity(pickedOrders)}
-            color="bg-accent"
-          />
+          <div className="flex items-center justify-between mb-1.5 shrink-0">
+            <div className="flex-1">
+              <SectionHeader
+                icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
+                title="Picked"
+                count={pickedOrders.length}
+                totalMinutes={getTotalMinutes(pickedOrders)}
+                totalPcs={getTotalQuantity(pickedOrders)}
+                color="bg-accent"
+              />
+            </div>
+            <button
+              onClick={() => setScanInOrder(pickedOrders[0])}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent/15 border border-accent/25 text-accent hover:bg-accent/25 transition-colors text-[9px] font-bold uppercase tracking-wider"
+            >
+              <ScanLine className="w-3 h-3" />
+              Scan In
+            </button>
+          </div>
           <div className={`flex-1 min-h-0 grid ${gridCols} gap-2 overflow-auto`} style={{ gridTemplateRows: `repeat(${gridRows}, 1fr)` }}>
             {pickedOrders.map((order) => (
               <PickedOrderCard key={order.id} order={order} onClick={() => setSelectedOrder(order)} />
