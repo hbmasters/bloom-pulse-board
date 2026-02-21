@@ -1,6 +1,7 @@
 import ProductionHeader from "@/components/ProductionHeader";
 import ActiveProduction from "@/components/ActiveProduction";
 import CompletedProduction from "@/components/CompletedProduction";
+import CrossLineHighlights from "@/components/CrossLineHighlights";
 import CrossLinePopup from "@/components/CrossLinePopup";
 import DayStartPopup from "@/components/DayStartPopup";
 import HBMasterPanel from "@/components/HBMasterPanel";
@@ -23,9 +24,14 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Right: Completed Today */}
-        <div className="flex-[35] min-w-0">
-          <CompletedProduction />
+        {/* Right: Completed Today + Cross-line highlights */}
+        <div className="flex-[35] min-w-0 flex flex-col gap-3">
+          <div className="flex-[6] min-h-0">
+            <CompletedProduction />
+          </div>
+          <div className="flex-[4] min-h-0">
+            <CrossLineHighlights />
+          </div>
         </div>
       </main>
 
