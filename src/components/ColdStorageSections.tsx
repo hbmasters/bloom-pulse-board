@@ -92,7 +92,29 @@ const ForceScanPopup = ({
           <X className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
+
+      {/* Product image */}
+      <div className="rounded-xl overflow-hidden mb-4 bg-secondary aspect-[16/9] flex items-center justify-center">
+        {"image" in order && order.image ? (
+          <img src={order.image} alt={order.name} className="w-full h-full object-cover" />
+        ) : (
+          <span className="text-4xl font-black text-muted-foreground/20">{order.name.charAt(0)}</span>
+        )}
+      </div>
+
       <div className="bg-secondary rounded-xl p-4 mb-4">
+        {/* Person avatar + name */}
+        {(() => {
+          const personName = ("picker" in order && order.picker) || order.pickedBy || order.printedBy;
+          return personName ? (
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 rounded-full bg-gradient-brand flex items-center justify-center">
+                <span className="text-[10px] font-black text-primary-foreground">{personName.charAt(0)}</span>
+              </div>
+              <span className="text-xs font-bold text-foreground">{personName}</span>
+            </div>
+          ) : null;
+        })()}
         <div className="text-sm font-bold text-foreground mb-1">{order.name}</div>
         <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
           <span className="font-mono font-bold">{order.quantity} pcs</span>
