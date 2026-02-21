@@ -38,8 +38,8 @@ const ColdStorageHeader = () => {
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card">
           <Users className="w-4 h-4 text-primary" />
           <div className="leading-none">
-            <div className="text-[8px] text-muted-foreground uppercase tracking-wider">People</div>
-            <div className="text-lg font-mono font-black text-foreground">{coldStorageStats.totalPeople}</div>
+            <div className="text-[8px] text-muted-foreground uppercase tracking-wider">Pickers</div>
+            <div className="text-lg font-mono font-black text-foreground">{coldStorageStats.totalPickers}</div>
           </div>
         </div>
 
