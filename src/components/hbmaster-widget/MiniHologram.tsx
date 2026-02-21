@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { flowerDrawers, FlowerType, FLOWER_TYPES, FLOWER_WEIGHTS } from "../mission-control/flowerRenderers";
 
 interface Particle {
@@ -6,6 +6,12 @@ interface Particle {
   size: number; opacity: number; life: number; maxLife: number;
   type: FlowerType; rotation: number; rotSpeed: number;
   orbitAngle: number; orbitSpeed: number; orbitRadius: number;
+  layer: number;
+}
+
+interface HexNode {
+  angle: number; radius: number; speed: number;
+  pulsePhase: number; connections: number[];
 }
 
 interface MiniHologramProps {
@@ -17,7 +23,11 @@ interface MiniHologramProps {
 const MiniHologram = ({ state, accentHsl, size = 120 }: MiniHologramProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const hexNodesRef = useRef<HexNode[]>([]);
   const timeRef = useRef(0);
+  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
+
+  const scale = size / 480; // scale factor relative to full AIHologram
 
   const pickFlowerType = useCallback((): FlowerType => {
     let r = Math.random(), cumul = 0;
@@ -30,29 +40,32 @@ const MiniHologram = ({ state, accentHsl, size = 120 }: MiniHologramProps) => {
 
   const createParticle = useCallback((cx: number, cy: number): Particle => {
     const angle = Math.random() * Math.PI * 2;
-    const maxR = size * 0.42;
-    const dist = 10 + Math.random() * maxR;
+    const dist = (50 + Math.random() * 170) * scale;
     const type = pickFlowerType();
-    const small = ["craspedia", "babybreath", "lavender", "eucalyptus"].includes(type as string);
-    const baseSize = small ? 1.5 + Math.random() * 2 : 2.5 + Math.random() * 4;
+    const layer = Math.floor(Math.random() * 3);
+    const sizeMultiplier = [0.7, 1, 1.3][layer];
+    const small = ["craspedia", "babybreath", "lavender", "eucalyptus", "jasmine", "wisteria"].includes(type as string);
+    const medium = ["whitebranch", "fern", "freesia"].includes(type as string);
+    const baseSize = small ? 2.5 + Math.random() * 3 : medium ? 3.5 + Math.random() * 5 : 5 + Math.random() * 7;
 
     return {
       x: cx + Math.cos(angle) * dist,
       y: cy + Math.sin(angle) * dist,
-      vx: (Math.random() - 0.5) * 0.05,
-      vy: (Math.random() - 0.5) * 0.05 - 0.02,
-      size: baseSize * (size / 120), // scale with canvas size
-      opacity: 0.35 + Math.random() * 0.5,
-      life: Math.random() * 100,
-      maxLife: 200 + Math.random() * 250,
+      vx: (Math.random() - 0.5) * 0.1,
+      vy: (Math.random() - 0.5) * 0.1 - 0.06,
+      size: baseSize * sizeMultiplier * scale,
+      opacity: (0.3 + Math.random() * 0.5) * [0.5, 0.75, 1][layer],
+      life: Math.random() * 120,
+      maxLife: 250 + Math.random() * 300,
       type,
       rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.015,
+      rotSpeed: (Math.random() - 0.5) * 0.012,
       orbitAngle: angle,
-      orbitSpeed: (0.002 + Math.random() * 0.005) * (Math.random() < 0.5 ? 1 : -1),
+      orbitSpeed: (0.001 + Math.random() * 0.004) * (Math.random() < 0.5 ? 1 : -1) * [0.6, 1, 1.4][layer],
       orbitRadius: dist,
+      layer,
     };
-  }, [pickFlowerType, size]);
+  }, [pickFlowerType, scale]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -67,9 +80,38 @@ const MiniHologram = ({ state, accentHsl, size = 120 }: MiniHologramProps) => {
     const cx = size / 2;
     const cy = size / 2;
 
-    // Scale particle count with size
-    const particleCount = Math.max(20, Math.round((size / 120) * 80));
+    // Scale particle count — match AIHologram density
+    const particleCount = Math.max(40, Math.round(640 * scale * scale));
     particlesRef.current = Array.from({ length: particleCount }, () => createParticle(cx, cy));
+
+    // Hex connection network
+    const nodeCount = Math.max(4, Math.round(24 * scale));
+    hexNodesRef.current = Array.from({ length: nodeCount }, (_, i) => {
+      const conns: number[] = [];
+      for (let c = 0; c < 2 + Math.floor(Math.random() * 3); c++) {
+        conns.push(Math.floor(Math.random() * nodeCount));
+      }
+      return {
+        angle: (Math.PI * 2 / nodeCount) * i + Math.random() * 0.3,
+        radius: (100 + Math.random() * 80) * scale,
+        speed: (0.002 + Math.random() * 0.006) * (Math.random() < 0.5 ? 1 : -1),
+        pulsePhase: Math.random() * Math.PI * 2,
+        connections: conns.filter(c => c !== i),
+      };
+    });
+
+    // Mouse interaction
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: (e.clientX - rect.left) * (size / rect.width),
+        y: (e.clientY - rect.top) * (size / rect.height),
+        active: true,
+      };
+    };
+    const handleMouseLeave = () => { mouseRef.current.active = false; };
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
 
     let animId: number;
     const draw = () => {
@@ -78,79 +120,89 @@ const MiniHologram = ({ state, accentHsl, size = 120 }: MiniHologramProps) => {
       ctx.clearRect(0, 0, size, size);
 
       const isSpeaking = state === "speaking";
+      const isHover = mouseRef.current.active;
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
       const spinMul = isSpeaking ? 2.5 : 1;
+
       const pulse = isSpeaking
-        ? 0.7 + Math.sin(t * 3) * 0.3
-        : 0.35 + Math.sin(t * 0.8) * 0.15;
+        ? 0.8 + Math.sin(t * 2) * 0.2
+        : isHover ? 0.55 + Math.sin(t * 1.5) * 0.2
+        : 0.4 + Math.sin(t * 0.8) * 0.15;
 
-      // === HUD RINGS ===
-      // Outer dashed arc segments
-      for (let i = 0; i < 2; i++) {
-        const r = size * (0.43 + i * 0.04);
-        const rot = t * (0.08 + i * 0.04) * spinMul * (i % 2 === 0 ? 1 : -1);
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rot);
-        for (let j = 0; j < 3; j++) {
-          const startA = (Math.PI * 2 / 3) * j + 0.15;
-          const endA = startA + 1.5;
-          ctx.beginPath();
-          ctx.arc(0, 0, r, startA, endA);
-          ctx.strokeStyle = `hsla(${accentHsl}, ${0.06 + pulse * 0.08 - i * 0.015})`;
-          ctx.lineWidth = 1 - i * 0.3;
-          ctx.setLineDash([3 + i * 2, 5 + i * 2]);
-          ctx.stroke();
-          ctx.setLineDash([]);
+      // ═══ HUD OUTER ARC SEGMENTS ═══
+      if (size >= 120) {
+        for (let i = 0; i < 3; i++) {
+          const r = size * (0.41 + i * 0.037);
+          const rot = t * (0.08 + i * 0.03) * spinMul * (i % 2 === 0 ? 1 : -1);
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+          for (let j = 0; j < 4; j++) {
+            const startA = (Math.PI / 2) * j + 0.15;
+            const endA = startA + 1.1 - i * 0.1;
+            ctx.beginPath(); ctx.arc(0, 0, r, startA, endA);
+            ctx.strokeStyle = `hsla(${accentHsl}, ${0.06 + pulse * 0.08 - i * 0.015})`;
+            ctx.lineWidth = 1.5 - i * 0.3; ctx.stroke();
+          }
+          ctx.restore();
         }
-        ctx.restore();
-      }
 
-      // Tick marks (only for larger sizes)
-      if (size >= 80) {
-        const tickCount = Math.round(size / 4);
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(t * 0.02 * spinMul);
+        // Tick marks
+        const tickCount = Math.round(60 * scale) || 20;
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.02 * spinMul);
         for (let i = 0; i < tickCount; i++) {
           const a = (Math.PI * 2 / tickCount) * i;
           const isMajor = i % 5 === 0;
-          const inner = size * (isMajor ? 0.39 : 0.41);
-          const outer = size * 0.43;
+          const inner = size * (isMajor ? 0.385 : 0.396);
+          const outer = size * 0.41;
           ctx.beginPath();
           ctx.moveTo(Math.cos(a) * inner, Math.sin(a) * inner);
           ctx.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
-          ctx.strokeStyle = `hsla(${accentHsl}, ${isMajor ? 0.15 + pulse * 0.1 : 0.06})`;
-          ctx.lineWidth = isMajor ? 0.8 : 0.3;
-          ctx.stroke();
+          ctx.strokeStyle = `hsla(${accentHsl}, ${isMajor ? 0.2 + pulse * 0.15 : 0.08})`;
+          ctx.lineWidth = isMajor ? 1.2 : 0.5; ctx.stroke();
         }
         ctx.restore();
       }
 
-      // Scanning rings
-      for (let i = 0; i < 3; i++) {
-        const r = size * (0.15 + i * 0.1) + Math.sin(t * (0.8 + i * 0.2)) * 2;
+      // ═══ SCANNING RINGS ═══
+      const ringCount = size >= 150 ? 5 : 3;
+      for (let i = 0; i < ringCount; i++) {
+        const r = (55 + i * 28) * scale + Math.sin(t * (0.8 + i * 0.2)) * 4 * scale;
         const rot = t * (0.12 + i * 0.06) * spinMul * (i % 2 === 0 ? 1 : -1);
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rot);
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * (1.0 + i * 0.2));
-        ctx.strokeStyle = `hsla(${accentHsl}, ${0.06 + pulse * 0.07})`;
-        ctx.lineWidth = 0.8;
-        ctx.setLineDash([2 + i, 5 + i]);
-        ctx.stroke();
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * (1.0 + i * 0.15));
+        ctx.strokeStyle = `hsla(${accentHsl}, ${0.07 + pulse * 0.09 - i * 0.01})`;
+        ctx.lineWidth = 1.2; ctx.setLineDash([3 + i * 2, 7 + i * 2]); ctx.stroke();
         ctx.setLineDash([]);
         ctx.restore();
       }
 
-      // Corner brackets (medium+ sizes)
-      if (size >= 100) {
-        const bracketSize = size * 0.06;
-        const bracketOffset = size * 0.38;
+      // ═══ RADIAL DATA STREAMS ═══
+      if (size >= 140) {
+        for (let i = 0; i < 8; i++) {
+          const lineAngle = (Math.PI * 2 / 8) * i + t * 0.06 * spinMul;
+          const innerR = 60 * scale;
+          const outerR = (100 + Math.sin(t * 2 + i) * 25) * scale;
+          const x1 = cx + Math.cos(lineAngle) * innerR;
+          const y1 = cy + Math.sin(lineAngle) * innerR;
+          const x2 = cx + Math.cos(lineAngle) * outerR;
+          const y2 = cy + Math.sin(lineAngle) * outerR;
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `hsla(${accentHsl}, ${0.05 + pulse * 0.06})`;
+          ctx.lineWidth = 0.6; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]);
+          const travelT = (t * 0.8 * spinMul + i * 0.5) % 1;
+          const dotX = x1 + (x2 - x1) * travelT;
+          const dotY = y1 + (y2 - y1) * travelT;
+          ctx.beginPath(); ctx.arc(dotX, dotY, 1.8 * Math.max(scale, 0.5), 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${accentHsl}, ${0.3 + pulse * 0.3})`; ctx.fill();
+        }
+      }
+
+      // ═══ CORNER BRACKETS ═══
+      if (size >= 120) {
+        const bracketSize = 18 * scale;
+        const bracketOffset = 168 * scale;
         const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(t * 0.04 * spinMul);
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.04 * spinMul);
         for (const [dx, dy] of corners) {
           const bx = dx * bracketOffset;
           const by = dy * bracketOffset;
@@ -158,148 +210,302 @@ const MiniHologram = ({ state, accentHsl, size = 120 }: MiniHologramProps) => {
           ctx.moveTo(bx, by + dy * -bracketSize);
           ctx.lineTo(bx, by);
           ctx.lineTo(bx + dx * -bracketSize, by);
-          ctx.strokeStyle = `hsla(${accentHsl}, ${0.12 + pulse * 0.1})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
+          ctx.strokeStyle = `hsla(${accentHsl}, ${0.15 + pulse * 0.12})`;
+          ctx.lineWidth = 1.5; ctx.stroke();
         }
         ctx.restore();
       }
 
-      // === FLOWER PARTICLES ===
-      const particles = particlesRef.current;
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.life++;
-        if (p.life >= p.maxLife) {
-          particles[i] = createParticle(cx, cy);
-          continue;
+      // ═══ SCANNING SWEEP ═══
+      if (size >= 150) {
+        const sweepAngle = t * 0.5 * spinMul;
+        const sweepGrad = ctx.createConicGradient(sweepAngle, cx, cy);
+        sweepGrad.addColorStop(0, `hsla(${accentHsl}, ${0.08 * pulse})`);
+        sweepGrad.addColorStop(0.08, `hsla(${accentHsl}, 0)`);
+        sweepGrad.addColorStop(0.5, `hsla(${accentHsl}, 0)`);
+        sweepGrad.addColorStop(1, `hsla(${accentHsl}, 0)`);
+        ctx.fillStyle = sweepGrad;
+        ctx.beginPath(); ctx.arc(cx, cy, 180 * scale, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ═══ HEX CONNECTION NETWORK ═══
+      const hexNodes = hexNodesRef.current;
+      const nodePositions: { x: number; y: number }[] = [];
+      for (let i = 0; i < hexNodes.length; i++) {
+        const node = hexNodes[i];
+        node.angle += node.speed * spinMul;
+        const wobble = Math.sin(t * 1.5 + node.pulsePhase) * 12 * scale;
+        const nx = cx + Math.cos(node.angle) * (node.radius + wobble);
+        const ny = cy + Math.sin(node.angle) * (node.radius + wobble);
+        nodePositions.push({ x: nx, y: ny });
+      }
+
+      for (let i = 0; i < hexNodes.length; i++) {
+        const node = hexNodes[i];
+        const p1 = nodePositions[i];
+        for (const ci of node.connections) {
+          if (ci >= nodePositions.length) continue;
+          const p2 = nodePositions[ci];
+          const dist = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+          if (dist > 200 * scale) continue;
+          const connAlpha = Math.max(0, 1 - dist / (200 * scale)) * 0.15 * (0.5 + pulse * 0.5);
+          ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `hsla(${accentHsl}, ${connAlpha})`;
+          ctx.lineWidth = 0.8; ctx.stroke();
+
+          const dotT = (t * 0.4 * spinMul + i * 0.3) % 1;
+          const dx = p1.x + (p2.x - p1.x) * dotT;
+          const dy = p1.y + (p2.y - p1.y) * dotT;
+          ctx.beginPath(); ctx.arc(dx, dy, 1.5 * Math.max(scale, 0.5), 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${accentHsl}, ${connAlpha * 2})`; ctx.fill();
         }
+      }
 
-        p.orbitAngle += p.orbitSpeed * spinMul;
-        p.x = cx + Math.cos(p.orbitAngle) * p.orbitRadius + p.vx * p.life;
-        p.y = cy + Math.sin(p.orbitAngle) * p.orbitRadius + p.vy * p.life;
-        p.rotation += p.rotSpeed * spinMul;
+      for (let i = 0; i < nodePositions.length; i++) {
+        const p = nodePositions[i];
+        const nodePulse = Math.sin(t * 2.5 + hexNodes[i].pulsePhase) * 0.5 + 0.5;
+        const nodeSize = (2.5 + nodePulse * 1.5) * Math.max(scale, 0.5);
+        ctx.beginPath(); ctx.arc(p.x, p.y, nodeSize, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${accentHsl}, ${0.25 + pulse * 0.25})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, nodeSize + 5 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${accentHsl}, ${0.03 + pulse * 0.03})`; ctx.fill();
 
-        const fadeIn = Math.min(p.life / 15, 1);
-        const fadeOut = Math.max(0, 1 - (p.life - p.maxLife + 30) / 30);
-        const alpha = p.opacity * fadeIn * fadeOut;
-        if (alpha <= 0) continue;
-
-        const drawer = flowerDrawers[p.type];
-        if (drawer) {
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rotation);
-          drawer(ctx, p.size, alpha);
+        if (size >= 120) {
+          ctx.save(); ctx.translate(p.x, p.y);
+          ctx.rotate(t * 0.3 * spinMul + i);
+          const hexR = (4 + nodePulse * 2) * Math.max(scale, 0.5);
+          ctx.beginPath();
+          for (let h = 0; h < 6; h++) {
+            const ha = (Math.PI / 3) * h;
+            if (h === 0) ctx.moveTo(Math.cos(ha) * hexR, Math.sin(ha) * hexR);
+            else ctx.lineTo(Math.cos(ha) * hexR, Math.sin(ha) * hexR);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = `hsla(${accentHsl}, ${0.15 + pulse * 0.15})`;
+          ctx.lineWidth = 0.6; ctx.stroke();
           ctx.restore();
         }
       }
 
-      // === CORE ===
-      // Core glow
-      const coreR = size * 0.12;
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR + size * 0.05);
-      grad.addColorStop(0, `hsla(${accentHsl}, ${0.18 * pulse})`);
-      grad.addColorStop(0.5, `hsla(340, 40%, 65%, ${0.04 * pulse})`);
-      grad.addColorStop(1, "transparent");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, coreR + size * 0.05, 0, Math.PI * 2);
-      ctx.fill();
+      // ═══ CORE GLOW ═══
+      const coreR = 55 * scale;
+      const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR + 20 * scale);
+      grad1.addColorStop(0, `hsla(${accentHsl}, ${0.2 * pulse})`);
+      grad1.addColorStop(0.4, `hsla(340, 40%, 65%, ${0.06 * pulse})`);
+      grad1.addColorStop(1, "transparent");
+      ctx.fillStyle = grad1;
+      ctx.beginPath(); ctx.arc(cx, cy, coreR + 20 * scale, 0, Math.PI * 2); ctx.fill();
 
-      // Rotating hexagons
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(t * 0.1 * spinMul);
-      const hexR = coreR + Math.sin(t * 1.5) * 2;
+      // ═══ ROTATING HEXAGONS — triple layer ═══
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.1 * spinMul);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i - Math.PI / 6;
-        if (i === 0) ctx.moveTo(Math.cos(a) * hexR, Math.sin(a) * hexR);
-        else ctx.lineTo(Math.cos(a) * hexR, Math.sin(a) * hexR);
+        const hr = coreR + Math.sin(t * 1.5 * spinMul + i) * 4 * scale;
+        if (i === 0) ctx.moveTo(Math.cos(a) * hr, Math.sin(a) * hr);
+        else ctx.lineTo(Math.cos(a) * hr, Math.sin(a) * hr);
       }
       ctx.closePath();
-      ctx.strokeStyle = `hsla(${accentHsl}, ${0.25 + pulse * 0.2})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.fillStyle = `hsla(${accentHsl}, ${0.02 + pulse * 0.02})`;
-      ctx.fill();
+      ctx.strokeStyle = `hsla(${accentHsl}, ${0.3 + pulse * 0.25})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = `hsla(${accentHsl}, ${0.02 + pulse * 0.03})`; ctx.fill();
 
       // Inner counter-rotating hex
       ctx.rotate(-t * 0.2 * spinMul);
-      const hexR2 = coreR * 0.55;
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i;
-        if (i === 0) ctx.moveTo(Math.cos(a) * hexR2, Math.sin(a) * hexR2);
-        else ctx.lineTo(Math.cos(a) * hexR2, Math.sin(a) * hexR2);
+        const hr2 = coreR * 0.6 + Math.sin(t * 2 * spinMul + i) * 2 * scale;
+        if (i === 0) ctx.moveTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
+        else ctx.lineTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `hsla(${accentHsl}, ${0.12 + pulse * 0.12})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+
+      // Third hexagon — fast spin
+      ctx.rotate(t * 0.35 * spinMul);
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i + Math.PI / 6;
+        const hr3 = coreR * 0.35 + Math.sin(t * 3 * spinMul + i) * 1.5 * scale;
+        if (i === 0) ctx.moveTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
+        else ctx.lineTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
       }
       ctx.closePath();
       ctx.strokeStyle = `hsla(${accentHsl}, ${0.1 + pulse * 0.1})`;
-      ctx.lineWidth = 0.6;
-      ctx.stroke();
+      ctx.lineWidth = 0.6; ctx.stroke();
       ctx.restore();
 
-      // === VOICE WAVEFORM ===
-      if (size >= 60) {
-        const barCount = Math.max(6, Math.round(size / 8));
-        const barW = Math.max(1.2, size / 60);
-        const barGap = Math.max(0.8, size / 80);
-        const totalW = barCount * (barW + barGap);
-        const waveBaseY = cy + coreR * 0.4;
-        const maxBarH = isSpeaking ? size * 0.1 : size * 0.025;
+      // ═══ HBMASTER TEXT ═══
+      if (size >= 150) {
+        ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.shadowColor = `hsla(${accentHsl}, ${pulse * 0.7})`;
+        ctx.shadowBlur = 30 * scale;
+        const fontSize = Math.round(38 * scale);
+        ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+        ctx.letterSpacing = `${Math.round(6 * scale)}px`;
+        ctx.fillStyle = `hsla(${accentHsl.split(",")[0] || "228"}, 55%, 38%, ${0.85 + pulse * 0.15})`;
+        ctx.fillText("HBMASTER", cx, cy - 10 * scale);
+        ctx.shadowBlur = 50 * scale;
+        ctx.shadowColor = `hsla(${accentHsl}, ${pulse * 0.3})`;
+        ctx.fillStyle = `hsla(${accentHsl.split(",")[0] || "228"}, 50%, 50%, ${0.15 + pulse * 0.1})`;
+        ctx.fillText("HBMASTER", cx, cy - 10 * scale);
+        ctx.shadowBlur = 0;
+        ctx.font = `600 ${Math.round(11 * scale)}px 'Inter', sans-serif`;
+        ctx.letterSpacing = `${Math.round(4 * scale)}px`;
+        ctx.fillStyle = `hsla(${accentHsl}, ${0.4 + pulse * 0.2})`;
+        ctx.fillText("MISSION CONTROL", cx, cy + 24 * scale);
+        ctx.letterSpacing = "0px";
+        ctx.restore();
+      }
 
+      // ═══ VOICE WAVEFORM ═══
+      if (size >= 80) {
+        const barCount = Math.max(8, Math.round(32 * scale));
+        const barW = Math.max(1.5, 3.2 * scale);
+        const barGap = Math.max(0.8, 1.5 * scale);
+        const totalW = barCount * (barW + barGap);
+        const waveBaseY = cy + 52 * scale;
+        const maxBarH = isSpeaking ? 28 * scale : 6 * scale;
+
+        ctx.save();
         for (let i = 0; i < barCount; i++) {
           const x = cx - totalW / 2 + i * (barW + barGap);
           const freq1 = Math.sin(t * 8 * spinMul + i * 0.4) * 0.5 + 0.5;
           const freq2 = Math.sin(t * 12 * spinMul + i * 0.7) * 0.3 + 0.3;
+          const freq3 = Math.sin(t * 5 * spinMul + i * 0.25) * 0.2 + 0.2;
           const envelope = Math.sin((i / barCount) * Math.PI);
           let h: number;
           if (isSpeaking) {
-            h = maxBarH * (freq1 * 0.6 + freq2 * 0.4) * envelope;
+            h = maxBarH * (freq1 * 0.5 + freq2 * 0.3 + freq3 * 0.2) * envelope;
           } else {
-            h = maxBarH * (0.3 + freq1 * 0.2) * envelope;
+            h = maxBarH * (0.2 + freq1 * 0.15) * envelope;
           }
-          const barAlpha = isSpeaking ? 0.4 + freq1 * 0.3 : 0.08 + freq1 * 0.05;
-          ctx.fillStyle = `hsla(${accentHsl}, ${barAlpha})`;
+          const barAlpha = isSpeaking ? 0.6 + freq1 * 0.3 : 0.08 + freq1 * 0.06;
+          const grad = ctx.createLinearGradient(x, waveBaseY - h, x, waveBaseY + h);
+          grad.addColorStop(0, `hsla(${accentHsl}, ${barAlpha * 0.3})`);
+          grad.addColorStop(0.5, `hsla(${accentHsl}, ${barAlpha})`);
+          grad.addColorStop(1, `hsla(${accentHsl}, ${barAlpha * 0.3})`);
+          ctx.fillStyle = grad;
           ctx.beginPath();
           ctx.roundRect(x, waveBaseY - h, barW, h * 2, barW / 2);
           ctx.fill();
         }
+        ctx.restore();
+
+        // Oscilloscope wave (speaking only)
+        if (isSpeaking && size >= 120) {
+          const waveAmplitude = 12 * scale;
+          const waveWidth = totalW * 0.9;
+          ctx.beginPath();
+          for (let i = 0; i <= 60; i++) {
+            const ratio = i / 60;
+            const x = cx - waveWidth / 2 + ratio * waveWidth;
+            const wave = Math.sin(ratio * Math.PI * 6 + t * 10 * spinMul) * waveAmplitude
+              + Math.sin(ratio * Math.PI * 3 + t * 6 * spinMul) * waveAmplitude * 0.4;
+            const env = Math.sin(ratio * Math.PI);
+            const y = waveBaseY + wave * env;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = `hsla(340, 50%, 65%, 0.25)`;
+          ctx.lineWidth = 1.2; ctx.stroke();
+        }
       }
 
-      // === HBMASTER TEXT (larger sizes only) ===
-      if (size >= 150) {
+      // ═══ BLOOM FLARE ═══
+      if (isSpeaking) {
+        const flareR = (70 + Math.sin(t * 3 * spinMul) * 20) * scale;
+        const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, flareR);
+        flareGrad.addColorStop(0, `hsla(340, 55%, 65%, ${0.05 + Math.sin(t * 5) * 0.03})`);
+        flareGrad.addColorStop(0.5, `hsla(280, 40%, 55%, 0.03)`);
+        flareGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = flareGrad;
+        ctx.beginPath(); ctx.arc(cx, cy, flareR, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ═══ MOUSE HOVER GLOW ═══
+      if (isHover) {
+        const hoverGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 70 * scale);
+        hoverGrad.addColorStop(0, `hsla(${accentHsl}, 0.07)`);
+        hoverGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = hoverGrad;
+        ctx.beginPath(); ctx.arc(mx, my, 70 * scale, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ═══ FLOWER PARTICLES — 3-layer parallax ═══
+      const particles = particlesRef.current;
+      particles.sort((a, b) => a.layer - b.layer);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.life++;
+
+        // Smooth physics (lerp + velocity damping) — exact AIHologram behavior
+        p.orbitAngle += p.orbitSpeed * spinMul;
+        const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius;
+        const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius;
+        p.x += (targetX - p.x) * 0.02 + p.vx;
+        p.y += (targetY - p.y) * 0.02 + p.vy;
+        p.rotation += p.rotSpeed * spinMul;
+
+        if (isSpeaking) {
+          p.vx += (cx - p.x) * 0.0025;
+          p.vy += (cy - p.y) * 0.0025;
+          p.orbitRadius *= 0.997;
+        }
+
+        // Mouse repulsion
+        if (isHover) {
+          const dx = p.x - mx;
+          const dy = p.y - my;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 80 * scale && dist > 0) {
+            const force = (80 * scale - dist) / (80 * scale) * 0.5;
+            p.vx += (dx / dist) * force;
+            p.vy += (dy / dist) * force;
+          }
+        }
+
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+
+        const lifeRatio = p.life / p.maxLife;
+        const fadeIn = Math.min(lifeRatio * 5, 1);
+        const fadeOut = Math.max(1 - (lifeRatio - 0.7) / 0.3, 0);
+        const alpha = p.opacity * fadeIn * (lifeRatio > 0.7 ? fadeOut : 1);
+
         ctx.save();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = `hsla(${accentHsl}, ${pulse * 0.5})`;
-        ctx.shadowBlur = 15;
-        const fontSize = Math.round(size * 0.11);
-        ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-        ctx.letterSpacing = `${Math.round(size * 0.02)}px`;
-        ctx.fillStyle = `hsla(${accentHsl.split(",")[0] || "228"}, 55%, 38%, ${0.7 + pulse * 0.15})`;
-        ctx.fillText("HBMASTER", cx, cy - coreR * 0.6);
-        ctx.shadowBlur = 0;
-        ctx.font = `500 ${Math.round(fontSize * 0.45)}px 'Inter', sans-serif`;
-        ctx.letterSpacing = `${Math.round(size * 0.03)}px`;
-        ctx.fillStyle = `hsla(${accentHsl}, ${0.25 + pulse * 0.1})`;
-        ctx.fillText("MISSION CONTROL", cx, cy - coreR * 0.6 + fontSize * 0.7);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        const drawFn = flowerDrawers[p.type];
+        if (drawFn) drawFn(ctx, p.size, alpha);
         ctx.restore();
+
+        if (p.life >= p.maxLife) {
+          particles[i] = createParticle(cx, cy);
+          if (!isSpeaking) {
+            particles[i].orbitRadius = (50 + Math.random() * 170) * scale;
+          }
+        }
       }
 
       animId = requestAnimationFrame(draw);
     };
 
     animId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(animId);
-  }, [state, accentHsl, size, createParticle]);
+    return () => {
+      cancelAnimationFrame(animId);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [state, accentHsl, size, scale, createParticle]);
 
   return (
     <canvas
       ref={canvasRef}
       style={{ width: size, height: size }}
-      className="pointer-events-none"
+      className="cursor-crosshair"
     />
   );
 };
