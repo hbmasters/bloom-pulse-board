@@ -114,6 +114,17 @@ export const crossLineAlerts: CrossLineAlert[] = [
   { line: "Hand Line 5", product: "BQ Coffee S", message: "+9% speed increase this hour", metric: "+9%" },
 ];
 
+export interface TeamLeader {
+  name: string;
+  initials: string;
+  role: string;
+}
+
+export const teamLeaders: TeamLeader[] = [
+  { name: "Ingrida", initials: "IN", role: "Bandleider" },
+  { name: "Greta", initials: "GR", role: "Bandleider" },
+];
+
 export const lineStats = {
   lineName: "HAND LINE 1",
   totalPeople: 7,

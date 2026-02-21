@@ -1,4 +1,4 @@
-import { Printer, UserCheck, Hand, Cog } from "lucide-react";
+import { Printer, UserCheck, Hand, Cog, User } from "lucide-react";
 import {
   printedOrders,
   pickedOrders,
@@ -45,6 +45,22 @@ const SectionHeader = ({
   </div>
 );
 
+const PrintedOrderRow = ({ order }: { order: ColdStorageOrder }) => (
+  <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-border bg-card">
+    <div className="flex-1 min-w-0">
+      <span className="text-[11px] font-bold text-foreground truncate block">{order.name}</span>
+      <div className="flex items-center gap-1 mt-0.5">
+        <User className="w-2.5 h-2.5 text-muted-foreground" />
+        <span className="text-[9px] text-muted-foreground">{order.printedBy || "—"} · {formatHours(order.estimatedMinutes)}</span>
+      </div>
+    </div>
+    <div className="text-right shrink-0">
+      <div className="text-base font-mono font-black text-foreground leading-none">{order.quantity}</div>
+      <div className="text-[8px] text-muted-foreground">pcs</div>
+    </div>
+  </div>
+);
+
 const OrderRow = ({ order }: { order: ColdStorageOrder }) => (
   <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg border border-border bg-card">
     <div className="flex-1 min-w-0">
@@ -58,37 +74,58 @@ const OrderRow = ({ order }: { order: ColdStorageOrder }) => (
   </div>
 );
 
+// Picker-centric card with photo, name central, scales for up to 12 pickers
 const PickedOrderCard = ({ order }: { order: PickedOrder }) => (
   <div className="bg-card rounded-xl border border-accent/25 overflow-hidden flex flex-col h-full shadow-sm">
     <div className="relative flex-1 min-h-0 overflow-hidden bg-secondary">
       <img src={order.image} alt={order.name} className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute top-2 left-2">
-        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md border bg-accent/15 text-accent-foreground border-accent/25">
-          <UserCheck className="w-3 h-3" />{order.picker}
-        </span>
+      {/* Gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      {/* Central picker name */}
+      <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center">
+        <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center shadow-md border-2 border-white/80 mb-0.5">
+          <span className="text-[10px] font-black text-primary-foreground">{order.picker.charAt(0)}</span>
+        </div>
+        <span className="text-xs font-bold text-white drop-shadow-md">{order.picker}</span>
       </div>
-      <div className="absolute bottom-2 right-2 bg-card/95 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-border shadow-md">
-        <div className="text-base font-mono font-black text-foreground leading-none">{order.quantity}</div>
-        <div className="text-[8px] text-muted-foreground">pcs</div>
+      {/* Quantity badge */}
+      <div className="absolute top-1.5 right-1.5 bg-card/90 backdrop-blur-sm rounded-md px-1.5 py-0.5 border border-border shadow-sm">
+        <div className="text-sm font-mono font-black text-foreground leading-none">{order.quantity}</div>
       </div>
     </div>
-    <div className="p-2.5">
-      <h3 className="text-sm font-bold text-foreground truncate mb-1">{order.name}</h3>
-      <div className="text-[9px] text-muted-foreground mb-1.5">Start {order.startTime} · {formatHours(order.estimatedMinutes)}</div>
-      <div className="flex items-center gap-2 mb-0.5">
-        <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+    <div className="p-2 shrink-0">
+      <h3 className="text-[11px] font-bold text-foreground truncate mb-0.5">{order.name}</h3>
+      <div className="flex items-center gap-1.5">
+        <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
           <div
             className="h-full rounded-full bg-gradient-success transition-all duration-1000"
             style={{ width: `${order.progress}%` }}
           />
         </div>
-        <span className="text-[10px] font-mono font-bold text-foreground">{order.progress}%</span>
+        <span className="text-[9px] font-mono font-bold text-foreground">{order.progress}%</span>
       </div>
     </div>
   </div>
 );
 
+// Dynamic columns: 3 cols for ≤6, 4 cols for 7-12
+const getPickedGridCols = (count: number) => {
+  if (count <= 3) return "grid-cols-3";
+  if (count <= 6) return "grid-cols-3";
+  if (count <= 8) return "grid-cols-4";
+  return "grid-cols-4";
+};
+
+const getPickedGridRows = (count: number) => {
+  const cols = count <= 6 ? 3 : 4;
+  const rows = Math.ceil(count / cols);
+  return rows;
+};
+
 const ColdStorageSections = () => {
+  const gridCols = getPickedGridCols(pickedOrders.length);
+  const gridRows = getPickedGridRows(pickedOrders.length);
+
   return (
     <div className="grid grid-cols-3 gap-3 h-full" style={{ gridTemplateColumns: "1fr 2fr 1fr" }}>
       {/* Printed */}
@@ -102,12 +139,12 @@ const ColdStorageSections = () => {
         />
         <div className="flex-1 min-h-0 space-y-1 overflow-auto">
           {printedOrders.map((order) => (
-            <OrderRow key={order.id} order={order} />
+            <PrintedOrderRow key={order.id} order={order} />
           ))}
         </div>
       </div>
 
-      {/* Picked - with photos */}
+      {/* Picked - picker-centric with photos */}
       <div className="flex flex-col min-h-0">
         <SectionHeader
           icon={<UserCheck className="w-3.5 h-3.5 text-primary-foreground" />}
@@ -116,7 +153,7 @@ const ColdStorageSections = () => {
           totalMinutes={getTotalMinutes(pickedOrders)}
           color="bg-accent"
         />
-        <div className="flex-1 min-h-0 grid grid-cols-3 gap-2 auto-rows-fr overflow-auto">
+        <div className={`flex-1 min-h-0 grid ${gridCols} gap-2 overflow-auto`} style={{ gridTemplateRows: `repeat(${gridRows}, 1fr)` }}>
           {pickedOrders.map((order) => (
             <PickedOrderCard key={order.id} order={order} />
           ))}
