@@ -231,12 +231,12 @@ const getPickedGridRows = (count: number) => {
   return Math.ceil(count / cols);
 };
 
-// Fastest picker panel
+// Most orders done today panel
 const FastestPickerPanel = () => (
   <div className="rounded-xl border border-bloom-warm/30 bg-bloom-warm/5 p-3">
     <div className="flex items-center gap-2 mb-1">
       <Trophy className="w-4 h-4 text-bloom-warm" />
-      <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Snelste Picker</span>
+      <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Most Orders Done Today</span>
     </div>
     <div className="flex items-center gap-3">
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-bloom-warm to-bloom-warm/70 flex items-center justify-center shadow-md">
