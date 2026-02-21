@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { ChatMsg } from "./types";
 import ReactMarkdown from "react-markdown";
+import HexAvatar from "./HexAvatar";
 
 interface MessageBubbleProps {
   msg: ChatMsg;
@@ -12,10 +13,15 @@ const MessageBubble = ({ msg, accentHsl }: MessageBubbleProps) => {
   const isUser = msg.role === "user";
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+    <div className={cn("flex gap-2", isUser ? "justify-end" : "justify-start")}>
+      {!isUser && (
+        <div className="shrink-0 mt-1">
+          <HexAvatar accentHsl={accentHsl} size={24} animate={false} />
+        </div>
+      )}
       <div
         className={cn(
-          "max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+          "max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
           isUser
             ? "text-primary-foreground"
             : "bg-card border border-border text-foreground",
