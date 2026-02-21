@@ -28,17 +28,16 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
           </span>
         </div>
         <div className="absolute bottom-2 right-2 bg-card/95 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-accent/30 shadow-md">
-          <div className="text-[7px] text-accent uppercase tracking-wider font-bold">PCS/H</div>
+          <div className="text-[7px] text-accent uppercase tracking-wider font-bold">APU</div>
           <div className="text-xl font-mono font-black text-accent text-glow-success leading-none">{product.piecesPerHour}</div>
           {speedDiff > 0 && <div className="text-[8px] font-bold text-accent">+{speedDiff}%</div>}
         </div>
       </div>
       <div className="p-2.5">
         <h3 className="text-sm font-bold text-foreground truncate mb-1">{product.name}</h3>
-        <div className="flex items-center gap-2 text-[9px] text-muted-foreground mb-1.5">
-          <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{product.startTime}–{product.expectedEndTime}</span>
-          <span className="flex items-center gap-0.5"><Users className="w-2.5 h-2.5" />{product.people}</span>
-          <span>{formatDuration(product.minutesActive)}</span>
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-1.5">
+          <span className="flex items-center gap-1 font-semibold text-foreground/80"><Users className="w-3 h-3 text-primary" />{product.people} people</span>
+          <span className="flex items-center gap-1 font-semibold text-foreground/80"><Clock className="w-3 h-3 text-primary" />until {product.expectedEndTime}</span>
         </div>
         <div className="flex justify-between text-[9px] mb-0.5">
           <span className="font-mono font-bold text-foreground">{product.produced} <span className="text-muted-foreground font-normal">/ {product.target}</span></span>
