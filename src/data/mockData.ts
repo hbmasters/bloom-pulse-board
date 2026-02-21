@@ -19,7 +19,7 @@ export interface ActiveProduct {
   minutesActive: number;
   piecesPerHour: number;
   plannedPiecesPerHour: number;
-  status: "op-schema" | "sneller" | "hoog-tempo";
+  status: "on-schedule" | "faster" | "high-pace";
 }
 
 export interface CompletedProduct {
@@ -48,7 +48,6 @@ export interface YesterdayStats {
   performanceVsPlanned: number;
 }
 
-// Hand Line 1 active production orders
 export const activeProducts: ActiveProduct[] = [
   {
     id: 1,
@@ -62,7 +61,7 @@ export const activeProducts: ActiveProduct[] = [
     minutesActive: 195,
     piecesPerHour: 88,
     plannedPiecesPerHour: 80,
-    status: "sneller",
+    status: "faster",
   },
   {
     id: 2,
@@ -76,7 +75,7 @@ export const activeProducts: ActiveProduct[] = [
     minutesActive: 180,
     piecesPerHour: 119,
     plannedPiecesPerHour: 100,
-    status: "hoog-tempo",
+    status: "high-pace",
   },
   {
     id: 3,
@@ -90,11 +89,10 @@ export const activeProducts: ActiveProduct[] = [
     minutesActive: 135,
     piecesPerHour: 88,
     plannedPiecesPerHour: 85,
-    status: "op-schema",
+    status: "on-schedule",
   },
 ];
 
-// Hand Line 1 completed today
 export const completedProducts: CompletedProduct[] = [
   { id: 1, name: "BQ de Luxe", quantity: 350, plannedMinutes: 240, actualMinutes: 210, completedAt: "08:45" },
   { id: 2, name: "BQ Lovely", quantity: 200, plannedMinutes: 180, actualMinutes: 180, completedAt: "09:30" },
@@ -102,30 +100,30 @@ export const completedProducts: CompletedProduct[] = [
 ];
 
 export const hbMasterMessages = [
-  { text: "Sterk tempo dit uur — +6% boven planning.", mode: "flow" as const },
-  { text: "Output per persoon stijgt. Sterke lijn.", mode: "flow" as const },
-  { text: "Nog 4% voor een nieuw dagrecord.", mode: "flow" as const },
-  { text: "Nieuwe order gestart: BQ Charme XL. Bouw tempo gecontroleerd op.", mode: "stabilisatie" as const },
-  { text: "Jullie liggen voor op planning — excellent werk.", mode: "flow" as const },
-  { text: "Snelheid stabiel rond planning. Solide productie.", mode: "stabilisatie" as const },
+  { text: "Strong tempo this hour — +6% above planned.", mode: "flow" as const },
+  { text: "Output per person is rising. Solid line.", mode: "flow" as const },
+  { text: "4% more to hit a new daily record.", mode: "flow" as const },
+  { text: "New order started: BQ Charme XL. Building pace.", mode: "stabilisatie" as const },
+  { text: "You are ahead of schedule — excellent work.", mode: "flow" as const },
+  { text: "Speed stable around target. Solid production.", mode: "stabilisatie" as const },
 ];
 
 export const crossLineAlerts: CrossLineAlert[] = [
-  { line: "Handlijn 3", product: "BQ Field M", message: "+12% boven planning", metric: "112%" },
-  { line: "Bandlijn 2", product: "BQ Trend", message: "Nieuw uurrecord: 1.480 PCS/H", metric: "Record" },
-  { line: "Handlijn 5", product: "BQ Coffee S", message: "+9% versnelling dit uur", metric: "+9%" },
+  { line: "Hand Line 3", product: "BQ Field M", message: "+12% above planned", metric: "112%" },
+  { line: "Belt Line 2", product: "BQ Trend", message: "New hourly record: 1,480 PCS/H", metric: "Record" },
+  { line: "Hand Line 5", product: "BQ Coffee S", message: "+9% speed increase this hour", metric: "+9%" },
 ];
 
 export const lineStats = {
   lineName: "HAND LINE 1",
   totalPeople: 7,
-  totalProduced: 1.541,
+  totalProduced: 1541,
   plannedPiecesPerHour: 80,
   currentPiecesPerHour: 88,
   performanceVsPlanned: 110,
   outputPerPerson: 12.6,
   efficiencyScore: 94,
-  peopleLastUpdated: 12, // minutes ago
+  peopleLastUpdated: 12,
 };
 
 export const yesterdayStats: YesterdayStats = {

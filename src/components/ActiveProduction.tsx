@@ -2,15 +2,15 @@ import { Clock, Users, Zap, Rocket, ThumbsUp } from "lucide-react";
 import { activeProducts, type ActiveProduct } from "@/data/mockData";
 
 const statusConfig = {
-  "op-schema": { label: "Op schema", icon: <ThumbsUp className="w-3.5 h-3.5" />, className: "bg-primary/15 text-primary border-primary/25" },
-  "sneller": { label: "Sneller", icon: <Zap className="w-3.5 h-3.5" />, className: "bg-accent/15 text-accent border-accent/25" },
-  "hoog-tempo": { label: "Hoog tempo", icon: <Rocket className="w-3.5 h-3.5" />, className: "bg-bloom-warm/15 text-bloom-warm border-bloom-warm/25" },
+  "on-schedule": { label: "On schedule", icon: <ThumbsUp className="w-3.5 h-3.5" />, className: "bg-primary/15 text-primary border-primary/25" },
+  "faster": { label: "Faster", icon: <Zap className="w-3.5 h-3.5" />, className: "bg-accent/15 text-accent border-accent/25" },
+  "high-pace": { label: "High pace", icon: <Rocket className="w-3.5 h-3.5" />, className: "bg-bloom-warm/15 text-bloom-warm border-bloom-warm/25" },
 };
 
 const formatDuration = (minutes: number) => {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return h > 0 ? `${h}u${m}m` : `${m}m`;
+  return h > 0 ? `${h}h${m}m` : `${m}m`;
 };
 
 const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
@@ -20,31 +20,19 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col shadow-sm">
-      {/* Square 1:1 product image — forced square */}
       <div className="relative w-full overflow-hidden bg-secondary" style={{ paddingBottom: "100%" }}>
-        <img
-          src={product.image}
-          alt={product.name}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Status badge */}
+        <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute top-2 left-2">
           <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md border ${status.className}`}>
-            {status.icon}
-            {status.label}
+            {status.icon}{status.label}
           </span>
         </div>
-        {/* PCS/H overlay */}
         <div className="absolute bottom-2 right-2 bg-card/95 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-accent/30 shadow-md">
-          <div className="text-[7px] text-accent uppercase tracking-wider font-bold">PCS/U</div>
+          <div className="text-[7px] text-accent uppercase tracking-wider font-bold">PCS/H</div>
           <div className="text-xl font-mono font-black text-accent text-glow-success leading-none">{product.piecesPerHour}</div>
-          {speedDiff > 0 && (
-            <div className="text-[8px] font-bold text-accent">+{speedDiff}%</div>
-          )}
+          {speedDiff > 0 && <div className="text-[8px] font-bold text-accent">+{speedDiff}%</div>}
         </div>
       </div>
-
-      {/* Info — compact */}
       <div className="p-2.5">
         <h3 className="text-sm font-bold text-foreground truncate mb-1">{product.name}</h3>
         <div className="flex items-center gap-2 text-[9px] text-muted-foreground mb-1.5">
@@ -59,7 +47,7 @@ const ActiveProductCard = ({ product }: { product: ActiveProduct }) => {
         <div className="h-2 rounded-full bg-secondary overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ease-out ${
-              product.status === "sneller" || product.status === "hoog-tempo" ? "bg-gradient-success" : "bg-primary"
+              product.status === "faster" || product.status === "high-pace" ? "bg-gradient-success" : "bg-primary"
             }`}
             style={{ width: `${pct}%` }}
           />
@@ -74,7 +62,7 @@ const ActiveProduction = () => {
     <section className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-2 shrink-0">
         <div className="w-2 h-2 rounded-full bg-accent animate-pulse-slow" />
-        <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">In Productie</h2>
+        <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">In Production</h2>
       </div>
       <div className="grid grid-cols-3 gap-3 flex-1 min-h-0 auto-rows-fr">
         {activeProducts.map((product) => (
