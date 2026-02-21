@@ -1,20 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from "react";
+import { flowerDrawers, FlowerType, FLOWER_TYPES, FLOWER_WEIGHTS } from "./flowerRenderers";
 
 interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  opacity: number;
-  life: number;
-  maxLife: number;
-  type: "lily" | "tulip" | "cosmos" | "craspedia" | "calla" | "darkleaf" | "whitebranch";
-  rotation: number;
-  rotSpeed: number;
-  orbitAngle: number;
-  orbitSpeed: number;
-  orbitRadius: number;
+  x: number; y: number; vx: number; vy: number;
+  size: number; opacity: number; life: number; maxLife: number;
+  type: FlowerType; rotation: number; rotSpeed: number;
+  orbitAngle: number; orbitSpeed: number; orbitRadius: number;
+  layer: number; // 0=far, 1=mid, 2=close — parallax depth
 }
 
 interface AIHologramProps {
@@ -29,193 +21,43 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
   const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
   const [hovered, setHovered] = useState(false);
 
+  const pickFlowerType = useCallback((): FlowerType => {
+    let r = Math.random(), cumul = 0;
+    for (let i = 0; i < FLOWER_WEIGHTS.length; i++) {
+      cumul += FLOWER_WEIGHTS[i];
+      if (r < cumul) return FLOWER_TYPES[i];
+    }
+    return FLOWER_TYPES[0];
+  }, []);
+
   const createParticle = useCallback((cx: number, cy: number): Particle => {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 40 + Math.random() * 150;
-    const types: Particle["type"][] = ["lily", "tulip", "cosmos", "craspedia", "calla", "darkleaf", "whitebranch"];
-    const weights = [0.16, 0.14, 0.13, 0.14, 0.13, 0.15, 0.15];
-    let r = Math.random(), cumul = 0, type: Particle["type"] = "lily";
-    for (let i = 0; i < weights.length; i++) {
-      cumul += weights[i];
-      if (r < cumul) { type = types[i]; break; }
-    }
+    const dist = 50 + Math.random() * 170;
+    const type = pickFlowerType();
+    const layer = Math.floor(Math.random() * 3);
+    const sizeMultiplier = [0.7, 1, 1.3][layer];
+    const baseSize = ["craspedia", "babybreath", "lavender"].includes(type)
+      ? 2.5 + Math.random() * 3
+      : ["whitebranch", "fern"].includes(type)
+        ? 3.5 + Math.random() * 5
+        : 5 + Math.random() * 7;
+
     return {
       x: cx + Math.cos(angle) * dist,
       y: cy + Math.sin(angle) * dist,
-      vx: (Math.random() - 0.5) * 0.12,
-      vy: (Math.random() - 0.5) * 0.12 - 0.08,
-      size: type === "craspedia" ? 2.5 + Math.random() * 2.5 : type === "whitebranch" ? 3.5 + Math.random() * 4.5 : 4.5 + Math.random() * 6,
-      opacity: 0.4 + Math.random() * 0.45,
-      life: Math.random() * 100, // stagger start
-      maxLife: 200 + Math.random() * 250,
-      type,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.015,
+      vx: (Math.random() - 0.5) * 0.1,
+      vy: (Math.random() - 0.5) * 0.1 - 0.06,
+      size: baseSize * sizeMultiplier,
+      opacity: (0.3 + Math.random() * 0.5) * [0.5, 0.75, 1][layer],
+      life: Math.random() * 120,
+      maxLife: 250 + Math.random() * 300,
+      type, rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.012,
       orbitAngle: angle,
-      orbitSpeed: (0.002 + Math.random() * 0.004) * (Math.random() < 0.5 ? 1 : -1),
-      orbitRadius: dist,
+      orbitSpeed: (0.001 + Math.random() * 0.004) * (Math.random() < 0.5 ? 1 : -1) * [0.6, 1, 1.4][layer],
+      orbitRadius: dist, layer,
     };
-  }, []);
-
-  // --- Draw helpers ---
-  const drawLily = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    for (let i = 0; i < 5; i++) {
-      const a = (Math.PI * 2 / 5) * i;
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * s * 0.5, Math.sin(a) * s * 0.5, s * 0.48, s * 0.2, a, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(340, 65%, 68%, ${alpha * 0.75})`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * s * 0.38, Math.sin(a) * s * 0.38, s * 0.22, s * 0.08, a, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(345, 72%, 80%, ${alpha * 0.5})`;
-      ctx.fill();
-    }
-    ctx.beginPath();
-    ctx.arc(0, 0, s * 0.13, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(45, 80%, 60%, ${alpha * 0.85})`;
-    ctx.fill();
-    // Stamen dots
-    for (let i = 0; i < 3; i++) {
-      const sa = (Math.PI * 2 / 3) * i;
-      ctx.beginPath();
-      ctx.arc(Math.cos(sa) * s * 0.08, Math.sin(sa) * s * 0.08, s * 0.03, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(35, 70%, 45%, ${alpha * 0.6})`;
-      ctx.fill();
-    }
-  }, []);
-
-  const drawTulip = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    const h = s * 0.95;
-    // 3 overlapping petals
-    for (let i = -1; i <= 1; i++) {
-      ctx.beginPath();
-      ctx.ellipse(i * s * 0.16, -h * 0.2, s * 0.28, h * 0.5, i * 0.1, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(280, 55%, ${48 + i * 6}%, ${alpha * 0.7})`;
-      ctx.fill();
-    }
-    // Highlight
-    ctx.beginPath();
-    ctx.ellipse(0, -h * 0.3, s * 0.12, h * 0.2, 0, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(285, 60%, 65%, ${alpha * 0.3})`;
-    ctx.fill();
-    // Stem
-    ctx.beginPath();
-    ctx.moveTo(0, h * 0.2);
-    ctx.lineTo(0, h * 0.6);
-    ctx.strokeStyle = `hsla(140, 40%, 45%, ${alpha * 0.45})`;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-  }, []);
-
-  const drawCosmos = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    for (let i = 0; i < 8; i++) {
-      const a = (Math.PI * 2 / 8) * i;
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * s * 0.38, Math.sin(a) * s * 0.38, s * 0.32, s * 0.13, a, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(285, 50%, 55%, ${alpha * 0.65})`;
-      ctx.fill();
-    }
-    ctx.beginPath();
-    ctx.arc(0, 0, s * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(50, 75%, 55%, ${alpha * 0.9})`;
-    ctx.fill();
-    for (let i = 0; i < 6; i++) {
-      const da = (Math.PI * 2 / 6) * i;
-      ctx.beginPath();
-      ctx.arc(Math.cos(da) * s * 0.12, Math.sin(da) * s * 0.12, s * 0.025, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(40, 70%, 40%, ${alpha * 0.55})`;
-      ctx.fill();
-    }
-  }, []);
-
-  const drawCraspedia = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    // Stem
-    ctx.beginPath();
-    ctx.moveTo(0, s * 0.35);
-    ctx.lineTo(0, s * 1.3);
-    ctx.strokeStyle = `hsla(140, 35%, 50%, ${alpha * 0.4})`;
-    ctx.lineWidth = 0.9;
-    ctx.stroke();
-    // Ball
-    ctx.beginPath();
-    ctx.arc(0, 0, s * 0.42, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(50, 82%, 55%, ${alpha * 0.85})`;
-    ctx.fill();
-    // Bumpy texture
-    for (let i = 0; i < 5; i++) {
-      const da = (Math.PI * 2 / 5) * i + 0.2;
-      ctx.beginPath();
-      ctx.arc(Math.cos(da) * s * 0.22, Math.sin(da) * s * 0.22, s * 0.07, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(48, 72%, 48%, ${alpha * 0.45})`;
-      ctx.fill();
-    }
-  }, []);
-
-  const drawCalla = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    ctx.beginPath();
-    ctx.moveTo(0, -s * 0.65);
-    ctx.bezierCurveTo(-s * 0.55, -s * 0.2, -s * 0.45, s * 0.4, 0, s * 0.55);
-    ctx.bezierCurveTo(s * 0.45, s * 0.4, s * 0.55, -s * 0.2, 0, -s * 0.65);
-    ctx.fillStyle = `hsla(0, 0%, 96%, ${alpha * 0.7})`;
-    ctx.fill();
-    ctx.strokeStyle = `hsla(220, 10%, 82%, ${alpha * 0.3})`;
-    ctx.lineWidth = 0.7;
-    ctx.stroke();
-    // Spadix
-    ctx.beginPath();
-    ctx.moveTo(0, -s * 0.38);
-    ctx.lineTo(0, s * 0.18);
-    ctx.strokeStyle = `hsla(50, 70%, 60%, ${alpha * 0.65})`;
-    ctx.lineWidth = 1.8;
-    ctx.lineCap = "round";
-    ctx.stroke();
-    ctx.lineCap = "butt";
-  }, []);
-
-  const drawDarkLeaf = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    ctx.beginPath();
-    ctx.moveTo(0, -s * 0.75);
-    ctx.bezierCurveTo(-s * 0.55, -s * 0.35, -s * 0.45, s * 0.35, 0, s * 0.75);
-    ctx.bezierCurveTo(s * 0.45, s * 0.35, s * 0.55, -s * 0.35, 0, -s * 0.75);
-    ctx.fillStyle = `hsla(350, 25%, 20%, ${alpha * 0.55})`;
-    ctx.fill();
-    // Center vein
-    ctx.beginPath();
-    ctx.moveTo(0, -s * 0.6);
-    ctx.lineTo(0, s * 0.6);
-    ctx.strokeStyle = `hsla(350, 20%, 28%, ${alpha * 0.3})`;
-    ctx.lineWidth = 0.6;
-    ctx.stroke();
-    // Side veins
-    for (let i = 0; i < 3; i++) {
-      const y = -s * 0.3 + i * s * 0.3;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(-s * 0.25, y - s * 0.1);
-      ctx.moveTo(0, y);
-      ctx.lineTo(s * 0.25, y - s * 0.1);
-      ctx.strokeStyle = `hsla(350, 18%, 30%, ${alpha * 0.2})`;
-      ctx.lineWidth = 0.4;
-      ctx.stroke();
-    }
-  }, []);
-
-  const drawWhiteBranch = useCallback((ctx: CanvasRenderingContext2D, s: number, alpha: number) => {
-    ctx.beginPath();
-    ctx.moveTo(0, s * 0.85);
-    ctx.lineTo(0, -s * 0.85);
-    ctx.strokeStyle = `hsla(0, 0%, 88%, ${alpha * 0.5})`;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-    for (let i = 0; i < 4; i++) {
-      const y = -s * 0.6 + i * s * 0.35;
-      const dir = i % 2 === 0 ? 1 : -1;
-      ctx.beginPath();
-      ctx.ellipse(dir * s * 0.22, y, s * 0.2, s * 0.07, dir * 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(0, 0%, 93%, ${alpha * 0.38})`;
-      ctx.fill();
-    }
-  }, []);
+  }, [pickFlowerType]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -223,7 +65,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const size = compact ? 200 : 420;
+    const size = compact ? 220 : 480;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = size * dpr;
     canvas.height = size * dpr;
@@ -231,9 +73,9 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     const cx = size / 2;
     const cy = size / 2;
 
-    particlesRef.current = Array.from({ length: compact ? 35 : 90 }, () => createParticle(cx, cy));
+    const particleCount = compact ? 40 : 140;
+    particlesRef.current = Array.from({ length: particleCount }, () => createParticle(cx, cy));
 
-    // Mouse tracking
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = {
@@ -260,64 +102,116 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         : isHover ? 0.55 + Math.sin(t * 1.5) * 0.2
         : 0.4 + Math.sin(t * 0.8) * 0.15;
 
-      // --- Outer scanning rings ---
-      const ringCount = compact ? 2 : 4;
-      for (let i = 0; i < ringCount; i++) {
-        const r = 50 + i * 25 + Math.sin(t * (0.8 + i * 0.2)) * 5;
-        const rot = t * (0.15 + i * 0.08) * (i % 2 === 0 ? 1 : -1);
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rot);
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * (1.2 + i * 0.15));
-        ctx.strokeStyle = `hsla(228, 50%, 55%, ${0.08 + pulseBase * 0.1 - i * 0.015})`;
-        ctx.lineWidth = 1 + (isHover ? 0.5 : 0);
-        ctx.setLineDash([4 + i * 2, 8 + i * 2]);
-        ctx.stroke();
+      // ═══ JARVIS HUD LAYER 1: Outer arc segments ═══
+      if (!compact) {
+        for (let i = 0; i < 3; i++) {
+          const r = 195 + i * 18;
+          const rot = t * (0.08 + i * 0.03) * (i % 2 === 0 ? 1 : -1);
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+          // Arc segments
+          for (let j = 0; j < 4; j++) {
+            const startA = (Math.PI / 2) * j + 0.15;
+            const endA = startA + 1.1 - i * 0.1;
+            ctx.beginPath(); ctx.arc(0, 0, r, startA, endA);
+            ctx.strokeStyle = `hsla(228, 50%, 60%, ${0.06 + pulseBase * 0.08 - i * 0.015})`;
+            ctx.lineWidth = 1.5 - i * 0.3; ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Tick marks on outermost ring
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.02);
+        for (let i = 0; i < 60; i++) {
+          const a = (Math.PI * 2 / 60) * i;
+          const isMajor = i % 5 === 0;
+          const inner = isMajor ? 185 : 190;
+          const outer = 195;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * inner, Math.sin(a) * inner);
+          ctx.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
+          ctx.strokeStyle = `hsla(228, 45%, 60%, ${isMajor ? 0.2 + pulseBase * 0.15 : 0.08})`;
+          ctx.lineWidth = isMajor ? 1.2 : 0.5; ctx.stroke();
+        }
         ctx.restore();
       }
 
-      // --- Data stream lines (Jarvis-style) ---
+      // ═══ JARVIS HUD LAYER 2: Scanning rings (dashed) ═══
+      const ringCount = compact ? 2 : 5;
+      for (let i = 0; i < ringCount; i++) {
+        const r = 55 + i * 28 + Math.sin(t * (0.8 + i * 0.2)) * 4;
+        const rot = t * (0.12 + i * 0.06) * (i % 2 === 0 ? 1 : -1);
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * (1.0 + i * 0.15));
+        ctx.strokeStyle = `hsla(228, 50%, 58%, ${0.07 + pulseBase * 0.09 - i * 0.01})`;
+        ctx.lineWidth = 1.2; ctx.setLineDash([3 + i * 2, 7 + i * 2]); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
+      // ═══ JARVIS HUD LAYER 3: Radial data streams ═══
       if (!compact) {
-        for (let i = 0; i < 6; i++) {
-          const lineAngle = (Math.PI * 2 / 6) * i + t * 0.1;
-          const innerR = 55;
-          const outerR = 90 + Math.sin(t * 2 + i) * 20;
+        for (let i = 0; i < 8; i++) {
+          const lineAngle = (Math.PI * 2 / 8) * i + t * 0.06;
+          const innerR = 60;
+          const outerR = 100 + Math.sin(t * 2 + i) * 25;
           const x1 = cx + Math.cos(lineAngle) * innerR;
           const y1 = cy + Math.sin(lineAngle) * innerR;
           const x2 = cx + Math.cos(lineAngle) * outerR;
           const y2 = cy + Math.sin(lineAngle) * outerR;
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.strokeStyle = `hsla(228, 45%, 60%, ${0.06 + pulseBase * 0.06})`;
-          ctx.lineWidth = 0.6;
-          ctx.setLineDash([2, 6]);
-          ctx.stroke();
-          ctx.setLineDash([]);
-          // Dot at end
-          ctx.beginPath();
-          ctx.arc(x2, y2, 1.5, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(228, 50%, 65%, ${0.15 + pulseBase * 0.15})`;
-          ctx.fill();
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `hsla(228, 45%, 62%, ${0.05 + pulseBase * 0.06})`;
+          ctx.lineWidth = 0.6; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]);
+          // Pulse dot traveling along line
+          const travelT = (t * 0.8 + i * 0.5) % 1;
+          const dotX = x1 + (x2 - x1) * travelT;
+          const dotY = y1 + (y2 - y1) * travelT;
+          ctx.beginPath(); ctx.arc(dotX, dotY, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(228, 55%, 68%, ${0.3 + pulseBase * 0.3})`; ctx.fill();
         }
       }
 
-      // --- Core glow ---
-      const coreRadius = compact ? 28 : 50;
-      const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 15);
-      grad1.addColorStop(0, `hsla(228, 50%, 55%, ${0.22 * pulseBase})`);
-      grad1.addColorStop(0.5, `hsla(340, 40%, 65%, ${0.06 * pulseBase})`);
+      // ═══ JARVIS HUD LAYER 4: Corner bracket decorations ═══
+      if (!compact) {
+        const bracketSize = 18;
+        const bracketOffset = 168;
+        const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.04);
+        for (const [dx, dy] of corners) {
+          const bx = dx * bracketOffset;
+          const by = dy * bracketOffset;
+          ctx.beginPath();
+          ctx.moveTo(bx, by + dy * -bracketSize);
+          ctx.lineTo(bx, by);
+          ctx.lineTo(bx + dx * -bracketSize, by);
+          ctx.strokeStyle = `hsla(228, 50%, 58%, ${0.15 + pulseBase * 0.12})`;
+          ctx.lineWidth = 1.5; ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // ═══ JARVIS HUD LAYER 5: Scanning sweep ═══
+      if (!compact) {
+        const sweepAngle = t * 0.5;
+        const sweepGrad = ctx.createConicGradient(sweepAngle, cx, cy);
+        sweepGrad.addColorStop(0, `hsla(228, 55%, 60%, ${0.08 * pulseBase})`);
+        sweepGrad.addColorStop(0.08, `hsla(228, 55%, 60%, 0)`);
+        sweepGrad.addColorStop(0.5, `hsla(228, 55%, 60%, 0)`);
+        sweepGrad.addColorStop(1, `hsla(228, 55%, 60%, 0)`);
+        ctx.fillStyle = sweepGrad;
+        ctx.beginPath(); ctx.arc(cx, cy, 180, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ═══ Core glow ═══
+      const coreRadius = compact ? 28 : 55;
+      const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 20);
+      grad1.addColorStop(0, `hsla(228, 50%, 55%, ${0.2 * pulseBase})`);
+      grad1.addColorStop(0.4, `hsla(340, 40%, 65%, ${0.06 * pulseBase})`);
       grad1.addColorStop(1, "transparent");
       ctx.fillStyle = grad1;
-      ctx.beginPath();
-      ctx.arc(cx, cy, coreRadius + 15, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, coreRadius + 20, 0, Math.PI * 2); ctx.fill();
 
-      // --- Inner hexagon ---
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(t * 0.12);
+      // ═══ Inner hexagons (double rotating) ═══
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.1);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i - Math.PI / 6;
@@ -327,72 +221,80 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       }
       ctx.closePath();
       ctx.strokeStyle = `hsla(228, 50%, 55%, ${0.3 + pulseBase * 0.25})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.fillStyle = `hsla(228, 50%, 55%, ${0.03 + pulseBase * 0.04})`;
-      ctx.fill();
+      ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = `hsla(228, 50%, 55%, ${0.02 + pulseBase * 0.03})`; ctx.fill();
 
-      // Second inner hexagon (counter-rotate)
-      ctx.rotate(-t * 0.24);
+      ctx.rotate(-t * 0.2);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i;
-        const hr2 = coreRadius * 0.65 + Math.sin(t * 2 + i) * 1.5;
+        const hr2 = coreRadius * 0.6 + Math.sin(t * 2 + i) * 1.5;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
         else ctx.lineTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
       }
       ctx.closePath();
-      ctx.strokeStyle = `hsla(228, 45%, 60%, ${0.15 + pulseBase * 0.15})`;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+      ctx.strokeStyle = `hsla(228, 45%, 60%, ${0.12 + pulseBase * 0.12})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
       ctx.restore();
 
-      // --- "HBMaster" text ---
-      ctx.save();
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `900 ${compact ? 16 : 30}px 'Inter', sans-serif`;
+      // ═══ NODE POINTS on rings (pulsing dots) ═══
+      if (!compact) {
+        for (let i = 0; i < 12; i++) {
+          const a = (Math.PI * 2 / 12) * i + t * 0.15;
+          const r = 140 + Math.sin(t * 1.2 + i * 0.8) * 8;
+          const nx = cx + Math.cos(a) * r;
+          const ny = cy + Math.sin(a) * r;
+          const nodeSize = 2 + Math.sin(t * 3 + i) * 0.8;
+          ctx.beginPath(); ctx.arc(nx, ny, nodeSize, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(228, 55%, 65%, ${0.2 + pulseBase * 0.25})`; ctx.fill();
+          // Glow
+          ctx.beginPath(); ctx.arc(nx, ny, nodeSize + 4, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(228, 55%, 65%, ${0.04 + pulseBase * 0.04})`; ctx.fill();
+        }
+      }
+
+      // ═══ "HBMaster" text ═══
+      ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = `900 ${compact ? 16 : 32}px 'Inter', sans-serif`;
       ctx.fillStyle = `hsla(228, 50%, 42%, ${0.75 + pulseBase * 0.25})`;
-      ctx.shadowColor = `hsla(228, 50%, 55%, ${pulseBase * 0.35})`;
-      ctx.shadowBlur = 14;
-      ctx.fillText("HBMaster", cx, cy - (compact ? 2 : 7));
+      ctx.shadowColor = `hsla(228, 50%, 55%, ${pulseBase * 0.4})`;
+      ctx.shadowBlur = 18;
+      ctx.fillText("HBMaster", cx, cy - (compact ? 2 : 8));
       ctx.shadowBlur = 0;
       ctx.font = `500 ${compact ? 8 : 11}px 'Inter', sans-serif`;
       ctx.fillStyle = `hsla(228, 30%, 55%, ${0.4 + pulseBase * 0.2})`;
-      ctx.fillText("Mission Control", cx, cy + (compact ? 12 : 21));
+      ctx.fillText("Mission Control", cx, cy + (compact ? 12 : 22));
       ctx.restore();
 
-      // --- Bloom flare on responding ---
+      // ═══ Bloom flare on responding ═══
       if (state === "responding") {
-        const flareR = 55 + Math.sin(t * 3) * 18;
+        const flareR = 70 + Math.sin(t * 3) * 20;
         const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, flareR);
         flareGrad.addColorStop(0, `hsla(340, 55%, 65%, ${0.05 + Math.sin(t * 5) * 0.03})`);
         flareGrad.addColorStop(0.5, `hsla(280, 40%, 55%, ${0.03})`);
         flareGrad.addColorStop(1, "transparent");
         ctx.fillStyle = flareGrad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, flareR, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, flareR, 0, Math.PI * 2); ctx.fill();
       }
 
-      // --- Mouse hover glow ---
+      // ═══ Mouse hover glow ═══
       if (isHover && !compact) {
-        const hoverGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 60);
-        hoverGrad.addColorStop(0, `hsla(228, 50%, 55%, 0.06)`);
+        const hoverGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 70);
+        hoverGrad.addColorStop(0, `hsla(228, 50%, 55%, 0.07)`);
         hoverGrad.addColorStop(1, "transparent");
         ctx.fillStyle = hoverGrad;
-        ctx.beginPath();
-        ctx.arc(mx, my, 60, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(mx, my, 70, 0, Math.PI * 2); ctx.fill();
       }
 
-      // --- Flower particles ---
+      // ═══ FLOWER PARTICLES (sorted by layer for depth) ═══
       const particles = particlesRef.current;
+      // Sort by layer for parallax (far first)
+      particles.sort((a, b) => a.layer - b.layer);
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.life++;
 
-        // Orbital motion
         p.orbitAngle += p.orbitSpeed;
         const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius;
         const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius;
@@ -400,30 +302,27 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         p.y += (targetY - p.y) * 0.02 + p.vy;
         p.rotation += p.rotSpeed;
 
-        // Respond to AI state
         if (state === "responding") {
-          p.vx += (cx - p.x) * 0.002;
-          p.vy += (cy - p.y) * 0.002;
-          p.orbitRadius *= 0.998; // spiral inward
+          p.vx += (cx - p.x) * 0.0025;
+          p.vy += (cy - p.y) * 0.0025;
+          p.orbitRadius *= 0.997;
         } else if (state === "thinking") {
-          p.orbitSpeed *= 1.0005; // speed up orbit
+          p.orbitSpeed *= 1.0005;
         }
 
-        // Mouse interaction — particles flee from cursor
         if (isHover && !compact) {
           const dx = p.x - mx;
           const dy = p.y - my;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 70 && dist > 0) {
-            const force = (70 - dist) / 70 * 0.4;
+          if (dist < 80 && dist > 0) {
+            const force = (80 - dist) / 80 * 0.5;
             p.vx += (dx / dist) * force;
             p.vy += (dy / dist) * force;
           }
         }
 
-        // Damping
-        p.vx *= 0.98;
-        p.vy *= 0.98;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
 
         const lifeRatio = p.life / p.maxLife;
         const fadeIn = Math.min(lifeRatio * 5, 1);
@@ -434,23 +333,15 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
 
-        switch (p.type) {
-          case "lily": drawLily(ctx, p.size, alpha); break;
-          case "tulip": drawTulip(ctx, p.size, alpha); break;
-          case "cosmos": drawCosmos(ctx, p.size, alpha); break;
-          case "craspedia": drawCraspedia(ctx, p.size, alpha); break;
-          case "calla": drawCalla(ctx, p.size, alpha); break;
-          case "darkleaf": drawDarkLeaf(ctx, p.size, alpha); break;
-          case "whitebranch": drawWhiteBranch(ctx, p.size, alpha); break;
-        }
+        const drawFn = flowerDrawers[p.type];
+        if (drawFn) drawFn(ctx, p.size, alpha);
 
         ctx.restore();
 
         if (p.life >= p.maxLife) {
           particles[i] = createParticle(cx, cy);
-          // Reset orbit radius when responding
           if (state !== "responding") {
-            particles[i].orbitRadius = 40 + Math.random() * 150;
+            particles[i].orbitRadius = 50 + Math.random() * 170;
           }
         }
       }
@@ -464,9 +355,9 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [state, compact, createParticle, drawLily, drawTulip, drawCosmos, drawCraspedia, drawCalla, drawDarkLeaf, drawWhiteBranch]);
+  }, [state, compact, createParticle]);
 
-  const canvasSize = compact ? 200 : 420;
+  const canvasSize = compact ? 220 : 480;
 
   return (
     <div
@@ -479,18 +370,25 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         className={`transition-opacity duration-300 ${hovered ? "cursor-crosshair" : ""}`}
         style={{ width: canvasSize, height: canvasSize }}
       />
-      {/* Status indicator */}
-      <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border shadow-sm -mt-3 transition-all duration-300 ${
-        hovered ? "border-primary/30 shadow-md" : "border-border"
-      }`}>
-        <div className={`w-1.5 h-1.5 rounded-full transition-colors ${
-          state === "responding" ? "bg-accent animate-pulse" :
-          state === "thinking" ? "bg-bloom-warm animate-pulse" :
-          hovered ? "bg-primary animate-pulse" :
-          "bg-primary/50"
-        }`} />
-        <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
-          {state === "responding" ? "Responding" : state === "thinking" ? "Thinking" : hovered ? "Interactive" : "Online"}
+      {/* Status indicator — 2026 glassmorphism style */}
+      <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full -mt-4 transition-all duration-500
+        backdrop-blur-xl bg-card/70 border shadow-lg
+        ${hovered ? "border-primary/30 shadow-primary/10" : "border-border/50"}`}>
+        <div className="relative">
+          <div className={`w-2 h-2 rounded-full transition-colors ${
+            state === "responding" ? "bg-accent" :
+            state === "thinking" ? "bg-bloom-warm" :
+            hovered ? "bg-primary" : "bg-primary/50"
+          }`} />
+          {(state !== "idle" || hovered) && (
+            <div className={`absolute inset-0 w-2 h-2 rounded-full animate-ping ${
+              state === "responding" ? "bg-accent/40" :
+              state === "thinking" ? "bg-bloom-warm/40" : "bg-primary/30"
+            }`} />
+          )}
+        </div>
+        <span className="text-[10px] font-mono text-muted-foreground/80 uppercase tracking-[0.2em]">
+          {state === "responding" ? "Responding" : state === "thinking" ? "Analyzing" : hovered ? "Interactive" : "Online"}
         </span>
       </div>
     </div>

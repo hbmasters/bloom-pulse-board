@@ -22,15 +22,16 @@ const MissionControl = () => {
       <div className="flex-1 min-w-0 flex relative z-10">
         {/* Center panel */}
         <div className="flex-1 min-w-0 flex flex-col">
-          {/* Top bar */}
-          <div className="shrink-0 h-12 border-b border-border flex items-center px-4 justify-between bg-card">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-foreground uppercase tracking-wider">
+          {/* Top bar — 2026 glassmorphism */}
+          <div className="shrink-0 h-14 border-b border-border/40 flex items-center px-5 justify-between backdrop-blur-lg bg-card/60">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full bg-primary/60" />
+              <span className="text-xs font-black text-foreground uppercase tracking-[0.15em]">
                 {view === "chat" ? "HBMaster Chat" : view === "kanban" ? "Kanban Board" : view === "history" ? "Historie" : "Settings"}
               </span>
             </div>
             {view === "chat" && (
-              <button className="text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary">
+              <button className="text-[10px] font-mono text-muted-foreground/70 hover:text-foreground transition-all duration-300 px-3 py-1.5 rounded-xl hover:bg-primary/5 border border-transparent hover:border-border/50">
                 + Nieuw gesprek
               </button>
             )}
@@ -41,8 +42,8 @@ const MissionControl = () => {
             {view === "chat" && (
               <div className="flex-1 min-w-0 flex flex-col">
                 {/* Hologram */}
-                <div className={`shrink-0 flex justify-center transition-all duration-500 ${
-                  messageCount === 0 ? "py-6" : "py-2"
+                <div className={`shrink-0 flex justify-center transition-all duration-700 ease-out ${
+                  messageCount === 0 ? "py-8" : "py-2"
                 }`}>
                   <AIHologram state={aiState} compact={messageCount > 0} />
                 </div>
@@ -55,7 +56,12 @@ const MissionControl = () => {
             {view === "history" && <ChatHistory />}
             {view === "settings" && (
               <div className="flex-1 flex items-center justify-center">
-                <p className="text-sm text-muted-foreground font-mono">Settings — coming soon</p>
+                <div className="text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 border border-border/50 mx-auto flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full border-2 border-primary/30" />
+                  </div>
+                  <p className="text-sm text-muted-foreground/60 font-mono tracking-wide">Settings — coming soon</p>
+                </div>
               </div>
             )}
           </div>
@@ -63,7 +69,7 @@ const MissionControl = () => {
 
         {/* Right panel - Telemetry */}
         {view === "chat" && (
-          <div className="hidden xl:block w-72 border-l border-border bg-card/50">
+          <div className="hidden xl:block w-72 border-l border-border/40 backdrop-blur-lg bg-card/40">
             <TelemetryPanel />
           </div>
         )}
