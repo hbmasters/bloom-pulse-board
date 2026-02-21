@@ -9,9 +9,10 @@ import ChatPanel from "./ChatPanel";
 interface HBMasterWidgetProps {
   config: HBMasterWidgetConfig;
   status?: WidgetStatus;
+  userName?: string;
 }
 
-const HBMasterWidget = ({ config, status = "online" }: HBMasterWidgetProps) => {
+const HBMasterWidget = ({ config, status = "online", userName }: HBMasterWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
   const accent = themeAccents[config.theme];
@@ -24,7 +25,6 @@ const HBMasterWidget = ({ config, status = "online" }: HBMasterWidgetProps) => {
         config.position === "bottom-left" ? "bottom-6 left-6" : "bottom-6 right-6"
       )}
     >
-      {/* Chat Panel */}
       {isOpen && (
         <div
           className={cn(
@@ -38,11 +38,11 @@ const HBMasterWidget = ({ config, status = "online" }: HBMasterWidgetProps) => {
             onClose={() => setIsOpen(false)}
             isOpen={isOpen}
             fullscreen={isMobile}
+            userName={userName}
           />
         </div>
       )}
 
-      {/* FAB — hide on mobile when panel open */}
       {!(isMobile && isOpen) && (
         <WidgetFAB
           onClick={() => setIsOpen(!isOpen)}

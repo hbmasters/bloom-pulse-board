@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChatMsg, WidgetStatus, HBMasterWidgetConfig } from "./types";
 import { themeAccents } from "./types";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import InsightPanel from "./InsightPanel";
+import MiniHologram from "./MiniHologram";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hbmaster-chat`;
 
@@ -15,12 +16,14 @@ interface ChatPanelProps {
   onClose: () => void;
   isOpen: boolean;
   fullscreen?: boolean;
+  userName?: string;
 }
 
-const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelProps) => {
+const ChatPanel = ({ config, status, onClose, isOpen, fullscreen, userName }: ChatPanelProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -82,12 +85,14 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
     const userMsg: ChatMsg = { role: "user", content: text, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
+    setIsStreaming(false);
 
     let assistantSoFar = "";
     try {
       await streamChat(
         [...messages, userMsg],
         (chunk) => {
+          if (!assistantSoFar) setIsStreaming(true);
           assistantSoFar += chunk;
           setMessages(prev => {
             const last = prev[prev.length - 1];
@@ -97,10 +102,11 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
             return [...prev, { role: "assistant", content: assistantSoFar, timestamp: new Date() }];
           });
         },
-        () => setIsLoading(false),
+        () => { setIsLoading(false); setIsStreaming(false); },
       );
     } catch (e) {
       setIsLoading(false);
+      setIsStreaming(false);
       setMessages(prev => [
         ...prev,
         {
@@ -133,22 +139,13 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
         boxShadow: fullscreen ? undefined : `0 24px 80px -16px hsl(${accentHsl} / 0.15), 0 8px 32px -8px hsl(0 0% 0% / 0.15)`,
       }}
     >
-      {/* Header */}
+      {/* Header with Jarvis hologram */}
       <div
-        className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border/40"
+        className="shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-border/40"
         style={{ background: `hsl(${accentHsl} / 0.04)` }}
       >
-        <div className="flex items-center gap-3">
-          {/* Hexagon icon */}
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: `hsl(${accentHsl} / 0.12)` }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke={`hsl(${accentHsl})`} strokeWidth="1.5" />
-              <circle cx="12" cy="12" r="3" stroke={`hsl(${accentHsl})`} strokeWidth="1.5" />
-            </svg>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <MiniHologram state={isStreaming ? "speaking" : "idle"} accentHsl={accentHsl} size={40} />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold tracking-wide">HBMaster</span>
@@ -162,13 +159,22 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
             </span>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Sluit chat"
-        >
-          <X className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* User badge */}
+          {userName && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/40 border border-border/40">
+              <User className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[11px] font-medium text-foreground/80">{userName}</span>
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Sluit chat"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
       {/* Insight */}
@@ -177,13 +183,10 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2 py-8">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="opacity-20">
-              <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke="currentColor" strokeWidth="1" />
-              <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1" />
-            </svg>
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3 py-8">
+            <MiniHologram state="idle" accentHsl={accentHsl} size={80} />
             <p className="text-xs font-mono">Stel een vraag aan HBMaster</p>
-            <div className="flex flex-wrap gap-1.5 mt-2 max-w-xs justify-center">
+            <div className="flex flex-wrap gap-1.5 mt-1 max-w-xs justify-center">
               {["Wat is de status?", "Toon vandaag's cijfers", "Analyseer trends"].map(q => (
                 <button
                   key={q}
@@ -201,7 +204,7 @@ const ChatPanel = ({ config, status, onClose, isOpen, fullscreen }: ChatPanelPro
           <MessageBubble key={i} msg={msg} accentHsl={accentHsl} />
         ))}
 
-        {isLoading && messages[messages.length - 1]?.role === "user" && (
+        {isLoading && !isStreaming && messages[messages.length - 1]?.role === "user" && (
           <TypingIndicator accentHsl={accentHsl} />
         )}
         <div ref={bottomRef} />

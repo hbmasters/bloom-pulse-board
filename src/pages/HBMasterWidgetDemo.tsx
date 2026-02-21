@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import HBMasterWidget from "@/components/hbmaster-widget/HBMasterWidget";
+import BroadcastWidget from "@/components/hbmaster-widget/BroadcastWidget";
 import type { WidgetTheme, WidgetStatus, HBMasterWidgetConfig } from "@/components/hbmaster-widget/types";
 import { themeAccents } from "@/components/hbmaster-widget/types";
 
@@ -13,6 +16,30 @@ const themes: { key: WidgetTheme; context: string; insight: string }[] = [
 const HBMasterWidgetDemo = () => {
   const [activeTheme, setActiveTheme] = useState<WidgetTheme>("productie");
   const [status, setStatus] = useState<WidgetStatus>("online");
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        // Try profile full_name first, fallback to email
+        supabase.from("profiles").select("full_name").eq("id", session.user.id).single().then(({ data }) => {
+          setUserName(data?.full_name || session.user.email?.split("@")[0] || null);
+        });
+      } else {
+        setUserName(null);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from("profiles").select("full_name").eq("id", session.user.id).single().then(({ data }) => {
+          setUserName(data?.full_name || session.user.email?.split("@")[0] || null);
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const currentTheme = themes.find(t => t.key === activeTheme)!;
   const accent = themeAccents[activeTheme];
@@ -40,6 +67,14 @@ const HBMasterWidgetDemo = () => {
               <p className="text-xs text-muted-foreground font-mono">Enterprise AI Assistant</p>
             </div>
           </div>
+          {/* User info */}
+          {userName && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border/60">
+              <User className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-sm font-medium">{userName}</span>
+              <span className="w-2 h-2 rounded-full bg-accent" />
+            </div>
+          )}
         </div>
       </header>
 
@@ -65,9 +100,7 @@ const HBMasterWidgetDemo = () => {
                     <span className="text-sm font-semibold">{a.label}</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground">{t.context}</p>
-                  {active && (
-                    <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: a.accent }} />
-                  )}
+                  {active && <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: a.accent }} />}
                 </button>
               );
             })}
@@ -87,13 +120,45 @@ const HBMasterWidgetDemo = () => {
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    s === "online" ? "bg-accent" : s === "busy" ? "bg-yellow-500" : "bg-red-500"
-                  }`} />
+                  <span className={`w-2 h-2 rounded-full ${s === "online" ? "bg-accent" : s === "busy" ? "bg-yellow-500" : "bg-red-500"}`} />
                   {s.charAt(0).toUpperCase() + s.slice(1)}
                 </span>
               </button>
             ))}
+          </div>
+        </section>
+
+        {/* Widget explanation */}
+        <section className="space-y-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Twee widgets</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-border/60 bg-card/50 p-5 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `hsl(${accent.hsl} / 0.12)` }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke={`hsl(${accent.hsl})`} strokeWidth="1.5" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold">Chat Widget</h3>
+              </div>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                Rechtsonder — interactieve AI chat. Stel vragen, krijg antwoorden. Met Jarvis mini-hologram dat meebeweegt tijdens het praten.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/50 p-5 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `hsl(${accent.hsl} / 0.12)` }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" stroke={`hsl(${accent.hsl})`} strokeWidth="1.5" />
+                    <circle cx="12" cy="12" r="3" fill={`hsl(${accent.hsl})`} />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold">Broadcast Widget</h3>
+              </div>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                Linksonder — alleen-lezen analyse feed. HBMaster stuurt automatisch inzichten vanuit alle systemen. Geen input mogelijk.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -102,12 +167,12 @@ const HBMasterWidgetDemo = () => {
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Component architectuur</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
+              { title: "MiniHologram", desc: "Canvas-gebaseerde Jarvis hologram met rotating rings, hexagon core en voice waveform bars" },
+              { title: "ChatPanel", desc: "Chat interface met streaming, Jarvis hologram in header en empty state, user badge" },
+              { title: "BroadcastWidget", desc: "Alleen-lezen analyse feed met auto-berichten, unread counter en severity kleuring" },
               { title: "WidgetFAB", desc: "Floating Action Button met halo-animatie, status indicator en hover glow" },
-              { title: "ChatPanel", desc: "Chat interface met streaming, markdown rendering, error states en contextual header" },
               { title: "InsightPanel", desc: "Live productie-inzichten boven de chat, met accent kleuring per systeem" },
               { title: "MessageBubble", desc: "Berichten met tijdstempel, markdown support, error states en correlation ID" },
-              { title: "TypingIndicator", desc: "Drie subtiel pulserende dots met accent kleur synchronisatie" },
-              { title: "HBMasterWidget", desc: "Container component met responsive gedrag, fullscreen mobile en theming" },
             ].map(c => (
               <div key={c.title} className="rounded-xl border border-border/60 bg-card/50 p-4 space-y-1.5">
                 <h3 className="text-sm font-bold font-mono" style={{ color: `hsl(${accent.hsl})` }}>{c.title}</h3>
@@ -117,7 +182,7 @@ const HBMasterWidgetDemo = () => {
           </div>
         </section>
 
-        {/* Tokens */}
+        {/* Design Tokens */}
         <section className="space-y-4">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Design tokens</h2>
           <div className="rounded-xl border border-border/60 bg-card/50 p-5 font-mono text-[12px] space-y-2 text-muted-foreground">
@@ -126,19 +191,19 @@ const HBMasterWidgetDemo = () => {
             <div className="flex justify-between"><span>Accent (Teams)</span><span>hsl(220 15% 45%)</span></div>
             <div className="flex justify-between"><span>Accent (Kenya)</span><span>hsl(25 70% 50%)</span></div>
             <div className="border-t border-border/30 my-2" />
-            <div className="flex justify-between"><span>Panel width</span><span>400px</span></div>
-            <div className="flex justify-between"><span>Panel height</span><span>600px</span></div>
-            <div className="flex justify-between"><span>Border radius</span><span>1rem (16px)</span></div>
-            <div className="flex justify-between"><span>FAB size</span><span>56px</span></div>
-            <div className="flex justify-between"><span>Font body</span><span>Inter, 14px</span></div>
-            <div className="flex justify-between"><span>Font mono</span><span>JetBrains Mono</span></div>
+            <div className="flex justify-between"><span>Chat panel</span><span>400×600px</span></div>
+            <div className="flex justify-between"><span>Broadcast panel</span><span>360×480px</span></div>
+            <div className="flex justify-between"><span>FAB (chat)</span><span>56px</span></div>
+            <div className="flex justify-between"><span>FAB (broadcast)</span><span>48px</span></div>
+            <div className="flex justify-between"><span>Mini hologram</span><span>40px (header) / 80px (empty)</span></div>
             <div className="flex justify-between"><span>Animation</span><span>250ms ease-out</span></div>
           </div>
         </section>
       </main>
 
-      {/* The actual widget */}
-      <HBMasterWidget config={config} status={status} />
+      {/* Both widgets */}
+      <HBMasterWidget config={config} status={status} userName={userName || undefined} />
+      <BroadcastWidget theme={activeTheme} status={status} position="bottom-left" />
     </div>
   );
 };
