@@ -160,7 +160,13 @@ const ForceScanPopup = ({
   );
 };
 
-// Category color map
+// Category config map
+const categoryConfig: Record<string, { color: string; badgeColor: string; icon: React.ReactNode }> = {
+  Hand: { color: "bg-bloom-warm", badgeColor: "bg-bloom-warm/15 text-bloom-warm border-bloom-warm/25", icon: <Hand className="w-3 h-3 text-primary-foreground" /> },
+  Band: { color: "bg-primary", badgeColor: "bg-primary/15 text-primary border-primary/25", icon: <Cog className="w-3 h-3 text-primary-foreground" /> },
+  Others: { color: "bg-bloom-sky", badgeColor: "bg-bloom-sky/15 text-bloom-sky border-bloom-sky/25", icon: <Package className="w-3 h-3 text-primary-foreground" /> },
+};
+
 const categoryColors: Record<string, string> = {
   Hand: "bg-bloom-warm/15 text-bloom-warm border-bloom-warm/25",
   Band: "bg-primary/15 text-primary border-primary/25",
@@ -438,16 +444,22 @@ const ColdStorageSections = () => {
                   if (catOrders.length === 0) return null;
                   const catMinutes = getTotalMinutes(catOrders);
                   const catPcs = getTotalQuantity(catOrders);
-                  const catColor = categoryColors[cat] || "bg-secondary text-muted-foreground border-border";
+                  const config = categoryConfig[cat];
                   return (
                     <div key={cat}>
                       <div className="flex items-center justify-between mb-0.5 px-1">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[7px] font-semibold px-1.5 py-0.5 rounded-full border ${catColor}`}>{cat}</span>
-                          <span className="text-[8px] font-mono font-bold text-muted-foreground">{catOrders.length}x</span>
+                          <div className={`w-4 h-4 rounded-md flex items-center justify-center ${config?.color || "bg-secondary"}`}>
+                            {config?.icon || <Package className="w-2.5 h-2.5 text-primary-foreground" />}
+                          </div>
+                          <span className="text-[9px] font-bold text-foreground uppercase tracking-wider">{cat}</span>
+                          <span className="text-[8px] font-mono font-bold text-muted-foreground bg-secondary px-1 py-0.5 rounded-full">{catOrders.length}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-mono font-bold text-foreground">{formatHours(catMinutes)}</span>
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-secondary border border-border">
+                            <span className="text-[8px] text-muted-foreground font-semibold">⏱</span>
+                            <span className="text-[10px] font-mono font-black text-foreground">{formatHours(catMinutes)}</span>
+                          </div>
                           <span className="text-[7px] text-muted-foreground">{catPcs} pcs</span>
                         </div>
                       </div>
