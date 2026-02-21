@@ -56,10 +56,12 @@ export default {
           foreground: "hsl(var(--success-foreground))",
         },
         bloom: {
-          lavender: "hsl(var(--bloom-lavender))",
-          pink: "hsl(var(--bloom-pink))",
-          sky: "hsl(var(--bloom-sky))",
+          blue: "hsl(var(--bloom-blue))",
+          "blue-light": "hsl(var(--bloom-blue-light))",
+          "blue-dark": "hsl(var(--bloom-blue-dark))",
+          natural: "hsl(var(--bloom-natural))",
           warm: "hsl(var(--bloom-warm))",
+          sky: "hsl(var(--bloom-sky))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
