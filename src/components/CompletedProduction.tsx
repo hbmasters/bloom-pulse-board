@@ -11,7 +11,7 @@ const getBadge = (planned: number, actual: number) => {
 const CompletedProduction = () => {
   return (
     <div className="flex flex-col h-full">
-      <h3 className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 shrink-0">
+      <h3 className="text-xs font-black text-foreground uppercase tracking-wider mb-2 shrink-0">
         Completed Today
       </h3>
       <div className="flex-1 min-h-0 space-y-1 overflow-hidden">

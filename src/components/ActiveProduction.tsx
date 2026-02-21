@@ -68,7 +68,7 @@ const ActiveProduction = () => {
     <section className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-2 shrink-0">
         <div className="w-2 h-2 rounded-full bg-accent animate-pulse-slow" />
-        <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">In Production</h2>
+        <h2 className="text-xs font-black text-foreground uppercase tracking-wider">In Production</h2>
       </div>
       <div className="grid grid-cols-4 gap-3 flex-1 min-h-0 auto-rows-fr">
         {activeProducts.map((product) => (
