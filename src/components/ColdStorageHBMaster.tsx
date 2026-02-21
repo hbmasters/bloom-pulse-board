@@ -25,16 +25,16 @@ const ColdStorageHBMaster = () => {
   const currentMsg = coldStorageHBMessages[msgIndex];
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${modeColors[currentMsg.mode]}`}>
-      <div className="flex items-center gap-3 px-4 py-3">
-        <div className="w-9 h-9 rounded-lg bg-gradient-brand flex items-center justify-center shrink-0 shadow-sm">
-          <span className="text-[10px] font-black text-primary-foreground">HB</span>
+    <div className={`rounded-lg border overflow-hidden ${modeColors[currentMsg.mode]} max-w-2xl`}>
+      <div className="flex items-center gap-2 px-3 py-1.5">
+        <div className="w-6 h-6 rounded-md bg-gradient-brand flex items-center justify-center shrink-0 shadow-sm">
+          <span className="text-[8px] font-black text-primary-foreground">HB</span>
         </div>
         <div className="overflow-hidden flex-1 min-w-0">
-          <div className="text-[9px] font-black text-primary uppercase tracking-wider mb-0.5">HBMASTER</div>
-          <p className={`text-sm font-semibold text-foreground transition-all duration-300 ${
+          <p className={`text-xs font-semibold text-foreground transition-all duration-300 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
           }`}>
+            <span className="text-[8px] font-black text-primary uppercase tracking-wider mr-2">HBMASTER</span>
             {currentMsg.text}
           </p>
         </div>

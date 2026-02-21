@@ -21,6 +21,7 @@ export interface ColdStorageOrder {
   category?: string;
   accountManager?: string;
   progress?: number;
+  finishedTime?: string;
 }
 
 export interface PickedOrder extends ColdStorageOrder {
@@ -54,24 +55,35 @@ export const pickedOrders: PickedOrder[] = [
 ];
 
 export const waitingForHandOrders: ColdStorageOrder[] = [
-  { id: 8, name: "BQ Field L", quantity: 400, estimatedMinutes: 210, pickedBy: "Anna", advisedLine: "H1", departureDate: "21 Feb", progress: 0 },
-  { id: 9, name: "BQ Elegance", quantity: 300, estimatedMinutes: 180, pickedBy: "Mark", advisedLine: "H2", departureDate: "22 Feb", progress: 0 },
-  { id: 10, name: "BQ Charme XL", quantity: 250, estimatedMinutes: 150, pickedBy: "Sophie", advisedLine: "H1", departureDate: "21 Feb", progress: 0 },
-  { id: 26, name: "BQ Lovely", quantity: 200, estimatedMinutes: 100, pickedBy: "Daan", advisedLine: "H3", departureDate: "22 Feb", progress: 0 },
-  { id: 27, name: "BQ Charme", quantity: 180, estimatedMinutes: 90, pickedBy: "Lisa", advisedLine: "H1", departureDate: "21 Feb", progress: 0 },
+  { id: 8, name: "BQ Field L", quantity: 400, estimatedMinutes: 210, pickedBy: "Anna", advisedLine: "H1", departureDate: "21 Feb", progress: 0, finishedTime: "09:45" },
+  { id: 9, name: "BQ Elegance", quantity: 300, estimatedMinutes: 180, pickedBy: "Mark", advisedLine: "H2", departureDate: "22 Feb", progress: 0, finishedTime: "10:12" },
+  { id: 10, name: "BQ Charme XL", quantity: 250, estimatedMinutes: 150, pickedBy: "Sophie", advisedLine: "H1", departureDate: "21 Feb", progress: 0, finishedTime: "10:30" },
+  { id: 26, name: "BQ Lovely", quantity: 200, estimatedMinutes: 100, pickedBy: "Daan", advisedLine: "H3", departureDate: "22 Feb", progress: 0, finishedTime: "11:00" },
+  { id: 27, name: "BQ Charme", quantity: 180, estimatedMinutes: 90, pickedBy: "Lisa", advisedLine: "H1", departureDate: "21 Feb", progress: 0, finishedTime: "11:15" },
 ];
 
 export const waitingForBandOrders: ColdStorageOrder[] = [
-  { id: 11, name: "BQ Coffee S", quantity: 500, estimatedMinutes: 120, pickedBy: "Tom", advisedLine: "B1", departureDate: "21 Feb", progress: 0 },
-  { id: 12, name: "BQ Trend", quantity: 350, estimatedMinutes: 90, pickedBy: "Anna", advisedLine: "B2", departureDate: "22 Feb", progress: 0 },
-  { id: 13, name: "BQ de Luxe", quantity: 400, estimatedMinutes: 105, pickedBy: "Mark", advisedLine: "B1", departureDate: "21 Feb", progress: 0 },
-  { id: 14, name: "BQ Lovely", quantity: 200, estimatedMinutes: 80, pickedBy: "Sophie", advisedLine: "B1", departureDate: "23 Feb", progress: 0 },
+  { id: 11, name: "BQ Coffee S", quantity: 500, estimatedMinutes: 120, pickedBy: "Tom", advisedLine: "B1", departureDate: "21 Feb", progress: 0, finishedTime: "08:50" },
+  { id: 12, name: "BQ Trend", quantity: 350, estimatedMinutes: 90, pickedBy: "Anna", advisedLine: "B2", departureDate: "22 Feb", progress: 0, finishedTime: "09:20" },
+  { id: 13, name: "BQ de Luxe", quantity: 400, estimatedMinutes: 105, pickedBy: "Mark", advisedLine: "B1", departureDate: "21 Feb", progress: 0, finishedTime: "09:55" },
+  { id: 14, name: "BQ Lovely", quantity: 200, estimatedMinutes: 80, pickedBy: "Sophie", advisedLine: "B1", departureDate: "23 Feb", progress: 0, finishedTime: "10:10" },
 ];
 
 export const waitingForOthersOrders: ColdStorageOrder[] = [
-  { id: 28, name: "Orchidee Mix", quantity: 120, estimatedMinutes: 60, pickedBy: "Daan", advisedLine: "A1", departureDate: "21 Feb", category: "Arrangement", progress: 0 },
-  { id: 29, name: "Succulent Set", quantity: 80, estimatedMinutes: 45, pickedBy: "Lisa", advisedLine: "P1", departureDate: "22 Feb", category: "Plants", progress: 0 },
-  { id: 30, name: "Rose Arrangement", quantity: 150, estimatedMinutes: 90, pickedBy: "Tom", advisedLine: "A2", departureDate: "21 Feb", category: "Arrangement", progress: 0 },
+  { id: 28, name: "Orchidee Mix", quantity: 120, estimatedMinutes: 60, pickedBy: "Daan", advisedLine: "A1", departureDate: "21 Feb", category: "Arrangement", progress: 0, finishedTime: "09:30" },
+  { id: 29, name: "Succulent Set", quantity: 80, estimatedMinutes: 45, pickedBy: "Lisa", advisedLine: "P1", departureDate: "22 Feb", category: "Plants", progress: 0, finishedTime: "10:00" },
+  { id: 30, name: "Rose Arrangement", quantity: 150, estimatedMinutes: 90, pickedBy: "Tom", advisedLine: "A2", departureDate: "21 Feb", category: "Arrangement", progress: 0, finishedTime: "10:45" },
+];
+
+export const availablePickers = [
+  { id: "anna", name: "Anna" },
+  { id: "mark", name: "Mark" },
+  { id: "sophie", name: "Sophie" },
+  { id: "daan", name: "Daan" },
+  { id: "lisa", name: "Lisa" },
+  { id: "tom", name: "Tom" },
+  { id: "jan", name: "Jan" },
+  { id: "pieter", name: "Pieter" },
 ];
 
 export interface FastestPicker {

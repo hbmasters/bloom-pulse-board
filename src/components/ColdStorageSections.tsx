@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Printer, UserCheck, Hand, Cog, User, Package, CalendarDays, Zap, Trophy, X, UserRound } from "lucide-react";
+import { Printer, UserCheck, Hand, Cog, User, Package, CalendarDays, Zap, Trophy, X, UserRound, Clock, ScanLine } from "lucide-react";
 import {
   printedOrders,
   pickedOrders,
@@ -7,6 +7,7 @@ import {
   waitingForBandOrders,
   waitingForOthersOrders,
   fastestPicker,
+  availablePickers,
   type ColdStorageOrder,
   type PickedOrder,
 } from "@/data/coldStorageData";
@@ -204,6 +205,12 @@ const WaitingOrderRow = ({ order, onClick }: { order: ColdStorageOrder; onClick:
             {order.category}
           </span>
         )}
+        {order.finishedTime && (
+          <span className="flex items-center gap-0.5 text-[7px] font-mono font-bold text-accent bg-accent/10 px-1 py-0.5 rounded-full border border-accent/20 shrink-0">
+            <Clock className="w-2 h-2" />
+            finished {order.finishedTime}
+          </span>
+        )}
       </div>
       <span className="text-[8px] text-muted-foreground">{order.departureDate}</span>
       <div className="hidden group-hover/row:flex items-center gap-1.5 mt-0.5">
@@ -235,12 +242,18 @@ const PickedOrderCard = ({ order, onClick }: { order: PickedOrder; onClick: () =
       ) : (
         <span className="text-2xl font-black text-muted-foreground/30">{order.name.charAt(0)}</span>
       )}
-      {/* Picker top-right */}
+      {/* Picker + start time top-right */}
       <div className="absolute top-1.5 right-1.5 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm rounded-full px-2 py-1 border border-border shadow-sm">
         <div className="w-5 h-5 rounded-full bg-gradient-brand flex items-center justify-center">
           <span className="text-[8px] font-black text-primary-foreground">{order.picker.charAt(0)}</span>
         </div>
-        <span className="text-[10px] font-bold text-foreground">{order.picker}</span>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-foreground leading-tight">{order.picker}</span>
+          <span className="text-[7px] text-muted-foreground leading-tight flex items-center gap-0.5">
+            <Clock className="w-2 h-2" />
+            started {order.startTime}
+          </span>
+        </div>
       </div>
     </div>
     {/* Info bar below photo */}
@@ -265,6 +278,99 @@ const getPickedGridCols = (count: number) => {
 const getPickedGridRows = (count: number) => {
   const cols = count <= 6 ? 3 : 4;
   return Math.ceil(count / cols);
+};
+
+// Scan-In popup — appears when a production order is scanned, select person
+const ScanInPopup = ({
+  order,
+  onClose,
+  onConfirm,
+}: {
+  order: ColdStorageOrder | PickedOrder;
+  onClose: () => void;
+  onConfirm: (pickerName: string) => void;
+}) => {
+  const [selectedPicker, setSelectedPicker] = useState<string | null>(null);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
+      <div
+        className="bg-card rounded-2xl border border-border shadow-2xl p-6 max-w-md w-full mx-4 animate-slide-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ScanLine className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-bold text-foreground">Order Ingescand</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-muted transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Product image */}
+        <div className="rounded-xl overflow-hidden mb-4 bg-secondary aspect-[16/9] flex items-center justify-center">
+          {"image" in order && order.image ? (
+            <img src={order.image} alt={order.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-4xl font-black text-muted-foreground/20">{order.name.charAt(0)}</span>
+          )}
+        </div>
+
+        <div className="bg-secondary rounded-xl p-4 mb-4">
+          <div className="text-sm font-bold text-foreground mb-1">{order.name}</div>
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className="font-mono font-bold">{order.quantity} pcs</span>
+            <span>{formatHours(order.estimatedMinutes)}</span>
+            {order.departureDate && <span>Vertrek: {order.departureDate}</span>}
+          </div>
+        </div>
+
+        {/* Person selector */}
+        <div className="mb-4">
+          <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Wie gaat dit uitgooien?</p>
+          <div className="grid grid-cols-4 gap-2">
+            {availablePickers.map((picker) => (
+              <button
+                key={picker.id}
+                onClick={() => setSelectedPicker(picker.name)}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${
+                  selectedPicker === picker.name
+                    ? "border-accent bg-accent/10 shadow-sm"
+                    : "border-border bg-card hover:border-primary/30 hover:bg-primary/5"
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  selectedPicker === picker.name ? "bg-gradient-brand" : "bg-secondary"
+                }`}>
+                  <span className={`text-[10px] font-black ${
+                    selectedPicker === picker.name ? "text-primary-foreground" : "text-muted-foreground"
+                  }`}>{picker.name.charAt(0)}</span>
+                </div>
+                <span className="text-[9px] font-bold text-foreground">{picker.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
+          >
+            Annuleren
+          </button>
+          <button
+            onClick={() => { if (selectedPicker) { onConfirm(selectedPicker); onClose(); } }}
+            disabled={!selectedPicker}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-md hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Toewijzen
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Most orders done today panel
@@ -294,6 +400,7 @@ const FastestPickerPanel = () => (
 
 const ColdStorageSections = () => {
   const [selectedOrder, setSelectedOrder] = useState<ColdStorageOrder | PickedOrder | null>(null);
+  const [scanInOrder, setScanInOrder] = useState<ColdStorageOrder | PickedOrder | null>(null);
   const [printedOpen, setPrintedOpen] = useState(false);
   const gridCols = getPickedGridCols(pickedOrders.length);
   const gridRows = getPickedGridRows(pickedOrders.length);
@@ -341,14 +448,25 @@ const ColdStorageSections = () => {
 
         {/* Center: Picked */}
         <div className="flex flex-col min-h-0">
-          <SectionHeader
-            icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
-            title="Picked"
-            count={pickedOrders.length}
-            totalMinutes={getTotalMinutes(pickedOrders)}
-            totalPcs={getTotalQuantity(pickedOrders)}
-            color="bg-accent"
-          />
+          <div className="flex items-center justify-between mb-1.5 shrink-0">
+            <div className="flex-1">
+              <SectionHeader
+                icon={<UserCheck className="w-3 h-3 text-primary-foreground" />}
+                title="Picked"
+                count={pickedOrders.length}
+                totalMinutes={getTotalMinutes(pickedOrders)}
+                totalPcs={getTotalQuantity(pickedOrders)}
+                color="bg-accent"
+              />
+            </div>
+            <button
+              onClick={() => setScanInOrder(pickedOrders[0])}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent/15 border border-accent/25 text-accent hover:bg-accent/25 transition-colors text-[9px] font-bold uppercase tracking-wider"
+            >
+              <ScanLine className="w-3 h-3" />
+              Scan In
+            </button>
+          </div>
           <div className={`flex-1 min-h-0 grid ${gridCols} gap-2 overflow-auto`} style={{ gridTemplateRows: `repeat(${gridRows}, 1fr)` }}>
             {pickedOrders.map((order) => (
               <PickedOrderCard key={order.id} order={order} onClick={() => setSelectedOrder(order)} />
@@ -414,6 +532,14 @@ const ColdStorageSections = () => {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onConfirm={() => console.log("Force scan:", selectedOrder.name)}
+        />
+      )}
+
+      {scanInOrder && (
+        <ScanInPopup
+          order={scanInOrder}
+          onClose={() => setScanInOrder(null)}
+          onConfirm={(picker) => console.log("Scan in:", scanInOrder.name, "assigned to:", picker)}
         />
       )}
     </>
