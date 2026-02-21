@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Users, Minus, Plus, Check, ChevronDown, Clock, TrendingUp, Package } from "lucide-react";
+import { LogOut, Users, Minus, Plus, Check, ChevronDown, Clock, TrendingUp, Package, Zap, CalendarDays, Target } from "lucide-react";
 
 // Product image map
 import productFieldL from "@/assets/product-field-l.jpg";
@@ -23,6 +23,18 @@ const productImages: Record<string, string> = {
   "BQ Lovely": productLovely,
   "BQ Chique": productChique,
   "BQ Trend": productTrend,
+};
+
+// Mock production stats per product
+const productStats: Record<string, { produced: number; target: number; apu: number; plannedApu: number; departureDate: string; expectedEnd: string; status: "in-production" | "completed" }> = {
+  "BQ Field L":    { produced: 287, target: 400, apu: 88, plannedApu: 80, departureDate: "21 feb", expectedEnd: "11:30", status: "in-production" },
+  "BQ de Luxe":    { produced: 250, target: 250, apu: 95, plannedApu: 85, departureDate: "21 feb", expectedEnd: "—", status: "completed" },
+  "BQ Elegance":   { produced: 356, target: 400, apu: 119, plannedApu: 100, departureDate: "22 feb", expectedEnd: "12:00", status: "in-production" },
+  "BQ Charme XL":  { produced: 198, target: 350, apu: 88, plannedApu: 85, departureDate: "21 feb", expectedEnd: "13:00", status: "in-production" },
+  "BQ Lovely":     { produced: 200, target: 200, apu: 78, plannedApu: 75, departureDate: "22 feb", expectedEnd: "—", status: "completed" },
+  "BQ Chique":     { produced: 150, target: 150, apu: 92, plannedApu: 90, departureDate: "21 feb", expectedEnd: "—", status: "completed" },
+  "BQ Trend":      { produced: 95, target: 300, apu: 95, plannedApu: 90, departureDate: "23 feb", expectedEnd: "14:00", status: "in-production" },
+  "BQ Field M":    { produced: 120, target: 280, apu: 82, plannedApu: 80, departureDate: "21 feb", expectedEnd: "13:30", status: "in-production" },
 };
 
 interface Line {
@@ -149,44 +161,87 @@ const ProductCard = ({
   onTap: () => void;
 }) => {
   const image = productImages[product.name];
-  const updatedAgo = product.updated_at
-    ? (() => {
-        const diff = Math.floor((Date.now() - new Date(product.updated_at).getTime()) / 60000);
-        if (diff < 1) return "Zojuist";
-        if (diff < 60) return `${diff} min geleden`;
-        return `${Math.floor(diff / 60)}u geleden`;
-      })()
-    : "";
+  const stats = productStats[product.name];
+  const pct = stats ? Math.round((stats.produced / stats.target) * 100) : 0;
+  const apuDiff = stats ? Math.round(((stats.apu - stats.plannedApu) / stats.plannedApu) * 100) : 0;
+  const isInProduction = stats?.status === "in-production";
 
   return (
     <button
       onClick={onTap}
-      className="w-full bg-card rounded-2xl border border-border p-4 text-left active:scale-[0.97] transition-transform touch-manipulation shadow-sm flex gap-4 items-center"
+      className="w-full bg-card rounded-2xl border border-border text-left active:scale-[0.97] transition-transform touch-manipulation shadow-sm overflow-hidden"
     >
-      {image ? (
-        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border shadow-sm">
-          <img src={image} alt={product.name} className="w-full h-full object-cover" />
-        </div>
-      ) : (
-        <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center shrink-0 border border-border">
-          <Package className="w-6 h-6 text-muted-foreground" />
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="text-base font-black text-foreground truncate">{product.name}</h3>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shrink-0 ml-2">
-            <Users className="w-3.5 h-3.5 text-primary" />
-            <span className="text-lg font-mono font-black text-primary">{product.persons_count}</span>
+      {/* Top: image + name + persons */}
+      <div className="flex gap-3 p-3 pb-2">
+        {image ? (
+          <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-border shadow-sm">
+            <img src={image} alt={product.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center shrink-0 border border-border">
+            <Package className="w-7 h-7 text-muted-foreground" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-base font-black text-foreground truncate">{product.name}</h3>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 shrink-0 ml-2">
+              <Users className="w-3.5 h-3.5 text-primary" />
+              <span className="text-lg font-mono font-black text-primary">{product.persons_count}</span>
+            </div>
+          </div>
+          {/* Status badge */}
+          <div className="flex items-center gap-2">
+            {isInProduction ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-slow" />
+                In productie
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                <Check className="w-3 h-3" />
+                Klaar
+              </span>
+            )}
+            {stats && (
+              <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" /> {stats.departureDate}
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          {product.updated_by && (
-            <span>Door <span className="font-semibold text-foreground/70">{product.updated_by}</span></span>
-          )}
-          <span className="ml-auto">{updatedAgo}</span>
-        </div>
       </div>
+
+      {/* Stats row */}
+      {stats && (
+        <div className="px-3 pb-2">
+          <div className="flex items-center gap-4 text-[11px] mb-1.5">
+            <span className="flex items-center gap-1 font-semibold text-foreground/80">
+              <Target className="w-3 h-3 text-primary" />
+              <span className="font-mono font-bold">{stats.produced}</span>
+              <span className="text-muted-foreground">/ {stats.target}</span>
+            </span>
+            <span className="flex items-center gap-1 font-semibold text-accent">
+              <Zap className="w-3 h-3" />
+              {stats.apu} APU
+              {apuDiff > 0 && <span className="text-[9px] font-bold">+{apuDiff}%</span>}
+            </span>
+            {isInProduction && stats.expectedEnd !== "—" && (
+              <span className="flex items-center gap-1 font-semibold text-foreground/70 ml-auto">
+                <Clock className="w-3 h-3 text-primary" />
+                Klaar {stats.expectedEnd}
+              </span>
+            )}
+          </div>
+          {/* Progress bar */}
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${pct >= 100 ? "bg-accent" : "bg-primary"}`}
+              style={{ width: `${Math.min(pct, 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
     </button>
   );
 };
