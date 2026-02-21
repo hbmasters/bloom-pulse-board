@@ -42,6 +42,17 @@ export const waitingForBandOrders: ColdStorageOrder[] = [
   { id: 14, name: "BQ Lovely", quantity: 200, estimatedMinutes: 80 },
 ];
 
+export interface TeamLeader {
+  name: string;
+  initials: string;
+  role: string;
+}
+
+export const teamLeaders: TeamLeader[] = [
+  { name: "Ingrida", initials: "IN", role: "Bandleider" },
+  { name: "Greta", initials: "GR", role: "Bandleider" },
+];
+
 export const coldStorageStats = {
   lineName: "COLD STORAGE",
   totalPeople: 5,

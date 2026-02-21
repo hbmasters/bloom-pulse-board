@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Users, Snowflake } from "lucide-react";
-import { coldStorageStats } from "@/data/coldStorageData";
+import { Users, Snowflake, Star } from "lucide-react";
+import { coldStorageStats, teamLeaders } from "@/data/coldStorageData";
 
 const LiveClock = () => {
   const [time, setTime] = useState(new Date());
@@ -33,6 +33,24 @@ const ColdStorageHeader = () => {
             <h1 className="text-xl font-black text-foreground tracking-tight">{coldStorageStats.lineName}</h1>
             <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Hoorn Bloommasters</p>
           </div>
+        </div>
+
+        {/* Team Leaders */}
+        <div className="flex items-center gap-3 ml-2">
+          {teamLeaders.map((leader) => (
+            <div key={leader.name} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/20 bg-primary/5">
+              <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center shadow-sm">
+                <span className="text-xs font-black text-primary-foreground">{leader.initials}</span>
+              </div>
+              <div className="leading-none">
+                <div className="text-sm font-bold text-foreground">{leader.name}</div>
+                <div className="flex items-center gap-0.5">
+                  <Star className="w-2.5 h-2.5 text-bloom-warm fill-bloom-warm" />
+                  <span className="text-[8px] text-muted-foreground uppercase tracking-wider font-semibold">{leader.role}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card">
