@@ -410,7 +410,7 @@ const ColdStorageSections = () => {
                 color="bg-bloom-sky"
                 onIconClick={() => setPrintedOpen(false)}
               />
-              <div className="flex-1 min-h-0 overflow-auto space-y-2 pr-1">
+              <div className="flex-1 min-h-0 overflow-auto space-y-2 pr-1 mt-3">
                 {(["Hand", "Band", "Others"] as const).map((cat) => {
                   const catOrders = printedOrders.filter((o) => o.category === cat);
                   if (catOrders.length === 0) return null;
