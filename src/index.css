@@ -174,4 +174,44 @@
     pointer-events: none;
     z-index: 0;
   }
+
+  /* Mission Control dark theme */
+  .mc-dark {
+    --background: 220 18% 9%;
+    --foreground: 210 20% 90%;
+    --card: 228 20% 14%;
+    --card-foreground: 210 20% 90%;
+    --popover: 220 16% 12%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 228 60% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 16%;
+    --secondary-foreground: 210 20% 85%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 215 12% 50%;
+    --accent: 155 55% 42%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 228 60% 58%;
+    --sidebar-background: 228 22% 12%;
+    --sidebar-foreground: 228 15% 70%;
+    --sidebar-primary: 228 60% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 228 18% 20%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 228 16% 16%;
+    --sidebar-ring: 228 60% 58%;
+    --sidebar-muted: 215 12% 40%;
+
+    background: hsl(220 18% 9%);
+    color: hsl(210 20% 90%);
+  }
+
+  .mc-dark .bg-card {
+    background-color: hsl(228 20% 14% / 0.7) !important;
+    backdrop-filter: blur(8px);
+  }
 }

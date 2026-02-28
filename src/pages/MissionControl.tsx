@@ -16,7 +16,7 @@ const MissionControl = () => {
   const [messageCount, setMessageCount] = useState(0);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="mc-dark flex h-screen w-full overflow-hidden">
       <MCSidebar active={view} onNavigate={setView} />
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
@@ -56,7 +56,7 @@ const MissionControl = () => {
 
           {/* Right panel - Telemetry */}
           {view === "chat" && (
-            <div className="hidden xl:block w-72 border-l border-border bg-card/75 backdrop-blur-sm">
+            <div className="hidden xl:block w-72 border-l border-border">
               <TelemetryPanel />
             </div>
           )}

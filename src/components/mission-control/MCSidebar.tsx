@@ -36,9 +36,12 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
       {/* Header */}
       <div className="flex h-14 items-center border-b border-sidebar-border px-3 gap-2">
         {!collapsed && (
-          <span className="flex-1 text-sm font-bold tracking-wide text-sidebar-primary-foreground pl-1">
-            HBMaster AI
-          </span>
+          <div className="flex-1 pl-1">
+            <span className="text-sm font-black tracking-wider text-sidebar-primary-foreground">
+              HBMASTER
+            </span>
+            <span className="text-[9px] font-mono text-sidebar-muted block -mt-0.5">AI Command Center</span>
+          </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

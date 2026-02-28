@@ -15,14 +15,14 @@ const StatCard = ({ icon, label, value, sub, color, delay = 0 }: StatCardProps) 
   useEffect(() => { const t = setTimeout(() => setVisible(true), delay); return () => clearTimeout(t); }, [delay]);
 
   return (
-    <div className={`rounded-xl border border-border bg-card p-3 transition-all duration-500 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
+    <div className={`rounded-xl border border-border bg-card/60 backdrop-blur-sm p-3 transition-all duration-500 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
       <div className="flex items-center gap-2 mb-2">
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
       </div>
-      <div className="text-xl font-mono font-bold text-foreground">{value}</div>
+      <div className="text-xl font-mono font-black text-foreground">{value}</div>
       {sub && <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{sub}</div>}
     </div>
   );
@@ -39,16 +39,16 @@ const TelemetryPanel = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full p-4 space-y-3 overflow-y-auto">
-      <h3 className="text-[10px] font-mono font-black text-muted-foreground uppercase tracking-widest">AI Telemetry</h3>
+    <div className="flex flex-col h-full p-4 space-y-3 overflow-y-auto bg-card/40 backdrop-blur-sm">
+      <h3 className="text-[10px] font-mono font-black text-primary uppercase tracking-widest">⚡ AI Telemetry</h3>
       
       <div className="grid grid-cols-2 gap-2">
-        <StatCard icon={<Activity className="w-3.5 h-3.5 text-accent" />} label="Status" value="Online" color="bg-accent/10" delay={0} />
-        <StatCard icon={<Zap className="w-3.5 h-3.5 text-bloom-warm" />} label="Latency" value={`${latency}ms`} sub="avg response" color="bg-bloom-warm/10" delay={50} />
-        <StatCard icon={<Users className="w-3.5 h-3.5 text-primary" />} label="Sessions" value="3" sub="actief" color="bg-primary/10" delay={100} />
-        <StatCard icon={<BarChart3 className="w-3.5 h-3.5 text-bloom-sky" />} label="Tokens" value="12.4k" sub="vandaag" color="bg-bloom-sky/10" delay={150} />
-        <StatCard icon={<CheckCircle2 className="w-3.5 h-3.5 text-accent" />} label="Success" value="98.2%" sub="last 24h" color="bg-accent/10" delay={200} />
-        <StatCard icon={<Cpu className="w-3.5 h-3.5 text-bloom-warm" />} label="Top Task" value="Planning" sub="40% van queries" color="bg-bloom-warm/10" delay={250} />
+        <StatCard icon={<Activity className="w-3.5 h-3.5 text-accent" />} label="Status" value="Online" color="bg-accent/15" delay={0} />
+        <StatCard icon={<Zap className="w-3.5 h-3.5 text-primary" />} label="Latency" value={`${latency}ms`} sub="avg response" color="bg-primary/15" delay={50} />
+        <StatCard icon={<Users className="w-3.5 h-3.5 text-primary" />} label="Sessions" value="3" sub="actief" color="bg-primary/15" delay={100} />
+        <StatCard icon={<BarChart3 className="w-3.5 h-3.5 text-accent" />} label="Tokens" value="12.4k" sub="vandaag" color="bg-accent/15" delay={150} />
+        <StatCard icon={<CheckCircle2 className="w-3.5 h-3.5 text-accent" />} label="Success" value="98.2%" sub="last 24h" color="bg-accent/15" delay={200} />
+        <StatCard icon={<Cpu className="w-3.5 h-3.5 text-primary" />} label="Top Task" value="Planning" sub="40% van queries" color="bg-primary/15" delay={250} />
       </div>
 
       {/* System status */}
@@ -64,7 +64,7 @@ const TelemetryPanel = () => {
             <div key={s.name} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-secondary/50 border border-border">
               <span className="text-[11px] font-mono text-muted-foreground">{s.name}</span>
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_hsl(155_55%_42%/0.5)]" />
                 <span className="text-[9px] font-mono text-accent">{s.status}</span>
               </div>
             </div>
