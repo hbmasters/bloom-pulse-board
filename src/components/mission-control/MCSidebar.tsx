@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "settings";
 
 interface MCSidebarProps {
   active: MCView;
@@ -110,12 +110,31 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
         </ul>
       </nav>
 
-      {/* Bottom status */}
+      {/* Bottom status button */}
       <div className="p-3 border-t border-sidebar-border">
-        <div className={cn("flex items-center gap-2", collapsed ? "justify-center" : "px-2")}>
-          <div className="w-2 h-2 rounded-full bg-sidebar-primary animate-pulse" />
-          {!collapsed && <span className="text-[10px] font-mono text-sidebar-muted">AI Online</span>}
-        </div>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => onNavigate("status")}
+              className={cn(
+                "w-full flex items-center rounded-md transition-colors",
+                collapsed ? "justify-center px-0 py-2" : "gap-2 px-3 py-2 text-sm",
+                active === "status"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+              )}
+            >
+              <div className="relative flex-shrink-0">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-400/40 animate-ping" />
+              </div>
+              {!collapsed && <span className="text-[10px] font-mono">Systeem Status</span>}
+            </button>
+          </TooltipTrigger>
+          {collapsed && (
+            <TooltipContent side="right" sideOffset={8}>Systeem Status</TooltipContent>
+          )}
+        </Tooltip>
       </div>
     </aside>
   );
