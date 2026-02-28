@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, X, GripVertical, ChevronLeft, ChevronRight, Clock, Target, Flame, Check } from "lucide-react";
+import { Plus, X, GripVertical, ChevronLeft, ChevronRight, Clock, Target, Flame, Check, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isToday, isSameDay } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -72,6 +72,18 @@ const MCWeekPlanner = () => {
   const [newTime, setNewTime] = useState("08:00");
   const [newDuration, setNewDuration] = useState(60);
   const [newCategory, setNewCategory] = useState<BlockCategory>("focus");
+  const [selectedCategories, setSelectedCategories] = useState<Set<BlockCategory>>(new Set());
+
+  const toggleCategoryFilter = (cat: BlockCategory) => {
+    setSelectedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      return next;
+    });
+  };
+
+  const filterBlocks = (list: PlanBlock[]) =>
+    selectedCategories.size === 0 ? list : list.filter(b => selectedCategories.has(b.category));
 
   const days = useMemo(() => 
     Array.from({ length: 5 }, (_, i) => {
@@ -153,16 +165,42 @@ const MCWeekPlanner = () => {
             <span className="text-xs text-muted-foreground">{weekStats.doneCount}/{weekStats.totalCount} afgerond</span>
           </div>
         </div>
+
+        {/* Category filters */}
+        <div className="flex items-center gap-1.5 mt-3">
+          <Filter className="w-3 h-3 text-muted-foreground/50" />
+          {(Object.entries(categoryConfig) as [BlockCategory, typeof categoryConfig["focus"]][]).map(([key, cfg]) => {
+            const active = selectedCategories.has(key);
+            return (
+              <button
+                key={key}
+                onClick={() => toggleCategoryFilter(key)}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
+                  active ? `${cfg.bgClass} ${cfg.borderClass} ${cfg.color}` : "border-border text-muted-foreground/40 hover:border-muted-foreground/30"
+                )}
+              >
+                {cfg.label}
+              </button>
+            );
+          })}
+          {selectedCategories.size > 0 && (
+            <button onClick={() => setSelectedCategories(new Set())} className="text-[9px] text-muted-foreground hover:text-foreground ml-1 transition-colors">
+              Wis
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Day columns */}
       <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto">
         <div className="flex min-w-[800px] h-full">
           {days.map(day => {
-            const dayBlocks = blocks[day.key] || [];
+            const dayBlocks = filterBlocks(blocks[day.key] || []);
+            const allDayBlocks = blocks[day.key] || [];
             const today = isToday(day.date);
-            const dayFocus = dayBlocks.filter(b => b.category === "focus").reduce((s, b) => s + b.duration, 0);
-            const dayTotal = dayBlocks.reduce((s, b) => s + b.duration, 0);
+            const dayFocus = allDayBlocks.filter(b => b.category === "focus").reduce((s, b) => s + b.duration, 0);
+            const dayTotal = allDayBlocks.reduce((s, b) => s + b.duration, 0);
 
             return (
               <div
@@ -212,6 +250,7 @@ const MCWeekPlanner = () => {
                           <div className="flex-1 min-w-0">
                             <p className={cn("text-xs font-medium leading-tight", block.done && "line-through", cfg.color)}>{block.title}</p>
                             <div className="flex items-center gap-1.5 mt-1">
+                              <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full border", cfg.bgClass, cfg.borderClass, cfg.color)}>{cfg.label}</span>
                               {block.time && <span className="text-[9px] font-mono text-muted-foreground">{block.time}</span>}
                               <span className="text-[9px] font-mono text-muted-foreground/50">{block.duration}m</span>
                             </div>
