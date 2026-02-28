@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { MessageSquare, LayoutGrid, Clock, Settings, Menu, X, ArrowLeft } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -9,6 +8,8 @@ type MCView = "chat" | "kanban" | "history" | "settings";
 interface MCMobileMenuProps {
   active: MCView;
   onNavigate: (view: MCView) => void;
+  open: boolean;
+  onClose: () => void;
 }
 
 const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
@@ -18,41 +19,32 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "settings", icon: Settings, label: "Instellingen" },
 ];
 
-const MCMobileMenu = ({ active, onNavigate }: MCMobileMenuProps) => {
-  const [open, setOpen] = useState(false);
+const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) => {
   const navigate = useNavigate();
 
   const handleNav = (view: MCView) => {
     onNavigate(view);
-    setOpen(false);
+    onClose();
   };
 
   return (
     <>
-      {/* Hamburger button — rendered in the top bar area */}
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-        aria-label="Open menu"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
-
       {/* Backdrop */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-fade-in"
-          onClick={() => setOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/70"
+          style={{ zIndex: 9998 }}
+          onClick={onClose}
         />
       )}
 
       {/* Slide-in sidebar */}
       <aside
-        style={{ backgroundColor: "hsl(228 22% 12%)" }}
         className={cn(
-          "md:hidden fixed top-0 left-0 z-50 h-full w-64 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
+          "md:hidden fixed top-0 left-0 h-full w-64 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
           open ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ zIndex: 9999, background: "hsl(228, 22%, 12%)" }}
       >
         {/* Header */}
         <div className="flex h-14 items-center border-b border-sidebar-border px-4 gap-3">
@@ -62,7 +54,7 @@ const MCMobileMenu = ({ active, onNavigate }: MCMobileMenuProps) => {
             <span className="text-[9px] font-mono text-sidebar-muted block -mt-0.5">AI Command Center</span>
           </div>
           <button
-            onClick={() => setOpen(false)}
+            onClick={onClose}
             className="flex items-center justify-center w-8 h-8 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
           >
             <X className="w-4 h-4" />

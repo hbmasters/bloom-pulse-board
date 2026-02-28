@@ -31,9 +31,9 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
   // Responsive size calculation
   const responsiveSize = useMemo(() => {
-    if (compact) return Math.min(220, containerWidth * 0.55);
-    // Full hologram: scale down for mobile
-    return Math.min(480, containerWidth * 0.85, window.innerHeight * 0.4);
+    if (compact) return Math.min(180, containerWidth * 0.45);
+    // Full hologram: scale to fit within viewport without clipping
+    return Math.min(360, containerWidth * 0.7, window.innerHeight * 0.35);
   }, [compact, containerWidth]);
 
   // Observe container width
@@ -539,7 +539,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
   return (
     <div
       ref={containerRef}
-      className="relative flex flex-col items-center justify-center w-full"
+      className="relative flex flex-col items-center justify-center w-full overflow-hidden"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

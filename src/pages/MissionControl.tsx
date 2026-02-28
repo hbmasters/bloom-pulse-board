@@ -17,9 +17,13 @@ const MissionControl = () => {
   const [aiState, setAiState] = useState<"idle" | "thinking" | "responding" | "loading">("idle");
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="mc-dark flex h-[100dvh] w-full overflow-hidden">
+      {/* Mobile menu — rendered at root level to be above everything */}
+      <MCMobileMenu active={view} onNavigate={setView} open={menuOpen} onClose={() => setMenuOpen(false)} />
+
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
         <MCSidebar active={view} onNavigate={setView} />
@@ -27,7 +31,7 @@ const MissionControl = () => {
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {view !== "chat" && <MCHologramBackground />}
-        <MCTopBar view={view} mobileMenu={<MCMobileMenu active={view} onNavigate={setView} />} />
+        <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} />
 
         {/* Main content */}
         <main className="flex-1 min-h-0 flex flex-col md:flex-row relative z-10">
