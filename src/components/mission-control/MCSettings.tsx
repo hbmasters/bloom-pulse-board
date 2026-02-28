@@ -38,15 +38,15 @@ const Toggle = ({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
 const SettingRow = ({ icon: Icon, label, description, children }: {
   icon: typeof User; label: string; description?: string; children: React.ReactNode;
 }) => (
-  <div className="flex items-center justify-between gap-4 py-3 border-b border-border/40 last:border-0">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 py-3 border-b border-border/40 last:border-0">
     <div className="flex items-start gap-3 min-w-0">
       <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
-        {description && <p className="text-[11px] text-muted-foreground mt-0.5">{description}</p>}
+        {description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{description}</p>}
       </div>
     </div>
-    <div className="shrink-0">{children}</div>
+    <div className="shrink-0 pl-7 sm:pl-0">{children}</div>
   </div>
 );
 
@@ -137,11 +137,11 @@ const MCSettings = () => {
             <SectionHeader title="Persoonlijke gegevens" />
             <SettingRow icon={User} label="Weergavenaam" description="Hoe je naam wordt weergegeven in het systeem">
               <input value={displayName} onChange={e => setDisplayName(e.target.value)}
-                className="text-xs bg-muted border border-border rounded-lg px-2.5 py-1.5 w-40 text-foreground outline-none focus:border-primary/40 transition-colors" />
+                className="text-xs bg-muted border border-border rounded-lg px-2.5 py-1.5 w-full sm:w-40 text-foreground outline-none focus:border-primary/40 transition-colors" />
             </SettingRow>
             <SettingRow icon={Mail} label="E-mailadres" description="Gebruikt voor notificaties en login">
               <input value={email} onChange={e => setEmail(e.target.value)}
-                className="text-xs bg-muted border border-border rounded-lg px-2.5 py-1.5 w-48 text-foreground outline-none focus:border-primary/40 transition-colors" />
+                className="text-xs bg-muted border border-border rounded-lg px-2.5 py-1.5 w-full sm:w-48 text-foreground outline-none focus:border-primary/40 transition-colors" />
             </SettingRow>
             <SettingRow icon={Shield} label="Rol" description="Je systeemrol bepaalt je toegangsrechten">
               <span className="text-xs font-mono text-muted-foreground bg-muted border border-border rounded-lg px-2.5 py-1.5">{role}</span>
@@ -395,10 +395,35 @@ const MCSettings = () => {
         </div>
       </div>
 
+      {/* Mobile tab bar */}
+      <div className="flex-shrink-0 md:hidden overflow-x-auto border-b border-border bg-card/20 px-2 py-1.5 scrollbar-none">
+        <div className="flex gap-1 min-w-max">
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors",
+                  active
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                )}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Content: tabs + panel */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Tab sidebar */}
-        <div className="w-44 md:w-52 shrink-0 border-r border-border bg-card/20 overflow-y-auto py-2">
+        {/* Tab sidebar (desktop) */}
+        <div className="hidden md:block w-44 lg:w-52 shrink-0 border-r border-border bg-card/20 overflow-y-auto py-2">
           {tabs.map(tab => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -422,7 +447,7 @@ const MCSettings = () => {
         </div>
 
         {/* Settings panel */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-4">
           {renderContent()}
         </div>
       </div>
