@@ -30,11 +30,17 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
   const [containerWidth, setContainerWidth] = useState(480);
 
   // Responsive size calculation
-  const responsiveSize = useMemo(() => {
+  // The "draw area" for the hologram core stays moderate, but the canvas spans the full width
+  // so particles can fly in from the edges of the screen
+  const coreSize = useMemo(() => {
     if (compact) return Math.min(220, containerWidth * 0.55);
-    // Full hologram: 20% larger, allow particles to extend beyond
     return Math.min(430, containerWidth * 0.85, window.innerHeight * 0.42);
   }, [compact, containerWidth]);
+
+  const responsiveSize = useMemo(() => {
+    // Canvas = full container width so particles are visible from edges
+    return Math.max(coreSize, containerWidth);
+  }, [coreSize, containerWidth]);
 
   // Observe container width
   useEffect(() => {
@@ -97,15 +103,18 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     if (!ctx) return;
 
     const size = Math.round(responsiveSize);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap DPR for perf on mobile
+    const core = Math.round(coreSize);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Canvas is wide (full container) but height matches core for layout
+    const canvasH = Math.round(core * 1.1);
     canvas.width = size * dpr;
-    canvas.height = size * dpr;
+    canvas.height = canvasH * dpr;
     ctx.scale(dpr, dpr);
     const cx = size / 2;
-    const cy = size / 2;
+    const cy = canvasH / 2;
 
-    // Scale everything proportionally to canvas size
-    const s = size / 480; // scale factor: 1.0 at 480px
+    // Scale HUD elements proportionally to core size
+    const s = core / 480;
     const particleCount = compact ? Math.round(200 * Math.max(s, 0.5)) : Math.round(640 * Math.max(s, 0.4));
     // Spawn most particles from edges so they fly in visibly
     particlesRef.current = Array.from({ length: particleCount }, (_, i) => createParticle(cx, cy, i < particleCount * 0.7));
@@ -142,7 +151,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     let animId: number;
     const draw = () => {
       timeRef.current += 0.016;
-      ctx.clearRect(0, 0, size, size);
+      ctx.clearRect(0, 0, size, canvasH);
       const t = timeRef.current;
       const isHover = mouseRef.current.active;
       const mx = mouseRef.current.x;
@@ -472,31 +481,36 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       const particles = particlesRef.current;
       particles.sort((a, b) => a.layer - b.layer);
 
+      // State-based modifiers for particle behavior
+      const stateSpeedMul = state === "responding" ? 1.8 : state === "thinking" ? 1.4 : isLoading ? 3.0 : 1.0;
+      const stateSizeMul = state === "responding" ? 1.25 : state === "thinking" ? 0.85 : isLoading ? 0.7 : 1.0;
+      // Color tint overlay per state (applied as globalCompositeOperation)
+      const stateHue = state === "responding" ? 155 : state === "thinking" ? 35 : isLoading ? 280 : -1;
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.life++;
 
-        // Gradually shrink orbit radius toward target (particles fly inward)
-        const targetOrbitRadius = 50 + Math.random() * 0.1; // tiny jitter
+        // Fly inward from edges
         if (p.orbitRadius > 220) {
-          p.orbitRadius *= 0.993; // fly inward smoothly
+          p.orbitRadius *= 0.991;
         }
         // Fade in opacity as particle approaches
-        if (p.opacity < 0.6 && p.life < 60) {
-          p.opacity = Math.min(p.opacity + 0.012, 0.3 + Math.random() * 0.4);
+        if (p.opacity < 0.6 && p.life < 80) {
+          p.opacity = Math.min(p.opacity + 0.01, 0.3 + Math.random() * 0.4);
         }
 
-        p.orbitAngle += p.orbitSpeed * loadSpin;
+        p.orbitAngle += p.orbitSpeed * loadSpin * stateSpeedMul;
         const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius * s;
         const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius * s;
         p.x += (targetX - p.x) * 0.02 + p.vx;
         p.y += (targetY - p.y) * 0.02 + p.vy;
-        p.rotation += p.rotSpeed * loadSpin;
+        p.rotation += p.rotSpeed * loadSpin * stateSpeedMul;
 
         if (state === "responding") {
-          p.vx += (cx - p.x) * 0.0025;
-          p.vy += (cy - p.y) * 0.0025;
-          p.orbitRadius *= 0.997;
+          p.vx += (cx - p.x) * 0.003;
+          p.vy += (cy - p.y) * 0.003;
+          p.orbitRadius *= 0.996;
         } else if (state === "thinking" || isLoading) {
           p.orbitSpeed *= 1.0005;
         }
@@ -520,17 +534,28 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         const fadeOut = Math.max(1 - (lifeRatio - 0.7) / 0.3, 0);
         const alpha = p.opacity * fadeIn * (lifeRatio > 0.7 ? fadeOut : 1);
 
+        const drawSize = p.size * stateSizeMul;
+
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
 
+        // Apply color tint for non-idle states
+        if (stateHue >= 0 && alpha > 0.1) {
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = `hsl(${stateHue}, 60%, 55%)`;
+          ctx.beginPath();
+          ctx.arc(0, 0, drawSize * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
         const drawFn = flowerDrawers[p.type];
-        if (drawFn) drawFn(ctx, p.size, alpha);
+        if (drawFn) drawFn(ctx, drawSize, alpha);
 
         ctx.restore();
 
         if (p.life >= p.maxLife) {
-          // Respawn from edge so it flies in visibly
           particles[i] = createParticle(cx, cy, true);
         }
       }
@@ -544,9 +569,10 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [state, compact, createParticle, responsiveSize]);
+  }, [state, compact, createParticle, responsiveSize, coreSize]);
 
-  const canvasSize = Math.round(responsiveSize);
+  const canvasW = Math.round(responsiveSize);
+  const canvasH = Math.round(coreSize * 1.1);
 
   return (
     <div
@@ -557,8 +583,8 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     >
       <canvas
         ref={canvasRef}
-        className={`transition-opacity duration-300 max-w-full ${hovered ? "cursor-crosshair" : ""}`}
-        style={{ width: canvasSize, height: canvasSize }}
+        className={`transition-opacity duration-300 ${hovered ? "cursor-crosshair" : ""}`}
+        style={{ width: canvasW, height: canvasH }}
       />
       <div className={`flex items-center gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full -mt-4 transition-all duration-500
         backdrop-blur-xl bg-card/70 border shadow-lg
