@@ -7,7 +7,7 @@ import AIHologram from "@/components/mission-control/AIHologram";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import KanbanBoard from "@/components/mission-control/KanbanBoard";
 import ChatHistory from "@/components/mission-control/ChatHistory";
-import MCBottomNav from "@/components/mission-control/MCBottomNav";
+import MCMobileMenu from "@/components/mission-control/MCMobileMenu";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 type MCView = "chat" | "kanban" | "history" | "settings";
@@ -27,7 +27,7 @@ const MissionControl = () => {
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
         <MCHologramBackground />
-        <MCTopBar view={view} />
+        <MCTopBar view={view} mobileMenu={<MCMobileMenu active={view} onNavigate={setView} />} />
 
         {/* Main content */}
         <main className="flex-1 min-h-0 flex flex-col md:flex-row relative z-10">
@@ -35,7 +35,6 @@ const MissionControl = () => {
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
             {view === "chat" && (
               <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-                {/* Hologram — responsive sizes */}
                 <div className={`shrink-0 flex justify-center transition-all duration-700 ease-out ${
                   messageCount === 0 ? "py-3 md:py-6" : "py-1 md:py-2"
                 }`}>
@@ -83,9 +82,6 @@ const MissionControl = () => {
             </div>
           )}
         </main>
-
-        {/* Mobile bottom nav */}
-        <MCBottomNav active={view} onNavigate={setView} />
       </div>
     </div>
   );
