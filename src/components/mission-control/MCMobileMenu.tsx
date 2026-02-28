@@ -1,9 +1,9 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, ArrowLeft, BarChart3 } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, ArrowLeft, BarChart3, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "settings";
 
 interface MCMobileMenuProps {
   active: MCView;
@@ -16,6 +16,7 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "chat", icon: MessageSquare, label: "Chat" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
+  { id: "notifications", icon: Bell, label: "Notificaties" },
   { id: "history", icon: Clock, label: "Historie" },
   { id: "settings", icon: Settings, label: "Instellingen" },
 ];
