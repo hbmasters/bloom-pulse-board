@@ -15,6 +15,7 @@ import MCStatusPanel from "@/components/mission-control/MCStatusPanel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
+import MCSettings from "@/components/mission-control/MCSettings";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
@@ -84,16 +85,7 @@ const MissionControl = () => {
             {view === "methodiek" && <MCMethodiek />}
             {view === "agents" && <MCAgents />}
             {view === "history" && <ChatHistory />}
-            {view === "settings" && (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-muted border border-border mx-auto flex items-center justify-center">
-                    <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">Instellingen — binnenkort beschikbaar</p>
-                </div>
-              </div>
-            )}
+            {view === "settings" && <MCSettings />}
           </div>
 
           {/* Right panel - Telemetry (desktop only) */}
