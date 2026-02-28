@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 import bouquetIcon from "@/assets/bouquet-neon-icon.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -66,6 +67,73 @@ const WorkflowPanel = ({ workflow }: { workflow: AIWorkflowData }) => {
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+/* ── Lovable-style thinking bubble ── */
+const thinkingSteps = [
+  "Context analyseren…",
+  "Data ophalen…",
+  "Antwoord formuleren…",
+];
+
+const ThinkingBubble = () => {
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep(prev => (prev < thinkingSteps.length - 1 ? prev + 1 : prev));
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex justify-start">
+      <div className="bg-card border border-border rounded-2xl px-4 py-3 min-w-[220px] space-y-2">
+        {/* Header */}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            <div className="absolute inset-0 w-4 h-4 rounded-full bg-primary/20 animate-ping" />
+          </div>
+          <span className="text-xs font-semibold text-foreground">HBMaster is bezig</span>
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-1.5">
+          {thinkingSteps.map((step, i) => {
+            const done = i < activeStep;
+            const active = i === activeStep;
+            return (
+              <div key={i} className={cn(
+                "flex items-center gap-2 transition-all duration-500",
+                i > activeStep && "opacity-30"
+              )}>
+                {done ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                ) : active ? (
+                  <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
+                ) : (
+                  <Circle className="w-3.5 h-3.5 text-muted-foreground/30 shrink-0" />
+                )}
+                <span className={cn(
+                  "text-[11px] font-mono transition-colors duration-300",
+                  done ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground/40"
+                )}>{step}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-1 w-full rounded-full bg-border overflow-hidden mt-1">
+          <div
+            className="h-full rounded-full bg-primary/60 transition-all duration-1000 ease-out"
+            style={{ width: `${((activeStep + 1) / thinkingSteps.length) * 100}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -215,12 +283,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
         })}
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
-          <div className="flex justify-start">
-            <div className="bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-2">
-              <Loader2 className="w-4 h-4 text-primary animate-spin" />
-              <span className="text-xs text-muted-foreground font-mono">HBMaster denkt na...</span>
-            </div>
-          </div>
+          <ThinkingBubble />
         )}
         <div ref={bottomRef} />
       </div>
