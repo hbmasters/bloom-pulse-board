@@ -2,7 +2,7 @@ import { Search, Zap, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import HBMasterLogo from "./HBMasterLogo";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "settings";
 
 interface MCTopBarProps {
   view: MCView;
@@ -17,6 +17,7 @@ const viewTitles: Record<MCView, string> = {
   notifications: "Notificaties",
   planner: "Weekplanner",
   status: "Systeem Status",
+  cronjobs: "Cron Jobs",
   history: "Chat Historie",
   settings: "Instellingen",
 };
