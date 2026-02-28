@@ -177,7 +177,23 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
-            <div className="text-4xl">🌸</div>
+            <div className="text-6xl leading-none select-none animate-fade-in" title="HBMaster Boeket">
+              <div className="flex justify-center gap-0.5">
+                <span className="inline-block -rotate-12">🌷</span>
+                <span className="inline-block rotate-6 -mt-1">🌹</span>
+                <span className="inline-block -rotate-3">🌸</span>
+                <span className="inline-block rotate-12 -mt-1">🌺</span>
+                <span className="inline-block -rotate-6">🌻</span>
+              </div>
+              <div className="flex justify-center gap-0.5 -mt-3">
+                <span className="inline-block rotate-3">🌼</span>
+                <span className="inline-block -rotate-12 -mt-0.5">💐</span>
+                <span className="inline-block rotate-6">🌼</span>
+              </div>
+              <div className="flex justify-center text-4xl -mt-2">
+                <span>🌿</span>
+              </div>
+            </div>
             <p className="text-sm font-mono">Start een gesprek met HBMaster</p>
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
               {["Wat is de huidige productie status?", "Analyseer de APU trends", "Hoeveel orders staan er vandaag?"].map(q => (
