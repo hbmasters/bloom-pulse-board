@@ -28,6 +28,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
   const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
   const [hovered, setHovered] = useState(false);
   const [containerWidth, setContainerWidth] = useState(480);
+  const [jarvisScale, setJarvisScale] = useState(1);
 
   // Responsive size calculation
   // The "draw area" for the hologram core stays moderate, but the canvas spans the full width
@@ -54,6 +55,50 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     observer.observe(container);
     return () => observer.disconnect();
   }, []);
+
+  // ╔══════════════════════════════════════════════════════════════════╗
+  // ║  JARVIS SCALE ENGINE — Whole-hologram breathing & reactive      ║
+  // ║  scale, like Tony Stark's Jarvis interface pulsing with life    ║
+  // ║                                                                  ║
+  // ║  idle:       gentle slow breathe (1.0 → 1.03)                   ║
+  // ║  thinking:   medium pulse, slightly contracted (0.96 → 1.04)    ║
+  // ║  responding: dramatic pump, speech-driven (0.94 → 1.08)         ║
+  // ║  loading:    rapid micro-pulse, compressed (0.92 → 1.02)        ║
+  // ╚══════════════════════════════════════════════════════════════════╝
+  useEffect(() => {
+    let animId: number;
+    let t = 0;
+    const tick = () => {
+      t += 0.016;
+      let scale: number;
+      if (state === "responding") {
+        // Dramatic speech pump — two overlapping sine waves for organic feel
+        const primary = Math.sin(t * 3.2) * 0.06;
+        const secondary = Math.sin(t * 7.5) * 0.02;
+        const accent = Math.abs(Math.sin(t * 1.8)) * 0.02; // occasional surge
+        scale = 1.0 + primary + secondary + accent;
+      } else if (state === "thinking") {
+        // Searching pulse — steady medium breathe with subtle jitter
+        const breathe = Math.sin(t * 2.0) * 0.04;
+        const jitter = Math.sin(t * 9) * 0.005;
+        scale = 1.0 + breathe + jitter;
+      } else if (state === "loading") {
+        // Rapid compressed heartbeat — fast & tight
+        const rapid = Math.sin(t * 6) * 0.04;
+        const micro = Math.sin(t * 14) * 0.01;
+        scale = 0.97 + rapid + micro;
+      } else {
+        // Idle — slow, calm, alive breathe
+        const calm = Math.sin(t * 0.8) * 0.015;
+        const drift = Math.sin(t * 2.2) * 0.005;
+        scale = 1.0 + calm + drift;
+      }
+      setJarvisScale(scale);
+      animId = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(animId);
+  }, [state]);
 
   const pickFlowerType = useCallback((): FlowerType => {
     let r = Math.random(), cumul = 0;
@@ -687,7 +732,13 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       <canvas
         ref={canvasRef}
         className={`transition-opacity duration-300 ${hovered ? "cursor-crosshair" : ""}`}
-        style={{ width: canvasW, height: canvasH }}
+        style={{
+          width: canvasW,
+          height: canvasH,
+          transform: `scale(${jarvisScale})`,
+          transformOrigin: "center center",
+          willChange: "transform",
+        }}
       />
       <div className={`flex items-center gap-2 px-3 md:px-4 py-1 md:py-1.5 rounded-full -mt-4 transition-all duration-500
         backdrop-blur-xl bg-card/70 border shadow-lg
