@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "settings";
 
 interface MCMobileMenuProps {
   active: MCView;
@@ -102,10 +102,20 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
 
         {/* Bottom status */}
         <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-2 px-2">
-            <div className="w-2 h-2 rounded-full bg-sidebar-primary animate-pulse" />
-            <span className="text-[10px] font-mono text-sidebar-muted">AI Online</span>
-          </div>
+          <button
+            onClick={() => handleNav("status")}
+            className={cn(
+              "w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-md transition-colors",
+              active === "status"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+            )}
+          >
+            <div className="relative flex-shrink-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <span className="text-[10px] font-mono">Systeem Status</span>
+          </button>
         </div>
       </aside>
     </>

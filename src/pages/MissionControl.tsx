@@ -11,9 +11,10 @@ import MCNotifications from "@/components/mission-control/MCNotifications";
 import MCWeekPlanner from "@/components/mission-control/MCWeekPlanner";
 import ChatHistory from "@/components/mission-control/ChatHistory";
 import MCMobileMenu from "@/components/mission-control/MCMobileMenu";
+import MCStatusPanel from "@/components/mission-control/MCStatusPanel";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "settings";
 
 const MissionControl = () => {
   const [view, setView] = useState<MCView>("chat");
@@ -75,6 +76,7 @@ const MissionControl = () => {
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
             {view === "planner" && <MCWeekPlanner />}
+            {view === "status" && <MCStatusPanel />}
             {view === "history" && <ChatHistory />}
             {view === "settings" && (
               <div className="flex-1 flex items-center justify-center">
