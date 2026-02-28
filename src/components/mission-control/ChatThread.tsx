@@ -178,7 +178,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
-            <img src={bouquetIcon} alt="HBMaster Boeket" className="w-24 h-24 select-none animate-fade-in drop-shadow-[0_0_15px_rgba(0,255,200,0.4)]" />
+            <img src={bouquetIcon} alt="HBMaster Boeket" className="w-24 h-24 select-none animate-fade-in drop-shadow-[0_0_20px_rgba(0,220,255,0.5)] opacity-80" />
             <p className="text-sm font-mono">Start een gesprek met HBMaster</p>
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
               {["Wat is de huidige productie status?", "Analyseer de APU trends", "Hoeveel orders staan er vandaag?"].map(q => (
