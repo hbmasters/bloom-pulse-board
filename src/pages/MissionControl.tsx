@@ -38,13 +38,16 @@ const MissionControl = () => {
           {/* Center panel */}
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
             {view === "chat" && (
-              <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-                <div className={`shrink-0 flex justify-center transition-all duration-700 ease-out ${
-                  messageCount === 0 ? "py-3 md:py-6" : "py-1 md:py-2"
+              <div className="flex-1 min-w-0 min-h-0 flex flex-col relative">
+                {/* Hologram — absolute behind chat when messages exist */}
+                <div className={`flex justify-center transition-all duration-700 ease-out ${
+                  messageCount === 0 
+                    ? "relative shrink-0 py-3 md:py-6" 
+                    : "absolute inset-0 z-0 opacity-30 pointer-events-none items-start pt-4"
                 }`}>
                   <AIHologram state={aiState} compact={messageCount > 0} />
                 </div>
-                <div className="flex-1 min-h-0">
+                <div className={`flex-1 min-h-0 ${messageCount > 0 ? "relative z-10" : ""}`}>
                   <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} />
                 </div>
 

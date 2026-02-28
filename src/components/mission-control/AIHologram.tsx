@@ -158,20 +158,126 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       const my = mouseRef.current.y;
       const isLoading = state === "loading";
 
-      // Loading multiplier — everything spins faster
-      const loadSpin = isLoading ? 3.5 : 1;
+      // ╔══════════════════════════════════════════════════════════════════╗
+      // ║  STATE ENGINE — Controls all visual behavior per AI status      ║
+      // ║                                                                 ║
+      // ║  States:                                                        ║
+      // ║   • idle       — calm, slow orbit, baseline everything          ║
+      // ║   • thinking   — faster spin, warm glow, "processing" feel     ║
+      // ║   • responding — speech pulse, heartbeat, particles gather     ║
+      // ║   • loading    — very fast spin, compressed particles, purple  ║
+      // ║                                                                 ║
+      // ║  To add a new state: add a case to each config block below     ║
+      // ╚══════════════════════════════════════════════════════════════════╝
 
+      // --- ORBIT SPEED MULTIPLIER ---
+      // How fast particles orbit around the center
+      // idle=1.0 (calm), thinking=1.6 (searching), responding=2.2 (active), loading=4.0 (urgent)
+      const orbitSpeedMul = state === "responding" ? 2.2
+        : state === "thinking" ? 1.6
+        : isLoading ? 4.0 : 1.0;
+
+      // --- ROTATION SPEED MULTIPLIER ---
+      // How fast individual flowers spin on their own axis
+      const rotSpeedMul = state === "responding" ? 1.5
+        : state === "thinking" ? 1.3
+        : isLoading ? 3.0 : 1.0;
+
+      // --- PARTICLE SIZE MULTIPLIER ---
+      // Flowers grow when responding (energetic), shrink when loading (compressed)
+      const sizeMul = state === "responding" ? 1.3
+        : state === "thinking" ? 0.9
+        : isLoading ? 0.65 : 1.0;
+
+      // --- COLOR TINT HUE ---
+      // Overlay glow color: green=responding, warm=thinking, purple=loading, -1=none (idle)
+      const tintHue = state === "responding" ? 155
+        : state === "thinking" ? 35
+        : isLoading ? 280 : -1;
+
+      // --- HEARTBEAT EFFECT ---
+      // Pulsating scale applied to all particles simulating a "heartbeat"
+      // responding: strong heartbeat (speech), thinking: subtle pulse, idle: none
+      const heartbeatFreq = state === "responding" ? 8
+        : state === "thinking" ? 3
+        : isLoading ? 12 : 0;
+      const heartbeatAmp = state === "responding" ? 0.12
+        : state === "thinking" ? 0.05
+        : isLoading ? 0.08 : 0;
+      const heartbeat = heartbeatFreq > 0
+        ? 1 + Math.abs(Math.sin(t * heartbeatFreq)) * heartbeatAmp
+        : 1;
+
+      // --- SPEECH WAVE EFFECT ---
+      // Radial wave that pulses outward from center during "responding"
+      // Creates the visual of sound/speech emanating from the AI
+      const speechWaveRadius = state === "responding"
+        ? (t * 80) % (200 * s) : 0;
+      const speechWaveActive = state === "responding";
+
+      // --- BREATHING EFFECT ---
+      // Gentle orbit radius oscillation, like the hologram is "alive"
+      // Active in all states but more pronounced when responding
+      const breathAmp = state === "responding" ? 8
+        : state === "thinking" ? 5
+        : isLoading ? 2 : 3;
+      const breathFreq = state === "responding" ? 2.5
+        : state === "thinking" ? 1.5
+        : isLoading ? 5 : 0.8;
+      const breathOffset = Math.sin(t * breathFreq) * breathAmp;
+
+      // --- HUD SPIN MULTIPLIER ---
+      // Controls speed of the outer arcs/rings
+      const hudSpin = isLoading ? 3.5
+        : state === "responding" ? 2.0
+        : state === "thinking" ? 1.5 : 1.0;
+
+      // --- PULSE BASE ---
+      // Overall brightness oscillation of HUD elements
       const pulseBase = isLoading ? 0.5 + Math.sin(t * 6) * 0.5
         : state === "thinking" ? 0.6 + Math.sin(t * 4) * 0.4
         : state === "responding" ? 0.8 + Math.sin(t * 2) * 0.2
         : isHover ? 0.55 + Math.sin(t * 1.5) * 0.2
         : 0.4 + Math.sin(t * 0.8) * 0.15;
 
+      // ═══ SPEECH WAVE RING — visible during responding ═══
+      // Expanding ring emanating from center, like sound waves
+      if (speechWaveActive && !compact) {
+        const waveAlpha = Math.max(0, 0.25 - speechWaveRadius / (200 * s) * 0.25);
+        ctx.beginPath();
+        ctx.arc(cx, cy, speechWaveRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(155, 55%, 50%, ${waveAlpha})`;
+        ctx.lineWidth = 2 * s;
+        ctx.stroke();
+        // Second wave offset
+        const wave2 = ((t * 80) + 100 * s) % (200 * s);
+        const wave2Alpha = Math.max(0, 0.2 - wave2 / (200 * s) * 0.2);
+        ctx.beginPath();
+        ctx.arc(cx, cy, wave2, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(155, 55%, 50%, ${wave2Alpha})`;
+        ctx.lineWidth = 1.5 * s;
+        ctx.stroke();
+      }
+
+      // ═══ HEARTBEAT CENTER GLOW — pulses with heartbeat ═══
+      // Visible during active states, creates a warm center glow
+      if (heartbeatFreq > 0 && !compact) {
+        const glowSize = (60 + heartbeat * 20) * s;
+        const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+        const glowHue = tintHue >= 0 ? tintHue : 228;
+        glowGrad.addColorStop(0, `hsla(${glowHue}, 50%, 55%, ${0.08 * heartbeat})`);
+        glowGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       // ═══ JARVIS HUD LAYER 1: Outer arc segments ═══
       if (!compact) {
         for (let i = 0; i < 3; i++) {
           const r = (195 + i * 18) * s;
-          const rot = t * (0.08 + i * 0.03) * loadSpin * (i % 2 === 0 ? 1 : -1);
+          const rot = t * (0.08 + i * 0.03) * hudSpin * (i % 2 === 0 ? 1 : -1);
           ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
           for (let j = 0; j < 4; j++) {
             const startA = (Math.PI / 2) * j + 0.15;
@@ -184,7 +290,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         }
 
         // Tick marks
-        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.02 * loadSpin);
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.02 * hudSpin);
         for (let i = 0; i < 60; i++) {
           const a = (Math.PI * 2 / 60) * i;
           const isMajor = i % 5 === 0;
@@ -203,7 +309,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       const ringCount = compact ? 2 : 5;
       for (let i = 0; i < ringCount; i++) {
         const r = (55 + i * 28) * s + Math.sin(t * (0.8 + i * 0.2)) * 4 * s;
-        const rot = t * (0.12 + i * 0.06) * loadSpin * (i % 2 === 0 ? 1 : -1);
+        const rot = t * (0.12 + i * 0.06) * hudSpin * (i % 2 === 0 ? 1 : -1);
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
         ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * (1.0 + i * 0.15));
         ctx.strokeStyle = `hsla(228, 50%, 58%, ${0.07 + pulseBase * 0.09 - i * 0.01})`;
@@ -215,7 +321,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // ═══ RADIAL DATA STREAMS ═══
       if (!compact) {
         for (let i = 0; i < 8; i++) {
-          const lineAngle = (Math.PI * 2 / 8) * i + t * 0.06 * loadSpin;
+          const lineAngle = (Math.PI * 2 / 8) * i + t * 0.06 * hudSpin;
           const innerR = 60 * s;
           const outerR = (100 + Math.sin(t * 2 + i) * 25) * s;
           const x1 = cx + Math.cos(lineAngle) * innerR;
@@ -225,7 +331,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
           ctx.strokeStyle = `hsla(228, 45%, 62%, ${0.05 + pulseBase * 0.06})`;
           ctx.lineWidth = 0.6 * s; ctx.setLineDash([2 * s, 5 * s]); ctx.stroke(); ctx.setLineDash([]);
-          const travelT = (t * 0.8 * loadSpin + i * 0.5) % 1;
+          const travelT = (t * 0.8 * hudSpin + i * 0.5) % 1;
           const dotX = x1 + (x2 - x1) * travelT;
           const dotY = y1 + (y2 - y1) * travelT;
           ctx.beginPath(); ctx.arc(dotX, dotY, 1.8 * s, 0, Math.PI * 2);
@@ -238,7 +344,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         const bracketSize = 18 * s;
         const bracketOffset = 168 * s;
         const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
-        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.04 * loadSpin);
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.04 * hudSpin);
         for (const [dx, dy] of corners) {
           const bx = dx * bracketOffset;
           const by = dy * bracketOffset;
@@ -254,7 +360,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
       // ═══ SCANNING SWEEP ═══
       if (!compact) {
-        const sweepAngle = t * 0.5 * loadSpin;
+        const sweepAngle = t * 0.5 * hudSpin;
         const sweepGrad = ctx.createConicGradient(sweepAngle, cx, cy);
         sweepGrad.addColorStop(0, `hsla(228, 55%, 60%, ${0.08 * pulseBase})`);
         sweepGrad.addColorStop(0.08, `hsla(228, 55%, 60%, 0)`);
@@ -269,7 +375,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       const nodePositions: { x: number; y: number }[] = [];
       for (let i = 0; i < hexNodes.length; i++) {
         const node = hexNodes[i];
-        node.angle += node.speed * loadSpin;
+        node.angle += node.speed * hudSpin;
         const wobble = Math.sin(t * 1.5 + node.pulsePhase) * 12 * s;
         const nx = cx + Math.cos(node.angle) * (node.radius * s + wobble);
         const ny = cy + Math.sin(node.angle) * (node.radius * s + wobble);
@@ -289,7 +395,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
           ctx.strokeStyle = `hsla(228, 50%, 60%, ${connAlpha})`;
           ctx.lineWidth = 0.8 * s; ctx.stroke();
-          const dotT = (t * 0.4 * loadSpin + i * 0.3) % 1;
+          const dotT = (t * 0.4 * hudSpin + i * 0.3) % 1;
           const dx = p1.x + (p2.x - p1.x) * dotT;
           const dy = p1.y + (p2.y - p1.y) * dotT;
           ctx.beginPath(); ctx.arc(dx, dy, 1.5 * s, 0, Math.PI * 2);
@@ -310,7 +416,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         // Mini hexagon at each node
         if (!compact) {
           ctx.save(); ctx.translate(p.x, p.y);
-          ctx.rotate(t * 0.3 * loadSpin + i);
+          ctx.rotate(t * 0.3 * hudSpin + i);
           const hexR = (4 + nodePulse * 2) * s;
           ctx.beginPath();
           for (let h = 0; h < 6; h++) {
@@ -337,15 +443,15 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         ctx.save();
         for (let i = 0; i < barCount; i++) {
           const x = cx - totalW / 2 + i * (barWidth + barGap);
-          const freq1 = Math.sin(t * 8 * loadSpin + i * 0.4) * 0.5 + 0.5;
-          const freq2 = Math.sin(t * 12 * loadSpin + i * 0.7) * 0.3 + 0.3;
-          const freq3 = Math.sin(t * 5 * loadSpin + i * 0.25) * 0.2 + 0.2;
+          const freq1 = Math.sin(t * 8 * hudSpin + i * 0.4) * 0.5 + 0.5;
+          const freq2 = Math.sin(t * 12 * hudSpin + i * 0.7) * 0.3 + 0.3;
+          const freq3 = Math.sin(t * 5 * hudSpin + i * 0.25) * 0.2 + 0.2;
           const envelope = Math.sin((i / barCount) * Math.PI);
           let h: number;
           if (state === "responding") {
             h = maxBarH * (freq1 * 0.5 + freq2 * 0.3 + freq3 * 0.2) * envelope;
           } else if (state === "thinking" || isLoading) {
-            h = maxBarH * (0.3 + freq1 * 0.4) * envelope * (0.5 + Math.sin(t * 3 * loadSpin) * 0.5);
+            h = maxBarH * (0.3 + freq1 * 0.4) * envelope * (0.5 + Math.sin(t * 3 * hudSpin) * 0.5);
           } else {
             h = maxBarH * (0.2 + freq1 * 0.15) * envelope;
           }
@@ -375,8 +481,8 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           for (let i = 0; i <= 60; i++) {
             const ratio = i / 60;
             const x = cx - waveWidth / 2 + ratio * waveWidth;
-            const wave = Math.sin(ratio * Math.PI * 6 + t * 10 * loadSpin) * waveAmplitude
-              + Math.sin(ratio * Math.PI * 3 + t * 6 * loadSpin) * waveAmplitude * 0.4;
+            const wave = Math.sin(ratio * Math.PI * 6 + t * 10 * hudSpin) * waveAmplitude
+              + Math.sin(ratio * Math.PI * 3 + t * 6 * hudSpin) * waveAmplitude * 0.4;
             const env = Math.sin(ratio * Math.PI);
             const y = waveBaseY + wave * env;
             if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
@@ -396,11 +502,11 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.beginPath(); ctx.arc(cx, cy, coreRadius + 20 * s, 0, Math.PI * 2); ctx.fill();
 
       // ═══ ROTATING HEXAGONS — now fully animated ═══
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.1 * loadSpin);
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.1 * hudSpin);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i - Math.PI / 6;
-        const hr = coreRadius + Math.sin(t * 1.5 * loadSpin + i) * 4 * s;
+        const hr = coreRadius + Math.sin(t * 1.5 * hudSpin + i) * 4 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr, Math.sin(a) * hr);
         else ctx.lineTo(Math.cos(a) * hr, Math.sin(a) * hr);
       }
@@ -410,11 +516,11 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.fillStyle = `hsla(228, 50%, 55%, ${0.02 + pulseBase * 0.03})`; ctx.fill();
 
       // Inner hexagon — counter-rotate
-      ctx.rotate(-t * 0.2 * loadSpin);
+      ctx.rotate(-t * 0.2 * hudSpin);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i;
-        const hr2 = coreRadius * 0.6 + Math.sin(t * 2 * loadSpin + i) * 2 * s;
+        const hr2 = coreRadius * 0.6 + Math.sin(t * 2 * hudSpin + i) * 2 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
         else ctx.lineTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
       }
@@ -423,11 +529,11 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.lineWidth = 0.8 * s; ctx.stroke();
 
       // Third hexagon — smaller, fast spin
-      ctx.rotate(t * 0.35 * loadSpin);
+      ctx.rotate(t * 0.35 * hudSpin);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i + Math.PI / 6;
-        const hr3 = coreRadius * 0.35 + Math.sin(t * 3 * loadSpin + i) * 1.5 * s;
+        const hr3 = coreRadius * 0.35 + Math.sin(t * 3 * hudSpin + i) * 1.5 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
         else ctx.lineTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
       }
@@ -459,7 +565,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
       // ═══ Bloom flare ═══
       if (state === "responding" || isLoading) {
-        const flareR = (70 + Math.sin(t * 3 * loadSpin) * 20) * s;
+        const flareR = (70 + Math.sin(t * 3 * hudSpin) * 20) * s;
         const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, flareR);
         flareGrad.addColorStop(0, `hsla(340, 55%, 65%, ${0.05 + Math.sin(t * 5) * 0.03})`);
         flareGrad.addColorStop(0.5, `hsla(280, 40%, 55%, ${0.03})`);
@@ -481,11 +587,8 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       const particles = particlesRef.current;
       particles.sort((a, b) => a.layer - b.layer);
 
-      // State-based modifiers for particle behavior
-      const stateSpeedMul = state === "responding" ? 1.8 : state === "thinking" ? 1.4 : isLoading ? 3.0 : 1.0;
-      const stateSizeMul = state === "responding" ? 1.25 : state === "thinking" ? 0.85 : isLoading ? 0.7 : 1.0;
-      // Color tint overlay per state (applied as globalCompositeOperation)
-      const stateHue = state === "responding" ? 155 : state === "thinking" ? 35 : isLoading ? 280 : -1;
+      // Note: orbitSpeedMul, rotSpeedMul, sizeMul, tintHue, heartbeat, breathOffset
+      // are all defined in the STATE ENGINE block above
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -500,12 +603,12 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           p.opacity = Math.min(p.opacity + 0.01, 0.3 + Math.random() * 0.4);
         }
 
-        p.orbitAngle += p.orbitSpeed * loadSpin * stateSpeedMul;
-        const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius * s;
-        const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius * s;
+        p.orbitAngle += p.orbitSpeed * orbitSpeedMul;
+        const targetX = cx + Math.cos(p.orbitAngle) * (p.orbitRadius + breathOffset) * s;
+        const targetY = cy + Math.sin(p.orbitAngle) * (p.orbitRadius + breathOffset) * s;
         p.x += (targetX - p.x) * 0.02 + p.vx;
         p.y += (targetY - p.y) * 0.02 + p.vy;
-        p.rotation += p.rotSpeed * loadSpin * stateSpeedMul;
+        p.rotation += p.rotSpeed * rotSpeedMul;
 
         if (state === "responding") {
           p.vx += (cx - p.x) * 0.003;
@@ -534,16 +637,16 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         const fadeOut = Math.max(1 - (lifeRatio - 0.7) / 0.3, 0);
         const alpha = p.opacity * fadeIn * (lifeRatio > 0.7 ? fadeOut : 1);
 
-        const drawSize = p.size * stateSizeMul;
+        const drawSize = p.size * sizeMul * heartbeat;
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
 
         // Apply color tint for non-idle states
-        if (stateHue >= 0 && alpha > 0.1) {
+        if (tintHue >= 0 && alpha > 0.1) {
           ctx.globalAlpha = 0.15;
-          ctx.fillStyle = `hsl(${stateHue}, 60%, 55%)`;
+          ctx.fillStyle = `hsl(${tintHue}, 60%, 55%)`;
           ctx.beginPath();
           ctx.arc(0, 0, drawSize * 1.5, 0, Math.PI * 2);
           ctx.fill();
