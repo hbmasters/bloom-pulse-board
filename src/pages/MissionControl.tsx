@@ -14,7 +14,7 @@ type MCView = "chat" | "kanban" | "history" | "settings";
 
 const MissionControl = () => {
   const [view, setView] = useState<MCView>("chat");
-  const [aiState, setAiState] = useState<"idle" | "thinking" | "responding" | "loading">("idle");
+  const [aiState, setAiState] = useState<"idle" | "thinking" | "responding" | "loading" | "analyse" | "development" | "connectie">("idle");
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

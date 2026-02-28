@@ -14,8 +14,24 @@ interface HexNode {
   pulsePhase: number; connections: number[];
 }
 
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  HOLOGRAM STATES — All available visual modes                            ║
+// ║                                                                          ║
+// ║  Core states (driven by chat):                                           ║
+// ║   • idle       — calm baseline                                           ║
+// ║   • thinking   — processing, warm glow                                   ║
+// ║   • responding — speech, heartbeat, particles gather                     ║
+// ║   • loading    — fast spin, compressed, purple                           ║
+// ║                                                                          ║
+// ║  Special states (triggered programmatically):                            ║
+// ║   • analyse    — flying numbers/digits, data crunching feel              ║
+// ║   • development— streaming code characters, hacker/dev feel             ║
+// ║   • connectie  — network lines, nodes, connections forming              ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+type HologramState = "idle" | "thinking" | "responding" | "loading" | "analyse" | "development" | "connectie";
+
 interface AIHologramProps {
-  state: "idle" | "thinking" | "responding" | "loading";
+  state: HologramState;
   compact?: boolean;
 }
 
@@ -72,23 +88,34 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       t += 0.016;
       let scale: number;
       if (state === "responding") {
-        // Dramatic speech pump — two overlapping sine waves for organic feel
         const primary = Math.sin(t * 3.2) * 0.06;
         const secondary = Math.sin(t * 7.5) * 0.02;
-        const accent = Math.abs(Math.sin(t * 1.8)) * 0.02; // occasional surge
+        const accent = Math.abs(Math.sin(t * 1.8)) * 0.02;
         scale = 1.0 + primary + secondary + accent;
       } else if (state === "thinking") {
-        // Searching pulse — steady medium breathe with subtle jitter
         const breathe = Math.sin(t * 2.0) * 0.04;
         const jitter = Math.sin(t * 9) * 0.005;
         scale = 1.0 + breathe + jitter;
       } else if (state === "loading") {
-        // Rapid compressed heartbeat — fast & tight
         const rapid = Math.sin(t * 6) * 0.04;
         const micro = Math.sin(t * 14) * 0.01;
         scale = 0.97 + rapid + micro;
+      } else if (state === "analyse") {
+        // Analyse — sharp data-crunch pulse, like processing spikes
+        const crunch = Math.sin(t * 4) * 0.035;
+        const spike = Math.abs(Math.sin(t * 11)) * 0.015;
+        scale = 1.0 + crunch + spike;
+      } else if (state === "development") {
+        // Development — steady focused breathe with micro-jitter (typing feel)
+        const focus = Math.sin(t * 1.5) * 0.025;
+        const typing = Math.sin(t * 18) * 0.004;
+        scale = 1.0 + focus + typing;
+      } else if (state === "connectie") {
+        // Connectie — expanding/contracting like a network forming
+        const expand = Math.sin(t * 1.2) * 0.05;
+        const pulse = Math.sin(t * 5) * 0.015;
+        scale = 1.0 + expand + pulse;
       } else {
-        // Idle — slow, calm, alive breathe
         const calm = Math.sin(t * 0.8) * 0.015;
         const drift = Math.sin(t * 2.2) * 0.005;
         scale = 1.0 + calm + drift;
@@ -206,82 +233,119 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // ╔══════════════════════════════════════════════════════════════════╗
       // ║  STATE ENGINE — Controls all visual behavior per AI status      ║
       // ║                                                                 ║
-      // ║  States:                                                        ║
+      // ║  Core states:                                                   ║
       // ║   • idle       — calm, slow orbit, baseline everything          ║
       // ║   • thinking   — faster spin, warm glow, "processing" feel     ║
       // ║   • responding — speech pulse, heartbeat, particles gather     ║
       // ║   • loading    — very fast spin, compressed particles, purple  ║
       // ║                                                                 ║
+      // ║  Special states:                                                ║
+      // ║   • analyse    — cyan tint, data numbers fly around            ║
+      // ║   • development— green/matrix tint, code chars stream          ║
+      // ║   • connectie  — blue-white, network lines & nodes form        ║
+      // ║                                                                 ║
       // ║  To add a new state: add a case to each config block below     ║
       // ╚══════════════════════════════════════════════════════════════════╝
 
+      const isAnalyse = state === "analyse";
+      const isDev = state === "development";
+      const isConnectie = state === "connectie";
+
       // --- ORBIT SPEED MULTIPLIER ---
-      // How fast particles orbit around the center
-      // idle=1.0 (calm), thinking=1.6 (searching), responding=2.2 (active), loading=4.0 (urgent)
+      // analyse=1.8 (data orbiting), development=1.2 (focused), connectie=0.6 (network forming slowly)
       const orbitSpeedMul = state === "responding" ? 2.2
         : state === "thinking" ? 1.6
-        : isLoading ? 4.0 : 1.0;
+        : isLoading ? 4.0
+        : isAnalyse ? 1.8
+        : isDev ? 1.2
+        : isConnectie ? 0.6
+        : 1.0;
 
       // --- ROTATION SPEED MULTIPLIER ---
-      // How fast individual flowers spin on their own axis
       const rotSpeedMul = state === "responding" ? 1.5
         : state === "thinking" ? 1.3
-        : isLoading ? 3.0 : 1.0;
+        : isLoading ? 3.0
+        : isAnalyse ? 2.0
+        : isDev ? 0.8
+        : isConnectie ? 0.5
+        : 1.0;
 
       // --- PARTICLE SIZE MULTIPLIER ---
-      // Flowers grow when responding (energetic), shrink when loading (compressed)
       const sizeMul = state === "responding" ? 1.3
         : state === "thinking" ? 0.9
-        : isLoading ? 0.65 : 1.0;
+        : isLoading ? 0.65
+        : isAnalyse ? 0.7   // smaller — numbers dominate
+        : isDev ? 0.6       // small — code dominates
+        : isConnectie ? 0.5 // minimal — connections are the star
+        : 1.0;
 
       // --- COLOR TINT HUE ---
-      // Overlay glow color: green=responding, warm=thinking, purple=loading, -1=none (idle)
+      // analyse=190 (cyan), development=140 (matrix green), connectie=210 (cool blue)
       const tintHue = state === "responding" ? 155
         : state === "thinking" ? 35
-        : isLoading ? 280 : -1;
+        : isLoading ? 280
+        : isAnalyse ? 190
+        : isDev ? 140
+        : isConnectie ? 210
+        : -1;
 
       // --- HEARTBEAT EFFECT ---
-      // Pulsating scale applied to all particles simulating a "heartbeat"
-      // responding: strong heartbeat (speech), thinking: subtle pulse, idle: none
       const heartbeatFreq = state === "responding" ? 8
         : state === "thinking" ? 3
-        : isLoading ? 12 : 0;
+        : isLoading ? 12
+        : isAnalyse ? 5     // data pulse
+        : isDev ? 2         // subtle typing rhythm
+        : isConnectie ? 1.5 // slow network pulse
+        : 0;
       const heartbeatAmp = state === "responding" ? 0.12
         : state === "thinking" ? 0.05
-        : isLoading ? 0.08 : 0;
+        : isLoading ? 0.08
+        : isAnalyse ? 0.06
+        : isDev ? 0.03
+        : isConnectie ? 0.04
+        : 0;
       const heartbeat = heartbeatFreq > 0
         ? 1 + Math.abs(Math.sin(t * heartbeatFreq)) * heartbeatAmp
         : 1;
 
       // --- SPEECH WAVE EFFECT ---
-      // Radial wave that pulses outward from center during "responding"
-      // Creates the visual of sound/speech emanating from the AI
       const speechWaveRadius = state === "responding"
         ? (t * 80) % (200 * s) : 0;
       const speechWaveActive = state === "responding";
 
       // --- BREATHING EFFECT ---
-      // Gentle orbit radius oscillation, like the hologram is "alive"
-      // Active in all states but more pronounced when responding
       const breathAmp = state === "responding" ? 8
         : state === "thinking" ? 5
-        : isLoading ? 2 : 3;
+        : isLoading ? 2
+        : isAnalyse ? 4
+        : isDev ? 3
+        : isConnectie ? 6 // wider breathe for network expansion
+        : 3;
       const breathFreq = state === "responding" ? 2.5
         : state === "thinking" ? 1.5
-        : isLoading ? 5 : 0.8;
+        : isLoading ? 5
+        : isAnalyse ? 2.0
+        : isDev ? 1.0
+        : isConnectie ? 0.6
+        : 0.8;
       const breathOffset = Math.sin(t * breathFreq) * breathAmp;
 
       // --- HUD SPIN MULTIPLIER ---
-      // Controls speed of the outer arcs/rings
       const hudSpin = isLoading ? 3.5
         : state === "responding" ? 2.0
-        : state === "thinking" ? 1.5 : 1.0;
+        : state === "thinking" ? 1.5
+        : isAnalyse ? 2.5
+        : isDev ? 1.8
+        : isConnectie ? 0.8
+        : 1.0;
 
       // --- PULSE BASE ---
-      // Overall brightness oscillation of HUD elements
       const pulseBase = isLoading ? 0.5 + Math.sin(t * 6) * 0.5
         : state === "thinking" ? 0.6 + Math.sin(t * 4) * 0.4
         : state === "responding" ? 0.8 + Math.sin(t * 2) * 0.2
+        : isAnalyse ? 0.6 + Math.sin(t * 5) * 0.3
+        : isDev ? 0.5 + Math.sin(t * 3) * 0.25
+        : isConnectie ? 0.7 + Math.sin(t * 1.5) * 0.2
         : isHover ? 0.55 + Math.sin(t * 1.5) * 0.2
         : 0.4 + Math.sin(t * 0.8) * 0.15;
 
@@ -628,7 +692,160 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         ctx.beginPath(); ctx.arc(mx, my, 70 * s, 0, Math.PI * 2); ctx.fill();
       }
 
-      // ═══ FLOWER PARTICLES — 4x density ═══
+      // ╔══════════════════════════════════════════════════════════════════════╗
+      // ║  SPECIAL STATE OVERLAYS                                              ║
+      // ║  These render unique visual elements on top of the base hologram     ║
+      // ╚══════════════════════════════════════════════════════════════════════╝
+
+      // ═══ ANALYSE STATE — Flying numbers/digits orbiting the hologram ═══
+      // Creates a "data crunching" visual with numbers spawning from edges,
+      // orbiting around and fading. Cyan-tinted.
+      if (isAnalyse && !compact) {
+        ctx.save();
+        ctx.font = `700 ${Math.round(14 * s)}px 'Courier New', monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const analyseChars = "0123456789%+-.€#∑∆π≈";
+        for (let i = 0; i < 40; i++) {
+          const age = (t * 0.5 + i * 0.37) % 8; // 8s cycle per digit
+          const angle = (Math.PI * 2 / 40) * i + t * 0.3 + age * 0.5;
+          // Fly in from edge, spiral to mid-range, then fade out
+          const maxR = 280 * s;
+          const minR = 40 * s;
+          const progress = age / 8;
+          const r = progress < 0.3
+            ? maxR - (maxR - 100 * s) * (progress / 0.3) // fly in
+            : progress < 0.7
+              ? 100 * s + Math.sin(progress * Math.PI * 4) * 40 * s // orbit
+              : minR + (progress - 0.7) / 0.3 * 60 * s; // drift to center
+          const alpha = progress < 0.1 ? progress / 0.1
+            : progress > 0.85 ? (1 - progress) / 0.15
+            : 0.7;
+          const dx = cx + Math.cos(angle) * r;
+          const dy = cy + Math.sin(angle) * r;
+          const charIdx = (i + Math.floor(t * 3)) % analyseChars.length;
+          const fontSize = (10 + Math.sin(t * 3 + i) * 4) * s;
+          ctx.font = `700 ${Math.round(fontSize)}px 'Courier New', monospace`;
+          ctx.fillStyle = `hsla(190, 70%, 65%, ${alpha * 0.6})`;
+          ctx.shadowColor = `hsla(190, 80%, 55%, ${alpha * 0.4})`;
+          ctx.shadowBlur = 8 * s;
+          ctx.fillText(analyseChars[charIdx], dx, dy);
+        }
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      // ═══ DEVELOPMENT STATE — Streaming code characters, matrix-style ═══
+      // Columns of code-like text falling/rising through the hologram area.
+      // Green matrix tint with monospace font.
+      if (isDev && !compact) {
+        ctx.save();
+        const codeChars = "{}[]();=>const let var function return if else import export async await .map .filter <div/> useState useEffect";
+        const codeTokens = codeChars.split(" ");
+        // 20 vertical streams
+        for (let col = 0; col < 20; col++) {
+          const colX = cx - 180 * s + (col * 18 * s);
+          // Each column scrolls at different speed
+          const scrollSpeed = 30 + (col % 5) * 15;
+          const scrollOffset = t * scrollSpeed + col * 47;
+          // 8 chars per column
+          for (let row = 0; row < 8; row++) {
+            const rawY = ((scrollOffset + row * 22) % (300 * s)) - 50 * s;
+            const py = cy - 130 * s + rawY;
+            // Distance from center for fade
+            const distFromCenter = Math.sqrt((colX - cx) ** 2 + (py - cy) ** 2);
+            const maxDist = 180 * s;
+            if (distFromCenter > maxDist) continue;
+            const distFade = 1 - distFromCenter / maxDist;
+            const alpha = distFade * 0.5 * (0.4 + Math.sin(t * 2 + col + row) * 0.3);
+            const tokenIdx = (col * 8 + row + Math.floor(t * 2)) % codeTokens.length;
+            const token = codeTokens[tokenIdx];
+            const fontSize = (8 + Math.sin(t + col * 0.5) * 2) * s;
+            ctx.font = `500 ${Math.round(fontSize)}px 'Courier New', monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = `hsla(140, 70%, 60%, ${alpha})`;
+            ctx.shadowColor = `hsla(140, 80%, 50%, ${alpha * 0.5})`;
+            ctx.shadowBlur = 6 * s;
+            ctx.fillText(token, colX, py);
+          }
+        }
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      // ═══ CONNECTIE STATE — Network nodes & connection lines ═══
+      // Dynamic network topology: nodes appear, form connections with animated
+      // lines, dots travel along connections. Lines fly in and out from edges.
+      if (isConnectie && !compact) {
+        ctx.save();
+        const netNodeCount = 30;
+        const netNodes: { x: number; y: number; alpha: number; r: number }[] = [];
+        for (let i = 0; i < netNodeCount; i++) {
+          const age = (t * 0.3 + i * 0.51) % 6;
+          const progress = age / 6;
+          // Spawn from outside, drift to position, then fly out again
+          const baseAngle = (Math.PI * 2 / netNodeCount) * i + Math.sin(t * 0.2 + i) * 0.3;
+          const edgeR = 320 * s;
+          const targetR = (50 + (i % 7) * 22) * s;
+          let r: number;
+          if (progress < 0.2) {
+            r = edgeR - (edgeR - targetR) * (progress / 0.2); // fly in
+          } else if (progress < 0.75) {
+            r = targetR + Math.sin(t * 1.5 + i) * 15 * s; // orbit/wobble
+          } else {
+            r = targetR + (edgeR - targetR) * ((progress - 0.75) / 0.25); // fly out
+          }
+          const alpha = progress < 0.1 ? progress / 0.1
+            : progress > 0.85 ? (1 - progress) / 0.15
+            : 0.8;
+          const nx = cx + Math.cos(baseAngle) * r;
+          const ny = cy + Math.sin(baseAngle) * r;
+          const nodeSize = (3 + Math.sin(t * 3 + i) * 1.5) * s;
+          netNodes.push({ x: nx, y: ny, alpha, r: nodeSize });
+
+          // Draw node circle with glow
+          ctx.beginPath();
+          ctx.arc(nx, ny, nodeSize, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(210, 60%, 70%, ${alpha * 0.7})`;
+          ctx.fill();
+          // Glow ring
+          ctx.beginPath();
+          ctx.arc(nx, ny, nodeSize + 4 * s, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(210, 60%, 70%, ${alpha * 0.15})`;
+          ctx.lineWidth = 1 * s;
+          ctx.stroke();
+        }
+
+        // Draw connections between nearby nodes
+        for (let i = 0; i < netNodes.length; i++) {
+          const a = netNodes[i];
+          for (let j = i + 1; j < netNodes.length; j++) {
+            const b = netNodes[j];
+            const dist = Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
+            if (dist > 120 * s) continue;
+            const connAlpha = Math.min(a.alpha, b.alpha) * (1 - dist / (120 * s)) * 0.4;
+            if (connAlpha < 0.02) continue;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `hsla(210, 55%, 65%, ${connAlpha})`;
+            ctx.lineWidth = 1 * s;
+            ctx.stroke();
+            // Traveling dot along connection
+            const dotProgress = (t * 0.8 + i * 0.2 + j * 0.15) % 1;
+            const dotX = a.x + (b.x - a.x) * dotProgress;
+            const dotY = a.y + (b.y - a.y) * dotProgress;
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 2 * s, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(210, 70%, 75%, ${connAlpha * 1.5})`;
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+
+
       const particles = particlesRef.current;
       particles.sort((a, b) => a.layer - b.layer);
 
@@ -748,18 +965,31 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
             state === "responding" ? "bg-accent" :
             state === "thinking" ? "bg-bloom-warm" :
             state === "loading" ? "bg-primary animate-pulse" :
+            state === "analyse" ? "bg-cyan-400" :
+            state === "development" ? "bg-green-400" :
+            state === "connectie" ? "bg-blue-300" :
             hovered ? "bg-primary" : "bg-primary/50"
           }`} />
           {(state !== "idle" || hovered) && (
             <div className={`absolute inset-0 w-2 h-2 rounded-full animate-ping ${
               state === "responding" ? "bg-accent/40" :
               state === "thinking" ? "bg-bloom-warm/40" :
-              state === "loading" ? "bg-primary/40" : "bg-primary/30"
+              state === "loading" ? "bg-primary/40" :
+              state === "analyse" ? "bg-cyan-400/40" :
+              state === "development" ? "bg-green-400/40" :
+              state === "connectie" ? "bg-blue-300/40" :
+              "bg-primary/30"
             }`} />
           )}
         </div>
         <span className="text-[9px] md:text-[10px] font-mono text-muted-foreground/80 uppercase tracking-[0.2em]">
-          {state === "responding" ? "Speaking" : state === "thinking" ? "Analyzing" : state === "loading" ? "Initializing" : hovered ? "Interactive" : "Online"}
+          {state === "responding" ? "Speaking" :
+           state === "thinking" ? "Analyzing" :
+           state === "loading" ? "Initializing" :
+           state === "analyse" ? "Analysing Data" :
+           state === "development" ? "Development" :
+           state === "connectie" ? "Connecting" :
+           hovered ? "Interactive" : "Online"}
         </span>
       </div>
     </div>
