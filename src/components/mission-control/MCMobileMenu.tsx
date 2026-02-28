@@ -48,9 +48,9 @@ const MCMobileMenu = ({ active, onNavigate }: MCMobileMenuProps) => {
 
       {/* Slide-in sidebar */}
       <aside
+        style={{ backgroundColor: "hsl(228 22% 12%)" }}
         className={cn(
           "md:hidden fixed top-0 left-0 z-50 h-full w-64 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
-          "bg-[hsl(228_22%_12%)]",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
