@@ -664,11 +664,6 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.shadowColor = `hsla(228, 60%, 65%, ${pulseBase * 0.3})`;
       ctx.fillStyle = `hsla(228, 50%, 50%, ${0.15 + pulseBase * 0.1})`;
       ctx.fillText("HBMASTER", cx, cy - (compact ? 2 : 10) * s);
-      ctx.shadowBlur = 0;
-      ctx.font = `600 ${Math.round((compact ? 8 : 11) * s)}px 'Inter', sans-serif`;
-      ctx.letterSpacing = `${(compact ? 1 : 4) * s}px`;
-      ctx.fillStyle = `hsla(228, 30%, 55%, ${0.4 + pulseBase * 0.2})`;
-      ctx.fillText("MISSION CONTROL", cx, cy + (compact ? 12 : 24) * s);
       ctx.letterSpacing = "0px";
       ctx.restore();
 
