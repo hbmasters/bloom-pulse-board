@@ -6,11 +6,12 @@ import ChatThread from "@/components/mission-control/ChatThread";
 import AIHologram from "@/components/mission-control/AIHologram";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import KanbanBoard from "@/components/mission-control/KanbanBoard";
+import KPIDashboard from "@/components/mission-control/KPIDashboard";
 import ChatHistory from "@/components/mission-control/ChatHistory";
 import MCMobileMenu from "@/components/mission-control/MCMobileMenu";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-type MCView = "chat" | "kanban" | "history" | "settings";
+type MCView = "chat" | "kanban" | "history" | "kpis" | "settings";
 
 const MissionControl = () => {
   const [view, setView] = useState<MCView>("chat");
@@ -69,6 +70,7 @@ const MissionControl = () => {
               </div>
             )}
             {view === "kanban" && <KanbanBoard />}
+            {view === "kpis" && <KPIDashboard />}
             {view === "history" && <ChatHistory />}
             {view === "settings" && (
               <div className="flex-1 flex items-center justify-center">
