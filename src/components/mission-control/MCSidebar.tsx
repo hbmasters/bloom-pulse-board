@@ -2,6 +2,7 @@ import { MessageSquare, LayoutGrid, Clock, Settings, ArrowLeft, PanelLeftClose, 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import HBMasterLogo from "./HBMasterLogo";
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +36,7 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
     >
       {/* Header */}
       <div className="flex h-14 items-center border-b border-sidebar-border px-3 gap-2">
+        <HBMasterLogo size={collapsed ? 28 : 32} className="shrink-0" />
         {!collapsed && (
           <div className="flex-1 pl-1">
             <span className="text-sm font-black tracking-wider text-sidebar-primary-foreground">

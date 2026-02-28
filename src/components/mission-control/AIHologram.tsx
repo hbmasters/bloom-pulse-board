@@ -60,7 +60,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
   const createParticle = useCallback((cx: number, cy: number): Particle => {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 50 + Math.random() * 170;
+    const dist = (50 + Math.random() * 170);
     const type = pickFlowerType();
     const layer = Math.floor(Math.random() * 3);
     const sizeMultiplier = [0.7, 1, 1.3][layer];
@@ -101,9 +101,9 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
     const cx = size / 2;
     const cy = size / 2;
 
-    // Scale particle count with size
-    const scaleFactor = size / 480;
-    const particleCount = compact ? Math.round(200 * Math.max(scaleFactor, 0.5)) : Math.round(640 * Math.max(scaleFactor, 0.4));
+    // Scale everything proportionally to canvas size
+    const s = size / 480; // scale factor: 1.0 at 480px
+    const particleCount = compact ? Math.round(200 * Math.max(s, 0.5)) : Math.round(640 * Math.max(s, 0.4));
     particlesRef.current = Array.from({ length: particleCount }, () => createParticle(cx, cy));
 
     // Dynamic hex connection nodes
@@ -157,7 +157,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // ═══ JARVIS HUD LAYER 1: Outer arc segments ═══
       if (!compact) {
         for (let i = 0; i < 3; i++) {
-          const r = 195 + i * 18;
+          const r = (195 + i * 18) * s;
           const rot = t * (0.08 + i * 0.03) * loadSpin * (i % 2 === 0 ? 1 : -1);
           ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
           for (let j = 0; j < 4; j++) {
@@ -165,7 +165,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
             const endA = startA + 1.1 - i * 0.1;
             ctx.beginPath(); ctx.arc(0, 0, r, startA, endA);
             ctx.strokeStyle = `hsla(228, 50%, 60%, ${0.06 + pulseBase * 0.08 - i * 0.015})`;
-            ctx.lineWidth = 1.5 - i * 0.3; ctx.stroke();
+            ctx.lineWidth = (1.5 - i * 0.3) * s; ctx.stroke();
           }
           ctx.restore();
         }
@@ -175,13 +175,13 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         for (let i = 0; i < 60; i++) {
           const a = (Math.PI * 2 / 60) * i;
           const isMajor = i % 5 === 0;
-          const inner = isMajor ? 185 : 190;
-          const outer = 195;
+          const inner = (isMajor ? 185 : 190) * s;
+          const outer = 195 * s;
           ctx.beginPath();
           ctx.moveTo(Math.cos(a) * inner, Math.sin(a) * inner);
           ctx.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
           ctx.strokeStyle = `hsla(228, 45%, 60%, ${isMajor ? 0.2 + pulseBase * 0.15 : 0.08})`;
-          ctx.lineWidth = isMajor ? 1.2 : 0.5; ctx.stroke();
+          ctx.lineWidth = (isMajor ? 1.2 : 0.5) * s; ctx.stroke();
         }
         ctx.restore();
       }
@@ -189,12 +189,12 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // ═══ SCANNING RINGS ═══
       const ringCount = compact ? 2 : 5;
       for (let i = 0; i < ringCount; i++) {
-        const r = 55 + i * 28 + Math.sin(t * (0.8 + i * 0.2)) * 4;
+        const r = (55 + i * 28) * s + Math.sin(t * (0.8 + i * 0.2)) * 4 * s;
         const rot = t * (0.12 + i * 0.06) * loadSpin * (i % 2 === 0 ? 1 : -1);
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
         ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * (1.0 + i * 0.15));
         ctx.strokeStyle = `hsla(228, 50%, 58%, ${0.07 + pulseBase * 0.09 - i * 0.01})`;
-        ctx.lineWidth = 1.2; ctx.setLineDash([3 + i * 2, 7 + i * 2]); ctx.stroke();
+        ctx.lineWidth = 1.2 * s; ctx.setLineDash([3 * s + i * 2, 7 * s + i * 2]); ctx.stroke();
         ctx.setLineDash([]);
         ctx.restore();
       }
@@ -203,27 +203,27 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       if (!compact) {
         for (let i = 0; i < 8; i++) {
           const lineAngle = (Math.PI * 2 / 8) * i + t * 0.06 * loadSpin;
-          const innerR = 60;
-          const outerR = 100 + Math.sin(t * 2 + i) * 25;
+          const innerR = 60 * s;
+          const outerR = (100 + Math.sin(t * 2 + i) * 25) * s;
           const x1 = cx + Math.cos(lineAngle) * innerR;
           const y1 = cy + Math.sin(lineAngle) * innerR;
           const x2 = cx + Math.cos(lineAngle) * outerR;
           const y2 = cy + Math.sin(lineAngle) * outerR;
           ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
           ctx.strokeStyle = `hsla(228, 45%, 62%, ${0.05 + pulseBase * 0.06})`;
-          ctx.lineWidth = 0.6; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]);
+          ctx.lineWidth = 0.6 * s; ctx.setLineDash([2 * s, 5 * s]); ctx.stroke(); ctx.setLineDash([]);
           const travelT = (t * 0.8 * loadSpin + i * 0.5) % 1;
           const dotX = x1 + (x2 - x1) * travelT;
           const dotY = y1 + (y2 - y1) * travelT;
-          ctx.beginPath(); ctx.arc(dotX, dotY, 1.8, 0, Math.PI * 2);
+          ctx.beginPath(); ctx.arc(dotX, dotY, 1.8 * s, 0, Math.PI * 2);
           ctx.fillStyle = `hsla(228, 55%, 68%, ${0.3 + pulseBase * 0.3})`; ctx.fill();
         }
       }
 
       // ═══ CORNER BRACKETS ═══
       if (!compact) {
-        const bracketSize = 18;
-        const bracketOffset = 168;
+        const bracketSize = 18 * s;
+        const bracketOffset = 168 * s;
         const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.04 * loadSpin);
         for (const [dx, dy] of corners) {
@@ -234,7 +234,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           ctx.lineTo(bx, by);
           ctx.lineTo(bx + dx * -bracketSize, by);
           ctx.strokeStyle = `hsla(228, 50%, 58%, ${0.15 + pulseBase * 0.12})`;
-          ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.lineWidth = 1.5 * s; ctx.stroke();
         }
         ctx.restore();
       }
@@ -248,7 +248,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         sweepGrad.addColorStop(0.5, `hsla(228, 55%, 60%, 0)`);
         sweepGrad.addColorStop(1, `hsla(228, 55%, 60%, 0)`);
         ctx.fillStyle = sweepGrad;
-        ctx.beginPath(); ctx.arc(cx, cy, 180, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 180 * s, 0, Math.PI * 2); ctx.fill();
       }
 
       // ═══ DYNAMIC HEXAGON CONNECTION NETWORK ═══
@@ -257,9 +257,9 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       for (let i = 0; i < hexNodes.length; i++) {
         const node = hexNodes[i];
         node.angle += node.speed * loadSpin;
-        const wobble = Math.sin(t * 1.5 + node.pulsePhase) * 12;
-        const nx = cx + Math.cos(node.angle) * (node.radius + wobble);
-        const ny = cy + Math.sin(node.angle) * (node.radius + wobble);
+        const wobble = Math.sin(t * 1.5 + node.pulsePhase) * 12 * s;
+        const nx = cx + Math.cos(node.angle) * (node.radius * s + wobble);
+        const ny = cy + Math.sin(node.angle) * (node.radius * s + wobble);
         nodePositions.push({ x: nx, y: ny });
       }
 
@@ -271,17 +271,15 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           if (ci >= nodePositions.length) continue;
           const p2 = nodePositions[ci];
           const dist = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
-          if (dist > 200) continue; // Only draw nearby connections
-          const connAlpha = Math.max(0, 1 - dist / 200) * 0.15 * (0.5 + pulseBase * 0.5);
+          if (dist > 200 * s) continue;
+          const connAlpha = Math.max(0, 1 - dist / (200 * s)) * 0.15 * (0.5 + pulseBase * 0.5);
           ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
           ctx.strokeStyle = `hsla(228, 50%, 60%, ${connAlpha})`;
-          ctx.lineWidth = 0.8; ctx.stroke();
-
-          // Traveling data dot along connection
+          ctx.lineWidth = 0.8 * s; ctx.stroke();
           const dotT = (t * 0.4 * loadSpin + i * 0.3) % 1;
           const dx = p1.x + (p2.x - p1.x) * dotT;
           const dy = p1.y + (p2.y - p1.y) * dotT;
-          ctx.beginPath(); ctx.arc(dx, dy, 1.5, 0, Math.PI * 2);
+          ctx.beginPath(); ctx.arc(dx, dy, 1.5 * s, 0, Math.PI * 2);
           ctx.fillStyle = `hsla(228, 60%, 70%, ${connAlpha * 2})`; ctx.fill();
         }
       }
@@ -290,17 +288,17 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       for (let i = 0; i < nodePositions.length; i++) {
         const p = nodePositions[i];
         const nodePulse = Math.sin(t * 2.5 + hexNodes[i].pulsePhase) * 0.5 + 0.5;
-        const nodeSize = 2.5 + nodePulse * 1.5;
+        const nodeSize = (2.5 + nodePulse * 1.5) * s;
         ctx.beginPath(); ctx.arc(p.x, p.y, nodeSize, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(228, 55%, 65%, ${0.25 + pulseBase * 0.25})`; ctx.fill();
-        ctx.beginPath(); ctx.arc(p.x, p.y, nodeSize + 5, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(p.x, p.y, nodeSize + 5 * s, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(228, 55%, 65%, ${0.03 + pulseBase * 0.03})`; ctx.fill();
 
         // Mini hexagon at each node
         if (!compact) {
           ctx.save(); ctx.translate(p.x, p.y);
           ctx.rotate(t * 0.3 * loadSpin + i);
-          const hexR = 4 + nodePulse * 2;
+          const hexR = (4 + nodePulse * 2) * s;
           ctx.beginPath();
           for (let h = 0; h < 6; h++) {
             const ha = (Math.PI / 3) * h;
@@ -309,7 +307,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           }
           ctx.closePath();
           ctx.strokeStyle = `hsla(228, 45%, 60%, ${0.15 + pulseBase * 0.15})`;
-          ctx.lineWidth = 0.6; ctx.stroke();
+          ctx.lineWidth = 0.6 * s; ctx.stroke();
           ctx.restore();
         }
       }
@@ -317,11 +315,11 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       // ═══ VOICE WAVEFORM ═══
       if (!compact) {
         const barCount = 32;
-        const barWidth = 3.2;
-        const barGap = 1.5;
+        const barWidth = 3.2 * s;
+        const barGap = 1.5 * s;
         const totalW = barCount * (barWidth + barGap);
-        const waveBaseY = cy + 52;
-        const maxBarH = state === "responding" ? 28 : state === "thinking" ? 14 : isLoading ? 18 : 6;
+        const waveBaseY = cy + 52 * s;
+        const maxBarH = (state === "responding" ? 28 : state === "thinking" ? 14 : isLoading ? 18 : 6) * s;
 
         ctx.save();
         for (let i = 0; i < barCount; i++) {
@@ -358,7 +356,7 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
         // Oscilloscope
         if (state === "responding" || state === "thinking" || isLoading) {
-          const waveAmplitude = state === "responding" ? 12 : isLoading ? 8 : 5;
+          const waveAmplitude = (state === "responding" ? 12 : isLoading ? 8 : 5) * s;
           const waveWidth = totalW * 0.9;
           ctx.beginPath();
           for (let i = 0; i <= 60; i++) {
@@ -371,32 +369,31 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
             if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
           }
           ctx.strokeStyle = `hsla(340, 50%, 65%, ${state === "responding" ? 0.25 : 0.12})`;
-          ctx.lineWidth = 1.2; ctx.stroke();
+          ctx.lineWidth = 1.2 * s; ctx.stroke();
         }
       }
 
       // ═══ Core glow ═══
-      const coreRadius = compact ? 28 : 55;
-      const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 20);
+      const coreRadius = (compact ? 28 : 55) * s;
+      const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 20 * s);
       grad1.addColorStop(0, `hsla(228, 50%, 55%, ${0.2 * pulseBase})`);
       grad1.addColorStop(0.4, `hsla(340, 40%, 65%, ${0.06 * pulseBase})`);
       grad1.addColorStop(1, "transparent");
       ctx.fillStyle = grad1;
-      ctx.beginPath(); ctx.arc(cx, cy, coreRadius + 20, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, coreRadius + 20 * s, 0, Math.PI * 2); ctx.fill();
 
       // ═══ ROTATING HEXAGONS — now fully animated ═══
-      // Outer hexagon
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * 0.1 * loadSpin);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i - Math.PI / 6;
-        const hr = coreRadius + Math.sin(t * 1.5 * loadSpin + i) * 4;
+        const hr = coreRadius + Math.sin(t * 1.5 * loadSpin + i) * 4 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr, Math.sin(a) * hr);
         else ctx.lineTo(Math.cos(a) * hr, Math.sin(a) * hr);
       }
       ctx.closePath();
       ctx.strokeStyle = `hsla(228, 50%, 55%, ${0.3 + pulseBase * 0.25})`;
-      ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.lineWidth = 1.5 * s; ctx.stroke();
       ctx.fillStyle = `hsla(228, 50%, 55%, ${0.02 + pulseBase * 0.03})`; ctx.fill();
 
       // Inner hexagon — counter-rotate
@@ -404,53 +401,52 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i;
-        const hr2 = coreRadius * 0.6 + Math.sin(t * 2 * loadSpin + i) * 2;
+        const hr2 = coreRadius * 0.6 + Math.sin(t * 2 * loadSpin + i) * 2 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
         else ctx.lineTo(Math.cos(a) * hr2, Math.sin(a) * hr2);
       }
       ctx.closePath();
       ctx.strokeStyle = `hsla(228, 45%, 60%, ${0.12 + pulseBase * 0.12})`;
-      ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.lineWidth = 0.8 * s; ctx.stroke();
 
       // Third hexagon — smaller, fast spin
       ctx.rotate(t * 0.35 * loadSpin);
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = (Math.PI / 3) * i + Math.PI / 6;
-        const hr3 = coreRadius * 0.35 + Math.sin(t * 3 * loadSpin + i) * 1.5;
+        const hr3 = coreRadius * 0.35 + Math.sin(t * 3 * loadSpin + i) * 1.5 * s;
         if (i === 0) ctx.moveTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
         else ctx.lineTo(Math.cos(a) * hr3, Math.sin(a) * hr3);
       }
       ctx.closePath();
       ctx.strokeStyle = `hsla(228, 40%, 65%, ${0.1 + pulseBase * 0.1})`;
-      ctx.lineWidth = 0.6; ctx.stroke();
+      ctx.lineWidth = 0.6 * s; ctx.stroke();
       ctx.restore();
 
       // ═══ "HBMaster" BOLD TEXT ═══
       ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      // Outer glow
       ctx.shadowColor = `hsla(228, 60%, 55%, ${pulseBase * 0.7})`;
-      ctx.shadowBlur = 30;
-      ctx.font = `900 ${compact ? 18 : 38}px 'Inter', sans-serif`;
-      ctx.letterSpacing = compact ? "2px" : "6px";
+      ctx.shadowBlur = 30 * s;
+      ctx.font = `900 ${Math.round((compact ? 18 : 38) * s)}px 'Inter', sans-serif`;
+      ctx.letterSpacing = `${(compact ? 2 : 6) * s}px`;
       ctx.fillStyle = `hsla(228, 55%, 38%, ${0.85 + pulseBase * 0.15})`;
-      ctx.fillText("HBMASTER", cx, cy - (compact ? 2 : 10));
+      ctx.fillText("HBMASTER", cx, cy - (compact ? 2 : 10) * s);
       // Second pass for extra glow
-      ctx.shadowBlur = 50;
+      ctx.shadowBlur = 50 * s;
       ctx.shadowColor = `hsla(228, 60%, 65%, ${pulseBase * 0.3})`;
       ctx.fillStyle = `hsla(228, 50%, 50%, ${0.15 + pulseBase * 0.1})`;
-      ctx.fillText("HBMASTER", cx, cy - (compact ? 2 : 10));
+      ctx.fillText("HBMASTER", cx, cy - (compact ? 2 : 10) * s);
       ctx.shadowBlur = 0;
-      ctx.font = `600 ${compact ? 8 : 11}px 'Inter', sans-serif`;
-      ctx.letterSpacing = compact ? "1px" : "4px";
+      ctx.font = `600 ${Math.round((compact ? 8 : 11) * s)}px 'Inter', sans-serif`;
+      ctx.letterSpacing = `${(compact ? 1 : 4) * s}px`;
       ctx.fillStyle = `hsla(228, 30%, 55%, ${0.4 + pulseBase * 0.2})`;
-      ctx.fillText("MISSION CONTROL", cx, cy + (compact ? 12 : 24));
+      ctx.fillText("MISSION CONTROL", cx, cy + (compact ? 12 : 24) * s);
       ctx.letterSpacing = "0px";
       ctx.restore();
 
       // ═══ Bloom flare ═══
       if (state === "responding" || isLoading) {
-        const flareR = 70 + Math.sin(t * 3 * loadSpin) * 20;
+        const flareR = (70 + Math.sin(t * 3 * loadSpin) * 20) * s;
         const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, flareR);
         flareGrad.addColorStop(0, `hsla(340, 55%, 65%, ${0.05 + Math.sin(t * 5) * 0.03})`);
         flareGrad.addColorStop(0.5, `hsla(280, 40%, 55%, ${0.03})`);
@@ -461,11 +457,11 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
 
       // ═══ Mouse hover glow ═══
       if (isHover && !compact) {
-        const hoverGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 70);
+        const hoverGrad = ctx.createRadialGradient(mx, my, 0, mx, my, 70 * s);
         hoverGrad.addColorStop(0, `hsla(228, 50%, 55%, 0.07)`);
         hoverGrad.addColorStop(1, "transparent");
         ctx.fillStyle = hoverGrad;
-        ctx.beginPath(); ctx.arc(mx, my, 70, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mx, my, 70 * s, 0, Math.PI * 2); ctx.fill();
       }
 
       // ═══ FLOWER PARTICLES — 4x density ═══
@@ -477,8 +473,8 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
         p.life++;
 
         p.orbitAngle += p.orbitSpeed * loadSpin;
-        const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius;
-        const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius;
+        const targetX = cx + Math.cos(p.orbitAngle) * p.orbitRadius * s;
+        const targetY = cy + Math.sin(p.orbitAngle) * p.orbitRadius * s;
         p.x += (targetX - p.x) * 0.02 + p.vx;
         p.y += (targetY - p.y) * 0.02 + p.vy;
         p.rotation += p.rotSpeed * loadSpin;
@@ -495,8 +491,8 @@ const AIHologram = ({ state, compact = false }: AIHologramProps) => {
           const dx = p.x - mx;
           const dy = p.y - my;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 80 && dist > 0) {
-            const force = (80 - dist) / 80 * 0.5;
+          if (dist < 80 * s && dist > 0) {
+            const force = (80 * s - dist) / (80 * s) * 0.5;
             p.vx += (dx / dist) * force;
             p.vy += (dy / dist) * force;
           }
