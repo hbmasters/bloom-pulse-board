@@ -6,6 +6,8 @@ import KPICardGrid from "@/components/dashboards/KPICardGrid";
 import HighlightsFeed from "@/components/dashboards/HighlightsFeed";
 import InkoopStatsToday from "@/components/dashboards/InkoopStatsToday";
 import VerkoopBouquets from "@/components/dashboards/VerkoopBouquets";
+import HBMasterAlert from "@/components/dashboards/HBMasterAlert";
+import HBMasterLogo from "@/components/mission-control/HBMasterLogo";
 import {
   inkoopKPIs, inkoopHighlights,
   verkoopKPIs, verkoopHighlights,
@@ -66,9 +68,10 @@ const Dashboards = () => {
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
+          <HBMasterLogo size={30} />
           <div>
-            <h1 className="text-sm font-bold text-foreground tracking-tight">HBM Project Dashboards</h1>
-            <p className="text-[10px] text-muted-foreground">Bloom & HBMaster</p>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">Hoorn Bloommasters</h1>
+            <p className="text-[10px] text-muted-foreground">Project Dashboards — Bloom & HBMaster</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -147,6 +150,9 @@ const Dashboards = () => {
           </div>
         )}
       </div>
+
+      {/* HBMaster AI Alert */}
+      <HBMasterAlert />
     </div>
   );
 };
