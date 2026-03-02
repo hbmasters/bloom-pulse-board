@@ -16,6 +16,16 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MissionControl />} />
+          <Route path="/kanban" element={<MissionControl />} />
+          <Route path="/kpi" element={<MissionControl />} />
+          <Route path="/notificaties" element={<MissionControl />} />
+          <Route path="/weekplanner" element={<MissionControl />} />
+          <Route path="/system-status" element={<MissionControl />} />
+          <Route path="/cron-jobs" element={<MissionControl />} />
+          <Route path="/methodiek" element={<MissionControl />} />
+          <Route path="/agents" element={<MissionControl />} />
+          <Route path="/history" element={<MissionControl />} />
+          <Route path="/settings" element={<MissionControl />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

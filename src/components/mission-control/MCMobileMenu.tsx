@@ -1,9 +1,7 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, ArrowLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
-
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+import type { MCView } from "@/pages/MissionControl";
 
 interface MCMobileMenuProps {
   active: MCView;
@@ -26,7 +24,6 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
 ];
 
 const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) => {
-  const navigate = useNavigate();
 
   const handleNav = (view: MCView) => {
     onNavigate(view);
@@ -67,16 +64,6 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
           </button>
         </div>
 
-        {/* Back */}
-        <div className="px-3 py-2 border-b border-sidebar-border">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-xs">Terug</span>
-          </button>
-        </div>
 
         {/* Nav items */}
         <nav className="flex-1 py-3 px-2">

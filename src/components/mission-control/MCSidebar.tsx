@@ -1,5 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, ArrowLeft, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -8,8 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+import type { MCView } from "@/pages/MissionControl";
 
 interface MCSidebarProps {
   active: MCView;
@@ -30,7 +28,6 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
 ];
 
 const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
-  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -59,19 +56,6 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
         </button>
       </div>
 
-      {/* Back button */}
-      <div className="px-3 py-2 border-b border-sidebar-border">
-        <button
-          onClick={() => navigate("/")}
-          className={cn(
-            "flex items-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-colors",
-            collapsed ? "justify-center px-0 py-2" : "gap-2 px-3 py-2 text-sm"
-          )}
-        >
-          <ArrowLeft className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span className="text-xs">Terug</span>}
-        </button>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2">

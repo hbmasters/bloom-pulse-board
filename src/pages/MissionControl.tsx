@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import MCSidebar from "@/components/mission-control/MCSidebar";
 import MCTopBar from "@/components/mission-control/MCTopBar";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
@@ -18,10 +19,43 @@ import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+
+const routeToView: Record<string, MCView> = {
+  "/": "chat",
+  "/kanban": "kanban",
+  "/kpi": "kpis",
+  "/notificaties": "notifications",
+  "/weekplanner": "planner",
+  "/system-status": "status",
+  "/cron-jobs": "cronjobs",
+  "/methodiek": "methodiek",
+  "/agents": "agents",
+  "/history": "history",
+  "/settings": "settings",
+};
+
+export const viewToRoute: Record<MCView, string> = {
+  chat: "/",
+  kanban: "/kanban",
+  kpis: "/kpi",
+  notifications: "/notificaties",
+  planner: "/weekplanner",
+  status: "/system-status",
+  cronjobs: "/cron-jobs",
+  methodiek: "/methodiek",
+  agents: "/agents",
+  history: "/history",
+  settings: "/settings",
+};
 
 const MissionControl = () => {
-  const [view, setView] = useState<MCView>("chat");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const view = routeToView[location.pathname] || "chat";
+
+  const handleNavigate = (v: MCView) => navigate(viewToRoute[v]);
+
   const [aiState, setAiState] = useState<"idle" | "thinking" | "responding" | "loading" | "analyse" | "development" | "connectie">("idle");
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
@@ -29,25 +63,20 @@ const MissionControl = () => {
 
   return (
     <div className="mc-dark flex h-[100dvh] w-full overflow-hidden">
-      {/* Mobile menu — rendered at root level to be above everything */}
-      <MCMobileMenu active={view} onNavigate={setView} open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MCMobileMenu active={view} onNavigate={handleNavigate} open={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      {/* Desktop sidebar */}
       <div className="hidden md:flex">
-        <MCSidebar active={view} onNavigate={setView} />
+        <MCSidebar active={view} onNavigate={handleNavigate} />
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {view !== "chat" && <MCHologramBackground />}
         <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} />
 
-        {/* Main content */}
         <main className="flex-1 min-h-0 flex flex-col md:flex-row relative z-10">
-          {/* Center panel */}
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
             {view === "chat" && (
               <div className="flex-1 min-w-0 min-h-0 flex flex-col relative">
-                {/* Hologram — absolute behind chat when messages exist */}
                 <div className={`flex justify-center transition-all duration-700 ease-out ${
                   messageCount === 0 
                     ? "relative shrink-0 py-3 md:py-6" 
@@ -59,7 +88,6 @@ const MissionControl = () => {
                   <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} />
                 </div>
 
-                {/* Mobile telemetry toggle */}
                 <div className="md:hidden xl:hidden">
                   <button
                     onClick={() => setShowTelemetry(!showTelemetry)}
@@ -88,7 +116,6 @@ const MissionControl = () => {
             {view === "settings" && <MCSettings />}
           </div>
 
-          {/* Right panel - Telemetry (desktop only) */}
           {view === "chat" && (
             <div className="hidden xl:block w-72 border-l border-border">
               <TelemetryPanel />

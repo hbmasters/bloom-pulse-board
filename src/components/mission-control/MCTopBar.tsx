@@ -2,7 +2,7 @@ import { Search, Zap, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import HBMasterLogo from "./HBMasterLogo";
 
-type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+import type { MCView } from "@/pages/MissionControl";
 
 interface MCTopBarProps {
   view: MCView;
