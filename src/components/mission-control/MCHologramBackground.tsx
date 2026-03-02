@@ -1,5 +1,21 @@
-import MiniHologram from "@/components/hbmaster-widget/MiniHologram";
 import { useEffect, useState } from "react";
+
+function MiniHologram({ size, accentHsl }: { size: number; accentHsl: string; state?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="80" stroke={`hsl(${accentHsl})`} strokeWidth="0.5" opacity="0.4">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="100" cy="100" r="55" stroke={`hsl(${accentHsl})`} strokeWidth="0.3" opacity="0.3">
+        <animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="15s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="100" cy="100" r="30" stroke={`hsl(${accentHsl})`} strokeWidth="0.4" opacity="0.5">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="10s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="100" cy="100" r="4" fill={`hsl(${accentHsl})`} opacity="0.6" />
+    </svg>
+  );
+}
 
 export function MCHologramBackground() {
   const [size, setSize] = useState(480);
