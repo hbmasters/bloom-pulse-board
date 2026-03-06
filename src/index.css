@@ -133,7 +133,7 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, hsl(228 50% 55% / 0.06), transparent);
+    background: linear-gradient(90deg, transparent, hsl(211 100% 50% / 0.06), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
