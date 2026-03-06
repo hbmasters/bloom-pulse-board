@@ -18,21 +18,21 @@ const KPIDetailLayout = ({ title, subtitle, icon: Icon, onBack, children }: Prop
   });
 
   return (
-    <div className="flex flex-col h-full p-3 md:p-4 overflow-hidden">
-      <div className="flex items-center gap-3 mb-3">
-        <button onClick={onBack} className="p-1.5 rounded-lg border border-border hover:bg-card transition-colors">
+    <div className="flex flex-col h-full p-4 md:p-6 overflow-hidden">
+      <div className="flex items-center gap-3 mb-4">
+        <button onClick={onBack} className="p-2 rounded-xl border border-border hover:bg-card transition-colors">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
-        <Icon className="w-4 h-4 text-primary" />
+        <Icon className="w-5 h-5 text-primary/70" />
         <div>
-          <h2 className="text-xs font-black text-foreground uppercase tracking-wider">{title}</h2>
-          <p className="text-[9px] font-mono text-muted-foreground">{subtitle}</p>
+          <h2 className="text-base font-bold text-foreground tracking-tight">{title}</h2>
+          <p className="text-[12px] text-muted-foreground/60">{subtitle}</p>
         </div>
       </div>
 
       <KPIPeriodFilter value={filter} onChange={setFilter} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto mt-3 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto mt-4 space-y-5">
         {children(filter)}
       </div>
     </div>

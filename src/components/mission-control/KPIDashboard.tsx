@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { BarChart3, PiggyBank, Users, Trash2, PieChart, Factory, Truck, LayoutGrid, Globe, Brain, AlertTriangle, TrendingUp, Zap, ChevronRight } from "lucide-react";
+import { BarChart3, PiggyBank, Users, Trash2, PieChart, Factory, Truck, LayoutGrid, Globe, Brain, AlertTriangle, TrendingUp, Zap } from "lucide-react";
 import PageAgentBadges from "./PageAgentBadges";
 import KPIPeriodFilter, { PeriodFilterState } from "./kpi/KPIPeriodFilter";
 import KPIExecutiveCard, { ExecutiveKPI } from "./kpi/KPIExecutiveCard";
 
-// Detail pages
 import KPIProductCost from "./kpi/details/KPIProductCost";
 import KPILaborPerStem from "./kpi/details/KPILaborPerStem";
 import KPIWaste from "./kpi/details/KPIWaste";
@@ -68,9 +67,9 @@ const aiInsights = [
 ];
 
 const sevStyles = {
-  info: "border-primary/20 bg-primary/5",
-  warning: "border-yellow-500/20 bg-yellow-500/5",
-  critical: "border-red-500/20 bg-red-500/5",
+  info: "border-primary/15 bg-primary/5",
+  warning: "border-yellow-500/15 bg-yellow-500/5",
+  critical: "border-red-500/15 bg-red-500/5",
 };
 const sevDot = {
   info: "bg-primary",
@@ -98,52 +97,57 @@ const KPIDashboard = () => {
   if (activeKPI === "kenya") return <KPIKenya onBack={goBack} />;
 
   return (
-    <div className="flex flex-col h-full p-3 md:p-4 overflow-hidden">
+    <div className="flex flex-col h-full p-4 md:p-6 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <BarChart3 className="w-4 h-4 text-primary" />
-        <h2 className="text-xs font-black text-foreground uppercase tracking-wider">Executive KPI Dashboard</h2>
-        <span className="text-[9px] font-mono text-muted-foreground/50 ml-1">HBM • ~500 medewerkers • 13 perioden</span>
+      <div className="flex items-center gap-3 mb-3">
+        <BarChart3 className="w-5 h-5 text-primary/70" />
+        <div>
+          <h2 className="text-lg font-bold text-foreground tracking-tight">Executive KPI Dashboard</h2>
+          <p className="text-[13px] text-muted-foreground/50">HBM • ~500 medewerkers • 13 perioden per jaar</p>
+        </div>
       </div>
 
-      <PageAgentBadges pageId="kpis" className="mb-2" />
+      <PageAgentBadges pageId="kpis" className="mb-3" />
       <KPIPeriodFilter value={filter} onChange={setFilter} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto mt-3 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto mt-4 space-y-6">
         {/* AI Insights */}
-        <div className="rounded-xl border border-border bg-card/80 backdrop-blur-sm p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <Brain className="w-3.5 h-3.5 text-primary" />
+        <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-4">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-7 h-7 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+              <Brain className="w-4 h-4 text-primary" />
             </div>
-            <h3 className="text-[10px] font-black text-foreground uppercase tracking-wider">HBMaster AI Insights</h3>
-            <div className="ml-auto flex items-center gap-1">
+            <div>
+              <h3 className="text-[14px] font-semibold text-foreground tracking-tight">HBMaster AI Insights</h3>
+              <p className="text-[11px] text-muted-foreground/40">Automatische anomalie-detectie en aanbevelingen</p>
+            </div>
+            <div className="ml-auto flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[8px] font-mono text-red-400">2 kritiek</span>
+              <span className="text-[11px] font-medium text-red-400">2 kritiek</span>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
-            {aiInsights.map((a, i) => {
-              const Icon = a.icon;
-              return (
-                <div key={i} className={`flex items-start gap-2 p-2 rounded-lg border ${sevStyles[a.severity]}`}>
-                  <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${sevDot[a.severity]}`} />
-                  <span className="text-[9px] font-mono text-foreground/80 leading-relaxed">{a.text}</span>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {aiInsights.map((a, i) => (
+              <div key={i} className={`flex items-start gap-2.5 p-3 rounded-xl border ${sevStyles[a.severity]}`}>
+                <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sevDot[a.severity]}`} />
+                <span className="text-[12px] text-foreground/70 leading-relaxed">{a.text}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {kpis.map(kpi => (
-            <KPIExecutiveCard
-              key={kpi.id}
-              kpi={kpi}
-              onClick={() => setActiveKPI(kpi.id as ActiveKPI)}
-            />
-          ))}
+        <div>
+          <h3 className="text-[13px] font-semibold text-muted-foreground/50 tracking-wide mb-3">Kernprestatie-indicatoren</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map(kpi => (
+              <KPIExecutiveCard
+                key={kpi.id}
+                kpi={kpi}
+                onClick={() => setActiveKPI(kpi.id as ActiveKPI)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
