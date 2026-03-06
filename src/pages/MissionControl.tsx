@@ -125,6 +125,7 @@ const MissionControl = () => {
           )}
         </main>
       </div>
+      <MCWorkingModeToggle isWorking={workingMode} onToggle={() => setWorkingMode(!workingMode)} />
     </div>
   );
 };
