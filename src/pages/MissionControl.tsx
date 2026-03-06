@@ -73,7 +73,7 @@ const MissionControl = () => {
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {view !== "chat" && <MCHologramBackground />}
-        <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} />
+        <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} onNavigate={handleNavigate} />
 
         <main className="flex-1 min-h-0 flex flex-col md:flex-row relative z-10">
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
