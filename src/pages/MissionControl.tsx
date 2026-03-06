@@ -61,9 +61,10 @@ const MissionControl = () => {
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [workingMode, setWorkingMode] = useState(false);
 
   return (
-    <div className="mc-dark flex h-[100dvh] w-full overflow-hidden">
+    <div className={`${workingMode ? "" : "mc-dark"} flex h-[100dvh] w-full overflow-hidden transition-colors duration-500`}>
       <MCMobileMenu active={view} onNavigate={handleNavigate} open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div className="hidden md:flex">
