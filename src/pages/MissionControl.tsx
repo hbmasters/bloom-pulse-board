@@ -17,6 +17,7 @@ import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
+import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
@@ -60,9 +61,10 @@ const MissionControl = () => {
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [workingMode, setWorkingMode] = useState(false);
 
   return (
-    <div className="mc-dark flex h-[100dvh] w-full overflow-hidden">
+    <div className={`${workingMode ? "" : "mc-dark"} flex h-[100dvh] w-full overflow-hidden transition-colors duration-500`}>
       <MCMobileMenu active={view} onNavigate={handleNavigate} open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div className="hidden md:flex">
@@ -123,6 +125,7 @@ const MissionControl = () => {
           )}
         </main>
       </div>
+      <MCWorkingModeToggle isWorking={workingMode} onToggle={() => setWorkingMode(!workingMode)} />
     </div>
   );
 };
