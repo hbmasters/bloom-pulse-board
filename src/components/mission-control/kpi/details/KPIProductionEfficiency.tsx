@@ -1,4 +1,4 @@
-import { Factory, Gauge, TrendingUp } from "lucide-react";
+import { Factory, Gauge } from "lucide-react";
 import KPIDetailLayout from "../KPIDetailLayout";
 import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
@@ -33,47 +33,47 @@ const KPIProductionEfficiency = ({ onBack }: { onBack: () => void }) => (
   <KPIDetailLayout title="Productie Efficiëntie" subtitle="W-APU, O-APU, P-APU, C-APU en lijnprestaties" icon={Factory} onBack={onBack}>
     {(filter: PeriodFilterState) => (
       <>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {metrics.map(m => <KPIMetricCard key={m.id} metric={m} />)}
         </div>
 
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Gauge className="w-4 h-4 text-primary" />
-            <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">Lijn prestaties</h3>
+        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Gauge className="w-4 h-4 text-primary/70" />
+            <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Lijn prestaties</h3>
           </div>
-          <div className="space-y-1">
-            <div className="grid grid-cols-5 text-[8px] font-mono text-muted-foreground/50 uppercase pb-1 border-b border-border/50">
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-5 text-[11px] text-muted-foreground/40 pb-2 border-b border-border/30">
               <span>Lijn</span><span>W-APU</span><span>O-APU</span><span>Eff %</span><span>Status</span>
             </div>
             {lines.map(l => (
-              <div key={l.name} className="grid grid-cols-5 items-center text-[10px] font-mono py-0.5">
-                <span className="font-bold text-foreground">{l.name}</span>
-                <span className="text-muted-foreground">{l.wapu}</span>
-                <span className="text-muted-foreground">{l.oapu}</span>
-                <span className={`font-bold ${l.status === "healthy" ? "text-accent" : l.status === "warning" ? "text-yellow-500" : "text-red-500"}`}>{l.eff}%</span>
+              <div key={l.name} className="grid grid-cols-5 items-center text-[13px] py-1">
+                <span className="font-semibold text-foreground">{l.name}</span>
+                <span className="text-muted-foreground/70">{l.wapu}</span>
+                <span className="text-muted-foreground/70">{l.oapu}</span>
+                <span className={`font-semibold ${l.status === "healthy" ? "text-accent" : l.status === "warning" ? "text-yellow-500" : "text-red-500"}`}>{l.eff}%</span>
                 <span className={`w-2 h-2 rounded-full ${dot[l.status]}`} />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider mb-3">Efficiëntie trend per periode</h3>
-          <div className="flex items-end gap-1 h-20">
+        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+          <h3 className="text-[13px] font-semibold text-foreground tracking-tight mb-4">Efficiëntie trend per periode</h3>
+          <div className="flex items-end gap-1.5 h-24">
             {[218, 215, 212, 214, 210, 211, 209, 210, 208, 208, 0, 0, 0].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div
-                  className={`w-full rounded-t-sm ${i < 10 ? (v >= 220 ? "bg-accent/60" : v >= 200 ? "bg-yellow-500/50" : "bg-red-500/50") : "bg-border/20"}`}
+                  className={`w-full rounded-t ${i < 10 ? (v >= 220 ? "bg-accent/50" : v >= 200 ? "bg-yellow-500/40" : "bg-red-500/40") : "bg-border/15"}`}
                   style={{ height: v > 0 ? `${((v - 180) / 50) * 100}%` : "4px" }}
                 />
-                <span className="text-[7px] font-mono text-muted-foreground/50">P{i + 1}</span>
+                <span className="text-[10px] text-muted-foreground/40">P{i + 1}</span>
               </div>
             ))}
           </div>
-          <div className="mt-1 flex items-center gap-1">
-            <div className="flex-1 border-t border-dashed border-accent/30" />
-            <span className="text-[7px] font-mono text-accent/60">norm 220</span>
+          <div className="mt-2 flex items-center gap-1">
+            <div className="flex-1 border-t border-dashed border-accent/20" />
+            <span className="text-[10px] text-accent/50">norm 220</span>
           </div>
         </div>
       </>

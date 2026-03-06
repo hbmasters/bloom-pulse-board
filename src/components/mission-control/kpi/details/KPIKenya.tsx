@@ -1,4 +1,4 @@
-import { Globe, TrendingUp, Factory, Truck, DollarSign } from "lucide-react";
+import { Globe, Factory, Truck, DollarSign } from "lucide-react";
 import KPIDetailLayout from "../KPIDetailLayout";
 import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
@@ -32,27 +32,27 @@ const KPIKenya = ({ onBack }: { onBack: () => void }) => (
   <KPIDetailLayout title="HBM Kenya Performance" subtitle="Strategische prestatiemonitor Kenya operatie" icon={Globe} onBack={onBack}>
     {(filter: PeriodFilterState) => (
       <>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {metrics.map(m => <KPIMetricCard key={m.id} metric={m} />)}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {sections.map(sec => {
             const SIcon = sec.icon;
             return (
-              <div key={sec.title} className="rounded-xl border border-border bg-card/50 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <SIcon className="w-4 h-4 text-primary" />
-                  <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">{sec.title}</h3>
+              <div key={sec.title} className="rounded-2xl border border-border/50 bg-card/50 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <SIcon className="w-4 h-4 text-primary/70" />
+                  <h3 className="text-[13px] font-semibold text-foreground tracking-tight">{sec.title}</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {sec.items.map(item => (
                     <div key={item.label}>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-muted-foreground">{item.label}</span>
-                        <span className="font-bold text-foreground">{item.value}</span>
+                      <div className="flex justify-between text-[13px]">
+                        <span className="text-muted-foreground/60">{item.label}</span>
+                        <span className="font-semibold text-foreground">{item.value}</span>
                       </div>
-                      <p className="text-[8px] font-mono text-muted-foreground/50">{item.sub}</p>
+                      <p className="text-[11px] text-muted-foreground/35 mt-0.5">{item.sub}</p>
                     </div>
                   ))}
                 </div>
@@ -61,16 +61,16 @@ const KPIKenya = ({ onBack }: { onBack: () => void }) => (
           })}
         </div>
 
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider mb-3">Omzet trend per periode</h3>
-          <div className="flex items-end gap-1 h-20">
+        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+          <h3 className="text-[13px] font-semibold text-foreground tracking-tight mb-4">Omzet trend per periode</h3>
+          <div className="flex items-end gap-1.5 h-24">
             {[320, 330, 340, 355, 360, 375, 380, 390, 405, 420, 0, 0, 0].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div
-                  className={`w-full rounded-t-sm ${i < 10 ? "bg-accent/60" : "bg-border/20"}`}
+                  className={`w-full rounded-t ${i < 10 ? "bg-accent/50" : "bg-border/15"}`}
                   style={{ height: v > 0 ? `${((v - 300) / 150) * 100}%` : "4px" }}
                 />
-                <span className="text-[7px] font-mono text-muted-foreground/50">P{i + 1}</span>
+                <span className="text-[10px] text-muted-foreground/40">P{i + 1}</span>
               </div>
             ))}
           </div>

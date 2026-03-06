@@ -29,41 +29,41 @@ const KPIProductCost = ({ onBack }: { onBack: () => void }) => (
   <KPIDetailLayout title="Product Cost Control" subtitle="Marge-analyse per klant, product en categorie" icon={PiggyBank} onBack={onBack}>
     {(filter: PeriodFilterState) => (
       <>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {metrics.map(m => <KPIMetricCard key={m.id} metric={m} />)}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-border bg-card/50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-primary" />
-              <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">Marge per klant</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-primary/70" />
+              <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Marge per klant</h3>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {topCustomers.map(c => (
                 <div key={c.name} className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground">{c.name}</span>
-                  <div className="flex items-center gap-2">
+                  <span className="text-[13px] text-muted-foreground/70">{c.name}</span>
+                  <div className="flex items-center gap-2.5">
                     <span className={`w-2 h-2 rounded-full ${c.status === "healthy" ? "bg-accent" : c.status === "warning" ? "bg-yellow-500" : "bg-red-500"}`} />
-                    <span className="text-[10px] font-mono font-bold text-foreground">{c.margin}</span>
+                    <span className="text-[13px] font-semibold text-foreground">{c.margin}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card/50 p-4">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+            <div className="flex items-center gap-2 mb-4">
               <Package className="w-4 h-4 text-bloom-warm" />
-              <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">Marge per categorie</h3>
+              <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Marge per categorie</h3>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {categories.map(c => (
                 <div key={c.name} className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground">{c.name}</span>
-                  <div className="flex items-center gap-2">
+                  <span className="text-[13px] text-muted-foreground/70">{c.name}</span>
+                  <div className="flex items-center gap-2.5">
                     <span className={`w-2 h-2 rounded-full ${c.status === "healthy" ? "bg-accent" : c.status === "warning" ? "bg-yellow-500" : "bg-red-500"}`} />
-                    <span className="text-[10px] font-mono font-bold text-foreground">{c.margin}</span>
+                    <span className="text-[13px] font-semibold text-foreground">{c.margin}</span>
                   </div>
                 </div>
               ))}
@@ -71,19 +71,19 @@ const KPIProductCost = ({ onBack }: { onBack: () => void }) => (
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 text-accent" />
-            <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">Marge ontwikkeling per periode</h3>
+            <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Marge ontwikkeling per periode</h3>
           </div>
-          <div className="flex items-end gap-1 h-24">
+          <div className="flex items-end gap-1.5 h-28">
             {[36.5, 37.2, 37.8, 36.9, 37.5, 38.1, 37.0, 36.5, 36.8, 36.2, 0, 0, 0].map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div
-                  className={`w-full rounded-t-sm transition-all ${i < 10 ? (v >= 38 ? "bg-accent/60" : v >= 36 ? "bg-yellow-500/50" : "bg-red-500/50") : "bg-border/20"}`}
+                  className={`w-full rounded-t transition-all ${i < 10 ? (v >= 38 ? "bg-accent/50" : v >= 36 ? "bg-yellow-500/40" : "bg-red-500/40") : "bg-border/15"}`}
                   style={{ height: v > 0 ? `${((v - 34) / 6) * 100}%` : "4px" }}
                 />
-                <span className="text-[7px] font-mono text-muted-foreground/50">P{i + 1}</span>
+                <span className="text-[10px] text-muted-foreground/40">P{i + 1}</span>
               </div>
             ))}
           </div>

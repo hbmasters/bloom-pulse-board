@@ -1,4 +1,4 @@
-import { PieChart, AlertTriangle, TrendingUp } from "lucide-react";
+import { PieChart, AlertTriangle } from "lucide-react";
 import KPIDetailLayout from "../KPIDetailLayout";
 import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
@@ -23,33 +23,32 @@ const KPIRevenueDistribution = ({ onBack }: { onBack: () => void }) => (
   <KPIDetailLayout title="Omzetverdeling & Groei" subtitle="Klantconcentratie en groeiontwikkeling" icon={PieChart} onBack={onBack}>
     {(filter: PeriodFilterState) => (
       <>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {metrics.map(m => <KPIMetricCard key={m.id} metric={m} />)}
         </div>
 
-        {/* Warning banner */}
-        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 flex items-center gap-2">
+        <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-4 flex items-center gap-3">
           <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-          <span className="text-[10px] font-mono text-red-400">
+          <span className="text-[13px] text-red-400/80">
             <strong>Let op:</strong> Albert Heijn overschrijdt de 25% omzetgrens (27.4%). Risico op klantafhankelijkheid.
           </span>
         </div>
 
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <h3 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider mb-3">Omzetverdeling per klant</h3>
-          <div className="space-y-2">
+        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
+          <h3 className="text-[13px] font-semibold text-foreground tracking-tight mb-4">Omzetverdeling per klant</h3>
+          <div className="space-y-3">
             {customers.map(c => (
               <div key={c.name} className="flex items-center gap-3">
-                <span className="text-[9px] font-mono text-muted-foreground w-24 truncate">{c.name}</span>
-                <div className="flex-1 h-5 bg-border/20 rounded-full overflow-hidden">
+                <span className="text-[12px] text-muted-foreground/70 w-24 truncate">{c.name}</span>
+                <div className="flex-1 h-5 bg-border/15 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${c.status === "critical" ? "bg-red-500/40" : c.status === "warning" ? "bg-yellow-500/40" : "bg-primary/30"}`}
+                    className={`h-full rounded-full ${c.status === "critical" ? "bg-red-500/30" : c.status === "warning" ? "bg-yellow-500/30" : "bg-primary/20"}`}
                     style={{ width: `${c.share}%` }}
                   />
                 </div>
-                <span className="text-[9px] font-mono font-bold text-foreground w-12 text-right">{c.share}%</span>
-                <span className="text-[9px] font-mono text-muted-foreground w-14 text-right">{c.revenue}</span>
-                <span className={`text-[9px] font-mono font-bold w-12 text-right ${c.growth.startsWith("+") ? "text-accent" : "text-red-400"}`}>{c.growth}</span>
+                <span className="text-[12px] font-semibold text-foreground w-12 text-right">{c.share}%</span>
+                <span className="text-[12px] text-muted-foreground/50 w-16 text-right">{c.revenue}</span>
+                <span className={`text-[12px] font-semibold w-14 text-right ${c.growth.startsWith("+") ? "text-accent" : "text-red-400"}`}>{c.growth}</span>
               </div>
             ))}
           </div>
