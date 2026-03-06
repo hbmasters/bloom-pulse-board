@@ -1,151 +1,149 @@
 import { useState } from "react";
-import { Factory, ShoppingCart, Truck, DollarSign, BarChart3, ChevronRight, Users, AlertTriangle } from "lucide-react";
+import { BarChart3, PiggyBank, Users, Trash2, PieChart, Factory, Truck, LayoutGrid, Globe, Brain, AlertTriangle, TrendingUp, Zap, ChevronRight } from "lucide-react";
 import PageAgentBadges from "./PageAgentBadges";
-import KPIAIMonitor from "./kpi/KPIAIMonitor";
-import KPIOperations from "./kpi/KPIOperations";
-import KPISales from "./kpi/KPISales";
-import KPIProcurement from "./kpi/KPIProcurement";
-import KPIFinance from "./kpi/KPIFinance";
+import KPIPeriodFilter, { PeriodFilterState } from "./kpi/KPIPeriodFilter";
+import KPIExecutiveCard, { ExecutiveKPI } from "./kpi/KPIExecutiveCard";
 
-type Department = null | "sales" | "procurement" | "operations" | "finance";
+// Detail pages
+import KPIProductCost from "./kpi/details/KPIProductCost";
+import KPILaborPerStem from "./kpi/details/KPILaborPerStem";
+import KPIWaste from "./kpi/details/KPIWaste";
+import KPIRevenueDistribution from "./kpi/details/KPIRevenueDistribution";
+import KPIProductionEfficiency from "./kpi/details/KPIProductionEfficiency";
+import KPIProcurementDetail from "./kpi/details/KPIProcurementDetail";
+import KPICapacity from "./kpi/details/KPICapacity";
+import KPIKenya from "./kpi/details/KPIKenya";
 
-const departments = [
+type ActiveKPI = null | "product-cost" | "labor" | "waste" | "revenue" | "production" | "procurement" | "capacity" | "kenya";
+
+const kpis: ExecutiveKPI[] = [
   {
-    key: "sales" as const,
-    title: "Sales",
-    subtitle: "Omzet, orders & klantprestatie",
-    icon: ShoppingCart,
-    color: "text-primary",
-    bgColor: "bg-primary/10 border-primary/20 hover:border-primary/40 hover:shadow-primary/10",
-    stats: [
-      { label: "Omzet", value: "€2.4M", status: "healthy" as const },
-      { label: "Orders", value: "1,842", status: "healthy" as const },
-    ],
+    id: "product-cost", title: "Product Cost Control", icon: PiggyBank,
+    value: "36.2%", unit: "marge", target: "38.0%", diffTarget: "-1.8pp", diffTargetDir: "negative",
+    trendPeriod: "-0.3pp", trendPeriodDir: "down", trendYear: "-1.2pp", trendYearDir: "down", status: "warning",
   },
   {
-    key: "procurement" as const,
-    title: "Procurement",
-    subtitle: "Inkoop, leveranciers & kosten",
-    icon: Truck,
-    color: "text-bloom-warm",
-    bgColor: "bg-bloom-warm/10 border-bloom-warm/20 hover:border-bloom-warm/40 hover:shadow-bloom-warm/10",
-    stats: [
-      { label: "Prijs/steel", value: "€0.18", status: "warning" as const },
-      { label: "Leveranciers", value: "8", status: "healthy" as const },
-    ],
+    id: "labor", title: "Arbeid per Steel", icon: Users,
+    value: "€0.038", target: "< €0.042", diffTarget: "OK", diffTargetDir: "positive",
+    trendPeriod: "+4.8%", trendPeriodDir: "up", trendYear: "+8.2%", trendYearDir: "up", status: "warning",
   },
   {
-    key: "operations" as const,
-    title: "Operations",
-    subtitle: "Productie, lijnen & efficiency",
-    icon: Factory,
-    color: "text-accent",
-    bgColor: "bg-accent/10 border-accent/20 hover:border-accent/40 hover:shadow-accent/10",
-    stats: [
-      { label: "Output", value: "12,400 bq", status: "healthy" as const },
-      { label: "Efficiency", value: "87.5%", status: "warning" as const },
-    ],
+    id: "waste", title: "Uitval & Afschrijving", icon: Trash2,
+    value: "3.4%", target: "3.0%", diffTarget: "+0.4pp", diffTargetDir: "negative",
+    trendPeriod: "+0.2pp", trendPeriodDir: "up", trendYear: "+0.6pp", trendYearDir: "up", status: "critical",
   },
   {
-    key: "finance" as const,
-    title: "Finance",
-    subtitle: "Marge, kosten & cashflow",
-    icon: DollarSign,
-    color: "text-bloom-sky",
-    bgColor: "bg-bloom-sky/10 border-bloom-sky/20 hover:border-bloom-sky/40 hover:shadow-bloom-sky/10",
-    stats: [
-      { label: "Marge", value: "34.2%", status: "healthy" as const },
-      { label: "EBITDA", value: "€820K", status: "healthy" as const },
-    ],
+    id: "revenue", title: "Omzetverdeling", icon: PieChart,
+    value: "27.4%", unit: "top klant", target: "< 25%", diffTarget: "+2.4pp", diffTargetDir: "negative",
+    trendPeriod: "+1.2pp", trendPeriodDir: "up", trendYear: "+3.1pp", trendYearDir: "up", status: "critical",
+  },
+  {
+    id: "production", title: "Productie Efficiëntie", icon: Factory,
+    value: "208", unit: "st/p/u", target: "220", diffTarget: "-5.5%", diffTargetDir: "negative",
+    trendPeriod: "-1.0%", trendPeriodDir: "down", trendYear: "-4.2%", trendYearDir: "down", status: "warning",
+  },
+  {
+    id: "procurement", title: "Inkoop & Waardering", icon: Truck,
+    value: "€0.18", unit: "/steel", target: "€0.17", diffTarget: "+5.9%", diffTargetDir: "negative",
+    trendPeriod: "+2.8%", trendPeriodDir: "up", trendYear: "+12.5%", trendYearDir: "up", status: "warning",
+  },
+  {
+    id: "capacity", title: "Bedcapaciteit", icon: LayoutGrid,
+    value: "86.4%", target: "90%", diffTarget: "-3.6pp", diffTargetDir: "negative",
+    trendPeriod: "-0.6pp", trendPeriodDir: "down", trendYear: "-2.1pp", trendYearDir: "down", status: "warning",
+  },
+  {
+    id: "kenya", title: "HBM Kenya", icon: Globe,
+    value: "€420K", target: "€390K", diffTarget: "+7.7%", diffTargetDir: "positive",
+    trendPeriod: "+18.5%", trendPeriodDir: "up", trendYear: "+24.2%", trendYearDir: "up", status: "healthy",
   },
 ];
 
-const statusDot = {
-  healthy: "bg-accent",
+const aiInsights = [
+  { severity: "critical" as const, icon: AlertTriangle, text: "Albert Heijn overschrijdt 25% omzetgrens (27.4%) — klantafhankelijkheid risico" },
+  { severity: "critical" as const, icon: AlertTriangle, text: "Uitval boven 3% norm (3.4%) — stijgende trend afgelopen 4 perioden" },
+  { severity: "warning" as const, icon: TrendingUp, text: "Arbeidskosten per steel stijgend (+4.8% vs vorige periode)" },
+  { severity: "warning" as const, icon: Zap, text: "Productie-efficiëntie H3 lijn 23% onder target — operator verloop" },
+  { severity: "info" as const, icon: TrendingUp, text: "Kenya operatie overtreft forecast met 8% — positieve groeitrend" },
+];
+
+const sevStyles = {
+  info: "border-primary/20 bg-primary/5",
+  warning: "border-yellow-500/20 bg-yellow-500/5",
+  critical: "border-red-500/20 bg-red-500/5",
+};
+const sevDot = {
+  info: "bg-primary",
   warning: "bg-yellow-500",
   critical: "bg-red-500 animate-pulse",
 };
 
 const KPIDashboard = () => {
-  const [activeDept, setActiveDept] = useState<Department>(null);
+  const [activeKPI, setActiveKPI] = useState<ActiveKPI>(null);
+  const [filter, setFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: "previous",
+  });
 
-  if (activeDept === "operations") return <KPIOperations onBack={() => setActiveDept(null)} />;
-  if (activeDept === "sales") return <KPISales onBack={() => setActiveDept(null)} />;
-  if (activeDept === "procurement") return <KPIProcurement onBack={() => setActiveDept(null)} />;
-  if (activeDept === "finance") return <KPIFinance onBack={() => setActiveDept(null)} />;
+  const goBack = () => setActiveKPI(null);
+
+  if (activeKPI === "product-cost") return <KPIProductCost onBack={goBack} />;
+  if (activeKPI === "labor") return <KPILaborPerStem onBack={goBack} />;
+  if (activeKPI === "waste") return <KPIWaste onBack={goBack} />;
+  if (activeKPI === "revenue") return <KPIRevenueDistribution onBack={goBack} />;
+  if (activeKPI === "production") return <KPIProductionEfficiency onBack={goBack} />;
+  if (activeKPI === "procurement") return <KPIProcurementDetail onBack={goBack} />;
+  if (activeKPI === "capacity") return <KPICapacity onBack={goBack} />;
+  if (activeKPI === "kenya") return <KPIKenya onBack={goBack} />;
 
   return (
     <div className="flex flex-col h-full p-3 md:p-4 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <BarChart3 className="w-4 h-4 text-muted-foreground" />
-        <h2 className="text-xs font-black text-foreground uppercase tracking-wider">KPI Command Center</h2>
-        <span className="text-[9px] font-mono text-muted-foreground/50 ml-1">HBM • 500 medewerkers</span>
+      <div className="flex items-center gap-2 mb-2">
+        <BarChart3 className="w-4 h-4 text-primary" />
+        <h2 className="text-xs font-black text-foreground uppercase tracking-wider">Executive KPI Dashboard</h2>
+        <span className="text-[9px] font-mono text-muted-foreground/50 ml-1">HBM • ~500 medewerkers • 13 perioden</span>
       </div>
-      <PageAgentBadges pageId="kpis" className="mb-3" />
 
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
-        {/* AI Monitoring */}
-        <KPIAIMonitor />
+      <PageAgentBadges pageId="kpis" className="mb-2" />
+      <KPIPeriodFilter value={filter} onChange={setFilter} />
 
-        {/* Department buttons */}
-        <div>
-          <h3 className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider mb-2">Afdelingen</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {departments.map(dept => {
-              const Icon = dept.icon;
+      <div className="flex-1 min-h-0 overflow-y-auto mt-3 space-y-4">
+        {/* AI Insights */}
+        <div className="rounded-xl border border-border bg-card/80 backdrop-blur-sm p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Brain className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <h3 className="text-[10px] font-black text-foreground uppercase tracking-wider">HBMaster AI Insights</h3>
+            <div className="ml-auto flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[8px] font-mono text-red-400">2 kritiek</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
+            {aiInsights.map((a, i) => {
+              const Icon = a.icon;
               return (
-                <button
-                  key={dept.key}
-                  onClick={() => setActiveDept(dept.key)}
-                  className={`group text-left p-4 rounded-xl border transition-all hover:shadow-lg ${dept.bgColor}`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-10 h-10 rounded-xl bg-card/60 border border-border flex items-center justify-center ${dept.color} group-hover:scale-105 transition-transform`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-black text-foreground">{dept.title}</h3>
-                        <p className="text-[10px] text-muted-foreground">{dept.subtitle}</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-foreground/60 group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {dept.stats.map(s => (
-                      <div key={s.label} className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${statusDot[s.status]}`} />
-                        <span className="text-[9px] font-mono text-muted-foreground">{s.label}:</span>
-                        <span className="text-[10px] font-mono font-bold text-foreground">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </button>
+                <div key={i} className={`flex items-start gap-2 p-2 rounded-lg border ${sevStyles[a.severity]}`}>
+                  <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${sevDot[a.severity]}`} />
+                  <span className="text-[9px] font-mono text-foreground/80 leading-relaxed">{a.text}</span>
+                </div>
               );
             })}
           </div>
         </div>
 
-        {/* Quick alerts summary */}
-        <div className="rounded-xl border border-border bg-card/50 p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">Actieve Alerts</span>
-          </div>
-          <div className="space-y-1.5">
-            {[
-              { text: "H3 productiviteit onder drempel — 23% onder target", severity: "critical" as const },
-              { text: "Inkoopprijs rozen +12% vs vorige week", severity: "warning" as const },
-              { text: "Verpakkingsfouten stijgend (2.8%)", severity: "warning" as const },
-              { text: "Arbeidskosten boven budget (+4.8%)", severity: "warning" as const },
-            ].map((a, i) => (
-              <div key={i} className="flex items-center gap-2 text-[9px] font-mono text-muted-foreground">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot[a.severity]}`} />
-                {a.text}
-              </div>
-            ))}
-          </div>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {kpis.map(kpi => (
+            <KPIExecutiveCard
+              key={kpi.id}
+              kpi={kpi}
+              onClick={() => setActiveKPI(kpi.id as ActiveKPI)}
+            />
+          ))}
         </div>
       </div>
     </div>
