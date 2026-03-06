@@ -19,19 +19,19 @@ export interface ExecutiveKPI {
 }
 
 const statusStyles: Record<KPIStatus, { border: string; dot: string; glow: string }> = {
-  healthy:  { border: "border-accent/30", dot: "bg-accent", glow: "shadow-accent/5" },
-  warning:  { border: "border-yellow-500/30", dot: "bg-yellow-500", glow: "shadow-yellow-500/5" },
-  critical: { border: "border-red-500/30", dot: "bg-red-500 animate-pulse", glow: "shadow-red-500/5" },
+  healthy:  { border: "border-accent/25", dot: "bg-accent", glow: "shadow-accent/5" },
+  warning:  { border: "border-yellow-500/25", dot: "bg-yellow-500", glow: "shadow-yellow-500/5" },
+  critical: { border: "border-red-500/25", dot: "bg-red-500 animate-pulse", glow: "shadow-red-500/5" },
 };
 
 const TrendBadge = ({ label, value, dir }: { label: string; value: string; dir: "up" | "down" | "neutral" }) => {
   const Icon = dir === "up" ? TrendingUp : dir === "down" ? TrendingDown : Minus;
   const color = dir === "up" ? "text-accent" : dir === "down" ? "text-red-400" : "text-muted-foreground";
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-[8px] font-mono text-muted-foreground/60 uppercase">{label}</span>
-      <Icon className={`w-3 h-3 ${color}`} />
-      <span className={`text-[9px] font-mono font-bold ${color}`}>{value}</span>
+    <div className="flex items-center gap-1.5">
+      <span className="text-[11px] text-muted-foreground/50 tracking-wide">{label}</span>
+      <Icon className={`w-3.5 h-3.5 ${color}`} />
+      <span className={`text-xs font-semibold ${color}`}>{value}</span>
     </div>
   );
 };
@@ -44,40 +44,40 @@ const KPIExecutiveCard = ({ kpi, onClick }: { kpi: ExecutiveKPI; onClick: () => 
   return (
     <button
       onClick={onClick}
-      className={`group text-left w-full p-4 rounded-xl border ${s.border} bg-card/80 backdrop-blur-sm hover:shadow-lg ${s.glow} transition-all`}
+      className={`group text-left w-full p-5 rounded-2xl border ${s.border} bg-card/80 backdrop-blur-sm hover:shadow-lg ${s.glow} transition-all duration-200`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
           <div className={`w-2 h-2 rounded-full ${s.dot}`} />
-          <Icon className="w-4 h-4 text-primary" />
-          <span className="text-[10px] font-mono font-bold text-foreground uppercase tracking-wider">{kpi.title}</span>
+          <Icon className="w-4 h-4 text-primary/70" />
+          <span className="text-[13px] font-semibold text-foreground/80 tracking-tight">{kpi.title}</span>
         </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
       </div>
 
-      {/* Value */}
-      <div className="mb-3">
-        <div className="text-2xl font-black text-foreground leading-none animate-count-up">
+      {/* Value — dominant element */}
+      <div className="mb-4">
+        <div className="text-3xl font-extrabold text-foreground leading-none tracking-tight animate-count-up">
           {kpi.value}
-          {kpi.unit && <span className="text-xs font-normal text-muted-foreground ml-1">{kpi.unit}</span>}
+          {kpi.unit && <span className="text-sm font-normal text-muted-foreground/60 ml-1.5">{kpi.unit}</span>}
         </div>
       </div>
 
       {/* Target row */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-[9px] font-mono text-muted-foreground">
-          Target: <span className="font-bold text-foreground/70">{kpi.target}</span>
-        </div>
-        <div className={`text-[10px] font-mono font-bold ${diffColor}`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[12px] text-muted-foreground/50">
+          Target: <span className="font-medium text-foreground/60">{kpi.target}</span>
+        </span>
+        <span className={`text-[12px] font-semibold ${diffColor}`}>
           {kpi.diffTarget}
-        </div>
+        </span>
       </div>
 
       {/* Trend row */}
-      <div className="flex items-center gap-4 pt-2 border-t border-border/50">
-        <TrendBadge label="per" value={kpi.trendPeriod} dir={kpi.trendPeriodDir} />
-        <TrendBadge label="jr" value={kpi.trendYear} dir={kpi.trendYearDir} />
+      <div className="flex items-center gap-5 pt-3 border-t border-border/30">
+        <TrendBadge label="periode" value={kpi.trendPeriod} dir={kpi.trendPeriodDir} />
+        <TrendBadge label="jaar" value={kpi.trendYear} dir={kpi.trendYearDir} />
       </div>
     </button>
   );

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 
+export type TimeFilter = "day" | "week" | "month" | "custom";
+
 export interface PeriodFilterState {
   year: number;
   period: number;
   comparison: "previous" | "lastYear" | "forecast" | null;
 }
 
-interface Props {
+interface KPIPeriodFilterProps {
   value: PeriodFilterState;
   onChange: (v: PeriodFilterState) => void;
 }
@@ -22,15 +24,15 @@ const comparisons = [
   { key: "forecast" as const, label: "vs Forecast" },
 ];
 
-const KPIPeriodFilter = ({ value, onChange }: Props) => {
+const KPIPeriodFilter = ({ value, onChange }: KPIPeriodFilterProps) => {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2.5 flex-wrap">
       {/* Year */}
       <div className="relative">
         <select
           value={value.year}
           onChange={e => onChange({ ...value, year: Number(e.target.value) })}
-          className="appearance-none text-[10px] font-mono font-bold px-3 py-1.5 pr-7 rounded-lg border border-border bg-card text-foreground cursor-pointer hover:border-primary/30 transition-colors"
+          className="appearance-none text-[12px] font-medium px-3 py-2 pr-7 rounded-xl border border-border bg-card text-foreground cursor-pointer hover:border-primary/30 transition-colors"
         >
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
@@ -38,16 +40,16 @@ const KPIPeriodFilter = ({ value, onChange }: Props) => {
       </div>
 
       {/* Period */}
-      <div className="flex items-center gap-0.5">
-        <Calendar className="w-3 h-3 text-muted-foreground mr-1" />
+      <div className="flex items-center gap-1">
+        <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 mr-1" />
         {periods.map(p => (
           <button
             key={p}
             onClick={() => onChange({ ...value, period: p })}
-            className={`text-[9px] font-mono font-bold w-6 h-6 rounded-md border transition-all ${
+            className={`text-[11px] font-medium w-7 h-7 rounded-lg border transition-all ${
               value.period === p
-                ? "bg-primary/15 text-primary border-primary/30"
-                : "bg-card text-muted-foreground border-transparent hover:border-border"
+                ? "bg-primary/15 text-primary border-primary/30 font-semibold"
+                : "bg-transparent text-muted-foreground/60 border-transparent hover:border-border hover:text-foreground"
             }`}
           >
             {p}
@@ -55,17 +57,17 @@ const KPIPeriodFilter = ({ value, onChange }: Props) => {
         ))}
       </div>
 
-      <div className="h-4 w-px bg-border mx-1" />
+      <div className="h-5 w-px bg-border/50 mx-1" />
 
       {/* Comparison */}
       {comparisons.map(c => (
         <button
           key={c.key}
           onClick={() => onChange({ ...value, comparison: value.comparison === c.key ? null : c.key })}
-          className={`text-[9px] font-mono font-bold px-2.5 py-1.5 rounded-lg border transition-all ${
+          className={`text-[11px] font-medium px-3 py-1.5 rounded-xl border transition-all ${
             value.comparison === c.key
-              ? "bg-accent/15 text-accent border-accent/30"
-              : "bg-card text-muted-foreground border-border hover:border-accent/20"
+              ? "bg-accent/10 text-accent border-accent/25 font-semibold"
+              : "bg-transparent text-muted-foreground/50 border-border hover:border-accent/20 hover:text-foreground"
           }`}
         >
           {c.label}
