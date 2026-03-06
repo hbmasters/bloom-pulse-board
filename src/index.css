@@ -106,7 +106,7 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 24px -4px hsl(228 50% 55% / 0.2);
+    box-shadow: 0 0 24px -4px hsl(211 100% 50% / 0.2);
   }
 
   .animate-pulse-slow {
