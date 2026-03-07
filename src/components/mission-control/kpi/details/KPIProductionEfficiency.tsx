@@ -4,7 +4,8 @@ import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
 
 const metrics: MetricData[] = [
-  { id: "efficiency", title: "Huidige efficiëntie", value: "208", unit: "st/pers/uur", target: "220", change: "-5.5%", changeDir: "down", status: "warning", sparkline: [215, 212, 210, 209, 208] },
+  { id: "stelen-pp", title: "Stelen per persoon per uur", value: "208", unit: "st/pers/uur", target: "220", change: "-5.5%", changeDir: "down", status: "warning", sparkline: [215, 212, 210, 209, 208] },
+  { id: "efficiency", title: "Huidige efficiëntie", value: "94.5", unit: "%", target: "100%", change: "-2.1%", changeDir: "down", status: "warning", sparkline: [96, 95.5, 95, 94.8, 94.5] },
   { id: "w-apu", title: "W-APU", value: "195", unit: "bq/uur", target: "210", status: "warning" },
   { id: "o-apu", title: "O-APU", value: "210", unit: "bq/uur", status: "healthy" },
   { id: "p-apu", title: "P-APU (3m gem.)", value: "202", unit: "bq/uur", status: "warning" },
