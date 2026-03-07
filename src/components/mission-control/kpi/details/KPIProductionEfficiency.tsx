@@ -1,4 +1,4 @@
-import { Factory, Gauge } from "lucide-react";
+import { Factory, Gauge, Users } from "lucide-react";
 import KPIDetailLayout from "../KPIDetailLayout";
 import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
