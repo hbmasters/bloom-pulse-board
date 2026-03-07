@@ -12,7 +12,7 @@ const metrics: MetricData[] = [
   { id: "output", title: "Totale output", value: "12,400", unit: "bq", change: "+3.1%", changeDir: "up", status: "healthy" },
 ];
 
-const lines = [
+const handLines = [
   { name: "H1", wapu: 210, oapu: 210, eff: 100, status: "healthy" as const },
   { name: "H2", wapu: 205, oapu: 210, eff: 97.6, status: "healthy" as const },
   { name: "H3", wapu: 162, oapu: 210, eff: 77.1, status: "critical" as const },
@@ -20,6 +20,9 @@ const lines = [
   { name: "H5", wapu: 195, oapu: 210, eff: 92.9, status: "warning" as const },
   { name: "H6", wapu: 212, oapu: 210, eff: 101, status: "healthy" as const },
   { name: "H7", wapu: 188, oapu: 210, eff: 89.5, status: "warning" as const },
+];
+
+const bandLines = [
   { name: "B1", wapu: 320, oapu: 330, eff: 97, status: "healthy" as const },
   { name: "B2", wapu: 310, oapu: 330, eff: 93.9, status: "healthy" as const },
   { name: "B3", wapu: 295, oapu: 330, eff: 89.4, status: "warning" as const },
