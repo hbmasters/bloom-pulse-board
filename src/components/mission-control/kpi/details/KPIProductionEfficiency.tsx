@@ -1,4 +1,4 @@
-import { Factory, Gauge } from "lucide-react";
+import { Factory, Gauge, Users } from "lucide-react";
 import KPIDetailLayout from "../KPIDetailLayout";
 import KPIMetricCard, { MetricData } from "../KPIMetricCard";
 import { PeriodFilterState } from "../KPIPeriodFilter";
@@ -12,7 +12,7 @@ const metrics: MetricData[] = [
   { id: "output", title: "Totale output", value: "12,400", unit: "bq", change: "+3.1%", changeDir: "up", status: "healthy" },
 ];
 
-const lines = [
+const handLines = [
   { name: "H1", wapu: 210, oapu: 210, eff: 100, status: "healthy" as const },
   { name: "H2", wapu: 205, oapu: 210, eff: 97.6, status: "healthy" as const },
   { name: "H3", wapu: 162, oapu: 210, eff: 77.1, status: "critical" as const },
@@ -20,6 +20,9 @@ const lines = [
   { name: "H5", wapu: 195, oapu: 210, eff: 92.9, status: "warning" as const },
   { name: "H6", wapu: 212, oapu: 210, eff: 101, status: "healthy" as const },
   { name: "H7", wapu: 188, oapu: 210, eff: 89.5, status: "warning" as const },
+];
+
+const bandLines = [
   { name: "B1", wapu: 320, oapu: 330, eff: 97, status: "healthy" as const },
   { name: "B2", wapu: 310, oapu: 330, eff: 93.9, status: "healthy" as const },
   { name: "B3", wapu: 295, oapu: 330, eff: 89.4, status: "warning" as const },
@@ -37,26 +40,28 @@ const KPIProductionEfficiency = ({ onBack }: { onBack: () => void }) => (
           {metrics.map(m => <KPIMetricCard key={m.id} metric={m} />)}
         </div>
 
-        <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Gauge className="w-4 h-4 text-primary/70" />
-            <h3 className="text-[13px] font-semibold text-foreground tracking-tight">Lijn prestaties</h3>
-          </div>
-          <div className="space-y-1.5">
-            <div className="grid grid-cols-5 text-[11px] text-muted-foreground/40 pb-2 border-b border-border/30">
-              <span>Lijn</span><span>W-APU</span><span>O-APU</span><span>Eff %</span><span>Status</span>
+        {[{ title: "Hand Afdeling", icon: Users, data: handLines }, { title: "Band Afdeling", icon: Gauge, data: bandLines }].map(section => (
+          <div key={section.title} className="rounded-2xl border border-border/50 bg-card/50 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <section.icon className="w-4 h-4 text-primary/70" />
+              <h3 className="text-[13px] font-semibold text-foreground tracking-tight">{section.title}</h3>
             </div>
-            {lines.map(l => (
-              <div key={l.name} className="grid grid-cols-5 items-center text-[13px] py-1">
-                <span className="font-semibold text-foreground">{l.name}</span>
-                <span className="text-muted-foreground/70">{l.wapu}</span>
-                <span className="text-muted-foreground/70">{l.oapu}</span>
-                <span className={`font-semibold ${l.status === "healthy" ? "text-accent" : l.status === "warning" ? "text-yellow-500" : "text-red-500"}`}>{l.eff}%</span>
-                <span className={`w-2 h-2 rounded-full ${dot[l.status]}`} />
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-5 text-[11px] text-muted-foreground/40 pb-2 border-b border-border/30">
+                <span>Lijn</span><span>W-APU</span><span>O-APU</span><span>Eff %</span><span>Status</span>
               </div>
-            ))}
+              {section.data.map(l => (
+                <div key={l.name} className="grid grid-cols-5 items-center text-[13px] py-1">
+                  <span className="font-semibold text-foreground">{l.name}</span>
+                  <span className="text-muted-foreground/70">{l.wapu}</span>
+                  <span className="text-muted-foreground/70">{l.oapu}</span>
+                  <span className={`font-semibold ${l.status === "healthy" ? "text-accent" : l.status === "warning" ? "text-yellow-500" : "text-red-500"}`}>{l.eff}%</span>
+                  <span className={`w-2 h-2 rounded-full ${dot[l.status]}`} />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
 
         <div className="rounded-2xl border border-border/50 bg-card/50 p-5">
           <h3 className="text-[13px] font-semibold text-foreground tracking-tight mb-4">Efficiëntie trend per periode</h3>
