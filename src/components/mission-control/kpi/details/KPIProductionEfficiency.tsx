@@ -14,21 +14,21 @@ const metrics: MetricData[] = [
 ];
 
 const handLines = [
-  { name: "H1", wapu: 210, oapu: 210, eff: 100, status: "healthy" as const },
-  { name: "H2", wapu: 205, oapu: 210, eff: 97.6, status: "healthy" as const },
-  { name: "H3", wapu: 162, oapu: 210, eff: 77.1, status: "critical" as const },
-  { name: "H4", wapu: 198, oapu: 210, eff: 94.3, status: "healthy" as const },
-  { name: "H5", wapu: 195, oapu: 210, eff: 92.9, status: "warning" as const },
-  { name: "H6", wapu: 212, oapu: 210, eff: 101, status: "healthy" as const },
-  { name: "H7", wapu: 188, oapu: 210, eff: 89.5, status: "warning" as const },
+  { name: "H1", stelenPP: 225, wapu: 210, oapu: 210, eff: 100, status: "healthy" as const },
+  { name: "H2", stelenPP: 218, wapu: 205, oapu: 210, eff: 97.6, status: "healthy" as const },
+  { name: "H3", stelenPP: 172, wapu: 162, oapu: 210, eff: 77.1, status: "critical" as const },
+  { name: "H4", stelenPP: 210, wapu: 198, oapu: 210, eff: 94.3, status: "healthy" as const },
+  { name: "H5", stelenPP: 205, wapu: 195, oapu: 210, eff: 92.9, status: "warning" as const },
+  { name: "H6", stelenPP: 228, wapu: 212, oapu: 210, eff: 101, status: "healthy" as const },
+  { name: "H7", stelenPP: 195, wapu: 188, oapu: 210, eff: 89.5, status: "warning" as const },
 ];
 
 const bandLines = [
-  { name: "B1", wapu: 320, oapu: 330, eff: 97, status: "healthy" as const },
-  { name: "B2", wapu: 310, oapu: 330, eff: 93.9, status: "healthy" as const },
-  { name: "B3", wapu: 295, oapu: 330, eff: 89.4, status: "warning" as const },
-  { name: "B4", wapu: 330, oapu: 330, eff: 100, status: "healthy" as const },
-  { name: "B5", wapu: 305, oapu: 330, eff: 92.4, status: "warning" as const },
+  { name: "B1", stelenPP: 240, wapu: 320, oapu: 330, eff: 97, status: "healthy" as const },
+  { name: "B2", stelenPP: 232, wapu: 310, oapu: 330, eff: 93.9, status: "healthy" as const },
+  { name: "B3", stelenPP: 215, wapu: 295, oapu: 330, eff: 89.4, status: "warning" as const },
+  { name: "B4", stelenPP: 248, wapu: 330, oapu: 330, eff: 100, status: "healthy" as const },
+  { name: "B5", stelenPP: 228, wapu: 305, oapu: 330, eff: 92.4, status: "warning" as const },
 ];
 
 const dot = { healthy: "bg-accent", warning: "bg-yellow-500", critical: "bg-red-500 animate-pulse" };
