@@ -48,12 +48,13 @@ const KPIProductionEfficiency = ({ onBack }: { onBack: () => void }) => (
               <h3 className="text-[13px] font-semibold text-foreground tracking-tight">{section.title}</h3>
             </div>
             <div className="space-y-1.5">
-              <div className="grid grid-cols-5 text-[11px] text-muted-foreground/40 pb-2 border-b border-border/30">
-                <span>Lijn</span><span>W-APU</span><span>O-APU</span><span>Eff %</span><span>Status</span>
+              <div className="grid grid-cols-6 text-[11px] text-muted-foreground/40 pb-2 border-b border-border/30">
+                <span>Lijn</span><span>St/pers/uur</span><span>W-APU</span><span>O-APU</span><span>Eff %</span><span>Status</span>
               </div>
               {section.data.map(l => (
-                <div key={l.name} className="grid grid-cols-5 items-center text-[13px] py-1">
+                <div key={l.name} className="grid grid-cols-6 items-center text-[13px] py-1">
                   <span className="font-semibold text-foreground">{l.name}</span>
+                  <span className={`font-semibold ${l.stelenPP >= 220 ? "text-accent" : l.stelenPP >= 200 ? "text-yellow-500" : "text-red-500"}`}>{l.stelenPP}</span>
                   <span className="text-muted-foreground/70">{l.wapu}</span>
                   <span className="text-muted-foreground/70">{l.oapu}</span>
                   <span className={`font-semibold ${l.status === "healthy" ? "text-accent" : l.status === "warning" ? "text-yellow-500" : "text-red-500"}`}>{l.eff}%</span>
