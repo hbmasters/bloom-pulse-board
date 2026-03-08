@@ -35,14 +35,14 @@ interface ProductProfit {
 }
 
 const productProfits: ProductProfit[] = [
-  { product: "BQ Elegance", desiredMargin: 21, actualMargin: 24.0, gap: 3.0, revenue: "€186K", cost: "€141K", profit: "€45K", status: "healthy" },
-  { product: "BQ Charme XL", desiredMargin: 22, actualMargin: 23.5, gap: 1.5, revenue: "€142K", cost: "€109K", profit: "€33K", status: "healthy" },
-  { product: "Tulpenboeket Premium", desiredMargin: 20, actualMargin: 21.2, gap: 1.2, revenue: "€98K", cost: "€77K", profit: "€21K", status: "healthy" },
-  { product: "AH Boeketje Zomer", desiredMargin: 22, actualMargin: 19.9, gap: -2.1, revenue: "€210K", cost: "€168K", profit: "€42K", status: "warning" },
-  { product: "Vomar Boeket Fleur", desiredMargin: 21, actualMargin: 16.6, gap: -4.4, revenue: "€165K", cost: "€138K", profit: "€27K", status: "critical" },
-  { product: "REWE Monat", desiredMargin: 23, actualMargin: 19.8, gap: -3.2, revenue: "€280K", cost: "€225K", profit: "€55K", status: "critical" },
-  { product: "Jumbo Veldboeket", desiredMargin: 20, actualMargin: 18.5, gap: -1.5, revenue: "€120K", cost: "€98K", profit: "€22K", status: "warning" },
-  { product: "Lidl Aktie Bos", desiredMargin: 18, actualMargin: 17.2, gap: -0.8, revenue: "€95K", cost: "€79K", profit: "€16K", status: "warning" },
+  { product: "BQ Elegance", desiredMargin: 21, actualMargin: 24.0, gap: 3.0, revenue: "€186K", cost: "€141K", profit: "€45K", status: "healthy", department: "Verkoop" },
+  { product: "BQ Charme XL", desiredMargin: 22, actualMargin: 23.5, gap: 1.5, revenue: "€142K", cost: "€109K", profit: "€33K", status: "healthy", department: "Verkoop" },
+  { product: "Tulpenboeket Premium", desiredMargin: 20, actualMargin: 21.2, gap: 1.2, revenue: "€98K", cost: "€77K", profit: "€21K", status: "healthy", department: "Verkoop" },
+  { product: "AH Boeketje Zomer", desiredMargin: 22, actualMargin: 19.9, gap: -2.1, revenue: "€210K", cost: "€168K", profit: "€42K", status: "warning", department: "Verkoop" },
+  { product: "Vomar Boeket Fleur", desiredMargin: 21, actualMargin: 16.6, gap: -4.4, revenue: "€165K", cost: "€138K", profit: "€27K", status: "critical", department: "Verkoop" },
+  { product: "REWE Monat", desiredMargin: 23, actualMargin: 19.8, gap: -3.2, revenue: "€280K", cost: "€225K", profit: "€55K", status: "critical", department: "Verkoop" },
+  { product: "Jumbo Veldboeket", desiredMargin: 20, actualMargin: 18.5, gap: -1.5, revenue: "€120K", cost: "€98K", profit: "€22K", status: "warning", department: "Verkoop" },
+  { product: "Lidl Aktie Bos", desiredMargin: 18, actualMargin: 17.2, gap: -0.8, revenue: "€95K", cost: "€79K", profit: "€16K", status: "warning", department: "Verkoop" },
 ];
 
 /* ══════════════════════════════════════════
