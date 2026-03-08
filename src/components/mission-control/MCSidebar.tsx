@@ -19,6 +19,7 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "intelligence", icon: Radar, label: "Intelligence Hub" },
   { id: "risk-radar", icon: ShieldAlert, label: "Risk Radar" },
   { id: "chance-radar", icon: Sparkles, label: "Chance Radar" },
+  { id: "profit-engine", icon: CircleDollarSign, label: "Profit Engine" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
   { id: "notifications", icon: Bell, label: "Notificaties" },
