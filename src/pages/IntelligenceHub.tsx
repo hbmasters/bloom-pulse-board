@@ -6,8 +6,24 @@ import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcureme
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
 import IHActionCenter from "@/components/intelligence-hub/IHActionCenter";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
+import type { IntelligenceData } from "@/types/intelligence";
+import { filterBySignalType } from "@/types/intelligence";
 
-const IntelligenceHub = () => {
+interface Props {
+  intelligence?: IntelligenceData;
+}
+
+const IntelligenceHub = ({ intelligence }: Props) => {
+  const objectsState = intelligence?.objects.state ?? "complete";
+  const objects = intelligence?.objects.items ?? [];
+
+  // Group by signal_type for section awareness
+  const productionObjects = filterBySignalType(objects, ["production"]);
+  const financialObjects = filterBySignalType(objects, ["financial", "margin"]);
+  const procurementObjects = filterBySignalType(objects, ["procurement"]);
+  const forecastObjects = filterBySignalType(objects, ["forecast"]);
+
   return (
     <div className="relative flex-1 min-h-0 overflow-hidden">
       <MCHologramBackground />
@@ -22,27 +38,42 @@ const IntelligenceHub = () => {
               </h1>
               <p className="text-[11px] font-mono text-muted-foreground">
                 Unified operational intelligence • Data → Validation → Root Cause → Action
+                {objectsState === "partial" && (
+                  <span className="text-yellow-500 ml-2">⚠ partial</span>
+                )}
               </p>
             </div>
           </div>
 
           {/* 1. Business Health – Executive Overview */}
-          <IHBusinessHealth />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHBusinessHealth />
+          </DataStateWrapper>
 
           {/* 2. Production Intelligence */}
-          <IHProductionIntelligence />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHProductionIntelligence />
+          </DataStateWrapper>
 
           {/* 3. Margin Intelligence */}
-          <IHMarginIntelligence />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHMarginIntelligence />
+          </DataStateWrapper>
 
           {/* 4. Procurement Intelligence */}
-          <IHProcurementIntelligence />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHProcurementIntelligence />
+          </DataStateWrapper>
 
           {/* 5. Flower Forecast */}
-          <IHFlowerForecast />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHFlowerForecast />
+          </DataStateWrapper>
 
           {/* 6. AI Action Center */}
-          <IHActionCenter />
+          <DataStateWrapper state={objectsState} skeletonCount={1}>
+            <IHActionCenter />
+          </DataStateWrapper>
         </div>
       </ScrollArea>
     </div>

@@ -3,7 +3,9 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, SubdepartmentChip, DeptAccentBorder, type Department, type ProductionSub } from "@/components/department/DepartmentBadge";
+import type { IntelligenceData } from "@/types/intelligence";
 
 /* ── Risk Item Card ── */
 interface RiskItem {
@@ -77,7 +79,7 @@ const RiskCard = ({ item }: { item: RiskItem }) => {
   );
 };
 
-/* ── Section Data ── */
+/* ── Section Data (static fallback) ── */
 
 const supplyMetrics: IHMetric[] = [
   { label: "Supply gap totaal", value: "−42K", unit: "stelen", status: "critical", change: "Groeiend", changeDir: "down" },
@@ -87,19 +89,15 @@ const supplyMetrics: IHMetric[] = [
 
 const supplyRisks: RiskItem[] = [
   {
-    product: "Chrysant Ringa Yellow",
-    riskLevel: "HIGH",
-    description: "Contracted volume dekt slechts 75% van forecast",
-    department: "Inkoop",
+    product: "Chrysant Ringa Yellow", riskLevel: "HIGH",
+    description: "Contracted volume dekt slechts 75% van forecast", department: "Inkoop",
     metrics: [{ label: "Benodigd", value: "120K" }, { label: "Contract", value: "90K" }, { label: "Gap", value: "−30K" }],
     rootCauses: ["Leverancier Kenya Direct levert 15% minder", "Seizoenspiek niet afgedekt in contract"],
     actions: ["Reserveer 30K stelen bij Flora Holland Pool", "Onderhandel spoedlevering Kenya Direct"],
   },
   {
-    product: "Lisianthus Rosita White",
-    riskLevel: "HIGH",
-    description: "Supply gap van 7K stelen bij stijgende vraag",
-    department: "Inkoop",
+    product: "Lisianthus Rosita White", riskLevel: "HIGH",
+    description: "Supply gap van 7K stelen bij stijgende vraag", department: "Inkoop",
     metrics: [{ label: "Benodigd", value: "32K" }, { label: "Contract", value: "25K" }, { label: "Gap", value: "−7K" }],
     rootCauses: ["Beperkt aanbod dit seizoen", "Slechts 1 leverancier"],
     actions: ["Zoek alternatieve leverancier", "Overweeg receptaanpassing"],
@@ -114,19 +112,15 @@ const marginMetrics: IHMetric[] = [
 
 const marginRisks: RiskItem[] = [
   {
-    product: "Vomar Boeket Fleur",
-    riskLevel: "HIGH",
-    description: "Verwachte marge 4.4pp onder target",
-    department: "Financieel",
+    product: "Vomar Boeket Fleur", riskLevel: "HIGH",
+    description: "Verwachte marge 4.4pp onder target", department: "Financieel",
     metrics: [{ label: "Verwacht", value: "18%" }, { label: "Target", value: "21%" }],
     rootCauses: ["Bloemprijs stijging +9.3%", "Forecast mismatch −12%"],
     actions: ["Beveilig leverancierscontracten", "Pas boeketsamenstelling aan"],
   },
   {
-    product: "AH Boeketje Zomer",
-    riskLevel: "MEDIUM",
-    description: "Marge gap van 2.1pp door productiekosten",
-    department: "Financieel",
+    product: "AH Boeketje Zomer", riskLevel: "MEDIUM",
+    description: "Marge gap van 2.1pp door productiekosten", department: "Financieel",
     metrics: [{ label: "Verwacht", value: "19.9%" }, { label: "Target", value: "22%" }],
     rootCauses: ["Lijn H3 presteert 13% onder norm", "Hogere chrysantprijzen"],
     actions: ["Plan H3 onderhoud", "Wissel chrysant leverancier"],
@@ -135,10 +129,8 @@ const marginRisks: RiskItem[] = [
 
 const procurementRisks: RiskItem[] = [
   {
-    product: "Kenya Rozen partij K-2024-0892",
-    riskLevel: "MEDIUM",
-    description: "Partijprijs 12% boven offerte, leverancier instabiel",
-    department: "Inkoop",
+    product: "Kenya Rozen partij K-2024-0892", riskLevel: "MEDIUM",
+    description: "Partijprijs 12% boven offerte, leverancier instabiel", department: "Inkoop",
     rootCauses: ["Transportkosten gestegen", "Wisselkoers KES/EUR ongunstig"],
     actions: ["Heronderhandel prijs", "Activeer backup leverancier"],
   },
@@ -146,21 +138,15 @@ const procurementRisks: RiskItem[] = [
 
 const productionRisks: RiskItem[] = [
   {
-    product: "Lijn H3 – Hand Afdeling",
-    riskLevel: "HIGH",
-    description: "195 st/p/u – 11% onder norm van 220",
-    department: "Productie",
-    subdepartment: "Hand",
+    product: "Lijn H3 – Hand Afdeling", riskLevel: "HIGH",
+    description: "195 st/p/u – 11% onder norm van 220", department: "Productie", subdepartment: "Hand",
     metrics: [{ label: "Actueel", value: "195 st/u" }, { label: "Norm", value: "220 st/u" }],
     rootCauses: ["Mechanisch probleem transportband", "2 nieuwe medewerkers in opleiding"],
     actions: ["Plan technisch onderhoud", "Herverdeel ervaren personeel"],
   },
   {
-    product: "Lijn B5 – Band Afdeling",
-    riskLevel: "HIGH",
-    description: "290 st/p/u – 12% onder norm van 330",
-    department: "Productie",
-    subdepartment: "Band",
+    product: "Lijn B5 – Band Afdeling", riskLevel: "HIGH",
+    description: "290 st/p/u – 12% onder norm van 330", department: "Productie", subdepartment: "Band",
     metrics: [{ label: "Actueel", value: "290 st/u" }, { label: "Norm", value: "330 st/u" }],
     rootCauses: ["Sensor kalibratie nodig", "Orderwissel te frequent"],
     actions: ["Kalibreer sensoren", "Optimaliseer orderplanning"],
@@ -169,71 +155,84 @@ const productionRisks: RiskItem[] = [
 
 const forecastRisks: RiskItem[] = [
   {
-    product: "Moederdag programma",
-    riskLevel: "MEDIUM",
-    description: "Forecast wijkt 18% af van binnenkomende orders",
-    department: "Verkoop",
+    product: "Moederdag programma", riskLevel: "MEDIUM",
+    description: "Forecast wijkt 18% af van binnenkomende orders", department: "Verkoop",
     rootCauses: ["Retail forecast te optimistisch", "Markttrend lager dan verwacht"],
     actions: ["Herbereken forecast met actuele orderdata", "Verlaag productiecapaciteit reservering"],
   },
 ];
 
-const RiskRadar = () => (
-  <div className="relative flex-1 min-h-0 overflow-hidden">
-    <MCHologramBackground />
-    <ScrollArea className="h-full relative z-10">
-      <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-2 h-8 rounded-full bg-red-500" />
-          <div>
-            <h1 className="text-lg md:text-xl font-black tracking-tight text-foreground uppercase">Risk Radar</h1>
-            <p className="text-[11px] font-mono text-muted-foreground">Predictive risk detection • Supply · Margin · Procurement · Production · Forecast</p>
+interface Props {
+  intelligence?: IntelligenceData;
+}
+
+const RiskRadar = ({ intelligence }: Props) => {
+  const objectsState = intelligence?.objects.state ?? "complete";
+
+  return (
+    <div className="relative flex-1 min-h-0 overflow-hidden">
+      <MCHologramBackground />
+      <ScrollArea className="h-full relative z-10">
+        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-2 h-8 rounded-full bg-red-500" />
+            <div>
+              <h1 className="text-lg md:text-xl font-black tracking-tight text-foreground uppercase">Risk Radar</h1>
+              <p className="text-[11px] font-mono text-muted-foreground">
+                Predictive risk detection • Supply · Margin · Procurement · Production · Forecast
+                {objectsState === "partial" && (
+                  <span className="text-yellow-500 ml-2">⚠ partial</span>
+                )}
+              </p>
+            </div>
           </div>
+
+          <DataStateWrapper state={objectsState} skeletonCount={2}>
+            {/* 1. Supply Risk */}
+            <IHSectionShell icon={Shield} title="Supply Risk" subtitle="forecast × stems vs contracted volume" badge="3 ALERTS" badgeVariant="critical">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                {supplyMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
+              </div>
+              <div className="space-y-3">
+                {supplyRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+
+            {/* 2. Margin Risk */}
+            <IHSectionShell icon={TrendingDown} title="Margin Risk" subtitle="expected_margin < desired_margin" badge="4 PRODUCTEN" badgeVariant="warning">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                {marginMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
+              </div>
+              <div className="space-y-3">
+                {marginRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+
+            {/* 3. Procurement Risk */}
+            <IHSectionShell icon={Shield} title="Procurement Risk" subtitle="Prijsstijgingen & leveranciers instabiliteit" badge="1 ALERT" badgeVariant="warning">
+              <div className="space-y-3">
+                {procurementRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+
+            {/* 4. Production Risk */}
+            <IHSectionShell icon={Shield} title="Production Risk" subtitle="Inefficiënte lijnen & capaciteitstekorten" badge="2 LIJNEN" badgeVariant="critical">
+              <div className="space-y-3">
+                {productionRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+
+            {/* 5. Forecast Risk */}
+            <IHSectionShell icon={Shield} title="Forecast Risk" subtitle="Afwijkingen forecast vs inkomende orders" badge="MONITOR" badgeVariant="warning">
+              <div className="space-y-3">
+                {forecastRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+          </DataStateWrapper>
         </div>
-
-        {/* 1. Supply Risk */}
-        <IHSectionShell icon={Shield} title="Supply Risk" subtitle="forecast × stems vs contracted volume" badge="3 ALERTS" badgeVariant="critical">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-            {supplyMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
-          </div>
-          <div className="space-y-3">
-            {supplyRisks.map((r) => <RiskCard key={r.product} item={r} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 2. Margin Risk */}
-        <IHSectionShell icon={TrendingDown} title="Margin Risk" subtitle="expected_margin < desired_margin" badge="4 PRODUCTEN" badgeVariant="warning">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-            {marginMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
-          </div>
-          <div className="space-y-3">
-            {marginRisks.map((r) => <RiskCard key={r.product} item={r} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 3. Procurement Risk */}
-        <IHSectionShell icon={Shield} title="Procurement Risk" subtitle="Prijsstijgingen & leveranciers instabiliteit" badge="1 ALERT" badgeVariant="warning">
-          <div className="space-y-3">
-            {procurementRisks.map((r) => <RiskCard key={r.product} item={r} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 4. Production Risk */}
-        <IHSectionShell icon={Shield} title="Production Risk" subtitle="Inefficiënte lijnen & capaciteitstekorten" badge="2 LIJNEN" badgeVariant="critical">
-          <div className="space-y-3">
-            {productionRisks.map((r) => <RiskCard key={r.product} item={r} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 5. Forecast Risk */}
-        <IHSectionShell icon={Shield} title="Forecast Risk" subtitle="Afwijkingen forecast vs inkomende orders" badge="MONITOR" badgeVariant="warning">
-          <div className="space-y-3">
-            {forecastRisks.map((r) => <RiskCard key={r.product} item={r} />)}
-          </div>
-        </IHSectionShell>
-      </div>
-    </ScrollArea>
-  </div>
-);
+      </ScrollArea>
+    </div>
+  );
+};
 
 export default RiskRadar;
