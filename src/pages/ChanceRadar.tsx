@@ -318,9 +318,7 @@ const ChanceRadar = () => {
                       <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${priorityStyle[action.priority]}`}>
                         {action.priority.toUpperCase()}
                       </span>
-                      <span className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border ${deptStyle[action.department] || ""}`}>
-                        {action.department}
-                      </span>
+                      <DepartmentBadge department={mapLegacyDept(action.department)} />
                     </div>
                   </div>
 
