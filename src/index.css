@@ -236,3 +236,14 @@
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* iOS scroll fix for nested scroll containers */
+[data-radix-scroll-area-viewport] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure touch scrolling works on all scroll containers */
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}

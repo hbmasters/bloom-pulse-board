@@ -143,7 +143,7 @@ const CommandRadar = () => {
       </div>
 
       {/* ── Tab Content ── */}
-      <div className="flex-1 min-h-0 relative z-10">
+      <div className="flex-1 min-h-0 relative z-10 overflow-hidden">
         {activeTab === "intelligence" && (
           <IntelligenceHub intelligence={intelligence} />
         )}

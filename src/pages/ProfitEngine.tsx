@@ -2,7 +2,7 @@ import { Banknote, TrendingUp, TrendingDown, ArrowRight, Star, AlertTriangle } f
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, type Department } from "@/components/department/DepartmentBadge";
 import type { IntelligenceData } from "@/types/intelligence";
@@ -139,8 +139,8 @@ const ProfitEngine = ({ intelligence }: Props) => {
   return (
     <div className="relative flex-1 min-h-0 overflow-hidden">
       <MCHologramBackground />
-      <ScrollArea className="h-full relative z-10">
-        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
+      <div className="absolute inset-0 z-10 overflow-y-auto overscroll-contain">
+        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto pb-8">
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
@@ -302,7 +302,7 @@ const ProfitEngine = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

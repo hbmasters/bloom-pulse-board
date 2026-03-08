@@ -1,5 +1,5 @@
 import { Zap, BarChart3, Kanban } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { ActionImpactSummary } from "./ActionImpactSummary";
@@ -47,8 +47,8 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
 
   return (
     <div className="relative flex-1 min-h-0 overflow-hidden">
-      <ScrollArea className="h-full relative z-10">
-        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
+      <div className="absolute inset-0 z-10 overflow-y-auto overscroll-contain">
+        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto pb-8">
           {/* Page header */}
           <div className="flex items-center gap-3 mb-2">
             <div className="w-2 h-8 rounded-full bg-primary" />
@@ -104,7 +104,7 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
