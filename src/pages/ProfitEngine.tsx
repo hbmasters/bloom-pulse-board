@@ -211,9 +211,9 @@ const ProfitEngine = () => (
               );
             })}
             <div className="flex gap-4 mt-1">
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">Inkoop</span></div>
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-yellow-500" /><span className="text-[10px] text-muted-foreground">Productie</span></div>
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-400" /><span className="text-[10px] text-muted-foreground">Sales</span></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Inkoop" size="sm" /></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Productie" size="sm" /></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Verkoop" size="sm" /></div>
             </div>
           </div>
         </IHSectionShell>
