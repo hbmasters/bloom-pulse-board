@@ -52,7 +52,7 @@ export const ActionImpactSystem = () => {
             title="Action Pipeline"
             subtitle="Uitvoeringsstatus per actie"
             badge="PIPELINE"
-            badgeVariant="info"
+            badgeVariant="default"
           >
             <ActionPipeline actions={actionItems} />
           </IHSectionShell>
