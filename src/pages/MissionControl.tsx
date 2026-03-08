@@ -131,6 +131,7 @@ const MissionControl = () => {
             {view === "intelligence" && <IntelligenceHub />}
             {view === "risk-radar" && <RiskRadar />}
             {view === "chance-radar" && <ChanceRadar />}
+            {view === "profit-engine" && <ProfitEngine />}
           </div>
 
           {view === "chat" && (
