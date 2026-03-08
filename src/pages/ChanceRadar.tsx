@@ -245,55 +245,147 @@ const deptStyle: Record<string, string> = {
   Planning: "text-blue-400 bg-blue-400/10 border-blue-400/20",
 };
 
-const ChanceRadar = () => (
-  <div className="relative flex-1 min-h-0 overflow-hidden">
-    <MCHologramBackground />
-    <ScrollArea className="h-full relative z-10">
-      <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-2 h-8 rounded-full bg-accent" />
-          <div>
-            <h1 className="text-lg md:text-xl font-black tracking-tight text-foreground uppercase">Chance Radar</h1>
-            <p className="text-[11px] font-mono text-muted-foreground">Opportunity detection • Kosten · Productie · Vraag · Receptuur</p>
+const ChanceRadar = () => {
+  const [deptFilter, setDeptFilter] = useState<string>("All");
+
+  const filteredActions = actionItems
+    .filter((a) => deptFilter === "All" || a.department === deptFilter)
+    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+  return (
+    <div className="relative flex-1 min-h-0 overflow-hidden">
+      <MCHologramBackground />
+      <ScrollArea className="h-full relative z-10">
+        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-2 h-8 rounded-full bg-accent" />
+            <div>
+              <h1 className="text-lg md:text-xl font-black tracking-tight text-foreground uppercase">Chance Radar</h1>
+              <p className="text-[11px] font-mono text-muted-foreground">Opportunity detection • Kosten · Productie · Vraag · Receptuur · Acties</p>
+            </div>
           </div>
+
+          {/* 1. Flower Cost Advantage */}
+          <IHSectionShell icon={Sparkles} title="Flower Cost Advantage" subtitle="Partijprijs < verwachte kostprijs" badge="5 PARTIJEN" badgeVariant="success">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              {flowerCostMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
+            </div>
+            <div className="space-y-3">
+              {flowerCostOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
+            </div>
+          </IHSectionShell>
+
+          {/* 2. Production Efficiency Opportunity */}
+          <IHSectionShell icon={TrendingUp} title="Production Efficiency Opportunity" subtitle="APU of stelen/pers/uur boven verwachting" badge="4 LIJNEN" badgeVariant="success">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              {prodEffMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
+            </div>
+            <div className="space-y-3">
+              {prodEffOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
+            </div>
+          </IHSectionShell>
+
+          {/* 3. Demand Opportunity */}
+          <IHSectionShell icon={TrendingUp} title="Demand Opportunity" subtitle="Orders > forecast levels" badge="2 PRODUCTEN" badgeVariant="success">
+            <div className="space-y-3">
+              {demandOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
+            </div>
+          </IHSectionShell>
+
+          {/* 4. Design Efficiency Opportunity */}
+          <IHSectionShell icon={Sparkles} title="Design Efficiency Opportunity" subtitle="Recepten met snellere productie of lagere arbeid" badge="ANALYSE">
+            <div className="space-y-3">
+              {designOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
+            </div>
+          </IHSectionShell>
+
+          {/* 5. Action Engine */}
+          <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
+            {/* Department filters */}
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {departments.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDeptFilter(d)}
+                  className={`text-[10px] font-mono font-semibold px-3 py-1 rounded-full border transition-colors ${
+                    deptFilter === d
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/20 text-muted-foreground border-border hover:border-primary/40"
+                  }`}
+                >
+                  {d === "All" ? "Alle afdelingen" : d}
+                </button>
+              ))}
+            </div>
+
+            {/* Action cards */}
+            <div className="space-y-3">
+              {filteredActions.map((action) => (
+                <div key={action.action_title} className={`rounded-xl border p-4 ${
+                  action.priority === "High" ? "border-red-500/30 bg-red-500/5" :
+                  action.priority === "Medium" ? "border-yellow-500/30 bg-yellow-500/5" :
+                  "border-border bg-muted/10"
+                }`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Zap className={`w-3.5 h-3.5 ${action.priority === "High" ? "text-red-500" : "text-primary"}`} />
+                      <span className="text-sm font-bold text-foreground">{action.action_title}</span>
+                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${priorityStyle[action.priority]}`}>
+                        {action.priority.toUpperCase()}
+                      </span>
+                      <span className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border ${deptStyle[action.department] || ""}`}>
+                        {action.department}
+                      </span>
+                    </div>
+                  </div>
+
+                  {action.flower && (
+                    <div className="text-[10px] font-mono text-muted-foreground mb-2">
+                      Bloem: <span className="text-foreground font-semibold">{action.flower}</span>
+                      <span className="mx-2 text-border">|</span>
+                      Driver: <span className="text-foreground font-semibold">{action.driver.replace(/_/g, " ")}</span>
+                    </div>
+                  )}
+                  {!action.flower && (
+                    <div className="text-[10px] font-mono text-muted-foreground mb-2">
+                      Driver: <span className="text-foreground font-semibold">{action.driver.replace(/_/g, " ")}</span>
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider mb-1">Aanbevolen actie</h4>
+                      <div className="flex items-start gap-1.5 text-[11px]">
+                        <ArrowRight className="w-3 h-3 mt-0.5 text-accent shrink-0" />
+                        <span className="text-foreground/80">{action.recommended_action}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider mb-1">Verwacht effect</h4>
+                      <span className="text-[11px] font-mono font-bold text-accent">{action.expected_impact}</span>
+                      {action.constraints && (
+                        <div className="mt-1 text-[10px] text-muted-foreground">
+                          <span className="text-foreground/50">Constraint:</span> {action.constraints}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {action.data_sources_used.map((ds) => (
+                      <Badge key={ds} variant="outline" className="text-[8px] font-mono px-1.5 py-0 h-4">
+                        {ds}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </IHSectionShell>
         </div>
-
-        {/* 1. Flower Cost Advantage */}
-        <IHSectionShell icon={Sparkles} title="Flower Cost Advantage" subtitle="Partijprijs < verwachte kostprijs" badge="5 PARTIJEN" badgeVariant="success">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-            {flowerCostMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
-          </div>
-          <div className="space-y-3">
-            {flowerCostOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 2. Production Efficiency Opportunity */}
-        <IHSectionShell icon={TrendingUp} title="Production Efficiency Opportunity" subtitle="APU of stelen/pers/uur boven verwachting" badge="4 LIJNEN" badgeVariant="success">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-            {prodEffMetrics.map((m) => <IHMetricCard key={m.label} metric={m} />)}
-          </div>
-          <div className="space-y-3">
-            {prodEffOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 3. Demand Opportunity */}
-        <IHSectionShell icon={TrendingUp} title="Demand Opportunity" subtitle="Orders > forecast levels" badge="2 PRODUCTEN" badgeVariant="success">
-          <div className="space-y-3">
-            {demandOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
-          </div>
-        </IHSectionShell>
-
-        {/* 4. Design Efficiency Opportunity */}
-        <IHSectionShell icon={Sparkles} title="Design Efficiency Opportunity" subtitle="Recepten met snellere productie of lagere arbeid" badge="ANALYSE">
-          <div className="space-y-3">
-            {designOpps.map((o) => <OpportunityCard key={o.product} item={o} />)}
-          </div>
-        </IHSectionShell>
-      </div>
-    </ScrollArea>
-  </div>
-);
+      </ScrollArea>
+    </div>
+  );
+};
 
 export default ChanceRadar;
