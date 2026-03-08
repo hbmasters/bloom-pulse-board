@@ -203,9 +203,9 @@ const ProfitEngine = () => (
                 <div key={d.product}>
                   <div className="text-[10px] text-foreground/60 mb-1">{d.product} <span className="text-red-500 font-mono font-bold">{d.totalGap}</span></div>
                   <div className="flex h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary transition-all" style={{ width: `${pInk}%` }} />
-                    <div className="bg-yellow-500 transition-all" style={{ width: `${pProd}%` }} />
-                    <div className="bg-red-400 transition-all" style={{ width: `${pSal}%` }} />
+                    <div className="transition-all" style={{ width: `${pInk}%`, backgroundColor: `hsl(var(--dept-inkoop))` }} />
+                    <div className="transition-all" style={{ width: `${pProd}%`, backgroundColor: `hsl(var(--dept-productie))` }} />
+                    <div className="transition-all" style={{ width: `${pSal}%`, backgroundColor: `hsl(var(--dept-verkoop))` }} />
                   </div>
                 </div>
               );
