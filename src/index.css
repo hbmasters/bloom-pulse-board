@@ -62,6 +62,23 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 211 70% 60%;
     --sidebar-ring: 211 100% 50%;
+
+    /* Department colors */
+    --dept-verkoop: 211 85% 50%;
+    --dept-inkoop: 155 55% 42%;
+    --dept-productie: 28 85% 55%;
+    --dept-administratie: 270 50% 55%;
+    --dept-financieel: 340 55% 38%;
+
+    /* Production subdepartments */
+    --dept-ingang: 25 75% 50%;
+    --dept-koelcel: 200 55% 48%;
+    --dept-hand: 32 80% 52%;
+    --dept-band: 20 70% 48%;
+    --dept-arrangement: 35 85% 55%;
+    --dept-inpak: 15 65% 45%;
+    --dept-verdelen: 30 60% 50%;
+    --dept-uitgaande: 22 70% 42%;
   }
 }
 
