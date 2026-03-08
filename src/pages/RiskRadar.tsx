@@ -33,6 +33,8 @@ const RiskCard = ({ item }: { item: RiskItem }) => {
             <AlertTriangle className={`w-3.5 h-3.5 ${item.riskLevel === "HIGH" ? "text-red-500" : item.riskLevel === "MEDIUM" ? "text-yellow-500" : "text-accent"}`} />
             <span className="text-sm font-bold text-foreground">{item.product}</span>
             <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${s.badge}`}>{item.riskLevel}</span>
+            {item.department && <DepartmentBadge department={item.department} />}
+            {item.subdepartment && <SubdepartmentChip sub={item.subdepartment} />}
           </div>
           <p className="text-[11px] text-muted-foreground">{item.description}</p>
         </div>
