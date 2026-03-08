@@ -75,7 +75,7 @@ const IntelligenceHub = ({ intelligence }: Props) => {
             <IHActionCenter />
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
