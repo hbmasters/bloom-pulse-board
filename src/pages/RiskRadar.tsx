@@ -138,6 +138,7 @@ const procurementRisks: RiskItem[] = [
     product: "Kenya Rozen partij K-2024-0892",
     riskLevel: "MEDIUM",
     description: "Partijprijs 12% boven offerte, leverancier instabiel",
+    department: "Inkoop",
     rootCauses: ["Transportkosten gestegen", "Wisselkoers KES/EUR ongunstig"],
     actions: ["Heronderhandel prijs", "Activeer backup leverancier"],
   },
