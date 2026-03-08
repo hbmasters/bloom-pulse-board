@@ -119,6 +119,7 @@ const MissionControl = () => {
             {view === "agents" && <MCAgents />}
             {view === "history" && <ChatHistory />}
             {view === "settings" && <MCSettings />}
+            {view === "intelligence" && <IntelligenceHub />}
           </div>
 
           {view === "chat" && (
