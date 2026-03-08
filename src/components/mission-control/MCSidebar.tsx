@@ -17,10 +17,6 @@ interface MCSidebarProps {
 const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "chat", icon: MessageSquare, label: "Chat" },
   { id: "command-radar", icon: Crosshair, label: "Command Radar" },
-  { id: "intelligence", icon: Radar, label: "Intelligence Hub" },
-  { id: "risk-radar", icon: ShieldAlert, label: "Risk Radar" },
-  { id: "chance-radar", icon: Sparkles, label: "Chance Radar" },
-  { id: "profit-engine", icon: CircleDollarSign, label: "Profit Engine" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
   { id: "notifications", icon: Bell, label: "Notificaties" },
