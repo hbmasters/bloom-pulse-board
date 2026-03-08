@@ -13,6 +13,8 @@ interface RiskItem {
   rootCauses: string[];
   actions: string[];
   metrics?: { label: string; value: string }[];
+  department?: Department;
+  subdepartment?: ProductionSub;
 }
 
 const riskLevelStyle = {
