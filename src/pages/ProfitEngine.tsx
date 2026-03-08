@@ -2,7 +2,7 @@ import { Banknote, TrendingUp, TrendingDown, ArrowRight, Star, AlertTriangle } f
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, type Department } from "@/components/department/DepartmentBadge";
 import type { IntelligenceData } from "@/types/intelligence";

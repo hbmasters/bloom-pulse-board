@@ -5,7 +5,7 @@ import IHMarginIntelligence from "@/components/intelligence-hub/IHMarginIntellig
 import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcurementIntelligence";
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
 import IHActionCenter from "@/components/intelligence-hub/IHActionCenter";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import type { IntelligenceData } from "@/types/intelligence";
 import { filterBySignalType } from "@/types/intelligence";

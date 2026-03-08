@@ -1,5 +1,5 @@
 import { Zap, BarChart3, Kanban } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { ActionImpactSummary } from "./ActionImpactSummary";
