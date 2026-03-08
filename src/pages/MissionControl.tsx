@@ -20,6 +20,7 @@ import MCSettings from "@/components/mission-control/MCSettings";
 import IntelligenceHub from "@/pages/IntelligenceHub";
 import RiskRadar from "@/pages/RiskRadar";
 import ChanceRadar from "@/pages/ChanceRadar";
+import ProfitEngine from "@/pages/ProfitEngine";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
