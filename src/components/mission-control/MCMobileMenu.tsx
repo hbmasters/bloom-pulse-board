@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Radar, ShieldAlert, Sparkles } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Radar, ShieldAlert, Sparkles, CircleDollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
 import type { MCView } from "@/pages/MissionControl";
