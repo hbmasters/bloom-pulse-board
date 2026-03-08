@@ -164,11 +164,11 @@ const ProfitEngine = () => (
                   <div className={`w-1.5 h-1.5 rounded-full ${statusDot(p.status)}`} />
                   <span className="font-medium text-foreground truncate">{p.product}</span>
                 </span>
+                <span>{p.department && <DepartmentBadge department={p.department} showIcon={false} />}</span>
                 <span className="text-muted-foreground font-mono">{p.desiredMargin}%</span>
                 <span className={`font-mono font-semibold ${gapColor(p.gap)}`}>{p.actualMargin}%</span>
                 <span className={`font-mono font-bold ${gapColor(p.gap)}`}>{p.gap >= 0 ? "+" : ""}{p.gap}pp</span>
                 <span className="text-foreground/70 font-mono">{p.revenue}</span>
-                <span className="text-foreground/70 font-mono">{p.cost}</span>
                 <span className="text-foreground font-mono font-semibold">{p.profit}</span>
               </div>
             ))}
