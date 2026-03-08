@@ -133,7 +133,7 @@ const CommandRadar = () => {
         {activeTab === "risk" && <RiskRadar />}
         {activeTab === "chance" && <ChanceRadar />}
         {activeTab === "profit" && <ProfitEngine />}
-        {activeTab === "actions" && <ActionEngineContent />}
+        {activeTab === "actions" && <ActionImpactSystem />}
       </div>
     </div>
   );
