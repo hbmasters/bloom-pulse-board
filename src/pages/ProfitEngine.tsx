@@ -31,6 +31,7 @@ interface ProductProfit {
   cost: string;
   profit: string;
   status: "healthy" | "warning" | "critical";
+  department?: Department;
 }
 
 const productProfits: ProductProfit[] = [
