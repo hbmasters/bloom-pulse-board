@@ -5,6 +5,7 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DepartmentBadge, DepartmentFilter, DeptAccentBorder, mapLegacyDept, type Department } from "@/components/department/DepartmentBadge";
 
 /* ── Opportunity Card ── */
 interface OpportunityItem {
