@@ -243,7 +243,7 @@ const ChanceRadar = () => {
   const [deptFilter, setDeptFilter] = useState<string>("All");
 
   const filteredActions = actionItems
-    .filter((a) => deptFilter === "All" || a.department === deptFilter)
+    .filter((a) => deptFilter === "All" || mapLegacyDept(a.department) === deptFilter)
     .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
   return (
