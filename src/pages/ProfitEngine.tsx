@@ -156,7 +156,7 @@ const ProfitEngine = () => (
         <IHSectionShell icon={Banknote} title="Profit by Product" subtitle="Product-niveau winstgevendheid" badge={`${productProfits.filter(p => p.gap < 0).length} ONDER TARGET`} badgeVariant="warning">
           <div className="rounded-xl border border-border overflow-hidden">
             <div className="grid grid-cols-8 text-[10px] text-muted-foreground/50 font-mono px-3 py-2 bg-muted/20 border-b border-border">
-              <span className="col-span-2">Product</span><span>Target</span><span>Actueel</span><span>Gap</span><span>Omzet</span><span>Kosten</span><span>Winst</span>
+              <span className="col-span-2">Product</span><span>Afd.</span><span>Target</span><span>Actueel</span><span>Gap</span><span>Omzet</span><span>Winst</span>
             </div>
             {productProfits.map((p) => (
               <div key={p.product} className="grid grid-cols-8 text-[11px] px-3 py-2.5 border-b border-border/50 last:border-0 hover:bg-muted/10 transition-colors items-center">
