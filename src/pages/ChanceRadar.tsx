@@ -1,4 +1,6 @@
-import { Sparkles, TrendingUp, ArrowRight, Star } from "lucide-react";
+import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
