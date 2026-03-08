@@ -23,6 +23,7 @@ const viewTitles: Record<MCView, string> = {
   agents: "OpenClaw Agents",
   history: "Chat Historie",
   settings: "Instellingen",
+  intelligence: "Intelligence Hub",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {
