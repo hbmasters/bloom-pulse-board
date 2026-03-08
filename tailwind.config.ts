@@ -63,6 +63,13 @@ export default {
           warm: "hsl(var(--bloom-warm))",
           sky: "hsl(var(--bloom-sky))",
         },
+        dept: {
+          verkoop: "hsl(var(--dept-verkoop))",
+          inkoop: "hsl(var(--dept-inkoop))",
+          productie: "hsl(var(--dept-productie))",
+          administratie: "hsl(var(--dept-administratie))",
+          financieel: "hsl(var(--dept-financieel))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
