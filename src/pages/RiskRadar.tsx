@@ -172,6 +172,7 @@ const forecastRisks: RiskItem[] = [
     product: "Moederdag programma",
     riskLevel: "MEDIUM",
     description: "Forecast wijkt 18% af van binnenkomende orders",
+    department: "Verkoop",
     rootCauses: ["Retail forecast te optimistisch", "Markttrend lager dan verwacht"],
     actions: ["Herbereken forecast met actuele orderdata", "Verlaag productiecapaciteit reservering"],
   },
