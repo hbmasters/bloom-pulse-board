@@ -24,6 +24,8 @@ const viewTitles: Record<MCView, string> = {
   history: "Chat Historie",
   settings: "Instellingen",
   intelligence: "Intelligence Hub",
+  "risk-radar": "Risk Radar",
+  "chance-radar": "Chance Radar",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {

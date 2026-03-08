@@ -18,10 +18,12 @@ import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
 import IntelligenceHub from "@/pages/IntelligenceHub";
+import RiskRadar from "@/pages/RiskRadar";
+import ChanceRadar from "@/pages/ChanceRadar";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -36,6 +38,8 @@ const routeToView: Record<string, MCView> = {
   "/history": "history",
   "/settings": "settings",
   "/intelligence": "intelligence",
+  "/risk-radar": "risk-radar",
+  "/chance-radar": "chance-radar",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -51,6 +55,8 @@ export const viewToRoute: Record<MCView, string> = {
   history: "/history",
   settings: "/settings",
   intelligence: "/intelligence",
+  "risk-radar": "/risk-radar",
+  "chance-radar": "/chance-radar",
 };
 
 const MissionControl = () => {
@@ -120,6 +126,8 @@ const MissionControl = () => {
             {view === "history" && <ChatHistory />}
             {view === "settings" && <MCSettings />}
             {view === "intelligence" && <IntelligenceHub />}
+            {view === "risk-radar" && <RiskRadar />}
+            {view === "chance-radar" && <ChanceRadar />}
           </div>
 
           {view === "chat" && (
