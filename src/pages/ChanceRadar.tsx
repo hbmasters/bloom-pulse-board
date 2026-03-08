@@ -296,21 +296,12 @@ const ChanceRadar = () => {
           {/* 5. Action Engine */}
           <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
             {/* Department filters */}
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {departments.map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDeptFilter(d)}
-                  className={`text-[10px] font-mono font-semibold px-3 py-1 rounded-full border transition-colors ${
-                    deptFilter === d
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted/20 text-muted-foreground border-border hover:border-primary/40"
-                  }`}
-                >
-                  {d === "All" ? "Alle afdelingen" : d}
-                </button>
-              ))}
-            </div>
+            <DepartmentFilter
+              departments={allDepts}
+              active={deptFilter}
+              onChange={setDeptFilter}
+              className="mb-4"
+            />
 
             {/* Action cards */}
             <div className="space-y-3">
