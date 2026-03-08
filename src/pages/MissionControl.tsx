@@ -22,9 +22,10 @@ import RiskRadar from "@/pages/RiskRadar";
 import ChanceRadar from "@/pages/ChanceRadar";
 import ProfitEngine from "@/pages/ProfitEngine";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
+import CommandRadar from "@/pages/CommandRadar";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -42,6 +43,7 @@ const routeToView: Record<string, MCView> = {
   "/risk-radar": "risk-radar",
   "/chance-radar": "chance-radar",
   "/profit-engine": "profit-engine",
+  "/command-radar": "command-radar",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -60,6 +62,7 @@ export const viewToRoute: Record<MCView, string> = {
   "risk-radar": "/risk-radar",
   "chance-radar": "/chance-radar",
   "profit-engine": "/profit-engine",
+  "command-radar": "/command-radar",
 };
 
 const MissionControl = () => {
@@ -132,6 +135,7 @@ const MissionControl = () => {
             {view === "risk-radar" && <RiskRadar />}
             {view === "chance-radar" && <ChanceRadar />}
             {view === "profit-engine" && <ProfitEngine />}
+            {view === "command-radar" && <CommandRadar />}
           </div>
 
           {view === "chat" && (
