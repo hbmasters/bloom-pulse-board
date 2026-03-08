@@ -49,6 +49,7 @@ export const viewToRoute: Record<MCView, string> = {
   agents: "/agents",
   history: "/history",
   settings: "/settings",
+  intelligence: "/intelligence",
 };
 
 const MissionControl = () => {
