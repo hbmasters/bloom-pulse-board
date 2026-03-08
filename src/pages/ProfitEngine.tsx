@@ -3,6 +3,7 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DepartmentBadge, type Department } from "@/components/department/DepartmentBadge";
 
 /* ══════════════════════════════════════════
    1. PROFIT OVERVIEW
@@ -30,17 +31,18 @@ interface ProductProfit {
   cost: string;
   profit: string;
   status: "healthy" | "warning" | "critical";
+  department?: Department;
 }
 
 const productProfits: ProductProfit[] = [
-  { product: "BQ Elegance", desiredMargin: 21, actualMargin: 24.0, gap: 3.0, revenue: "€186K", cost: "€141K", profit: "€45K", status: "healthy" },
-  { product: "BQ Charme XL", desiredMargin: 22, actualMargin: 23.5, gap: 1.5, revenue: "€142K", cost: "€109K", profit: "€33K", status: "healthy" },
-  { product: "Tulpenboeket Premium", desiredMargin: 20, actualMargin: 21.2, gap: 1.2, revenue: "€98K", cost: "€77K", profit: "€21K", status: "healthy" },
-  { product: "AH Boeketje Zomer", desiredMargin: 22, actualMargin: 19.9, gap: -2.1, revenue: "€210K", cost: "€168K", profit: "€42K", status: "warning" },
-  { product: "Vomar Boeket Fleur", desiredMargin: 21, actualMargin: 16.6, gap: -4.4, revenue: "€165K", cost: "€138K", profit: "€27K", status: "critical" },
-  { product: "REWE Monat", desiredMargin: 23, actualMargin: 19.8, gap: -3.2, revenue: "€280K", cost: "€225K", profit: "€55K", status: "critical" },
-  { product: "Jumbo Veldboeket", desiredMargin: 20, actualMargin: 18.5, gap: -1.5, revenue: "€120K", cost: "€98K", profit: "€22K", status: "warning" },
-  { product: "Lidl Aktie Bos", desiredMargin: 18, actualMargin: 17.2, gap: -0.8, revenue: "€95K", cost: "€79K", profit: "€16K", status: "warning" },
+  { product: "BQ Elegance", desiredMargin: 21, actualMargin: 24.0, gap: 3.0, revenue: "€186K", cost: "€141K", profit: "€45K", status: "healthy", department: "Verkoop" },
+  { product: "BQ Charme XL", desiredMargin: 22, actualMargin: 23.5, gap: 1.5, revenue: "€142K", cost: "€109K", profit: "€33K", status: "healthy", department: "Verkoop" },
+  { product: "Tulpenboeket Premium", desiredMargin: 20, actualMargin: 21.2, gap: 1.2, revenue: "€98K", cost: "€77K", profit: "€21K", status: "healthy", department: "Verkoop" },
+  { product: "AH Boeketje Zomer", desiredMargin: 22, actualMargin: 19.9, gap: -2.1, revenue: "€210K", cost: "€168K", profit: "€42K", status: "warning", department: "Verkoop" },
+  { product: "Vomar Boeket Fleur", desiredMargin: 21, actualMargin: 16.6, gap: -4.4, revenue: "€165K", cost: "€138K", profit: "€27K", status: "critical", department: "Verkoop" },
+  { product: "REWE Monat", desiredMargin: 23, actualMargin: 19.8, gap: -3.2, revenue: "€280K", cost: "€225K", profit: "€55K", status: "critical", department: "Verkoop" },
+  { product: "Jumbo Veldboeket", desiredMargin: 20, actualMargin: 18.5, gap: -1.5, revenue: "€120K", cost: "€98K", profit: "€22K", status: "warning", department: "Verkoop" },
+  { product: "Lidl Aktie Bos", desiredMargin: 18, actualMargin: 17.2, gap: -0.8, revenue: "€95K", cost: "€79K", profit: "€16K", status: "warning", department: "Verkoop" },
 ];
 
 /* ══════════════════════════════════════════
@@ -154,7 +156,7 @@ const ProfitEngine = () => (
         <IHSectionShell icon={Banknote} title="Profit by Product" subtitle="Product-niveau winstgevendheid" badge={`${productProfits.filter(p => p.gap < 0).length} ONDER TARGET`} badgeVariant="warning">
           <div className="rounded-xl border border-border overflow-hidden">
             <div className="grid grid-cols-8 text-[10px] text-muted-foreground/50 font-mono px-3 py-2 bg-muted/20 border-b border-border">
-              <span className="col-span-2">Product</span><span>Target</span><span>Actueel</span><span>Gap</span><span>Omzet</span><span>Kosten</span><span>Winst</span>
+              <span className="col-span-2">Product</span><span>Afd.</span><span>Target</span><span>Actueel</span><span>Gap</span><span>Omzet</span><span>Winst</span>
             </div>
             {productProfits.map((p) => (
               <div key={p.product} className="grid grid-cols-8 text-[11px] px-3 py-2.5 border-b border-border/50 last:border-0 hover:bg-muted/10 transition-colors items-center">
@@ -162,11 +164,11 @@ const ProfitEngine = () => (
                   <div className={`w-1.5 h-1.5 rounded-full ${statusDot(p.status)}`} />
                   <span className="font-medium text-foreground truncate">{p.product}</span>
                 </span>
+                <span>{p.department && <DepartmentBadge department={p.department} showIcon={false} />}</span>
                 <span className="text-muted-foreground font-mono">{p.desiredMargin}%</span>
                 <span className={`font-mono font-semibold ${gapColor(p.gap)}`}>{p.actualMargin}%</span>
                 <span className={`font-mono font-bold ${gapColor(p.gap)}`}>{p.gap >= 0 ? "+" : ""}{p.gap}pp</span>
                 <span className="text-foreground/70 font-mono">{p.revenue}</span>
-                <span className="text-foreground/70 font-mono">{p.cost}</span>
                 <span className="text-foreground font-mono font-semibold">{p.profit}</span>
               </div>
             ))}
@@ -201,17 +203,17 @@ const ProfitEngine = () => (
                 <div key={d.product}>
                   <div className="text-[10px] text-foreground/60 mb-1">{d.product} <span className="text-red-500 font-mono font-bold">{d.totalGap}</span></div>
                   <div className="flex h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary transition-all" style={{ width: `${pInk}%` }} />
-                    <div className="bg-yellow-500 transition-all" style={{ width: `${pProd}%` }} />
-                    <div className="bg-red-400 transition-all" style={{ width: `${pSal}%` }} />
+                    <div className="transition-all" style={{ width: `${pInk}%`, backgroundColor: `hsl(var(--dept-inkoop))` }} />
+                    <div className="transition-all" style={{ width: `${pProd}%`, backgroundColor: `hsl(var(--dept-productie))` }} />
+                    <div className="transition-all" style={{ width: `${pSal}%`, backgroundColor: `hsl(var(--dept-verkoop))` }} />
                   </div>
                 </div>
               );
             })}
             <div className="flex gap-4 mt-1">
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">Inkoop</span></div>
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-yellow-500" /><span className="text-[10px] text-muted-foreground">Productie</span></div>
-              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-400" /><span className="text-[10px] text-muted-foreground">Sales</span></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Inkoop" size="sm" /></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Productie" size="sm" /></div>
+              <div className="flex items-center gap-1.5"><DepartmentBadge department="Verkoop" size="sm" /></div>
             </div>
           </div>
         </IHSectionShell>

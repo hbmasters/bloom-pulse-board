@@ -5,6 +5,7 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DepartmentBadge, DepartmentFilter, DeptAccentBorder, mapLegacyDept, type Department } from "@/components/department/DepartmentBadge";
 
 /* ── Opportunity Card ── */
 interface OpportunityItem {
@@ -229,7 +230,7 @@ const actionItems: ActionItem[] = [
   },
 ];
 
-const departments = ["All", "Procurement", "Production", "Sales", "Design", "Planning"] as const;
+const allDepts: (Department | "All")[] = ["All", "Verkoop", "Inkoop", "Productie", "Administratie", "Financieel"];
 
 const priorityOrder = { High: 0, Medium: 1, Low: 2 };
 const priorityStyle = {
@@ -237,19 +238,12 @@ const priorityStyle = {
   Medium: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
   Low: "text-muted-foreground bg-muted/20 border-border",
 };
-const deptStyle: Record<string, string> = {
-  Procurement: "text-primary bg-primary/10 border-primary/20",
-  Production: "text-accent bg-accent/10 border-accent/20",
-  Sales: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
-  Design: "text-pink-400 bg-pink-400/10 border-pink-400/20",
-  Planning: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-};
 
 const ChanceRadar = () => {
   const [deptFilter, setDeptFilter] = useState<string>("All");
 
   const filteredActions = actionItems
-    .filter((a) => deptFilter === "All" || a.department === deptFilter)
+    .filter((a) => deptFilter === "All" || mapLegacyDept(a.department) === deptFilter)
     .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
   return (
@@ -302,21 +296,12 @@ const ChanceRadar = () => {
           {/* 5. Action Engine */}
           <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
             {/* Department filters */}
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {departments.map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDeptFilter(d)}
-                  className={`text-[10px] font-mono font-semibold px-3 py-1 rounded-full border transition-colors ${
-                    deptFilter === d
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted/20 text-muted-foreground border-border hover:border-primary/40"
-                  }`}
-                >
-                  {d === "All" ? "Alle afdelingen" : d}
-                </button>
-              ))}
-            </div>
+            <DepartmentFilter
+              departments={allDepts}
+              active={deptFilter}
+              onChange={setDeptFilter}
+              className="mb-4"
+            />
 
             {/* Action cards */}
             <div className="space-y-3">
@@ -333,9 +318,7 @@ const ChanceRadar = () => {
                       <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${priorityStyle[action.priority]}`}>
                         {action.priority.toUpperCase()}
                       </span>
-                      <span className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border ${deptStyle[action.department] || ""}`}>
-                        {action.department}
-                      </span>
+                      <DepartmentBadge department={mapLegacyDept(action.department)} />
                     </div>
                   </div>
 

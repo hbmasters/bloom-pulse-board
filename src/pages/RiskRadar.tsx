@@ -3,6 +3,7 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DepartmentBadge, SubdepartmentChip, DeptAccentBorder, type Department, type ProductionSub } from "@/components/department/DepartmentBadge";
 
 /* ── Risk Item Card ── */
 interface RiskItem {
@@ -12,6 +13,8 @@ interface RiskItem {
   rootCauses: string[];
   actions: string[];
   metrics?: { label: string; value: string }[];
+  department?: Department;
+  subdepartment?: ProductionSub;
 }
 
 const riskLevelStyle = {
@@ -30,6 +33,8 @@ const RiskCard = ({ item }: { item: RiskItem }) => {
             <AlertTriangle className={`w-3.5 h-3.5 ${item.riskLevel === "HIGH" ? "text-red-500" : item.riskLevel === "MEDIUM" ? "text-yellow-500" : "text-accent"}`} />
             <span className="text-sm font-bold text-foreground">{item.product}</span>
             <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${s.badge}`}>{item.riskLevel}</span>
+            {item.department && <DepartmentBadge department={item.department} />}
+            {item.subdepartment && <SubdepartmentChip sub={item.subdepartment} />}
           </div>
           <p className="text-[11px] text-muted-foreground">{item.description}</p>
         </div>
@@ -85,6 +90,7 @@ const supplyRisks: RiskItem[] = [
     product: "Chrysant Ringa Yellow",
     riskLevel: "HIGH",
     description: "Contracted volume dekt slechts 75% van forecast",
+    department: "Inkoop",
     metrics: [{ label: "Benodigd", value: "120K" }, { label: "Contract", value: "90K" }, { label: "Gap", value: "−30K" }],
     rootCauses: ["Leverancier Kenya Direct levert 15% minder", "Seizoenspiek niet afgedekt in contract"],
     actions: ["Reserveer 30K stelen bij Flora Holland Pool", "Onderhandel spoedlevering Kenya Direct"],
@@ -93,6 +99,7 @@ const supplyRisks: RiskItem[] = [
     product: "Lisianthus Rosita White",
     riskLevel: "HIGH",
     description: "Supply gap van 7K stelen bij stijgende vraag",
+    department: "Inkoop",
     metrics: [{ label: "Benodigd", value: "32K" }, { label: "Contract", value: "25K" }, { label: "Gap", value: "−7K" }],
     rootCauses: ["Beperkt aanbod dit seizoen", "Slechts 1 leverancier"],
     actions: ["Zoek alternatieve leverancier", "Overweeg receptaanpassing"],
@@ -110,6 +117,7 @@ const marginRisks: RiskItem[] = [
     product: "Vomar Boeket Fleur",
     riskLevel: "HIGH",
     description: "Verwachte marge 4.4pp onder target",
+    department: "Financieel",
     metrics: [{ label: "Verwacht", value: "18%" }, { label: "Target", value: "21%" }],
     rootCauses: ["Bloemprijs stijging +9.3%", "Forecast mismatch −12%"],
     actions: ["Beveilig leverancierscontracten", "Pas boeketsamenstelling aan"],
@@ -118,6 +126,7 @@ const marginRisks: RiskItem[] = [
     product: "AH Boeketje Zomer",
     riskLevel: "MEDIUM",
     description: "Marge gap van 2.1pp door productiekosten",
+    department: "Financieel",
     metrics: [{ label: "Verwacht", value: "19.9%" }, { label: "Target", value: "22%" }],
     rootCauses: ["Lijn H3 presteert 13% onder norm", "Hogere chrysantprijzen"],
     actions: ["Plan H3 onderhoud", "Wissel chrysant leverancier"],
@@ -129,6 +138,7 @@ const procurementRisks: RiskItem[] = [
     product: "Kenya Rozen partij K-2024-0892",
     riskLevel: "MEDIUM",
     description: "Partijprijs 12% boven offerte, leverancier instabiel",
+    department: "Inkoop",
     rootCauses: ["Transportkosten gestegen", "Wisselkoers KES/EUR ongunstig"],
     actions: ["Heronderhandel prijs", "Activeer backup leverancier"],
   },
@@ -139,6 +149,8 @@ const productionRisks: RiskItem[] = [
     product: "Lijn H3 – Hand Afdeling",
     riskLevel: "HIGH",
     description: "195 st/p/u – 11% onder norm van 220",
+    department: "Productie",
+    subdepartment: "Hand",
     metrics: [{ label: "Actueel", value: "195 st/u" }, { label: "Norm", value: "220 st/u" }],
     rootCauses: ["Mechanisch probleem transportband", "2 nieuwe medewerkers in opleiding"],
     actions: ["Plan technisch onderhoud", "Herverdeel ervaren personeel"],
@@ -147,6 +159,8 @@ const productionRisks: RiskItem[] = [
     product: "Lijn B5 – Band Afdeling",
     riskLevel: "HIGH",
     description: "290 st/p/u – 12% onder norm van 330",
+    department: "Productie",
+    subdepartment: "Band",
     metrics: [{ label: "Actueel", value: "290 st/u" }, { label: "Norm", value: "330 st/u" }],
     rootCauses: ["Sensor kalibratie nodig", "Orderwissel te frequent"],
     actions: ["Kalibreer sensoren", "Optimaliseer orderplanning"],
@@ -158,6 +172,7 @@ const forecastRisks: RiskItem[] = [
     product: "Moederdag programma",
     riskLevel: "MEDIUM",
     description: "Forecast wijkt 18% af van binnenkomende orders",
+    department: "Verkoop",
     rootCauses: ["Retail forecast te optimistisch", "Markttrend lager dan verwacht"],
     actions: ["Herbereken forecast met actuele orderdata", "Verlaag productiecapaciteit reservering"],
   },
