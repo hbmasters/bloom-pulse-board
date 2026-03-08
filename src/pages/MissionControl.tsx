@@ -17,6 +17,7 @@ import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
+import IntelligenceHub from "@/pages/IntelligenceHub";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
