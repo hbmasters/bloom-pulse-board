@@ -53,6 +53,8 @@ export const viewToRoute: Record<MCView, string> = {
   history: "/history",
   settings: "/settings",
   intelligence: "/intelligence",
+  "risk-radar": "/risk-radar",
+  "chance-radar": "/chance-radar",
 };
 
 const MissionControl = () => {
