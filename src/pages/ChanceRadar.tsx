@@ -294,7 +294,7 @@ const ChanceRadar = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

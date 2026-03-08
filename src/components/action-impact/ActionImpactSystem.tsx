@@ -104,7 +104,7 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

@@ -302,7 +302,7 @@ const ProfitEngine = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
