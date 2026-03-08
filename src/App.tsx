@@ -29,6 +29,8 @@ const App = () => (
           <Route path="/history" element={<MissionControl />} />
            <Route path="/settings" element={<MissionControl />} />
            <Route path="/intelligence" element={<MissionControl />} />
+           <Route path="/risk-radar" element={<MissionControl />} />
+           <Route path="/chance-radar" element={<MissionControl />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
