@@ -230,20 +230,13 @@ const actionItems: ActionItem[] = [
   },
 ];
 
-const departments = ["All", "Procurement", "Production", "Sales", "Design", "Planning"] as const;
+const allDepts: (Department | "All")[] = ["All", "Verkoop", "Inkoop", "Productie", "Administratie", "Financieel"];
 
 const priorityOrder = { High: 0, Medium: 1, Low: 2 };
 const priorityStyle = {
   High: "text-red-500 bg-red-500/10 border-red-500/20",
   Medium: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
   Low: "text-muted-foreground bg-muted/20 border-border",
-};
-const deptStyle: Record<string, string> = {
-  Procurement: "text-primary bg-primary/10 border-primary/20",
-  Production: "text-accent bg-accent/10 border-accent/20",
-  Sales: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
-  Design: "text-pink-400 bg-pink-400/10 border-pink-400/20",
-  Planning: "text-blue-400 bg-blue-400/10 border-blue-400/20",
 };
 
 const ChanceRadar = () => {
