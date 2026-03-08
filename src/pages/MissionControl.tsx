@@ -17,10 +17,11 @@ import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
+import IntelligenceHub from "@/pages/IntelligenceHub";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -34,6 +35,7 @@ const routeToView: Record<string, MCView> = {
   "/agents": "agents",
   "/history": "history",
   "/settings": "settings",
+  "/intelligence": "intelligence",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -48,6 +50,7 @@ export const viewToRoute: Record<MCView, string> = {
   agents: "/agents",
   history: "/history",
   settings: "/settings",
+  intelligence: "/intelligence",
 };
 
 const MissionControl = () => {
@@ -116,6 +119,7 @@ const MissionControl = () => {
             {view === "agents" && <MCAgents />}
             {view === "history" && <ChatHistory />}
             {view === "settings" && <MCSettings />}
+            {view === "intelligence" && <IntelligenceHub />}
           </div>
 
           {view === "chat" && (

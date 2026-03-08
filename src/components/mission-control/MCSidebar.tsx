@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Radar } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -16,6 +16,7 @@ interface MCSidebarProps {
 
 const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "chat", icon: MessageSquare, label: "Chat" },
+  { id: "intelligence", icon: Radar, label: "Intelligence Hub" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
   { id: "notifications", icon: Bell, label: "Notificaties" },

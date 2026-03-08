@@ -1,0 +1,50 @@
+import { DollarSign } from "lucide-react";
+import IHSectionShell from "./IHSectionShell";
+import IHMetricCard, { IHMetric } from "./IHMetricCard";
+
+const metrics: IHMetric[] = [
+  { label: "Gewenste marge", value: "35.0", unit: "%", status: "neutral" },
+  { label: "Werkelijke marge", value: "32.4", unit: "%", change: "−2.6pp", changeDir: "down", status: "warning", sparkline: [34, 33, 35, 32, 33, 31, 32] },
+  { label: "Marge gap", value: "−2.6", unit: "pp", status: "warning", change: "Verbreding", changeDir: "down" },
+  { label: "Bloemkosten", value: "€0.082", unit: "/steel", target: "€0.075", change: "+9.3%", changeDir: "up", status: "critical", sparkline: [72, 74, 76, 78, 80, 82] },
+  { label: "Arbeidskosten", value: "€0.034", unit: "/steel", target: "€0.030", status: "warning", change: "+13%", changeDir: "up" },
+  { label: "Factuurprijs variance", value: "−1.8", unit: "%", status: "warning", change: "vs offerte", changeDir: "down" },
+];
+
+const costBreakdown = [
+  { label: "Bloemen", pct: 48, color: "bg-primary" },
+  { label: "Arbeid", pct: 22, color: "bg-accent" },
+  { label: "Verpakking", pct: 12, color: "bg-yellow-500" },
+  { label: "Transport", pct: 10, color: "bg-muted-foreground" },
+  { label: "Overhead", pct: 8, color: "bg-red-400" },
+];
+
+const IHMarginIntelligence = () => (
+  <IHSectionShell icon={DollarSign} title="Margin Intelligence" subtitle="Financiële performance • Factuurprijs = financiële waarheid" badge="Axerrio DW" badgeVariant="warning">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+      {metrics.map((m) => (
+        <IHMetricCard key={m.label} metric={m} />
+      ))}
+    </div>
+
+    {/* Cost breakdown bar */}
+    <div>
+      <h3 className="text-[11px] font-bold text-foreground/70 uppercase tracking-wider mb-3">Kostenverdeling per steel</h3>
+      <div className="flex h-4 rounded-full overflow-hidden mb-2">
+        {costBreakdown.map((c) => (
+          <div key={c.label} className={`${c.color} transition-all`} style={{ width: `${c.pct}%` }} />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3">
+        {costBreakdown.map((c) => (
+          <div key={c.label} className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${c.color}`} />
+            <span className="text-[10px] text-muted-foreground">{c.label} {c.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </IHSectionShell>
+);
+
+export default IHMarginIntelligence;
