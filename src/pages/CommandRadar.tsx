@@ -10,7 +10,7 @@ import IntelligenceHub from "./IntelligenceHub";
 import RiskRadar from "./RiskRadar";
 import ChanceRadar from "./ChanceRadar";
 import ProfitEngine from "./ProfitEngine";
-import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
+
 /* ── Types ── */
 type TabId = "intelligence" | "risk" | "chance" | "profit";
 
