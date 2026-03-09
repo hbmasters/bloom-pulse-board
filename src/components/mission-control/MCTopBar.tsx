@@ -28,6 +28,7 @@ const viewTitles: Record<MCView, string> = {
   "chance-radar": "Chance Radar",
   "profit-engine": "Profit Engine",
   "command-radar": "Command Radar",
+  "action-engine": "Action Engine",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {

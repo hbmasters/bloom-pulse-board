@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, Shield, TrendingUp, Banknote, Zap, Radar } from "lucide-react";
+import { Activity, Shield, TrendingUp, Banknote, Radar } from "lucide-react";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { useIntelligenceData } from "@/hooks/useIntelligenceData";
 import { SignalUnknown, InlineLoader } from "@/components/intelligence-hub/DataStateWrapper";
@@ -10,10 +10,9 @@ import IntelligenceHub from "./IntelligenceHub";
 import RiskRadar from "./RiskRadar";
 import ChanceRadar from "./ChanceRadar";
 import ProfitEngine from "./ProfitEngine";
-import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
 
 /* ── Types ── */
-type TabId = "intelligence" | "risk" | "chance" | "profit" | "actions";
+type TabId = "intelligence" | "risk" | "chance" | "profit";
 
 /* ── Status styles ── */
 
@@ -51,7 +50,6 @@ const tabs: { id: TabId; label: string; icon: typeof Activity; shortLabel: strin
   { id: "risk", label: "Risk Radar", icon: Shield, shortLabel: "Risico's" },
   { id: "chance", label: "Chance Radar", icon: TrendingUp, shortLabel: "Kansen" },
   { id: "profit", label: "Profit Engine", icon: Banknote, shortLabel: "Winst" },
-  { id: "actions", label: "Action Engine", icon: Zap, shortLabel: "Acties" },
 ];
 
 /* ══════════════════════════════════════════
@@ -155,9 +153,6 @@ const CommandRadar = () => {
         )}
         {activeTab === "profit" && (
           <ProfitEngine intelligence={intelligence} />
-        )}
-        {activeTab === "actions" && (
-          <ActionImpactSystem intelligence={intelligence} />
         )}
       </div>
     </div>
