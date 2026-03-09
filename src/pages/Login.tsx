@@ -8,6 +8,7 @@ import HBMasterLogo from "@/components/mission-control/HBMasterLogo";
 import { useToast } from "@/hooks/use-toast";
 import { LoginHoloRing } from "@/components/login/LoginHoloRing";
 import { LoginParticles } from "@/components/login/LoginParticles";
+import { LoginSystemStatus } from "@/components/login/LoginSystemStatus";
 
 const Login = () => {
   const [email, setEmail] = useState("");
