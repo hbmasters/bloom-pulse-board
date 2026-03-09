@@ -163,6 +163,11 @@ const Login = () => {
             <span className="text-[10px] font-mono uppercase tracking-widest">Secured by HBMaster</span>
             <div className="h-px flex-1 bg-border" />
           </div>
+
+          {/* System status */}
+          <div className="mt-4 flex justify-center">
+            <LoginSystemStatus />
+          </div>
         </div>
       </div>
     </div>
