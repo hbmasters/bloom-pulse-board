@@ -12,7 +12,7 @@ import ChanceRadar from "./ChanceRadar";
 import ProfitEngine from "./ProfitEngine";
 import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
 /* ── Types ── */
-type TabId = "intelligence" | "risk" | "chance" | "profit" | "actions";
+type TabId = "intelligence" | "risk" | "chance" | "profit";
 
 /* ── Status styles ── */
 
