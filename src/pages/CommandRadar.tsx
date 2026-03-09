@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, Shield, TrendingUp, Banknote, Zap, Radar } from "lucide-react";
+import { Activity, Shield, TrendingUp, Banknote, Radar } from "lucide-react";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import { useIntelligenceData } from "@/hooks/useIntelligenceData";
 import { SignalUnknown, InlineLoader } from "@/components/intelligence-hub/DataStateWrapper";
