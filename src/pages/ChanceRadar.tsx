@@ -181,9 +181,9 @@ const ChanceRadar = ({ intelligence }: Props) => {
     .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
   return (
-    <div className="relative flex-1 min-h-0 overflow-hidden">
+    <div className="relative min-h-0">
       <MCHologramBackground />
-      <div className="absolute inset-0 z-10 overflow-y-auto overscroll-contain">
+      <div className="relative z-10">
         <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto pb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-2 h-8 rounded-full bg-accent" />
