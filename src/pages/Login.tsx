@@ -8,6 +8,7 @@ import HBMasterLogo from "@/components/mission-control/HBMasterLogo";
 import { useToast } from "@/hooks/use-toast";
 import { LoginHoloRing } from "@/components/login/LoginHoloRing";
 import { LoginParticles } from "@/components/login/LoginParticles";
+import { LoginSystemStatus } from "@/components/login/LoginSystemStatus";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -161,6 +162,11 @@ const Login = () => {
             <div className="h-px flex-1 bg-border" />
             <span className="text-[10px] font-mono uppercase tracking-widest">Secured by HBMaster</span>
             <div className="h-px flex-1 bg-border" />
+          </div>
+
+          {/* System status */}
+          <div className="mt-4 flex justify-center">
+            <LoginSystemStatus />
           </div>
         </div>
       </div>
