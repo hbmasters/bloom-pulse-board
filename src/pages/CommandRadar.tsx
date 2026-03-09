@@ -50,7 +50,6 @@ const tabs: { id: TabId; label: string; icon: typeof Activity; shortLabel: strin
   { id: "risk", label: "Risk Radar", icon: Shield, shortLabel: "Risico's" },
   { id: "chance", label: "Chance Radar", icon: TrendingUp, shortLabel: "Kansen" },
   { id: "profit", label: "Profit Engine", icon: Banknote, shortLabel: "Winst" },
-  { id: "actions", label: "Action Engine", icon: Zap, shortLabel: "Acties" },
 ];
 
 /* ══════════════════════════════════════════
