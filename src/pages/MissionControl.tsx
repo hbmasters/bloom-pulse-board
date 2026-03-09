@@ -44,6 +44,7 @@ const routeToView: Record<string, MCView> = {
   "/chance-radar": "chance-radar",
   "/profit-engine": "profit-engine",
   "/command-radar": "command-radar",
+  "/action-engine": "action-engine",
 };
 
 export const viewToRoute: Record<MCView, string> = {
