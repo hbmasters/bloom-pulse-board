@@ -154,9 +154,6 @@ const CommandRadar = () => {
         {activeTab === "profit" && (
           <ProfitEngine intelligence={intelligence} />
         )}
-        {activeTab === "actions" && (
-          <ActionImpactSystem intelligence={intelligence} />
-        )}
       </div>
     </div>
   );
