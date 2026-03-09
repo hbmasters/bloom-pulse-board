@@ -6,99 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
 import HBMasterLogo from "@/components/mission-control/HBMasterLogo";
 import { useToast } from "@/hooks/use-toast";
-
-/* ── Mini hologram ring SVG ── */
-function HoloRing({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 200 200" fill="none" className={className}>
-      <circle cx="100" cy="100" r="90" stroke="hsl(228 50% 55%)" strokeWidth="0.6" opacity="0.25">
-        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="30s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="100" cy="100" r="70" stroke="hsl(228 60% 62%)" strokeWidth="0.4" opacity="0.18">
-        <animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="22s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="100" cy="100" r="50" stroke="hsl(155 55% 42%)" strokeWidth="0.5" opacity="0.2">
-        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="15s" repeatCount="indefinite" />
-      </circle>
-      {/* Hex shape */}
-      <polygon
-        points="100,20 169,55 169,125 100,160 31,125 31,55"
-        stroke="hsl(228 50% 55%)"
-        strokeWidth="0.5"
-        fill="none"
-        opacity="0.15"
-      >
-        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="40s" repeatCount="indefinite" />
-      </polygon>
-      {/* Orbiting dots */}
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <circle key={i} cx="100" cy="100" r="2" fill="hsl(228 50% 65%)" opacity="0.4">
-          <animateMotion
-            dur={`${8 + i * 2}s`}
-            repeatCount="indefinite"
-            path={`M0,0 a${60 + i * 12},${60 + i * 12} 0 1,1 0,0.1`}
-          />
-        </circle>
-      ))}
-      <circle cx="100" cy="100" r="3" fill="hsl(228 60% 60%)" opacity="0.5" />
-    </svg>
-  );
-}
-
-/* ── Floating particles ── */
-function FloatingParticles() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const particles = Array.from({ length: 60 }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3 - 0.15,
-      size: 1 + Math.random() * 2,
-      opacity: 0.1 + Math.random() * 0.3,
-      hue: Math.random() > 0.7 ? 155 : 228,
-    }));
-
-    let animId: number;
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
-        if (p.x < -10) p.x = canvas.width + 10;
-        if (p.x > canvas.width + 10) p.x = -10;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 50%, 60%, ${p.opacity})`;
-        ctx.fill();
-      }
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />;
-}
+import { LoginHoloRing } from "@/components/login/LoginHoloRing";
+import { LoginParticles } from "@/components/login/LoginParticles";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -109,7 +18,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if already logged in
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (session) navigate("/");
@@ -136,19 +44,23 @@ const Login = () => {
   };
 
   return (
-    <div className="mc-dark min-h-[100dvh] flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[hsl(220_18%_9%)]" />
-      <FloatingParticles />
+    <div className="min-h-[100dvh] flex items-center justify-center relative overflow-hidden bg-background">
+      {/* Soft radial accents */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[400px] rounded-full bg-accent/5 blur-3xl" />
+      </div>
 
-      {/* Large hologram rings behind card */}
+      <LoginParticles />
+
+      {/* Floral hologram behind card */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-        <HoloRing size={Math.min(700, typeof window !== "undefined" ? window.innerWidth * 0.9 : 700)} />
+        <LoginHoloRing size={Math.min(700, typeof window !== "undefined" ? window.innerWidth * 0.9 : 700)} />
       </div>
 
       {/* Login card */}
       <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-card/60 backdrop-blur-xl border border-border rounded-2xl p-8 shadow-[0_0_80px_-20px_hsl(228_50%_55%/0.3)]">
+        <div className="bg-card/80 backdrop-blur-xl border border-border rounded-2xl p-8 shadow-[var(--shadow-card)]">
           {/* Logo & Title */}
           <div className="flex flex-col items-center mb-8">
             <div className="relative mb-4">
@@ -183,7 +95,7 @@ const Login = () => {
                 onBlur={() => setFocusedField(null)}
                 className={`pl-10 h-12 bg-secondary/50 border-border transition-all duration-300 ${
                   focusedField === "email"
-                    ? "border-primary ring-1 ring-primary/30 shadow-[0_0_20px_-5px_hsl(228_50%_55%/0.3)]"
+                    ? "border-primary ring-1 ring-primary/30 shadow-[var(--shadow-glow-primary)]"
                     : "hover:border-muted-foreground/30"
                 }`}
                 autoComplete="email"
@@ -206,7 +118,7 @@ const Login = () => {
                 onBlur={() => setFocusedField(null)}
                 className={`pl-10 pr-10 h-12 bg-secondary/50 border-border transition-all duration-300 ${
                   focusedField === "password"
-                    ? "border-primary ring-1 ring-primary/30 shadow-[0_0_20px_-5px_hsl(228_50%_55%/0.3)]"
+                    ? "border-primary ring-1 ring-primary/30 shadow-[var(--shadow-glow-primary)]"
                     : "hover:border-muted-foreground/30"
                 }`}
                 autoComplete="current-password"
@@ -225,7 +137,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 text-base font-semibold bg-gradient-brand hover:opacity-90 transition-all duration-300 shadow-[0_0_30px_-8px_hsl(228_50%_55%/0.4)] hover:shadow-[0_0_40px_-8px_hsl(228_50%_55%/0.6)]"
+              className="w-full h-12 text-base font-semibold bg-gradient-brand hover:opacity-90 transition-all duration-300 shadow-[var(--shadow-glow-primary)] hover:shadow-[0_0_40px_-8px_hsl(var(--primary)/0.4)]"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
