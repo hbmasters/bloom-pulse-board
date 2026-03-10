@@ -72,42 +72,16 @@ export const ActionImpactSummary = ({ actions }: Props) => {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Action counts */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {kpis.map((k) => (
-          <div key={k.label} className={`rounded-xl border p-4 ${k.bg} transition-all`}>
-            <div className="flex items-center gap-2 mb-2">
-              <k.icon className={`w-4 h-4 ${k.accent}`} />
-              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{k.label}</span>
-            </div>
-            <div className={`text-2xl font-black font-mono ${k.accent}`}>{k.value}</div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {kpis.map((k) => (
+        <div key={k.label} className={`rounded-xl border p-4 ${k.bg} transition-all`}>
+          <div className="flex items-center gap-2 mb-2">
+            <k.icon className={`w-4 h-4 ${k.accent}`} />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{k.label}</span>
           </div>
-        ))}
-      </div>
-
-      {/* Impact potential */}
-      <div className="rounded-xl border border-accent/20 bg-accent/5 p-4">
-        <h3 className="text-[10px] font-mono font-bold uppercase tracking-wider text-accent mb-3">
-          Potentiële Business Impact
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {impacts.map((i) => (
-            <div key={i.label} className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                <i.icon className={`w-4 h-4 ${i.accent}`} />
-              </div>
-              <div>
-                <div className="text-[10px] text-muted-foreground">{i.label}</div>
-                <div className="flex items-baseline gap-1">
-                  <span className={`text-lg font-black font-mono ${i.accent}`}>{i.value}</span>
-                  <span className="text-[10px] text-muted-foreground">{i.sub}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+          <div className={`text-2xl font-black font-mono ${k.accent}`}>{k.value}</div>
         </div>
-      </div>
+      ))}
     </div>
   );
 };
