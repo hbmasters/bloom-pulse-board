@@ -585,7 +585,7 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                         {s.supplier}
                         <Badge variant="outline" className="text-[7px] font-mono h-4 px-1">{s.channel}</Badge>
                         {s.isBestPrice && <span className="text-[7px] text-accent font-bold">BEST</span>}
-                        {s.supplier === row.bestHistoricalSupplier && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                        {s.supplier === row.bestHistoricalSupplier && <Star className="w-3 h-3 text-primary fill-primary" />}
                         {s.url && (
                           <a href={s.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} title="Open leverancier">
                             <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
