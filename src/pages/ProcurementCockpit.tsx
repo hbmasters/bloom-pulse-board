@@ -747,14 +747,14 @@ const thCls = "text-[9px] font-mono font-bold uppercase tracking-wider text-mute
 /*  MAIN PAGE                                                          */
 /* ------------------------------------------------------------------ */
 
+type ProcurementTab = "all" | "urgent" | "today" | "upcoming" | "completed";
+
 const ProcurementCockpit = () => {
   const [showAutomation, setShowAutomation] = useState(false);
   const [rows, setRows] = useState(demoRows);
-  const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ProcurementTab>("all");
 
-  // Simulate buy action with loader
   const handleBuy = (id: string) => {
-    setBuyingId(id);
     setRows(prev => prev.map(r => r.id === id ? { ...r, purchaseState: "buying" as PurchaseState } : r));
     setTimeout(() => {
       setRows(prev => prev.map(r => r.id === id ? {
@@ -767,12 +767,20 @@ const ProcurementCockpit = () => {
         coverageStatus: "covered" as CoverageStatus,
         section: "completed" as const,
       } : r));
-      setBuyingId(null);
     }, 2200);
   };
 
-  const activeRows = rows.filter(r => r.section !== "completed");
   const completedRows = rows.filter(r => r.section === "completed");
+  const urgentRows = rows.filter(r => r.section === "urgent");
+  const todayRows = rows.filter(r => r.section === "today");
+  const upcomingRows = rows.filter(r => r.section === "upcoming");
+  const allActiveRows = [...urgentRows, ...todayRows, ...upcomingRows];
+
+  const visibleRows = activeTab === "all" ? allActiveRows
+    : activeTab === "urgent" ? urgentRows
+    : activeTab === "today" ? todayRows
+    : activeTab === "upcoming" ? upcomingRows
+    : completedRows;
 
   const totalDemand = rows.reduce((s, r) => s + r.forecastDemand, 0);
   const totalCovered = rows.reduce((s, r) => s + r.coveredVolume, 0);
@@ -782,10 +790,6 @@ const ProcurementCockpit = () => {
   const uniqueSuppliers = new Set(rows.flatMap(r => r.suppliers.map(s => s.supplier))).size;
   const avgConfidence = Math.round(rows.reduce((s, r) => s + r.forecastConfidence, 0) / rows.length);
   const purchasedToday = completedRows.length;
-
-  const urgentRows = activeRows.filter(r => r.section === "urgent");
-  const todayRows = activeRows.filter(r => r.section === "today");
-  const upcomingRows = activeRows.filter(r => r.section === "upcoming");
 
   return (
     <div className="relative flex flex-col h-full min-h-0">
@@ -830,6 +834,32 @@ const ProcurementCockpit = () => {
           {/* Filters */}
           <FilterBar />
 
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProcurementTab)} className="w-full">
+            <TabsList className="bg-secondary/30 h-8">
+              <TabsTrigger value="all" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                <ShoppingCart className="w-3 h-3" /> Inkooplijst
+                <span className="text-[8px] text-muted-foreground ml-0.5">({allActiveRows.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="urgent" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                <AlertTriangle className="w-3 h-3" /> Urgent
+                {urgentRows.length > 0 && <span className="text-[8px] text-destructive font-bold ml-0.5">({urgentRows.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="today" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                <Package className="w-3 h-3" /> Vandaag
+                <span className="text-[8px] text-muted-foreground ml-0.5">({todayRows.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                <Clock className="w-3 h-3" /> Komende dagen
+                <span className="text-[8px] text-muted-foreground ml-0.5">({upcomingRows.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                <CheckCircle2 className="w-3 h-3" /> Afgerond
+                <span className="text-[8px] text-accent ml-0.5">({completedRows.length})</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           {/* Procurement Table */}
           <div className="rounded-lg border border-border bg-card overflow-x-auto">
             <Table>
@@ -857,33 +887,14 @@ const ProcurementCockpit = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* URGENT section */}
-                {urgentRows.length > 0 && (
-                  <>
-                    <SectionHeader label="Urgent — directe actie vereist" count={urgentRows.length} icon={AlertTriangle} accent="text-destructive" />
-                    {urgentRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)}
-                  </>
-                )}
-                {/* TODAY section */}
-                {todayRows.length > 0 && (
-                  <>
-                    <SectionHeader label="Vandaag inkopen" count={todayRows.length} icon={ShoppingCart} accent="text-primary" />
-                    {todayRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)}
-                  </>
-                )}
-                {/* UPCOMING section */}
-                {upcomingRows.length > 0 && (
-                  <>
-                    <SectionHeader label="Komende dagen" count={upcomingRows.length} icon={Clock} accent="text-muted-foreground" />
-                    {upcomingRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)}
-                  </>
-                )}
-                {/* COMPLETED section */}
-                {completedRows.length > 0 && (
-                  <>
-                    <SectionHeader label="Vandaag afgerond" count={completedRows.length} icon={CheckCircle2} accent="text-accent" />
-                    {completedRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)}
-                  </>
+                {visibleRows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={19} className="text-center py-8 text-[11px] font-mono text-muted-foreground">
+                      Geen items in deze categorie
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  visibleRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)
                 )}
               </TableBody>
             </Table>
