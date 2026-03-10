@@ -478,69 +478,57 @@ const ProcurementTableRow = ({ row, onBuy }: { row: ProcurementRow; onBuy: (id: 
     <Collapsible open={open} onOpenChange={setOpen}>
       <TableRow
         className={cn(
-          "group cursor-pointer hover:bg-secondary/30",
+          "group cursor-pointer hover:bg-secondary/20 border-b border-border",
           isPurchased && "opacity-60 bg-accent/5"
         )}
         onClick={() => setOpen(!open)}
       >
-        <TableCell className="w-6 px-1">
+        <TableCell className="w-6 px-1 border-r-0">
           <CollapsibleTrigger asChild>
             <button className="p-0.5" onClick={e => e.stopPropagation()}>
               {open ? <ChevronDown className="w-3 h-3 text-muted-foreground" /> : <ChevronRight className="w-3 h-3 text-muted-foreground" />}
             </button>
           </CollapsibleTrigger>
         </TableCell>
-        {/* Article */}
+        {/* Product group */}
         <TableCell className="font-bold text-[11px] text-foreground whitespace-nowrap">
           {row.article}
           {isPurchased && <span className="ml-1.5 text-[8px] font-mono text-accent">✓ {row.purchasedAt}</span>}
         </TableCell>
-        {/* Species */}
         <TableCell className="text-[10px] font-mono text-muted-foreground">{row.species}</TableCell>
-        {/* Quality */}
         <TableCell>{qualityBadge(row.quality)}</TableCell>
-        {/* Length */}
-        <TableCell className="text-[10px] font-mono text-muted-foreground">{row.stemLength}</TableCell>
-        {/* Buyer */}
+        <TableCell className="text-[10px] font-mono text-muted-foreground border-r border-border">{row.stemLength}</TableCell>
+        {/* Toewijzing group */}
         <TableCell className="text-[10px] font-mono text-foreground/70">{row.buyer}</TableCell>
-        {/* Program */}
-        <TableCell className="text-[11px] text-foreground max-w-[120px] truncate">{row.program}</TableCell>
-        {/* Demand + change */}
+        <TableCell className="text-[11px] text-foreground max-w-[120px] truncate border-r border-border">{row.program}</TableCell>
+        {/* Volume group */}
         <TableCell className="text-right">
           <span className="text-[11px] font-mono text-foreground tabular-nums">{fmt(row.forecastDemand)}</span>
         </TableCell>
-        {/* Change */}
         <TableCell className="text-center">{changeIcon(row.demandChange, row.demandChangePercent)}</TableCell>
-        {/* Stock */}
         <TableCell className="text-[11px] font-mono text-muted-foreground text-right tabular-nums">{fmt(row.currentStock)}</TableCell>
-        {/* Remaining */}
         <TableCell className={cn(
-          "text-[11px] font-mono font-bold text-right tabular-nums",
+          "text-[11px] font-mono font-bold text-right tabular-nums border-r border-border",
           row.remainingToBuy > 0 ? "text-primary" : "text-accent"
         )}>{fmt(row.remainingToBuy)}</TableCell>
-        {/* Historical */}
+        {/* Prijzen group */}
         <TableCell className="text-[10px] font-mono text-muted-foreground/60 text-right tabular-nums">{fmtPrice(row.historicalPrice)}</TableCell>
-        {/* Offer */}
         <TableCell className={cn(
           "text-[11px] font-mono text-right tabular-nums font-bold",
           row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : row.offerPrice > row.historicalPrice ? "text-destructive" : "text-foreground"
         )}>{fmtPrice(row.offerPrice)}</TableCell>
-        {/* Advice price */}
         <TableCell className="text-[11px] font-mono text-primary text-right tabular-nums font-bold">{fmtPrice(row.advicePrice)}</TableCell>
-        {/* Δ Marge */}
-        <TableCell className="text-right"><ProcurementDelta offer={row.offerPrice} expected={row.expectedPrice} /></TableCell>
-        {/* Status */}
+        <TableCell className="text-right border-r border-border"><ProcurementDelta offer={row.offerPrice} expected={row.expectedPrice} /></TableCell>
+        {/* Status group */}
         <TableCell className="text-center">{coverageBadge(row.coverageStatus)}</TableCell>
-        {/* Source */}
-        <TableCell className="text-center"><SourceHealthIcon health={row.sourceHealth} /></TableCell>
-        {/* AI */}
+        <TableCell className="text-center border-r border-border"><SourceHealthIcon health={row.sourceHealth} /></TableCell>
+        {/* Actie group */}
         <TableCell>
           <div className="flex items-center gap-1 max-w-[160px]">
             <Bot className="w-3 h-3 text-primary shrink-0" />
             <span className="text-[9px] text-muted-foreground truncate">{row.aiRecommendation}</span>
           </div>
         </TableCell>
-        {/* Action */}
         <TableCell><BuyButton row={row} onBuy={onBuy} /></TableCell>
       </TableRow>
 
@@ -862,26 +850,41 @@ const ProcurementCockpit = () => {
 
           {/* Procurement Table */}
           <div className="rounded-lg border border-border bg-card overflow-x-auto">
-            <Table>
+            <Table className="border-collapse">
               <TableHeader>
-                <TableRow className="bg-secondary/30">
-                  <TableHead className="w-6 px-1" />
-                  <TableHead className={thCls}>Artikel</TableHead>
+                {/* Column group headers */}
+                <TableRow className="bg-secondary/50 border-b-2 border-border">
+                  <TableHead className="w-6 px-1" rowSpan={2} />
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Product</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Toewijzing</TableHead>
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Volume</TableHead>
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Prijzen</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Status</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center py-1">Actie</TableHead>
+                </TableRow>
+                <TableRow className="bg-secondary/30 border-b border-border">
+                  {/* Product group */}
+                  <TableHead className={cn(thCls, "border-r-0")}>Artikel</TableHead>
                   <TableHead className={thCls}>Soort</TableHead>
                   <TableHead className={thCls}>Kwal.</TableHead>
-                  <TableHead className={thCls}>Lengte</TableHead>
+                  <TableHead className={cn(thCls, "border-r border-border")}>Lengte</TableHead>
+                  {/* Toewijzing group */}
                   <TableHead className={thCls}>Buyer</TableHead>
-                  <TableHead className={thCls}>Programma</TableHead>
+                  <TableHead className={cn(thCls, "border-r border-border")}>Programma</TableHead>
+                  {/* Volume group */}
                   <TableHead className={cn(thCls, "text-right")}>Vraag</TableHead>
                   <TableHead className={cn(thCls, "text-center")}>Δ</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Voorraad</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Open</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Hist. prijs</TableHead>
+                  <TableHead className={cn(thCls, "text-right border-r border-border")}>Open</TableHead>
+                  {/* Prijzen group */}
+                  <TableHead className={cn(thCls, "text-right")}>Hist.</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Offerte</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Advies</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Δ Marge</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Status</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Bron</TableHead>
+                  <TableHead className={cn(thCls, "text-right border-r border-border")}>Δ Marge</TableHead>
+                  {/* Status group */}
+                  <TableHead className={cn(thCls, "text-center")}>Dekking</TableHead>
+                  <TableHead className={cn(thCls, "text-center border-r border-border")}>Bron</TableHead>
+                  {/* Actie group */}
                   <TableHead className={thCls}>AI Advies</TableHead>
                   <TableHead className={thCls}>Actie</TableHead>
                 </TableRow>
