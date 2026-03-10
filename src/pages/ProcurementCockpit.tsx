@@ -111,9 +111,10 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "down", demandChangePercent: -5,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 91, forecastHorizonDays: 4,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
+    bestHistoricalSupplier: "Carnation BV",
     suppliers: [
-      { supplier: "Carnation BV", channel: "Contract", available: 2000, price: 0.17, deliveryDays: 1, confidence: 95, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "FloriTrade", channel: "Floriday", available: 1500, price: 0.20, deliveryDays: 2, confidence: 82, sourceHealth: "connected" },
+      { supplier: "Carnation BV", channel: "Contract", available: 2000, price: 0.17, deliveryDays: 1, confidence: 95, sourceHealth: "connected", isBestPrice: true, url: "https://carnationbv.nl" },
+      { supplier: "FloriTrade", channel: "Floriday", available: 1500, price: 0.20, deliveryDays: 2, confidence: 82, sourceHealth: "connected", url: "https://floriday.io/supplier/floritrade" },
     ],
   },
   {
