@@ -1,10 +1,11 @@
-import { Shield, AlertTriangle, TrendingDown, ArrowRight } from "lucide-react";
+import { Shield, AlertTriangle, TrendingDown, ArrowRight, Package, Link2Off } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, SubdepartmentChip, DeptAccentBorder, type Department, type ProductionSub } from "@/components/department/DepartmentBadge";
+import { DataMaturityBadge, ForecastEmptyState, DependencyStatus } from "@/components/intelligence-hub/DataMaturityBadge";
 import type { IntelligenceData } from "@/types/intelligence";
 
 /* ── Risk Item Card ── */
