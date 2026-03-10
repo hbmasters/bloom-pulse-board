@@ -862,26 +862,41 @@ const ProcurementCockpit = () => {
 
           {/* Procurement Table */}
           <div className="rounded-lg border border-border bg-card overflow-x-auto">
-            <Table>
+            <Table className="border-collapse">
               <TableHeader>
-                <TableRow className="bg-secondary/30">
-                  <TableHead className="w-6 px-1" />
-                  <TableHead className={thCls}>Artikel</TableHead>
+                {/* Column group headers */}
+                <TableRow className="bg-secondary/50 border-b-2 border-border">
+                  <TableHead className="w-6 px-1" rowSpan={2} />
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Product</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Toewijzing</TableHead>
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Volume</TableHead>
+                  <TableHead colSpan={4} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Prijzen</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center border-r border-border py-1">Status</TableHead>
+                  <TableHead colSpan={2} className="text-[8px] font-mono font-black uppercase tracking-[0.15em] text-foreground/50 text-center py-1">Actie</TableHead>
+                </TableRow>
+                <TableRow className="bg-secondary/30 border-b border-border">
+                  {/* Product group */}
+                  <TableHead className={cn(thCls, "border-r-0")}>Artikel</TableHead>
                   <TableHead className={thCls}>Soort</TableHead>
                   <TableHead className={thCls}>Kwal.</TableHead>
-                  <TableHead className={thCls}>Lengte</TableHead>
+                  <TableHead className={cn(thCls, "border-r border-border")}>Lengte</TableHead>
+                  {/* Toewijzing group */}
                   <TableHead className={thCls}>Buyer</TableHead>
-                  <TableHead className={thCls}>Programma</TableHead>
+                  <TableHead className={cn(thCls, "border-r border-border")}>Programma</TableHead>
+                  {/* Volume group */}
                   <TableHead className={cn(thCls, "text-right")}>Vraag</TableHead>
                   <TableHead className={cn(thCls, "text-center")}>Δ</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Voorraad</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Open</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Hist. prijs</TableHead>
+                  <TableHead className={cn(thCls, "text-right border-r border-border")}>Open</TableHead>
+                  {/* Prijzen group */}
+                  <TableHead className={cn(thCls, "text-right")}>Hist.</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Offerte</TableHead>
                   <TableHead className={cn(thCls, "text-right")}>Advies</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Δ Marge</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Status</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Bron</TableHead>
+                  <TableHead className={cn(thCls, "text-right border-r border-border")}>Δ Marge</TableHead>
+                  {/* Status group */}
+                  <TableHead className={cn(thCls, "text-center")}>Dekking</TableHead>
+                  <TableHead className={cn(thCls, "text-center border-r border-border")}>Bron</TableHead>
+                  {/* Actie group */}
                   <TableHead className={thCls}>AI Advies</TableHead>
                   <TableHead className={thCls}>Actie</TableHead>
                 </TableRow>
