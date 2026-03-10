@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
 import type { MCView } from "@/pages/MissionControl";
@@ -14,6 +14,7 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
   { id: "chat", icon: MessageSquare, label: "Chat" },
   { id: "command-radar", icon: Crosshair, label: "Command Radar" },
   { id: "action-engine", icon: Zap, label: "Action Engine" },
+  { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
   { id: "notifications", icon: Bell, label: "Notificaties" },
