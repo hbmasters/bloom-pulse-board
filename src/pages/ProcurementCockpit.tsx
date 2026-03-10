@@ -5,7 +5,7 @@ import {
   Filter, RotateCcw, ChevronDown, ChevronRight, ExternalLink,
   TrendingUp, TrendingDown, Minus, Bot, ShoppingCart, AlertTriangle,
   Clock, Package, Truck, DollarSign, CheckCircle2, X,
-  Wifi, WifiOff, RefreshCw, Shield, Zap,
+  Link2, Unlink, RefreshCw, Shield, Zap,
   ArrowUpRight, ArrowDownRight, Boxes, Loader2,
   Star, AlertCircle, Check, User, Activity
 } from "lucide-react";
