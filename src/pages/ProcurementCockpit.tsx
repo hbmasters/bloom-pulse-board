@@ -62,11 +62,12 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "at-risk", demandChange: "up", demandChangePercent: 24,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 72, forecastHorizonDays: 1,
     purchaseState: "open", purchasedQuantity: 0, section: "urgent",
+    bestHistoricalSupplier: "Germini World",
     suppliers: [
-      { supplier: "Germini World", channel: "Floriday", available: 4000, price: 0.10, deliveryDays: 2, confidence: 85, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "FlowerLink", channel: "Marketplace", available: 2500, price: 0.12, deliveryDays: 2, confidence: 72, sourceHealth: "stale" },
-      { supplier: "Direct Grower", channel: "Webshop", available: 3000, price: 0.11, deliveryDays: 3, confidence: 80, sourceHealth: "connected" },
-      { supplier: "BloemenVeiling", channel: "Floriday", available: 1500, price: 0.13, deliveryDays: 1, confidence: 90, sourceHealth: "connected" },
+      { supplier: "Germini World", channel: "Floriday", available: 4000, price: 0.10, deliveryDays: 2, confidence: 85, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/germini-world" },
+      { supplier: "FlowerLink", channel: "Marketplace", available: 2500, price: 0.12, deliveryDays: 2, confidence: 72, sourceHealth: "stale", url: "https://flowerlink.nl" },
+      { supplier: "Direct Grower", channel: "Webshop", available: 3000, price: 0.11, deliveryDays: 3, confidence: 80, sourceHealth: "connected", url: "https://directgrower.nl" },
+      { supplier: "BloemenVeiling", channel: "Floriday", available: 1500, price: 0.13, deliveryDays: 1, confidence: 90, sourceHealth: "connected", url: "https://floriday.io/supplier/bloemenveiling" },
     ],
   },
   {
