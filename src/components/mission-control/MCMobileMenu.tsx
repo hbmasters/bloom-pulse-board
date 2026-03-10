@@ -1,4 +1,5 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
 import type { MCView } from "@/pages/MissionControl";
@@ -10,12 +11,25 @@ interface MCMobileMenuProps {
   onClose: () => void;
 }
 
-const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
+type NavItem = { id: MCView; icon: typeof MessageSquare; label: string };
+type NavGroup = { id: string; icon: typeof MessageSquare; label: string; children: NavItem[] };
+type NavEntry = NavItem | NavGroup;
+
+const isGroup = (entry: NavEntry): entry is NavGroup => "children" in entry;
+
+const navEntries: NavEntry[] = [
   { id: "chat", icon: MessageSquare, label: "Chat" },
   { id: "command-radar", icon: Crosshair, label: "Command Radar" },
+  {
+    id: "management-cockpit",
+    icon: Briefcase,
+    label: "Management Cockpit",
+    children: [
+      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+      { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+    ],
+  },
   { id: "action-engine", icon: Zap, label: "Action Engine" },
-  { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
-  { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
   { id: "kanban", icon: LayoutGrid, label: "Kanban" },
   { id: "kpis", icon: BarChart3, label: "KPI's" },
   { id: "notifications", icon: Bell, label: "Notificaties" },
@@ -28,15 +42,18 @@ const navItems: { id: MCView; icon: typeof MessageSquare; label: string }[] = [
 ];
 
 const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) => {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const handleNav = (view: MCView) => {
     onNavigate(view);
     onClose();
   };
 
+  const toggleGroup = (id: string) => setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
+  const isChildActive = (group: NavGroup) => group.children.some(c => c.id === active);
+
   return (
     <>
-      {/* Backdrop */}
       {open && (
         <div
           className="md:hidden fixed inset-0 bg-black/70"
@@ -45,7 +62,6 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
         />
       )}
 
-      {/* Slide-in sidebar */}
       <aside
         className={cn(
           "md:hidden fixed top-0 left-0 h-full w-64 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
@@ -53,31 +69,66 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
         )}
         style={{ zIndex: 9999, background: "hsl(228, 22%, 12%)" }}
       >
-        {/* Header */}
         <div className="flex h-14 items-center border-b border-sidebar-border px-4 gap-3">
           <HBMasterLogo size={28} className="shrink-0" />
           <div className="flex-1">
             <span className="text-sm font-black tracking-wider text-sidebar-primary-foreground">HBMASTER</span>
             <span className="text-[9px] font-mono text-sidebar-muted block -mt-0.5">AI Command Center</span>
           </div>
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-          >
+          <button onClick={onClose} className="flex items-center justify-center w-8 h-8 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-
-        {/* Nav items */}
-        <nav className="flex-1 py-3 px-2">
+        <nav className="flex-1 py-3 px-2 overflow-y-auto">
           <ul className="space-y-0.5">
-            {navItems.map(item => {
-              const isActive = active === item.id;
+            {navEntries.map(entry => {
+              if (isGroup(entry)) {
+                const isOpen = openGroups[entry.id] ?? isChildActive(entry);
+                return (
+                  <li key={entry.id}>
+                    <button
+                      onClick={() => toggleGroup(entry.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
+                        isChildActive(entry)
+                          ? "text-sidebar-accent-foreground font-medium"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      )}
+                    >
+                      <entry.icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1 text-left">{entry.label}</span>
+                      <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
+                    </button>
+                    {isOpen && (
+                      <ul className="mt-0.5 space-y-0.5">
+                        {entry.children.map(child => (
+                          <li key={child.id}>
+                            <button
+                              onClick={() => handleNav(child.id)}
+                              className={cn(
+                                "w-full flex items-center gap-3 pl-9 pr-3 py-2.5 text-sm rounded-md transition-colors",
+                                active === child.id
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                              )}
+                            >
+                              <child.icon className="w-4 h-4 shrink-0" />
+                              <span>{child.label}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              }
+
+              const isActive = active === entry.id;
               return (
-                <li key={item.id}>
+                <li key={entry.id}>
                   <button
-                    onClick={() => handleNav(item.id)}
+                    onClick={() => handleNav(entry.id)}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
                       isActive
@@ -85,8 +136,8 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                     )}
                   >
-                    <item.icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
+                    <entry.icon className="w-4 h-4 shrink-0" />
+                    <span>{entry.label}</span>
                   </button>
                 </li>
               );
@@ -94,7 +145,6 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
           </ul>
         </nav>
 
-        {/* Bottom status */}
         <div className="p-4 border-t border-sidebar-border">
           <button
             onClick={() => handleNav("status")}
