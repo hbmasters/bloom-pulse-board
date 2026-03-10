@@ -38,8 +38,8 @@ function mapToActionItem(a: IntelligenceAction): ActionItem {
 type TabId = "priority" | "pipeline";
 
 const tabs: { id: TabId; label: string; icon: typeof BarChart3; shortLabel: string }[] = [
-  { id: "priority", label: "Action Priority Board", icon: BarChart3, shortLabel: "Priority" },
-  { id: "pipeline", label: "Action Pipeline", icon: Kanban, shortLabel: "Pipeline" },
+  { id: "priority", label: "Priority Board", icon: BarChart3, shortLabel: "Priority" },
+  { id: "pipeline", label: "Action Kanban", icon: Kanban, shortLabel: "Kanban" },
 ];
 
 interface Props {
@@ -115,28 +115,12 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
         <div className="p-4 md:p-6 max-w-[1600px] mx-auto pb-8">
           {activeTab === "priority" && (
             <DataStateWrapper state={actionsState} skeletonCount={2}>
-              <IHSectionShell
-                icon={BarChart3}
-                title="Action Priority Board"
-                subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
-                badge={`${actions.length} ACTIES`}
-                badgeVariant="warning"
-              >
-                <ActionPriorityBoard actions={actions} />
-              </IHSectionShell>
+              <ActionPriorityBoard actions={actions} />
             </DataStateWrapper>
           )}
           {activeTab === "pipeline" && (
             <DataStateWrapper state={actionsState} skeletonCount={1}>
-              <IHSectionShell
-                icon={Kanban}
-                title="Action Pipeline"
-                subtitle="Uitvoeringsstatus per actie"
-                badge="PIPELINE"
-                badgeVariant="default"
-              >
-                <ActionPipeline actions={actions} />
-              </IHSectionShell>
+              <ActionPipeline actions={actions} />
             </DataStateWrapper>
           )}
         </div>
