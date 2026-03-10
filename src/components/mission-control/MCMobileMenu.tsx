@@ -17,28 +17,40 @@ type NavEntry = NavItem | NavGroup;
 
 const isGroup = (entry: NavEntry): entry is NavGroup => "children" in entry;
 
-const navEntries: NavEntry[] = [
-  { id: "chat", icon: MessageSquare, label: "Chat" },
-  { id: "command-radar", icon: Crosshair, label: "Command Radar" },
+type NavSection = { label: string; entries: NavEntry[] };
+
+const navSections: NavSection[] = [
   {
-    id: "management-cockpit",
-    icon: Briefcase,
-    label: "Management Cockpit",
-    children: [
-      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
-      { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+    label: "Directie",
+    entries: [
+      { id: "command-radar", icon: Crosshair, label: "Command Radar" },
+      {
+        id: "management-cockpit",
+        icon: Briefcase,
+        label: "Management Cockpit",
+        children: [
+          { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+          { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+        ],
+      },
+      { id: "action-engine", icon: Zap, label: "Action Engine" },
     ],
   },
-  { id: "action-engine", icon: Zap, label: "Action Engine" },
-  { id: "kanban", icon: LayoutGrid, label: "Kanban" },
-  { id: "kpis", icon: BarChart3, label: "KPI's" },
-  { id: "notifications", icon: Bell, label: "Notificaties" },
-  { id: "planner", icon: CalendarDays, label: "Weekplanner" },
-  { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
-  { id: "methodiek", icon: Brain, label: "Methodiek" },
-  { id: "agents", icon: Bot, label: "Agents" },
-  { id: "history", icon: Clock, label: "Historie" },
-  { id: "settings", icon: Settings, label: "Instellingen" },
+  {
+    label: "AI Systemen",
+    entries: [
+      { id: "chat", icon: MessageSquare, label: "Chat" },
+      { id: "kanban", icon: LayoutGrid, label: "Kanban" },
+      { id: "kpis", icon: BarChart3, label: "KPI's" },
+      { id: "notifications", icon: Bell, label: "Notificaties" },
+      { id: "planner", icon: CalendarDays, label: "Weekplanner" },
+      { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
+      { id: "methodiek", icon: Brain, label: "Methodiek" },
+      { id: "agents", icon: Bot, label: "Agents" },
+      { id: "history", icon: Clock, label: "Historie" },
+      { id: "settings", icon: Settings, label: "Instellingen" },
+    ],
+  },
 ];
 
 const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) => {
@@ -81,68 +93,78 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
         </div>
 
         <nav className="flex-1 py-3 px-2 overflow-y-auto">
-          <ul className="space-y-0.5">
-            {navEntries.map(entry => {
-              if (isGroup(entry)) {
-                const isOpen = openGroups[entry.id] ?? isChildActive(entry);
-                return (
-                  <li key={entry.id}>
-                    <button
-                      onClick={() => toggleGroup(entry.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
-                        isChildActive(entry)
-                          ? "text-sidebar-accent-foreground font-medium"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                      )}
-                    >
-                      <entry.icon className="w-4 h-4 shrink-0" />
-                      <span className="flex-1 text-left">{entry.label}</span>
-                      <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
-                    </button>
-                    {isOpen && (
-                      <ul className="mt-0.5 space-y-0.5">
-                        {entry.children.map(child => (
-                          <li key={child.id}>
-                            <button
-                              onClick={() => handleNav(child.id)}
-                              className={cn(
-                                "w-full flex items-center gap-3 pl-9 pr-3 py-2.5 text-sm rounded-md transition-colors",
-                                active === child.id
-                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                              )}
-                            >
-                              <child.icon className="w-4 h-4 shrink-0" />
-                              <span>{child.label}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              }
+          {navSections.map((section, si) => (
+            <div key={section.label}>
+              {si > 0 && <div className="my-2 mx-2 border-t border-sidebar-border" />}
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-sidebar-foreground/40">
+                  {section.label}
+                </span>
+              </div>
+              <ul className="space-y-0.5">
+                {section.entries.map(entry => {
+                  if (isGroup(entry)) {
+                    const isOpen = openGroups[entry.id] ?? isChildActive(entry);
+                    return (
+                      <li key={entry.id}>
+                        <button
+                          onClick={() => toggleGroup(entry.id)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
+                            isChildActive(entry)
+                              ? "text-sidebar-accent-foreground font-medium"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                          )}
+                        >
+                          <entry.icon className="w-4 h-4 shrink-0" />
+                          <span className="flex-1 text-left">{entry.label}</span>
+                          <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
+                        </button>
+                        {isOpen && (
+                          <ul className="mt-0.5 space-y-0.5">
+                            {entry.children.map(child => (
+                              <li key={child.id}>
+                                <button
+                                  onClick={() => handleNav(child.id)}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 pl-9 pr-3 py-2.5 text-sm rounded-md transition-colors",
+                                    active === child.id
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                                  )}
+                                >
+                                  <child.icon className="w-4 h-4 shrink-0" />
+                                  <span>{child.label}</span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  }
 
-              const isActive = active === entry.id;
-              return (
-                <li key={entry.id}>
-                  <button
-                    onClick={() => handleNav(entry.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    )}
-                  >
-                    <entry.icon className="w-4 h-4 shrink-0" />
-                    <span>{entry.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                  const isActive = active === entry.id;
+                  return (
+                    <li key={entry.id}>
+                      <button
+                        onClick={() => handleNav(entry.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                        )}
+                      >
+                        <entry.icon className="w-4 h-4 shrink-0" />
+                        <span>{entry.label}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-sidebar-border">

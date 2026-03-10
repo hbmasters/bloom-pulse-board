@@ -20,28 +20,40 @@ type NavEntry = NavItem | NavGroup;
 
 const isGroup = (entry: NavEntry): entry is NavGroup => "children" in entry;
 
-const navEntries: NavEntry[] = [
-  { id: "chat", icon: MessageSquare, label: "Chat" },
-  { id: "command-radar", icon: Crosshair, label: "Command Radar" },
+type NavSection = { label: string; entries: NavEntry[] };
+
+const navSections: NavSection[] = [
   {
-    id: "management-cockpit",
-    icon: Briefcase,
-    label: "Management Cockpit",
-    children: [
-      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
-      { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+    label: "Directie",
+    entries: [
+      { id: "command-radar", icon: Crosshair, label: "Command Radar" },
+      {
+        id: "management-cockpit",
+        icon: Briefcase,
+        label: "Management Cockpit",
+        children: [
+          { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+          { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+        ],
+      },
+      { id: "action-engine", icon: Zap, label: "Action Engine" },
     ],
   },
-  { id: "action-engine", icon: Zap, label: "Action Engine" },
-  { id: "kanban", icon: LayoutGrid, label: "Kanban" },
-  { id: "kpis", icon: BarChart3, label: "KPI's" },
-  { id: "notifications", icon: Bell, label: "Notificaties" },
-  { id: "planner", icon: CalendarDays, label: "Weekplanner" },
-  { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
-  { id: "methodiek", icon: Brain, label: "Methodiek" },
-  { id: "agents", icon: Bot, label: "Agents" },
-  { id: "history", icon: Clock, label: "Historie" },
-  { id: "settings", icon: Settings, label: "Instellingen" },
+  {
+    label: "AI Systemen",
+    entries: [
+      { id: "chat", icon: MessageSquare, label: "Chat" },
+      { id: "kanban", icon: LayoutGrid, label: "Kanban" },
+      { id: "kpis", icon: BarChart3, label: "KPI's" },
+      { id: "notifications", icon: Bell, label: "Notificaties" },
+      { id: "planner", icon: CalendarDays, label: "Weekplanner" },
+      { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
+      { id: "methodiek", icon: Brain, label: "Methodiek" },
+      { id: "agents", icon: Bot, label: "Agents" },
+      { id: "history", icon: Clock, label: "Historie" },
+      { id: "settings", icon: Settings, label: "Instellingen" },
+    ],
+  },
 ];
 
 const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
@@ -144,11 +156,24 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2">
-        <ul className="space-y-0.5">
-          {navEntries.map(entry =>
-            isGroup(entry) ? renderGroup(entry) : renderItem(entry)
-          )}
-        </ul>
+        {navSections.map((section, si) => (
+          <div key={section.label}>
+            {si > 0 && <div className="my-2 mx-2 border-t border-sidebar-border" />}
+            {!collapsed && (
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-sidebar-foreground/40">
+                  {section.label}
+                </span>
+              </div>
+            )}
+            {collapsed && si > 0 && <div className="my-1" />}
+            <ul className="space-y-0.5">
+              {section.entries.map(entry =>
+                isGroup(entry) ? renderGroup(entry) : renderItem(entry)
+              )}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom status button */}
