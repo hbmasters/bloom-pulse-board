@@ -2,8 +2,23 @@ import { useState, useMemo } from "react";
 import {
   LayoutGrid, MoreHorizontal, ArrowUp, ArrowRight, ArrowDown,
   Flower2, Truck, ClipboardCheck, Users, Snowflake, PackageCheck,
-  Filter, X, Search, Calendar, User
+  Filter, X, Search, Calendar, User, GripVertical
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import PageAgentBadges from "./PageAgentBadges";
 
 type Priority = "high" | "medium" | "low";
@@ -52,7 +67,7 @@ const columns: KanbanColumn[] = [
   { title: "Klaar",          status: "done",        accent: "bg-accent/15 text-accent",         dotColor: "bg-accent" },
 ];
 
-const cards: KanbanCard[] = [
+const initialCards: KanbanCard[] = [
   { id: "1",  title: "BQ Trend voorbereiden",        description: "Alle materialen klaarzetten en receptuur controleren voor start productie.", category: "productie", priority: "high",   labels: ["urgent", "lijn-1"],     status: "todo",        assignee: undefined, dueDate: "28 feb", createdAt: "26 feb" },
   { id: "2",  title: "Bezetting middag plannen",      description: "Shift 2 bezetting afstemmen met beschikbare medewerkers.",                  category: "planning",  priority: "medium", labels: ["shift-2"],              status: "todo",        createdAt: "27 feb" },
   { id: "8",  title: "Nieuwe medewerker inwerken",    description: "Onboarding programma doorlopen met nieuwe medewerker op lijn 2.",           category: "personeel", priority: "low",    labels: ["onboarding"],           status: "todo",        assignee: "Maria",  createdAt: "25 feb" },
@@ -68,8 +83,6 @@ const cards: KanbanCard[] = [
   { id: "7",  title: "BQ Chique afgerond",            description: "Batch compleet, 100% goedgekeurd.",                                        category: "productie", priority: "low",    labels: ["lijn-3", "✓"],          status: "done",        createdAt: "26 feb" },
   { id: "14", title: "Weekplanning week 10",          description: "Planning voor volgende week afgerond en gecommuniceerd.",                   category: "planning",  priority: "medium", labels: ["planning", "✓"],        status: "done",        assignee: "Maria",  createdAt: "26 feb" },
 ];
-
-const allAssignees = [...new Set(cards.filter(c => c.assignee).map(c => c.assignee!))].sort();
 
 const PriorityBadge = ({ priority }: { priority: Priority }) => {
   const cfg = priorityConfig[priority];
@@ -121,12 +134,99 @@ const FilterChip = ({ label, active, onClick, icon, color }: FilterChipProps) =>
   </button>
 );
 
+/* ── Draggable Card ── */
+
+const DraggableKanbanCard = ({ card }: { card: KanbanCard }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`p-3 rounded-xl bg-card border border-border hover:border-primary/20 transition-colors group shadow-sm ${
+        isDragging ? "shadow-lg ring-2 ring-primary/30 z-50" : ""
+      }`}
+    >
+      <div className="flex items-start justify-between gap-1">
+        <div className="flex items-start gap-1.5 flex-1 min-w-0">
+          <button
+            {...attributes}
+            {...listeners}
+            className="touch-none text-muted-foreground/30 hover:text-muted-foreground shrink-0 mt-0.5 cursor-grab active:cursor-grabbing"
+            aria-label="Drag handle"
+          >
+            <GripVertical className="w-3 h-3" />
+          </button>
+          <h4 className="text-xs font-semibold text-foreground leading-snug flex-1">{card.title}</h4>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <PriorityBadge priority={card.priority} />
+          <MoreHorizontal className="w-3 h-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </div>
+
+      {card.description && (
+        <p className="text-[10px] text-muted-foreground/60 mt-1 line-clamp-2 leading-relaxed pl-4">
+          {card.description}
+        </p>
+      )}
+
+      <div className="flex items-center gap-1.5 mt-2 flex-wrap pl-4">
+        <CategoryBadge category={card.category} />
+        {card.labels.map(l => (
+          <LabelBadge key={l} label={l} />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between mt-2 pl-4">
+        {card.assignee ? (
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-[8px] font-bold text-primary">{card.assignee[0]}</span>
+            </div>
+            <span className="text-[9px] text-muted-foreground font-mono">{card.assignee}</span>
+          </div>
+        ) : <div />}
+        {card.dueDate && (
+          <div className="flex items-center gap-1">
+            <Calendar className="w-2.5 h-2.5 text-muted-foreground/40" />
+            <span className="text-[8px] font-mono text-muted-foreground/50">{card.dueDate}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ── Main Board ── */
+
 const KanbanBoard = () => {
+  const [cards, setCards] = useState<KanbanCard[]>(initialCards);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<Set<Category>>(new Set());
   const [selectedPriorities, setSelectedPriorities] = useState<Set<Priority>>(new Set());
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
+
+  const allAssignees = useMemo(() => [...new Set(cards.filter(c => c.assignee).map(c => c.assignee!))].sort(), [cards]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
 
   const toggleCategory = (c: Category) => {
     setSelectedCategories(prev => {
@@ -161,9 +261,35 @@ const KanbanBoard = () => {
       if (selectedAssignee && card.assignee !== selectedAssignee) return false;
       return true;
     });
-  }, [searchQuery, selectedCategories, selectedPriorities, selectedAssignee]);
+  }, [cards, searchQuery, selectedCategories, selectedPriorities, selectedAssignee]);
 
   const activeFilterCount = selectedCategories.size + selectedPriorities.size + (selectedAssignee ? 1 : 0) + (searchQuery ? 1 : 0);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Check if dropped on a column
+    const targetColumn = columns.find(c => c.status === overId);
+    const targetCard = cards.find(c => c.id === overId);
+
+    let newStatus: Status | null = null;
+
+    if (targetColumn) {
+      newStatus = targetColumn.status;
+    } else if (targetCard) {
+      newStatus = targetCard.status;
+    }
+
+    if (newStatus && activeId !== overId) {
+      setCards(prev =>
+        prev.map(c => (c.id === activeId ? { ...c, status: newStatus! } : c))
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col h-full p-3 md:p-4">
@@ -173,7 +299,6 @@ const KanbanBoard = () => {
         <h2 className="text-xs font-black text-foreground uppercase tracking-wider">Kanban Board</h2>
         <PageAgentBadges pageId="kanban" className="ml-2" />
         <div className="flex items-center gap-2 ml-auto">
-          {/* Priority legend — desktop */}
           <div className="hidden lg:flex items-center gap-3 mr-2">
             {Object.entries(priorityConfig).map(([key, cfg]) => {
               const Icon = cfg.icon;
@@ -185,7 +310,6 @@ const KanbanBoard = () => {
             })}
           </div>
 
-          {/* Filter toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`relative flex items-center gap-1 text-[10px] font-mono font-bold px-2.5 py-1.5 rounded-lg border transition-all ${
@@ -208,7 +332,6 @@ const KanbanBoard = () => {
       {/* Filter panel */}
       {showFilters && (
         <div className="mb-3 p-3 rounded-xl bg-card/60 border border-border space-y-3 animate-fade-in">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
             <input
@@ -220,7 +343,6 @@ const KanbanBoard = () => {
             />
           </div>
 
-          {/* Category filters */}
           <div>
             <span className="text-[9px] font-mono text-muted-foreground/60 uppercase tracking-wider mb-1.5 block">Categorie</span>
             <div className="flex flex-wrap gap-1.5">
@@ -240,7 +362,6 @@ const KanbanBoard = () => {
             </div>
           </div>
 
-          {/* Priority filters */}
           <div>
             <span className="text-[9px] font-mono text-muted-foreground/60 uppercase tracking-wider mb-1.5 block">Prioriteit</span>
             <div className="flex flex-wrap gap-1.5">
@@ -260,7 +381,6 @@ const KanbanBoard = () => {
             </div>
           </div>
 
-          {/* Assignee filter */}
           <div>
             <span className="text-[9px] font-mono text-muted-foreground/60 uppercase tracking-wider mb-1.5 block">Toegewezen aan</span>
             <div className="flex flex-wrap gap-1.5">
@@ -276,7 +396,6 @@ const KanbanBoard = () => {
             </div>
           </div>
 
-          {/* Clear all */}
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -288,76 +407,41 @@ const KanbanBoard = () => {
         </div>
       )}
 
-      {/* Kanban columns */}
-      <div
-        className="flex-1 min-h-0 flex md:grid gap-3 overflow-x-auto md:overflow-hidden snap-x snap-mandatory"
-        style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
-      >
-        {columns.map(col => {
-          const colCards = filteredCards.filter(c => c.status === col.status);
-          return (
-            <div key={col.status} className="flex flex-col min-h-0 min-w-[75vw] md:min-w-0 snap-center">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
-                <span className="text-xs font-bold text-muted-foreground">{col.title}</span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${col.accent}`}>
-                  {colCards.length}
-                </span>
-              </div>
-              <div className="flex-1 min-h-0 space-y-2 overflow-y-auto scrollbar-thin pr-1">
-                {colCards.length === 0 && (
-                  <div className="flex items-center justify-center py-8 text-[10px] font-mono text-muted-foreground/40">
-                    Geen taken
-                  </div>
-                )}
-                {colCards.map(card => (
-                  <div key={card.id} className="p-3 rounded-xl bg-card border border-border hover:border-primary/20 transition-colors group shadow-sm">
-                    <div className="flex items-start justify-between gap-1">
-                      <h4 className="text-xs font-semibold text-foreground leading-snug flex-1">{card.title}</h4>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <PriorityBadge priority={card.priority} />
-                        <MoreHorizontal className="w-3 h-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+      {/* Kanban columns with drag and drop */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div
+          className="flex-1 min-h-0 flex md:grid gap-3 overflow-x-auto md:overflow-hidden snap-x snap-mandatory"
+          style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
+        >
+          {columns.map(col => {
+            const colCards = filteredCards.filter(c => c.status === col.status);
+            const itemIds = colCards.map(c => c.id);
+            return (
+              <div key={col.status} id={col.status} className="flex flex-col min-h-0 min-w-[75vw] md:min-w-0 snap-center">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
+                  <span className="text-xs font-bold text-muted-foreground">{col.title}</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${col.accent}`}>
+                    {colCards.length}
+                  </span>
+                </div>
+                <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+                  <div className="flex-1 min-h-0 space-y-2 overflow-y-auto scrollbar-thin pr-1 min-h-[120px]">
+                    {colCards.length === 0 && (
+                      <div className="flex items-center justify-center py-8 text-[10px] font-mono text-muted-foreground/40">
+                        Sleep taken hierheen
                       </div>
-                    </div>
-
-                    {/* Description */}
-                    {card.description && (
-                      <p className="text-[10px] text-muted-foreground/60 mt-1 line-clamp-2 leading-relaxed">
-                        {card.description}
-                      </p>
                     )}
-
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      <CategoryBadge category={card.category} />
-                      {card.labels.map(l => (
-                        <LabelBadge key={l} label={l} />
-                      ))}
-                    </div>
-
-                    {/* Footer: assignee + date */}
-                    <div className="flex items-center justify-between mt-2">
-                      {card.assignee ? (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-                            <span className="text-[8px] font-bold text-primary">{card.assignee[0]}</span>
-                          </div>
-                          <span className="text-[9px] text-muted-foreground font-mono">{card.assignee}</span>
-                        </div>
-                      ) : <div />}
-                      {card.dueDate && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-2.5 h-2.5 text-muted-foreground/40" />
-                          <span className="text-[8px] font-mono text-muted-foreground/50">{card.dueDate}</span>
-                        </div>
-                      )}
-                    </div>
+                    {colCards.map(card => (
+                      <DraggableKanbanCard key={card.id} card={card} />
+                    ))}
                   </div>
-                ))}
+                </SortableContext>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </DndContext>
     </div>
   );
 };
