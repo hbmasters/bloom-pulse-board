@@ -122,7 +122,7 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
     <aside
       className={cn(
         "flex h-screen flex-col bg-sidebar text-sidebar-foreground flex-shrink-0 transition-all duration-200 border-r border-sidebar-border",
-        collapsed ? "w-16" : "w-56"
+        collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Header */}

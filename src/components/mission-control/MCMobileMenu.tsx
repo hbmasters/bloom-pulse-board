@@ -64,7 +64,7 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
 
       <aside
         className={cn(
-          "md:hidden fixed top-0 left-0 h-full w-64 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
+          "md:hidden fixed top-0 left-0 h-full w-72 flex flex-col border-r border-sidebar-border transition-transform duration-300 ease-out safe-area-bottom",
           open ? "translate-x-0" : "-translate-x-full"
         )}
         style={{ zIndex: 9999, background: "hsl(228, 22%, 12%)" }}
