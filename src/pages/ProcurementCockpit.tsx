@@ -222,11 +222,11 @@ const qualityCls = (q: QualityGrade) =>
   q === "A1" ? "text-accent bg-accent/10" : q === "A2" ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted";
 
 const SourceIcon = ({ h }: { h: SourceHealth }) => {
-  const m: Record<SourceHealth, { Icon: typeof Wifi; c: string; t: string }> = {
-    connected: { Icon: Wifi, c: "text-accent", t: "Verbonden" },
+  const m: Record<SourceHealth, { Icon: typeof Link2; c: string; t: string }> = {
+    connected: { Icon: Link2, c: "text-accent", t: "Verbonden" },
     delayed: { Icon: Clock, c: "text-yellow-500", t: "Vertraagd" },
     stale: { Icon: RefreshCw, c: "text-orange-500", t: "Verouderd" },
-    unavailable: { Icon: WifiOff, c: "text-muted-foreground/40", t: "Niet beschikbaar" },
+    unavailable: { Icon: Unlink, c: "text-muted-foreground/40", t: "Niet beschikbaar" },
     manual: { Icon: User, c: "text-primary/60", t: "Handmatig" },
   };
   const { Icon, c, t } = m[h];
