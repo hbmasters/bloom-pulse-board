@@ -4,77 +4,43 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Filter, RotateCcw, ChevronDown, ChevronRight, ExternalLink,
   TrendingUp, TrendingDown, Minus, Bot, ShoppingCart, AlertTriangle,
-  Clock, Package, Truck, DollarSign, CheckCircle2, X, User,
-  Wifi, WifiOff, RefreshCw, Settings2, Shield, Zap,
-  ArrowUpRight, ArrowDownRight, Eye, Boxes, Loader2,
-  Star, AlertCircle, Check
+  Clock, Package, Truck, DollarSign, CheckCircle2, X,
+  Wifi, WifiOff, RefreshCw, Shield, Zap,
+  ArrowUpRight, ArrowDownRight, Boxes, Loader2,
+  Star, AlertCircle, Check, User
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import {
-  Collapsible, CollapsibleContent, CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
-import { DataMaturityBadge, SourceLabel } from "@/components/intelligence-hub/DataMaturityBadge";
 
 /* ------------------------------------------------------------------ */
 /*  TYPES                                                              */
 /* ------------------------------------------------------------------ */
-
 type ChangeDirection = "up" | "down" | "stable";
 type CoverageStatus = "covered" | "partial" | "open" | "at-risk";
 type SourceHealth = "connected" | "delayed" | "stale" | "unavailable" | "manual";
 type PurchaseState = "open" | "buying" | "purchased";
 type QualityGrade = "A1" | "A2" | "B1" | "B2" | "—";
+type ProcurementTab = "all" | "urgent" | "today" | "upcoming" | "completed";
 
 interface SupplierOption {
-  supplier: string;
-  channel: string;
-  available: number;
-  price: number;
-  deliveryDays: number;
-  confidence: number;
-  sourceHealth: SourceHealth;
-  isBestPrice?: boolean;
+  supplier: string; channel: string; available: number; price: number;
+  deliveryDays: number; confidence: number; sourceHealth: SourceHealth; isBestPrice?: boolean;
 }
 
 interface ProcurementRow {
-  id: string;
-  article: string;
-  stemLength: string;
-  quality: QualityGrade;
-  species: string;
-  buyer: string;
-  program: string;
-  customer: string;
-  forecastDemand: number;
-  currentStock: number;
-  allocated: number;
-  coveredVolume: number;
-  remainingToBuy: number;
-  historicalPrice: number;
-  offerPrice: number;
-  advicePrice: number;
-  expectedPrice: number;
-  supplierCount: number;
-  aiRecommendation: string;
-  deliveryDate: string;
-  coverageStatus: CoverageStatus;
-  demandChange: ChangeDirection;
-  demandChangePercent: number;
-  demandSource: string;
-  sourceHealth: SourceHealth;
-  forecastConfidence: number;
-  forecastHorizonDays: number;
-  purchaseState: PurchaseState;
-  purchasedQuantity: number;
-  purchasedAt?: string;
+  id: string; article: string; stemLength: string; quality: QualityGrade; species: string;
+  buyer: string; program: string; customer: string;
+  forecastDemand: number; currentStock: number; allocated: number; coveredVolume: number; remainingToBuy: number;
+  historicalPrice: number; offerPrice: number; advicePrice: number; expectedPrice: number;
+  supplierCount: number; aiRecommendation: string; deliveryDate: string;
+  coverageStatus: CoverageStatus; demandChange: ChangeDirection; demandChangePercent: number;
+  demandSource: string; sourceHealth: SourceHealth; forecastConfidence: number; forecastHorizonDays: number;
+  purchaseState: PurchaseState; purchasedQuantity: number; purchasedAt?: string;
   suppliers: SupplierOption[];
   variants?: { length: string; demand: number; covered: number; stock: number }[];
   section: "urgent" | "today" | "upcoming" | "completed";
@@ -83,15 +49,13 @@ interface ProcurementRow {
 /* ------------------------------------------------------------------ */
 /*  DEMO DATA                                                          */
 /* ------------------------------------------------------------------ */
-
 const demoRows: ProcurementRow[] = [
-  // URGENT
   {
     id: "p3", article: "Germini Barca", stemLength: "45cm", quality: "A1", species: "Germini",
-    buyer: "Mark", program: "Week 12 — Aldi", customer: "Aldi",
+    buyer: "Mark", program: "Wk12 — Aldi", customer: "Aldi",
     forecastDemand: 9200, currentStock: 600, allocated: 0, coveredVolume: 2100, remainingToBuy: 7100,
     historicalPrice: 0.09, offerPrice: 0.10, advicePrice: 0.10, expectedPrice: 0.11,
-    supplierCount: 4, aiRecommendation: "Vraagpiek verwacht morgen — nu inkopen via Floriday",
+    supplierCount: 4, aiRecommendation: "Vraagpiek morgen — nu inkopen via Floriday",
     deliveryDate: "2026-03-15", coverageStatus: "at-risk", demandChange: "up", demandChangePercent: 24,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 72, forecastHorizonDays: 1,
     purchaseState: "open", purchasedQuantity: 0, section: "urgent",
@@ -104,22 +68,21 @@ const demoRows: ProcurementRow[] = [
   },
   {
     id: "p4", article: "Alstroemeria Virginia", stemLength: "55cm", quality: "—", species: "Alstroemeria",
-    buyer: "—", program: "Week 13 — Lidl", customer: "Lidl",
+    buyer: "—", program: "Wk13 — Lidl", customer: "Lidl",
     forecastDemand: 4600, currentStock: 0, allocated: 0, coveredVolume: 0, remainingToBuy: 4600,
     historicalPrice: 0, offerPrice: 0, advicePrice: 0, expectedPrice: 0,
-    supplierCount: 0, aiRecommendation: "Recept ontbreekt — productidentiteit onbekend",
+    supplierCount: 0, aiRecommendation: "Recept ontbreekt — identiteit onbekend",
     deliveryDate: "2026-03-20", coverageStatus: "open", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Forecast (onopgelost)", sourceHealth: "unavailable", forecastConfidence: 35, forecastHorizonDays: 8,
     purchaseState: "open", purchasedQuantity: 0, section: "urgent",
     suppliers: [],
   },
-  // TODAY
   {
     id: "p1", article: "Roos Red Naomi", stemLength: "60cm", quality: "A1", species: "Rosa",
-    buyer: "Mark", program: "Week 12 — AH", customer: "Albert Heijn",
+    buyer: "Mark", program: "Wk12 — AH", customer: "Albert Heijn",
     forecastDemand: 12400, currentStock: 1800, allocated: 1200, coveredVolume: 8200, remainingToBuy: 4200,
     historicalPrice: 0.21, offerPrice: 0.22, advicePrice: 0.22, expectedPrice: 0.24,
-    supplierCount: 3, aiRecommendation: "Koop vandaag via Floriday — prijsvoordeel 7%",
+    supplierCount: 3, aiRecommendation: "Koop vandaag via Floriday — 7% voordeel",
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "up", demandChangePercent: 8,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 88, forecastHorizonDays: 3,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
@@ -136,10 +99,10 @@ const demoRows: ProcurementRow[] = [
   },
   {
     id: "p5", article: "Dianthus Nobbio", stemLength: "60cm", quality: "A2", species: "Dianthus",
-    buyer: "Sandra", program: "Week 12 — Dekamarkt", customer: "Dekamarkt",
+    buyer: "Sandra", program: "Wk12 — Dekamarkt", customer: "Dekamarkt",
     forecastDemand: 3200, currentStock: 400, allocated: 400, coveredVolume: 1600, remainingToBuy: 1600,
     historicalPrice: 0.16, offerPrice: 0.17, advicePrice: 0.17, expectedPrice: 0.18,
-    supplierCount: 2, aiRecommendation: "Contractleverancier goedkoper dan markt",
+    supplierCount: 2, aiRecommendation: "Contract goedkoper dan markt",
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "down", demandChangePercent: -5,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 91, forecastHorizonDays: 4,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
@@ -148,13 +111,12 @@ const demoRows: ProcurementRow[] = [
       { supplier: "FloriTrade", channel: "Floriday", available: 1500, price: 0.20, deliveryDays: 2, confidence: 82, sourceHealth: "connected" },
     ],
   },
-  // UPCOMING
   {
     id: "p2", article: "Pistacia", stemLength: "50cm", quality: "A1", species: "Pistacia",
-    buyer: "Sandra", program: "Week 12 — Jumbo", customer: "Jumbo",
+    buyer: "Sandra", program: "Wk12 — Jumbo", customer: "Jumbo",
     forecastDemand: 6800, currentStock: 2400, allocated: 2400, coveredVolume: 6800, remainingToBuy: 0,
     historicalPrice: 0.15, offerPrice: 0.14, advicePrice: 0.14, expectedPrice: 0.14,
-    supplierCount: 2, aiRecommendation: "Volledig gedekt via contractleverancier",
+    supplierCount: 2, aiRecommendation: "Volledig gedekt via contract",
     deliveryDate: "2026-03-17", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 96, forecastHorizonDays: 5,
     purchaseState: "open", purchasedQuantity: 0, section: "upcoming",
@@ -168,235 +130,251 @@ const demoRows: ProcurementRow[] = [
       { length: "60cm", demand: 1800, covered: 1800, stock: 600 },
     ],
   },
-  // COMPLETED
   {
     id: "p6", article: "Chrysant Bacardi", stemLength: "65cm", quality: "A1", species: "Chrysant",
-    buyer: "Mark", program: "Week 12 — AH", customer: "Albert Heijn",
+    buyer: "Mark", program: "Wk12 — AH", customer: "Albert Heijn",
     forecastDemand: 5400, currentStock: 800, allocated: 800, coveredVolume: 5400, remainingToBuy: 0,
     historicalPrice: 0.12, offerPrice: 0.11, advicePrice: 0.11, expectedPrice: 0.12,
-    supplierCount: 2, aiRecommendation: "Ingekocht via Floriday — 8% onder verwachte prijs",
+    supplierCount: 2, aiRecommendation: "Ingekocht — 8% onder verwacht",
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 95, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 4600, purchasedAt: "08:12", section: "completed",
-    suppliers: [
-      { supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true },
-    ],
+    suppliers: [{ supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true }],
   },
   {
     id: "p7", article: "Eucalyptus Parvifolia", stemLength: "60cm", quality: "A2", species: "Eucalyptus",
-    buyer: "Sandra", program: "Week 12 — Jumbo", customer: "Jumbo",
+    buyer: "Sandra", program: "Wk12 — Jumbo", customer: "Jumbo",
     forecastDemand: 3800, currentStock: 200, allocated: 200, coveredVolume: 3800, remainingToBuy: 0,
     historicalPrice: 0.08, offerPrice: 0.07, advicePrice: 0.07, expectedPrice: 0.08,
-    supplierCount: 1, aiRecommendation: "Ingekocht via contract — voorraad bevestigd",
+    supplierCount: 1, aiRecommendation: "Ingekocht via contract",
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 98, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 3600, purchasedAt: "07:48", section: "completed",
-    suppliers: [
-      { supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true },
-    ],
+    suppliers: [{ supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true }],
   },
 ];
 
 /* ------------------------------------------------------------------ */
 /*  HELPERS                                                            */
 /* ------------------------------------------------------------------ */
-
-const coverageBadge = (s: CoverageStatus) => {
-  const map: Record<CoverageStatus, { label: string; cls: string }> = {
-    covered: { label: "Gedekt", cls: "bg-accent/15 text-accent border-accent/30" },
-    partial: { label: "Gedeeltelijk", cls: "bg-primary/15 text-primary border-primary/30" },
-    open: { label: "Open", cls: "bg-muted text-muted-foreground border-border" },
-    "at-risk": { label: "At Risk", cls: "bg-destructive/15 text-destructive border-destructive/30" },
-  };
-  const { label, cls } = map[s];
-  return <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full border", cls)}>{label}</span>;
-};
-
-const changeIcon = (d: ChangeDirection, pct: number) => {
-  if (d === "up") return (
-    <span className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold text-accent">
-      <TrendingUp className="w-3 h-3" />+{Math.abs(pct)}%
-    </span>
-  );
-  if (d === "down") return (
-    <span className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold text-destructive">
-      <TrendingDown className="w-3 h-3" />{pct}%
-    </span>
-  );
-  return <Minus className="w-3 h-3 text-muted-foreground" />;
-};
-
-const qualityBadge = (q: QualityGrade) => {
-  if (q === "—") return <span className="text-[9px] text-muted-foreground/40">—</span>;
-  const cls = q === "A1" ? "bg-accent/15 text-accent border-accent/30"
-    : q === "A2" ? "bg-primary/15 text-primary border-primary/30"
-    : "bg-muted text-muted-foreground border-border";
-  return (
-    <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5", cls)}>
-      <Star className="w-2.5 h-2.5" />{q}
-    </span>
-  );
-};
-
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => n > 0 ? `€${n.toFixed(2)}` : "—";
 
-const SourceHealthIcon = ({ health }: { health: SourceHealth }) => {
-  const config: Record<SourceHealth, { icon: typeof Wifi; cls: string; label: string }> = {
-    connected: { icon: Wifi, cls: "text-accent", label: "Verbonden" },
-    delayed: { icon: Clock, cls: "text-yellow-500", label: "Vertraagd" },
-    stale: { icon: RefreshCw, cls: "text-orange-500", label: "Verouderd" },
-    unavailable: { icon: WifiOff, cls: "text-muted-foreground/40", label: "Niet beschikbaar" },
-    manual: { icon: User, cls: "text-primary/60", label: "Handmatig" },
+const coverageCls: Record<CoverageStatus, string> = {
+  covered: "text-accent bg-accent/10",
+  partial: "text-primary bg-primary/10",
+  open: "text-muted-foreground bg-muted",
+  "at-risk": "text-destructive bg-destructive/10",
+};
+const coverageLabel: Record<CoverageStatus, string> = {
+  covered: "Gedekt", partial: "Deels", open: "Open", "at-risk": "At Risk",
+};
+
+const qualityCls = (q: QualityGrade) =>
+  q === "A1" ? "text-accent bg-accent/10" : q === "A2" ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted";
+
+const SourceIcon = ({ h }: { h: SourceHealth }) => {
+  const m: Record<SourceHealth, { Icon: typeof Wifi; c: string; t: string }> = {
+    connected: { Icon: Wifi, c: "text-accent", t: "Verbonden" },
+    delayed: { Icon: Clock, c: "text-yellow-500", t: "Vertraagd" },
+    stale: { Icon: RefreshCw, c: "text-orange-500", t: "Verouderd" },
+    unavailable: { Icon: WifiOff, c: "text-muted-foreground/40", t: "Niet beschikbaar" },
+    manual: { Icon: User, c: "text-primary/60", t: "Handmatig" },
   };
-  const c = config[health];
-  const Icon = c.icon;
-  return <span title={c.label} className="inline-flex"><Icon className={cn("w-3 h-3", c.cls)} /></span>;
-};
-
-const ProcurementDelta = ({ offer, expected }: { offer: number; expected: number }) => {
-  if (offer <= 0 || expected <= 0) return <span className="text-[10px] text-muted-foreground/40">—</span>;
-  const delta = expected - offer;
-  const pct = ((delta / expected) * 100);
-  const isPositive = delta > 0;
-  return (
-    <span className={cn(
-      "inline-flex items-center gap-0.5 text-[10px] font-mono font-bold",
-      isPositive ? "text-accent" : delta < 0 ? "text-destructive" : "text-muted-foreground"
-    )}>
-      {isPositive ? <ArrowDownRight className="w-3 h-3" /> : delta < 0 ? <ArrowUpRight className="w-3 h-3" /> : null}
-      {delta !== 0 ? `${isPositive ? "-" : "+"}€${Math.abs(delta).toFixed(2)}` : "€0.00"}
-      <span className="text-[8px] text-muted-foreground/60 ml-0.5">({pct > 0 ? "-" : "+"}{Math.abs(pct).toFixed(0)}%)</span>
-    </span>
-  );
-};
-
-const ConfidenceBar = ({ confidence, horizonDays }: { confidence: number; horizonDays: number }) => {
-  const level = confidence >= 85 ? "high" : confidence >= 60 ? "medium" : "low";
-  const colors = { high: "bg-accent", medium: "bg-yellow-500", low: "bg-destructive" };
-  return (
-    <div className="flex items-center gap-1.5" title={`${confidence}% · ${horizonDays}d`}>
-      <div className="w-10 h-1.5 rounded-full bg-muted overflow-hidden">
-        <div className={cn("h-full rounded-full", colors[level])} style={{ width: `${confidence}%` }} />
-      </div>
-      <span className={cn("text-[8px] font-mono font-bold", level === "high" ? "text-accent" : level === "medium" ? "text-yellow-500" : "text-destructive")}>
-        {confidence}%
-      </span>
-    </div>
-  );
+  const { Icon, c, t } = m[h];
+  return <Icon className={cn("w-3 h-3", c)} title={t} />;
 };
 
 /* ------------------------------------------------------------------ */
-/*  BUY BUTTON WITH LOADER                                             */
+/*  MAIN PAGE                                                          */
 /* ------------------------------------------------------------------ */
+const ProcurementCockpit = () => {
+  const [rows, setRows] = useState(demoRows);
+  const [tab, setTab] = useState<ProcurementTab>("all");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [showAuto, setShowAuto] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-const BuyButton = ({ row, onBuy }: { row: ProcurementRow; onBuy: (id: string) => void }) => {
-  if (row.purchaseState === "purchased") {
-    return (
-      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-accent">
-        <Check className="w-3 h-3" /> Gekocht
-      </span>
-    );
-  }
-  if (row.purchaseState === "buying") {
-    return (
-      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-primary animate-pulse">
-        <Loader2 className="w-3 h-3 animate-spin" /> Bestellen…
-      </span>
-    );
-  }
-  if (row.supplierCount === 0) return null;
-  return (
-    <Button
-      variant="ghost" size="sm"
-      className="h-6 px-2 text-[9px] font-mono text-primary hover:text-primary hover:bg-primary/10"
-      onClick={e => { e.stopPropagation(); onBuy(row.id); }}
-    >
-      <ShoppingCart className="w-3 h-3 mr-0.5" />Koop
-    </Button>
-  );
-};
+  const handleBuy = (id: string) => {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, purchaseState: "buying" as PurchaseState } : r));
+    setTimeout(() => {
+      setRows(prev => prev.map(r => r.id === id ? {
+        ...r, purchaseState: "purchased" as PurchaseState,
+        purchasedQuantity: r.remainingToBuy,
+        purchasedAt: new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }),
+        remainingToBuy: 0, coveredVolume: r.forecastDemand,
+        coverageStatus: "covered" as CoverageStatus, section: "completed" as const,
+      } : r));
+    }, 2200);
+  };
 
-/* ------------------------------------------------------------------ */
-/*  SECTION HEADER IN TABLE                                            */
-/* ------------------------------------------------------------------ */
+  const toggle = (id: string) => setExpanded(prev => prev === id ? null : id);
 
-const SectionHeader = ({ label, count, icon: Icon, accent }: {
-  label: string; count: number; icon: typeof AlertTriangle; accent: string;
-}) => (
-  <TableRow className="bg-secondary/10 border-t-2 border-border">
-    <TableCell colSpan={20} className="py-2 px-3">
-      <div className="flex items-center gap-2">
-        <Icon className={cn("w-3.5 h-3.5", accent)} />
-        <span className={cn("text-[10px] font-mono font-black uppercase tracking-widest", accent)}>{label}</span>
-        <span className="text-[9px] font-mono text-muted-foreground">({count})</span>
-      </div>
-    </TableCell>
-  </TableRow>
-);
+  const urgent = rows.filter(r => r.section === "urgent");
+  const today = rows.filter(r => r.section === "today");
+  const upcoming = rows.filter(r => r.section === "upcoming");
+  const completed = rows.filter(r => r.section === "completed");
+  const active = [...urgent, ...today, ...upcoming];
 
-/* ------------------------------------------------------------------ */
-/*  FORECAST DEVIATION ALERT                                           */
-/* ------------------------------------------------------------------ */
+  const visible = tab === "all" ? active : tab === "urgent" ? urgent : tab === "today" ? today : tab === "upcoming" ? upcoming : completed;
 
-const ForecastDeviationAlert = ({ rows }: { rows: ProcurementRow[] }) => {
+  const totalDemand = rows.reduce((s, r) => s + r.forecastDemand, 0);
+  const totalCovered = rows.reduce((s, r) => s + r.coveredVolume, 0);
+  const totalOpen = rows.reduce((s, r) => s + r.remainingToBuy, 0);
+  const totalValue = rows.reduce((s, r) => s + r.remainingToBuy * (r.advicePrice || r.expectedPrice), 0);
   const deviations = rows.filter(r => Math.abs(r.demandChangePercent) >= 10 && r.section !== "completed");
-  if (deviations.length === 0) return null;
-  return (
-    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2">
-      <div className="flex items-center gap-2">
-        <AlertCircle className="w-4 h-4 text-destructive" />
-        <span className="text-xs font-bold text-destructive">Prognose Afwijkingen</span>
-        <Badge variant="outline" className="text-[8px] font-mono border-destructive/30 text-destructive">{deviations.length} alert{deviations.length > 1 ? "s" : ""}</Badge>
-      </div>
-      <div className="space-y-1">
-        {deviations.map(d => (
-          <div key={d.id} className="flex items-center gap-3 text-[10px] font-mono">
-            <span className="font-bold text-foreground min-w-[140px]">{d.article}</span>
-            <span className={cn(
-              "font-bold",
-              d.demandChangePercent > 0 ? "text-accent" : "text-destructive"
-            )}>
-              {d.demandChangePercent > 0 ? "+" : ""}{d.demandChangePercent}% vraag
-            </span>
-            <span className="text-muted-foreground">{d.program}</span>
-            <span className="text-muted-foreground/60">→ {d.aiRecommendation}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/*  HIGH-LEVEL AI ADVICE BANNER                                        */
-/* ------------------------------------------------------------------ */
-
-const AIAdviceBanner = ({ rows }: { rows: ProcurementRow[] }) => {
-  const urgent = rows.filter(r => r.section === "urgent").length;
-  const atRisk = rows.filter(r => r.coverageStatus === "at-risk").length;
-  const totalOpenValue = rows.filter(r => r.remainingToBuy > 0).reduce((s, r) => s + r.remainingToBuy * (r.advicePrice || r.expectedPrice), 0);
-  const purchased = rows.filter(r => r.purchaseState === "purchased").length;
 
   return (
-    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-      <div className="flex items-start gap-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/15 shrink-0">
-          <Bot className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-foreground mb-1">AI Inkoopadvies — Hoogover</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono text-muted-foreground">
-            {urgent > 0 && <span className="text-destructive font-bold">{urgent} urgente items — direct actie vereist</span>}
-            {atRisk > 0 && <span className="text-destructive">{atRisk} at-risk posities</span>}
-            <span>Open waarde: <span className="text-foreground font-bold">€{totalOpenValue.toFixed(0)}</span></span>
-            <span className="text-accent">{purchased} regels vandaag afgerond</span>
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-[1600px] mx-auto p-4 md:p-5 space-y-4">
+
+          {/* ── HEADER ── */}
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-sm font-black text-foreground uppercase tracking-wider">Procurement Cockpit</h1>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1" onClick={() => setShowFilters(!showFilters)}>
+                <Filter className="w-3 h-3" /> Filters
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1" onClick={() => setShowAuto(!showAuto)}>
+                <Zap className="w-3 h-3" /> Automatisering
+              </Button>
+            </div>
           </div>
-          {urgent > 0 && (
-            <p className="text-[10px] font-mono text-primary mt-1">
-              Advies: focus op urgente items — Germini Barca vraagpiek +24%, Alstroemeria recept ontbreekt
-            </p>
+
+          {/* ── KPI STRIP ── */}
+          <div className="flex items-center gap-4 text-[11px] font-mono border-b border-border pb-3">
+            <Stat label="Vraag" value={fmt(totalDemand)} />
+            <Stat label="Gedekt" value={`${Math.round((totalCovered / totalDemand) * 100)}%`} accent />
+            <Stat label="Open" value={fmt(totalOpen)} warn={totalOpen > 0} />
+            <Stat label="Waarde" value={`€${totalValue.toFixed(0)}`} />
+            <Stat label="Afgerond" value={String(completed.length)} accent />
+            {deviations.length > 0 && (
+              <span className="ml-auto flex items-center gap-1 text-destructive font-bold">
+                <AlertCircle className="w-3.5 h-3.5" /> {deviations.length} afwijking{deviations.length > 1 ? "en" : ""}
+              </span>
+            )}
+          </div>
+
+          {/* ── ALERTS (compact) ── */}
+          {deviations.length > 0 && (
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-[10px] font-mono space-y-0.5">
+              {deviations.map(d => (
+                <div key={d.id} className="flex items-center gap-3">
+                  <AlertTriangle className="w-3 h-3 text-destructive shrink-0" />
+                  <span className="font-bold text-foreground w-36 truncate">{d.article}</span>
+                  <span className={cn("font-bold w-16", d.demandChangePercent > 0 ? "text-accent" : "text-destructive")}>
+                    {d.demandChangePercent > 0 ? "+" : ""}{d.demandChangePercent}%
+                  </span>
+                  <span className="text-muted-foreground truncate">{d.aiRecommendation}</span>
+                </div>
+              ))}
+            </div>
           )}
+
+          {/* ── FILTERS (collapsible) ── */}
+          {showFilters && (
+            <div className="flex items-center gap-2 flex-wrap border-b border-border pb-3">
+              {["Datum", "Buyer", "Klant", "Artikel", "Kanaal", "Dekking"].map(f => (
+                <Select key={f}>
+                  <SelectTrigger className="h-7 w-[110px] text-[10px] font-mono bg-card border-border">
+                    <SelectValue placeholder={f} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle</SelectItem>
+                  </SelectContent>
+                </Select>
+              ))}
+              <Button variant="ghost" size="sm" className="h-7 text-[10px] font-mono text-muted-foreground gap-1">
+                <RotateCcw className="w-3 h-3" /> Reset
+              </Button>
+            </div>
+          )}
+
+          {/* ── AUTOMATION (collapsible) ── */}
+          {showAuto && (
+            <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-primary" /> Inkoop Automatisering</span>
+                <Button variant="ghost" size="sm" className="h-5 px-1" onClick={() => setShowAuto(false)}><X className="w-3 h-3" /></Button>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-[10px] font-mono">
+                <div className="flex items-center justify-between border border-border rounded-md bg-card px-2.5 py-2">
+                  <span className="text-foreground font-bold">Auto-order</span><Switch />
+                </div>
+                <div className="flex items-center justify-between border border-border rounded-md bg-card px-2.5 py-2">
+                  <span className="text-foreground font-bold">Max afwijking</span><span className="text-primary font-bold">20%</span>
+                </div>
+                <div className="flex items-center justify-between border border-border rounded-md bg-card px-2.5 py-2">
+                  <span className="text-foreground font-bold">Min. confidence</span><span className="text-primary font-bold">85%</span>
+                </div>
+                <div className="flex items-center justify-between border border-border rounded-md bg-card px-2.5 py-2">
+                  <span className="text-foreground font-bold">Alleen verbonden</span><Switch defaultChecked />
+                </div>
+              </div>
+              <p className="text-[9px] text-muted-foreground/60 mt-2 flex items-center gap-1"><Shield className="w-3 h-3" /> Alleen regels die aan alle criteria voldoen.</p>
+            </div>
+          )}
+
+          {/* ── TABS ── */}
+          <Tabs value={tab} onValueChange={v => setTab(v as ProcurementTab)}>
+            <TabsList className="bg-muted/40 h-8">
+              <TabsTrigger value="all" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                Inkooplijst <span className="text-muted-foreground">({active.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="urgent" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                Urgent {urgent.length > 0 && <span className="text-destructive font-bold">({urgent.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="today" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                Vandaag <span className="text-muted-foreground">({today.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                Komend <span className="text-muted-foreground">({upcoming.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
+                Afgerond <span className="text-accent">({completed.length})</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* ── TABLE ── */}
+          <div className="rounded-lg border border-border bg-card overflow-x-auto">
+            <table className="w-full text-[11px]">
+              {/* Header */}
+              <thead>
+                <tr className="bg-muted/40 text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground border-b-2 border-border">
+                  <th className="w-8 px-2 py-2.5" />
+                  <th className="text-left px-3 py-2.5">Artikel</th>
+                  <th className="text-left px-2 py-2.5">Kwal</th>
+                  <th className="text-left px-2 py-2.5">Buyer</th>
+                  <th className="text-left px-2 py-2.5">Programma</th>
+                  <th className="text-right px-3 py-2.5">Vraag</th>
+                  <th className="text-center px-2 py-2.5">Δ</th>
+                  <th className="text-right px-3 py-2.5">Voorraad</th>
+                  <th className="text-right px-3 py-2.5 font-black">Te kopen</th>
+                  <th className="text-right px-2 py-2.5 text-muted-foreground/60">Hist.</th>
+                  <th className="text-right px-2 py-2.5">Offerte</th>
+                  <th className="text-right px-2 py-2.5">Advies</th>
+                  <th className="text-right px-2 py-2.5">Marge</th>
+                  <th className="text-center px-2 py-2.5">Status</th>
+                  <th className="text-left px-2 py-2.5">AI advies</th>
+                  <th className="text-center px-2 py-2.5">Actie</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.length === 0 ? (
+                  <tr><td colSpan={16} className="text-center py-16 text-xs font-mono text-muted-foreground">Geen items</td></tr>
+                ) : visible.map(row => (
+                  <Row key={row.id} row={row} isOpen={expanded === row.id} onToggle={() => toggle(row.id)} onBuy={handleBuy} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── FOOTER ── */}
+          <p className="text-[9px] font-mono text-muted-foreground pb-2">
+            Laatst bijgewerkt: vandaag 08:42 · {rows.length} artikelen · {completed.length} afgerond
+          </p>
         </div>
       </div>
     </div>
@@ -404,224 +382,216 @@ const AIAdviceBanner = ({ rows }: { rows: ProcurementRow[] }) => {
 };
 
 /* ------------------------------------------------------------------ */
-/*  KPI CARDS                                                          */
+/*  STAT (inline KPI)                                                  */
 /* ------------------------------------------------------------------ */
-
-const KpiCard = ({ icon: Icon, label, value, sub, accent }: {
-  icon: typeof Package; label: string; value: string; sub?: string; accent?: string;
-}) => (
-  <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 min-w-0">
-    <div className={cn("flex items-center justify-center w-9 h-9 rounded-lg shrink-0", accent || "bg-primary/10")}>
-      <Icon className={cn("w-4 h-4", accent ? "text-foreground/70" : "text-primary")} />
-    </div>
-    <div className="min-w-0">
-      <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider truncate">{label}</p>
-      <p className="text-sm font-black text-foreground">{value}</p>
-      {sub && <p className="text-[9px] font-mono text-muted-foreground">{sub}</p>}
-    </div>
+const Stat = ({ label, value, accent, warn }: { label: string; value: string; accent?: boolean; warn?: boolean }) => (
+  <div className="flex items-center gap-1.5">
+    <span className="text-muted-foreground">{label}</span>
+    <span className={cn("font-bold", accent ? "text-accent" : warn ? "text-primary" : "text-foreground")}>{value}</span>
   </div>
 );
 
 /* ------------------------------------------------------------------ */
-/*  SUPPLIER PANEL                                                     */
+/*  TABLE ROW                                                          */
 /* ------------------------------------------------------------------ */
-
-const SupplierPanel = ({ suppliers }: { suppliers: SupplierOption[] }) => {
-  if (suppliers.length === 0) {
-    return (
-      <div className="flex items-center gap-2 py-3 px-4 text-muted-foreground">
-        <AlertTriangle className="w-3.5 h-3.5" />
-        <span className="text-xs">Geen leveranciers beschikbaar — recept of artikelkoppeling ontbreekt</span>
-      </div>
-    );
-  }
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 p-3">
-      {suppliers.map((s, i) => (
-        <div key={i} className={cn(
-          "rounded-lg border p-3 space-y-1.5",
-          s.isBestPrice ? "border-accent/40 bg-accent/5" : "border-border bg-card/50"
-        )}>
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-xs font-bold text-foreground truncate">{s.supplier}</span>
-            <div className="flex items-center gap-1">
-              <SourceHealthIcon health={s.sourceHealth} />
-              <Badge variant="outline" className="text-[8px] font-mono">{s.channel}</Badge>
-            </div>
-          </div>
-          {s.isBestPrice && <span className="text-[8px] font-mono font-bold text-accent uppercase tracking-wider">Beste prijs</span>}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] font-mono">
-            <span className="text-muted-foreground">Beschikbaar</span>
-            <span className="text-foreground text-right">{fmt(s.available)}</span>
-            <span className="text-muted-foreground">Prijs</span>
-            <span className={cn("text-right font-bold", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
-            <span className="text-muted-foreground">Levertijd</span>
-            <span className="text-foreground text-right">{s.deliveryDays}d</span>
-            <span className="text-muted-foreground">Confidence</span>
-            <span className={cn("text-right", s.confidence >= 90 ? "text-accent" : "text-foreground")}>{s.confidence}%</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/*  EXPANDABLE ROW                                                     */
-/* ------------------------------------------------------------------ */
-
-const ProcurementTableRow = ({ row, onBuy }: { row: ProcurementRow; onBuy: (id: string) => void }) => {
-  const [open, setOpen] = useState(false);
+const Row = ({ row, isOpen, onToggle, onBuy }: {
+  row: ProcurementRow; isOpen: boolean; onToggle: () => void; onBuy: (id: string) => void;
+}) => {
   const isPurchased = row.purchaseState === "purchased";
+  const delta = row.offerPrice > 0 && row.expectedPrice > 0 ? row.expectedPrice - row.offerPrice : null;
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <TableRow
+    <>
+      <tr
         className={cn(
-          "cursor-pointer hover:bg-muted/40 transition-colors",
-          isPurchased && "opacity-50"
+          "border-b border-border cursor-pointer transition-colors hover:bg-muted/30",
+          isPurchased && "opacity-50",
+          row.coverageStatus === "at-risk" && "bg-destructive/[0.03]",
         )}
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
       >
-        <TableCell className="w-7 px-2">
-          <CollapsibleTrigger asChild>
-            <button className="p-0.5" onClick={e => e.stopPropagation()}>
-              {open ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
-            </button>
-          </CollapsibleTrigger>
-        </TableCell>
-        <TableCell className="py-3">
-          <div className="font-semibold text-xs text-foreground">{row.article}</div>
+        {/* Expand */}
+        <td className="px-2 py-3 text-center">
+          {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground inline" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground inline" />}
+        </td>
+        {/* Artikel */}
+        <td className="px-3 py-3">
+          <div className="font-semibold text-foreground leading-tight">{row.article}</div>
           <div className="text-[10px] text-muted-foreground font-mono">{row.species} · {row.stemLength}</div>
-        </TableCell>
-        <TableCell className="py-3">{qualityBadge(row.quality)}</TableCell>
-        <TableCell className="text-[11px] text-foreground/80 py-3">{row.buyer}</TableCell>
-        <TableCell className="text-[11px] text-foreground py-3 max-w-[140px] truncate">{row.program}</TableCell>
-        <TableCell className="text-right font-mono text-xs tabular-nums text-foreground py-3">{fmt(row.forecastDemand)}</TableCell>
-        <TableCell className="text-center py-3">{changeIcon(row.demandChange, row.demandChangePercent)}</TableCell>
-        <TableCell className="text-right font-mono text-xs tabular-nums text-muted-foreground py-3">{fmt(row.currentStock)}</TableCell>
-        <TableCell className={cn("text-right font-mono text-xs tabular-nums font-bold py-3", row.remainingToBuy > 0 ? "text-primary" : "text-accent")}>{fmt(row.remainingToBuy)}</TableCell>
-        <TableCell className="text-right font-mono text-[10px] tabular-nums text-muted-foreground/70 py-3">{fmtPrice(row.historicalPrice)}</TableCell>
-        <TableCell className={cn("text-right font-mono text-xs tabular-nums font-semibold py-3", row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : row.offerPrice > row.historicalPrice ? "text-destructive" : "text-foreground")}>{fmtPrice(row.offerPrice)}</TableCell>
-        <TableCell className="text-right font-mono text-xs tabular-nums font-bold text-primary py-3">{fmtPrice(row.advicePrice)}</TableCell>
-        <TableCell className="text-right py-3"><ProcurementDelta offer={row.offerPrice} expected={row.expectedPrice} /></TableCell>
-        <TableCell className="text-center py-3">{coverageBadge(row.coverageStatus)}</TableCell>
-        <TableCell className="py-3">
+        </td>
+        {/* Kwaliteit */}
+        <td className="px-2 py-3">
+          {row.quality !== "—" ? (
+            <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded", qualityCls(row.quality))}>{row.quality}</span>
+          ) : <span className="text-muted-foreground/40 text-[10px]">—</span>}
+        </td>
+        {/* Buyer */}
+        <td className="px-2 py-3 text-foreground/70 font-mono">{row.buyer}</td>
+        {/* Programma */}
+        <td className="px-2 py-3 text-foreground max-w-[120px] truncate">{row.program}</td>
+        {/* Vraag */}
+        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{fmt(row.forecastDemand)}</td>
+        {/* Δ */}
+        <td className="px-2 py-3 text-center">
+          {row.demandChange === "up" ? (
+            <span className="text-accent font-mono font-bold text-[9px]">+{row.demandChangePercent}%</span>
+          ) : row.demandChange === "down" ? (
+            <span className="text-destructive font-mono font-bold text-[9px]">{row.demandChangePercent}%</span>
+          ) : <Minus className="w-3 h-3 text-muted-foreground/40 inline" />}
+        </td>
+        {/* Voorraad */}
+        <td className="px-3 py-3 text-right font-mono tabular-nums text-muted-foreground">{fmt(row.currentStock)}</td>
+        {/* Te kopen */}
+        <td className={cn("px-3 py-3 text-right font-mono tabular-nums font-bold", row.remainingToBuy > 0 ? "text-primary" : "text-accent")}>
+          {fmt(row.remainingToBuy)}
+        </td>
+        {/* Hist */}
+        <td className="px-2 py-3 text-right font-mono tabular-nums text-muted-foreground/50 text-[10px]">{fmtPrice(row.historicalPrice)}</td>
+        {/* Offerte */}
+        <td className={cn("px-2 py-3 text-right font-mono tabular-nums font-semibold",
+          row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : row.offerPrice > row.historicalPrice ? "text-destructive" : "text-foreground"
+        )}>{fmtPrice(row.offerPrice)}</td>
+        {/* Advies */}
+        <td className="px-2 py-3 text-right font-mono tabular-nums font-bold text-primary">{fmtPrice(row.advicePrice)}</td>
+        {/* Marge */}
+        <td className="px-2 py-3 text-right">
+          {delta !== null ? (
+            <span className={cn("font-mono font-bold text-[10px]", delta > 0 ? "text-accent" : "text-destructive")}>
+              {delta > 0 ? "-" : "+"}{fmtPrice(Math.abs(delta))}
+            </span>
+          ) : <span className="text-muted-foreground/40 text-[10px]">—</span>}
+        </td>
+        {/* Status */}
+        <td className="px-2 py-3 text-center">
+          <span className={cn("text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full", coverageCls[row.coverageStatus])}>
+            {coverageLabel[row.coverageStatus]}
+          </span>
+        </td>
+        {/* AI */}
+        <td className="px-2 py-3">
           <div className="flex items-center gap-1.5 max-w-[180px]">
             <Bot className="w-3 h-3 text-primary shrink-0" />
             <span className="text-[10px] text-muted-foreground truncate">{row.aiRecommendation}</span>
           </div>
-        </TableCell>
-        <TableCell className="py-3">
-          <BuyButton row={row} onBuy={onBuy} />
-        </TableCell>
-      </TableRow>
+        </td>
+        {/* Actie */}
+        <td className="px-2 py-3 text-center">
+          {row.purchaseState === "purchased" ? (
+            <span className="text-accent text-[9px] font-mono font-bold inline-flex items-center gap-0.5"><Check className="w-3 h-3" /> {row.purchasedAt}</span>
+          ) : row.purchaseState === "buying" ? (
+            <Loader2 className="w-3.5 h-3.5 text-primary animate-spin inline" />
+          ) : row.supplierCount > 0 ? (
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-[9px] font-mono text-primary hover:bg-primary/10"
+              onClick={e => { e.stopPropagation(); onBuy(row.id); }}>
+              <ShoppingCart className="w-3 h-3 mr-0.5" /> Koop
+            </Button>
+          ) : null}
+        </td>
+      </tr>
 
-      <CollapsibleContent asChild>
+      {/* ── EXPANDED DETAIL ── */}
+      {isOpen && (
         <tr>
-          <td colSpan={16} className="p-0 border-b border-border">
-            <div className="bg-muted/20">
-              {/* AI Advice */}
-              <div className="flex items-start gap-3 px-5 py-3 border-b border-border/50 bg-primary/5">
-                <Bot className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-foreground">AI Inkoopadvies</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{row.aiRecommendation}</p>
+          <td colSpan={16} className="p-0">
+            <div className="bg-muted/10 border-b-2 border-border">
+              {/* AI + koop */}
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-border/60 bg-primary/[0.03]">
+                <Bot className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1">
+                  <span className="text-xs font-semibold text-foreground">AI Advies: </span>
+                  <span className="text-xs text-muted-foreground">{row.aiRecommendation}</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <ConfidenceBar confidence={row.forecastConfidence} horizonDays={row.forecastHorizonDays} />
-                  {row.supplierCount > 0 && row.purchaseState === "open" && (
-                    <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={e => { e.stopPropagation(); onBuy(row.id); }}>
-                      <ShoppingCart className="w-3 h-3" /> Koop nu
-                    </Button>
-                  )}
+                {row.supplierCount > 0 && row.purchaseState === "open" && (
+                  <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
+                    <ShoppingCart className="w-3 h-3" /> Koop nu
+                  </Button>
+                )}
+              </div>
+
+              {/* Detail rows — 2 column layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border/60">
+                {/* Left: volume */}
+                <div className="px-5 py-3">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Volume</h4>
+                  <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-[11px] font-mono">
+                    <DetailRow label="Bruto vraag" value={fmt(row.forecastDemand)} />
+                    <DetailRow label="Voorraad" value={fmt(row.currentStock)} />
+                    <DetailRow label="Toegewezen" value={fmt(row.allocated)} />
+                    <DetailRow label="Gedekt" value={fmt(row.coveredVolume)} accent />
+                    <DetailRow label="Open" value={fmt(row.remainingToBuy)} warn={row.remainingToBuy > 0} />
+                    {isPurchased && <DetailRow label="Gekocht" value={`${fmt(row.purchasedQuantity)} ✓`} accent />}
+                  </div>
+                </div>
+                {/* Right: prijzen + meta */}
+                <div className="px-5 py-3">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Prijzen & info</h4>
+                  <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-[11px] font-mono">
+                    <DetailRow label="Historisch" value={fmtPrice(row.historicalPrice)} muted />
+                    <DetailRow label="Offerte" value={fmtPrice(row.offerPrice)} accent={row.offerPrice > 0 && row.offerPrice <= row.historicalPrice} />
+                    <DetailRow label="Adviesprijs" value={fmtPrice(row.advicePrice)} primary />
+                    <DetailRow label="Verwacht" value={fmtPrice(row.expectedPrice)} />
+                    <DetailRow label="Klant" value={row.customer} />
+                    <DetailRow label="Leverdatum" value={row.deliveryDate} />
+                    <DetailRow label="Bron" value={row.demandSource} icon={<SourceIcon h={row.sourceHealth} />} />
+                  </div>
                 </div>
               </div>
 
-              {/* Detail grid */}
-              <div className="px-5 py-3 border-b border-border/50">
-                <table className="w-full text-[11px] font-mono">
-                  <tbody>
-                    <tr className="border-b border-border/30">
-                      <td className="text-muted-foreground py-1.5 pr-4 w-28">Bruto vraag</td>
-                      <td className="font-semibold text-foreground py-1.5 w-20">{fmt(row.forecastDemand)}</td>
-                      <td className="text-muted-foreground py-1.5 pr-4 w-28">Historische prijs</td>
-                      <td className="font-semibold text-foreground py-1.5 w-20">{fmtPrice(row.historicalPrice)}</td>
-                      <td className="text-muted-foreground py-1.5 pr-4 w-20">Klant</td>
-                      <td className="font-semibold text-foreground py-1.5">{row.customer}</td>
-                    </tr>
-                    <tr className="border-b border-border/30">
-                      <td className="text-muted-foreground py-1.5">Voorraad</td>
-                      <td className="font-semibold text-foreground py-1.5">{fmt(row.currentStock)}</td>
-                      <td className="text-muted-foreground py-1.5">Offerteprijs</td>
-                      <td className={cn("font-semibold py-1.5", row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : "text-foreground")}>{fmtPrice(row.offerPrice)}</td>
-                      <td className="text-muted-foreground py-1.5">Buyer</td>
-                      <td className="font-semibold text-foreground py-1.5">{row.buyer}</td>
-                    </tr>
-                    <tr className="border-b border-border/30">
-                      <td className="text-muted-foreground py-1.5">Toegewezen</td>
-                      <td className="font-semibold text-foreground py-1.5">{fmt(row.allocated)}</td>
-                      <td className="text-muted-foreground py-1.5">Adviesprijs</td>
-                      <td className="font-semibold text-primary py-1.5">{fmtPrice(row.advicePrice)}</td>
-                      <td className="text-muted-foreground py-1.5">Leverdatum</td>
-                      <td className="font-semibold text-foreground py-1.5">{row.deliveryDate}</td>
-                    </tr>
-                    <tr>
-                      <td className="text-muted-foreground py-1.5">Gedekt</td>
-                      <td className="font-semibold text-accent py-1.5">{fmt(row.coveredVolume)}</td>
-                      <td className="text-muted-foreground py-1.5">Verwachte prijs</td>
-                      <td className="font-semibold text-foreground py-1.5">{fmtPrice(row.expectedPrice)}</td>
-                      <td className="text-muted-foreground py-1.5">Bron</td>
-                      <td className="py-1.5 flex items-center gap-1.5">
-                        <SourceHealthIcon health={row.sourceHealth} />
-                        <span className="font-semibold text-foreground">{row.demandSource}</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Stem length variants */}
+              {/* Variants */}
               {row.variants && row.variants.length > 0 && (
-                <div className="px-5 py-3 border-b border-border/50">
-                  <p className="text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-2">Steellengte verdeling</p>
-                  <table className="w-full text-[11px] font-mono">
-                    <thead>
-                      <tr className="text-[9px] text-muted-foreground uppercase tracking-wider">
-                        <th className="text-left py-1 font-semibold">Lengte</th>
-                        <th className="text-right py-1 font-semibold">Vraag</th>
-                        <th className="text-right py-1 font-semibold">Gedekt</th>
-                        <th className="text-right py-1 font-semibold">Voorraad</th>
-                        <th className="text-right py-1 font-semibold">Open</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {row.variants.map((v, i) => (
-                        <tr key={i} className="border-t border-border/30">
-                          <td className="py-1.5 font-semibold text-foreground">{v.length}</td>
-                          <td className="text-right py-1.5 text-foreground">{fmt(v.demand)}</td>
-                          <td className="text-right py-1.5 text-accent">{fmt(v.covered)}</td>
-                          <td className="text-right py-1.5 text-muted-foreground">{fmt(v.stock)}</td>
-                          <td className={cn("text-right py-1.5 font-semibold", v.demand - v.covered > 0 ? "text-primary" : "text-accent")}>{fmt(Math.max(0, v.demand - v.covered))}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="px-5 py-3 border-t border-border/60">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Steellengte</h4>
+                  <div className="grid grid-cols-5 gap-1 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                    <span>Lengte</span><span className="text-right">Vraag</span><span className="text-right">Gedekt</span><span className="text-right">Voorraad</span><span className="text-right">Open</span>
+                  </div>
+                  {row.variants.map((v, i) => (
+                    <div key={i} className="grid grid-cols-5 gap-1 text-[11px] font-mono py-1 border-t border-border/30">
+                      <span className="font-semibold text-foreground">{v.length}</span>
+                      <span className="text-right text-foreground">{fmt(v.demand)}</span>
+                      <span className="text-right text-accent">{fmt(v.covered)}</span>
+                      <span className="text-right text-muted-foreground">{fmt(v.stock)}</span>
+                      <span className={cn("text-right font-semibold", v.demand - v.covered > 0 ? "text-primary" : "text-accent")}>{fmt(Math.max(0, v.demand - v.covered))}</span>
+                    </div>
+                  ))}
                 </div>
               )}
 
               {/* Suppliers */}
-              <SupplierPanel suppliers={row.suppliers} />
+              {row.suppliers.length > 0 ? (
+                <div className="px-5 py-3 border-t border-border/60">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Leveranciers</h4>
+                  <div className="grid grid-cols-5 gap-1 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                    <span>Leverancier</span><span className="text-right">Beschikbaar</span><span className="text-right">Prijs</span><span className="text-right">Levertijd</span><span className="text-center">Bron</span>
+                  </div>
+                  {row.suppliers.map((s, i) => (
+                    <div key={i} className={cn("grid grid-cols-5 gap-1 text-[11px] font-mono py-1.5 border-t border-border/30", s.isBestPrice && "bg-accent/5")}>
+                      <span className="font-semibold text-foreground flex items-center gap-1.5">
+                        {s.supplier}
+                        <Badge variant="outline" className="text-[7px] font-mono h-4 px-1">{s.channel}</Badge>
+                        {s.isBestPrice && <span className="text-[7px] text-accent font-bold">BEST</span>}
+                      </span>
+                      <span className="text-right text-foreground">{fmt(s.available)}</span>
+                      <span className={cn("text-right font-bold", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
+                      <span className="text-right text-foreground">{s.deliveryDays}d</span>
+                      <span className="text-center"><SourceIcon h={s.sourceHealth} /></span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-5 py-3 border-t border-border/60 flex items-center gap-2 text-muted-foreground text-xs">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Geen leveranciers — recept ontbreekt
+                </div>
+              )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2 px-5 py-3 border-t border-border/50">
+              <div className="flex items-center gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
                 {row.supplierCount > 0 && row.purchaseState === "open" && (
                   <>
-                    <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1">
-                      <ShoppingCart className="w-3 h-3" /> Koop — volg AI advies
+                    <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
+                      <ShoppingCart className="w-3 h-3" /> Koop — AI advies
                     </Button>
                     <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
-                      <ExternalLink className="w-3 h-3" /> Open leverancier
+                      <ExternalLink className="w-3 h-3" /> Leverancier
                     </Button>
                     <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Markeer ingekocht
@@ -630,7 +600,7 @@ const ProcurementTableRow = ({ row, onBuy }: { row: ProcurementRow; onBuy: (id: 
                 )}
                 {isPurchased && (
                   <span className="text-[10px] font-mono text-accent font-bold flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" /> Ingekocht om {row.purchasedAt} — {fmt(row.purchasedQuantity)} stelen
+                    <Check className="w-3.5 h-3.5" /> Ingekocht om {row.purchasedAt} — {fmt(row.purchasedQuantity)} st.
                   </span>
                 )}
                 <Button variant="ghost" size="sm" className="h-7 text-[10px] font-mono text-muted-foreground gap-1 ml-auto">
@@ -640,268 +610,26 @@ const ProcurementTableRow = ({ row, onBuy }: { row: ProcurementRow; onBuy: (id: 
             </div>
           </td>
         </tr>
-      </CollapsibleContent>
-    </Collapsible>
+      )}
+    </>
   );
 };
 
 /* ------------------------------------------------------------------ */
-/*  AUTOMATION SETTINGS                                                */
+/*  DETAIL ROW HELPER                                                  */
 /* ------------------------------------------------------------------ */
-
-const AutomationSettings = ({ open, onToggle }: { open: boolean; onToggle: () => void }) => {
-  if (!open) return null;
-  return (
-    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-primary" />
-          <span className="text-xs font-bold text-foreground">Inkoop Automatisering</span>
-        </div>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-[9px]" onClick={onToggle}><X className="w-3 h-3" /></Button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="flex items-center justify-between rounded-md border border-border bg-card p-2.5">
-          <div>
-            <p className="text-[10px] font-mono font-bold text-foreground">Auto-order</p>
-            <p className="text-[9px] font-mono text-muted-foreground">Volg AI advies automatisch</p>
-          </div>
-          <Switch />
-        </div>
-        <div className="flex items-center justify-between rounded-md border border-border bg-card p-2.5">
-          <div>
-            <p className="text-[10px] font-mono font-bold text-foreground">Max afwijking</p>
-            <p className="text-[9px] font-mono text-muted-foreground">Prijs tolerantie</p>
-          </div>
-          <span className="text-xs font-mono font-bold text-primary">20%</span>
-        </div>
-        <div className="flex items-center justify-between rounded-md border border-border bg-card p-2.5">
-          <div>
-            <p className="text-[10px] font-mono font-bold text-foreground">Min. confidence</p>
-            <p className="text-[9px] font-mono text-muted-foreground">Forecast drempel</p>
-          </div>
-          <span className="text-xs font-mono font-bold text-primary">85%</span>
-        </div>
-        <div className="flex items-center justify-between rounded-md border border-border bg-card p-2.5">
-          <div>
-            <p className="text-[10px] font-mono font-bold text-foreground">Bronvertrouwen</p>
-            <p className="text-[9px] font-mono text-muted-foreground">Alleen verbonden bronnen</p>
-          </div>
-          <Switch defaultChecked />
-        </div>
-      </div>
-      <p className="text-[9px] font-mono text-muted-foreground/60 flex items-center gap-1">
-        <Shield className="w-3 h-3" />
-        Automatisering werkt alleen voor regels die aan alle criteria voldoen.
-      </p>
-    </div>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/*  FILTER BAR                                                         */
-/* ------------------------------------------------------------------ */
-
-const FilterBar = () => (
-  <div className="flex items-center gap-2 flex-wrap">
-    <div className="flex items-center gap-1.5 text-muted-foreground">
-      <Filter className="w-3.5 h-3.5" />
-      <span className="text-[10px] font-mono font-bold uppercase tracking-wider">Filters</span>
-    </div>
-    {[
-      { placeholder: "Datum", items: ["Vandaag", "Deze week", "Volgende week", "Week 12", "Week 13"] },
-      { placeholder: "Buyer", items: ["Alle buyers", "Mark", "Sandra", "Niet toegewezen"] },
-      { placeholder: "Klant", items: ["Alle klanten", "Albert Heijn", "Jumbo", "Aldi", "Lidl"] },
-      { placeholder: "Artikel", items: ["Alle artikelen", "Roos", "Pistacia", "Germini", "Dianthus"] },
-      { placeholder: "Kanaal", items: ["Alle kanalen", "Floriday", "Contract", "Webshop", "Marketplace"] },
-      { placeholder: "Dekking", items: ["Alle statussen", "Open", "Gedeeltelijk", "At Risk", "Gedekt"] },
-    ].map(f => (
-      <Select key={f.placeholder}>
-        <SelectTrigger className="h-7 w-[120px] text-[10px] font-mono bg-card border-border">
-          <SelectValue placeholder={f.placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {f.items.map(item => (
-            <SelectItem key={item} value={item.toLowerCase().replace(/\s/g, "-")}>{item}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    ))}
-    <Button variant="ghost" size="sm" className="h-7 text-[10px] font-mono text-muted-foreground gap-1">
-      <RotateCcw className="w-3 h-3" /> Reset
-    </Button>
-  </div>
+const DetailRow = ({ label, value, accent, warn, primary, muted, icon }: {
+  label: string; value: string; accent?: boolean; warn?: boolean; primary?: boolean; muted?: boolean; icon?: React.ReactNode;
+}) => (
+  <>
+    <span className="text-muted-foreground">{label}</span>
+    <span className={cn(
+      "text-right font-semibold flex items-center justify-end gap-1",
+      accent ? "text-accent" : warn ? "text-primary" : primary ? "text-primary" : muted ? "text-muted-foreground/60" : "text-foreground"
+    )}>
+      {icon}{value}
+    </span>
+  </>
 );
-
-/* ------------------------------------------------------------------ */
-/*  TABLE                                                              */
-/* ------------------------------------------------------------------ */
-
-const thCls = "text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground";
-
-/* ------------------------------------------------------------------ */
-/*  MAIN PAGE                                                          */
-/* ------------------------------------------------------------------ */
-
-type ProcurementTab = "all" | "urgent" | "today" | "upcoming" | "completed";
-
-const ProcurementCockpit = () => {
-  const [showAutomation, setShowAutomation] = useState(false);
-  const [rows, setRows] = useState(demoRows);
-  const [activeTab, setActiveTab] = useState<ProcurementTab>("all");
-
-  const handleBuy = (id: string) => {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, purchaseState: "buying" as PurchaseState } : r));
-    setTimeout(() => {
-      setRows(prev => prev.map(r => r.id === id ? {
-        ...r,
-        purchaseState: "purchased" as PurchaseState,
-        purchasedQuantity: r.remainingToBuy,
-        purchasedAt: new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }),
-        remainingToBuy: 0,
-        coveredVolume: r.forecastDemand,
-        coverageStatus: "covered" as CoverageStatus,
-        section: "completed" as const,
-      } : r));
-    }, 2200);
-  };
-
-  const completedRows = rows.filter(r => r.section === "completed");
-  const urgentRows = rows.filter(r => r.section === "urgent");
-  const todayRows = rows.filter(r => r.section === "today");
-  const upcomingRows = rows.filter(r => r.section === "upcoming");
-  const allActiveRows = [...urgentRows, ...todayRows, ...upcomingRows];
-
-  const visibleRows = activeTab === "all" ? allActiveRows
-    : activeTab === "urgent" ? urgentRows
-    : activeTab === "today" ? todayRows
-    : activeTab === "upcoming" ? upcomingRows
-    : completedRows;
-
-  const totalDemand = rows.reduce((s, r) => s + r.forecastDemand, 0);
-  const totalCovered = rows.reduce((s, r) => s + r.coveredVolume, 0);
-  const totalOpen = rows.reduce((s, r) => s + r.remainingToBuy, 0);
-  const totalStock = rows.reduce((s, r) => s + r.currentStock, 0);
-  const totalValue = rows.reduce((s, r) => s + r.remainingToBuy * (r.advicePrice || r.expectedPrice), 0);
-  const uniqueSuppliers = new Set(rows.flatMap(r => r.suppliers.map(s => s.supplier))).size;
-  const avgConfidence = Math.round(rows.reduce((s, r) => s + r.forecastConfidence, 0) / rows.length);
-  const purchasedToday = completedRows.length;
-
-  return (
-    <div className="relative flex flex-col h-full min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="p-3 md:p-5 space-y-3 max-w-[1800px] mx-auto">
-
-          {/* Header */}
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <h1 className="text-sm md:text-base font-black text-foreground uppercase tracking-wider">Procurement Cockpit</h1>
-              <p className="text-[10px] font-mono text-muted-foreground">Operationeel inkoopoverzicht — vraag · kwaliteit · prijzen · AI advies · actie</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1.5" onClick={() => setShowAutomation(!showAutomation)}>
-                <Zap className="w-3 h-3" /> Inkoop Automatisering
-              </Button>
-              <DataMaturityBadge maturity="partial" size="sm" />
-            </div>
-          </div>
-
-          {/* KPI Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-            <KpiCard icon={Package} label="Totale vraag" value={fmt(totalDemand)} sub="stelen" />
-            <KpiCard icon={Boxes} label="Voorraad" value={fmt(totalStock)} sub="beschikbaar" />
-            <KpiCard icon={CheckCircle2} label="Gedekt" value={fmt(totalCovered)} sub={`${Math.round((totalCovered / totalDemand) * 100)}%`} accent="bg-accent/15" />
-            <KpiCard icon={ShoppingCart} label="Open inkoop" value={fmt(totalOpen)} sub="nog te kopen" />
-            <KpiCard icon={DollarSign} label="Open waarde" value={`€${totalValue.toFixed(0)}`} sub="adviesprijzen" />
-            <KpiCard icon={Truck} label="Leveranciers" value={String(uniqueSuppliers)} sub="beschikbaar" />
-            <KpiCard icon={Bot} label="AI Confidence" value={`${avgConfidence}%`} sub="gemiddeld" accent="bg-primary/10" />
-            <KpiCard icon={Check} label="Vandaag gekocht" value={String(purchasedToday)} sub="regels afgerond" accent="bg-accent/15" />
-          </div>
-
-          {/* AI Advice banner */}
-          <AIAdviceBanner rows={rows} />
-
-          {/* Forecast deviation alerts */}
-          <ForecastDeviationAlert rows={rows} />
-
-          {/* Automation settings */}
-          <AutomationSettings open={showAutomation} onToggle={() => setShowAutomation(false)} />
-
-          {/* Filters */}
-          <FilterBar />
-
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProcurementTab)} className="w-full">
-            <TabsList className="bg-secondary/30 h-8">
-              <TabsTrigger value="all" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
-                <ShoppingCart className="w-3 h-3" /> Inkooplijst
-                <span className="text-[8px] text-muted-foreground ml-0.5">({allActiveRows.length})</span>
-              </TabsTrigger>
-              <TabsTrigger value="urgent" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
-                <AlertTriangle className="w-3 h-3" /> Urgent
-                {urgentRows.length > 0 && <span className="text-[8px] text-destructive font-bold ml-0.5">({urgentRows.length})</span>}
-              </TabsTrigger>
-              <TabsTrigger value="today" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
-                <Package className="w-3 h-3" /> Vandaag
-                <span className="text-[8px] text-muted-foreground ml-0.5">({todayRows.length})</span>
-              </TabsTrigger>
-              <TabsTrigger value="upcoming" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
-                <Clock className="w-3 h-3" /> Komende dagen
-                <span className="text-[8px] text-muted-foreground ml-0.5">({upcomingRows.length})</span>
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="text-[10px] font-mono font-bold gap-1 data-[state=active]:bg-card">
-                <CheckCircle2 className="w-3 h-3" /> Afgerond
-                <span className="text-[8px] text-accent ml-0.5">({completedRows.length})</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Procurement Table */}
-          <div className="rounded-lg border border-border bg-card overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30 border-b-2 border-border">
-                  <TableHead className="w-7 px-2" />
-                  <TableHead className={thCls}>Artikel</TableHead>
-                  <TableHead className={thCls}>Kwal.</TableHead>
-                  <TableHead className={thCls}>Buyer</TableHead>
-                  <TableHead className={thCls}>Programma</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Vraag</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Δ</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Voorraad</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Te kopen</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Hist.</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Offerte</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Advies</TableHead>
-                  <TableHead className={cn(thCls, "text-right")}>Δ Marge</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Dekking</TableHead>
-                  <TableHead className={thCls}>AI Advies</TableHead>
-                  <TableHead className={cn(thCls, "text-center")}>Actie</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visibleRows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={16} className="text-center py-12 text-xs font-mono text-muted-foreground">
-                      Geen items in deze categorie
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  visibleRows.map(row => <ProcurementTableRow key={row.id} row={row} onBuy={handleBuy} />)
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between text-[9px] font-mono text-muted-foreground pb-4">
-            <span>Laatst bijgewerkt: vandaag 08:42 · Bron: Axerrio forecast + productieorders</span>
-            <span>{rows.length} artikelen · {uniqueSuppliers} leveranciers · {purchasedToday} afgerond</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default ProcurementCockpit;
