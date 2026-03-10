@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter } from "lucide-react";
+import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter, CalendarClock, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
@@ -7,6 +7,8 @@ import { MCHologramBackground } from "@/components/mission-control/MCHologramBac
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, DepartmentFilter, DeptAccentBorder, mapLegacyDept, type Department } from "@/components/department/DepartmentBadge";
+import { DataMaturityBadge, ForecastEmptyState } from "@/components/intelligence-hub/DataMaturityBadge";
+import { DemandConcentrationCard } from "@/components/intelligence-hub/ProcurementForecastCards";
 import type { IntelligenceData } from "@/types/intelligence";
 
 /* ── Opportunity Card ── */
