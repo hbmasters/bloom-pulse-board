@@ -82,7 +82,7 @@ const MissionControl = () => {
   const [messageCount, setMessageCount] = useState(0);
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [workingMode, setWorkingMode] = useState(false);
+  const [workingMode, setWorkingMode] = useState(true);
 
   return (
     <div className={`${workingMode ? "" : "mc-dark"} flex h-[100dvh] w-full overflow-hidden transition-colors duration-500`}>
