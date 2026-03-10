@@ -1,6 +1,6 @@
 import { Sparkles, TrendingUp, ArrowRight, Star, CalendarClock, ShoppingCart } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
