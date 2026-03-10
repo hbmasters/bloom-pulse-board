@@ -126,9 +126,10 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-17", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 96, forecastHorizonDays: 5,
     purchaseState: "open", purchasedQuantity: 0, section: "upcoming",
+    bestHistoricalSupplier: "Green Team",
     suppliers: [
-      { supplier: "Green Team", channel: "Contract", available: 7000, price: 0.14, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "Flora Direct", channel: "Webshop", available: 3000, price: 0.16, deliveryDays: 2, confidence: 88, sourceHealth: "connected" },
+      { supplier: "Green Team", channel: "Contract", available: 7000, price: 0.14, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true, url: "https://greenteam.nl" },
+      { supplier: "Flora Direct", channel: "Webshop", available: 3000, price: 0.16, deliveryDays: 2, confidence: 88, sourceHealth: "connected", url: "https://floradirect.nl" },
     ],
     variants: [
       { length: "40cm", demand: 1800, covered: 1800, stock: 600 },
