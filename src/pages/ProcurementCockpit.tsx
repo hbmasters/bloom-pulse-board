@@ -45,6 +45,8 @@ interface ProcurementRow {
   suppliers: SupplierOption[];
   variants?: { length: string; demand: number; covered: number; stock: number }[];
   section: "urgent" | "today" | "upcoming" | "completed";
+  bestHistoricalSupplier?: string;
+  trackTrace?: { status: string; location: string; eta: string };
 }
 
 /* ------------------------------------------------------------------ */
