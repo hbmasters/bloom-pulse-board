@@ -90,10 +90,11 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "up", demandChangePercent: 8,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 88, forecastHorizonDays: 3,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
+    bestHistoricalSupplier: "Van der Berg Roses",
     suppliers: [
-      { supplier: "Van der Berg Roses", channel: "Floriday", available: 5000, price: 0.22, deliveryDays: 2, confidence: 92, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "Porta Nova", channel: "Contract", available: 3000, price: 0.26, deliveryDays: 1, confidence: 98, sourceHealth: "connected" },
-      { supplier: "Marktplaats NL", channel: "Marketplace", available: 2000, price: 0.28, deliveryDays: 3, confidence: 75, sourceHealth: "delayed" },
+      { supplier: "Van der Berg Roses", channel: "Floriday", available: 5000, price: 0.22, deliveryDays: 2, confidence: 92, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/vdberg" },
+      { supplier: "Porta Nova", channel: "Contract", available: 3000, price: 0.26, deliveryDays: 1, confidence: 98, sourceHealth: "connected", url: "https://portanova.nl" },
+      { supplier: "Marktplaats NL", channel: "Marketplace", available: 2000, price: 0.28, deliveryDays: 3, confidence: 75, sourceHealth: "delayed", url: "https://marktplaats.nl" },
     ],
     variants: [
       { length: "50cm", demand: 3200, covered: 3200, stock: 400 },
