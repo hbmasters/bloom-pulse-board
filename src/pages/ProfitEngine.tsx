@@ -1,10 +1,12 @@
-import { Banknote, TrendingUp, TrendingDown, ArrowRight, Star, AlertTriangle } from "lucide-react";
+import { Banknote, TrendingUp, TrendingDown, ArrowRight, Star, AlertTriangle, ShoppingCart } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, type Department } from "@/components/department/DepartmentBadge";
+import { ForecastEmptyState } from "@/components/intelligence-hub/DataMaturityBadge";
+import { ForecastValueExposure } from "@/components/intelligence-hub/ProcurementForecastCards";
 import type { IntelligenceData } from "@/types/intelligence";
 
 /* ══════════════════════════════════════════
