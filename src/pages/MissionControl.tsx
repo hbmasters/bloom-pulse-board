@@ -24,6 +24,7 @@ import ProfitEngine from "@/pages/ProfitEngine";
 import MCWorkingModeToggle from "@/components/mission-control/MCWorkingModeToggle";
 import CommandRadar from "@/pages/CommandRadar";
 import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
+import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine";
