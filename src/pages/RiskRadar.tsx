@@ -1,10 +1,11 @@
-import { Shield, AlertTriangle, TrendingDown, ArrowRight } from "lucide-react";
+import { Shield, AlertTriangle, TrendingDown, ArrowRight, Package, Link2Off } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCard";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, SubdepartmentChip, DeptAccentBorder, type Department, type ProductionSub } from "@/components/department/DepartmentBadge";
+import { DataMaturityBadge, ForecastEmptyState, DependencyStatus } from "@/components/intelligence-hub/DataMaturityBadge";
 import type { IntelligenceData } from "@/types/intelligence";
 
 /* ── Risk Item Card ── */
@@ -226,6 +227,44 @@ const RiskRadar = ({ intelligence }: Props) => {
             <IHSectionShell icon={Shield} title="Forecast Risk" subtitle="Afwijkingen forecast vs inkomende orders" badge="MONITOR" badgeVariant="warning">
               <div className="space-y-3">
                 {forecastRisks.map((r) => <RiskCard key={r.product} item={r} />)}
+              </div>
+            </IHSectionShell>
+
+            {/* 6. Procurement Forecast Risk */}
+            <IHSectionShell icon={Package} title="Procurement Forecast Risk" subtitle="Inkooprisico's door onvolledige forecastdata" badge="PREPARATION" badgeVariant="warning">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                  <IHMetricCard metric={{ label: "Onopgeloste recepten", value: "5", status: "critical", change: "149 orders", changeDir: "up" }} />
+                  <IHMetricCard metric={{ label: "Supply coverage", value: "—", unit: "%", status: "neutral", change: "Bron ontbreekt", changeDir: "neutral" }} />
+                  <IHMetricCard metric={{ label: "Prijsdata beschikbaar", value: "62", unit: "%", status: "warning", change: "Alleen offerteprijzen", changeDir: "neutral" }} />
+                </div>
+
+                <RiskCard item={{
+                  product: "Toekomstige orders zonder recept",
+                  riskLevel: "HIGH",
+                  description: "149 orders met ontbrekende receptkoppeling — steelvraag kan niet worden berekend",
+                  department: "Inkoop",
+                  metrics: [{ label: "Orders", value: "149" }, { label: "Klanten", value: "5" }, { label: "Impact", value: "Onbekend" }],
+                  rootCauses: ["Receptsysteem niet volledig gekoppeld aan orderdata", "Nieuwe producten zonder receptdefinitie", "Seizoenswisseling — verlopen recepten"],
+                  actions: ["Koppel ontbrekende recepten aan productgroepen", "Prioriteer recepten voor top-5 klanten", "Escaleer naar productdesign team"],
+                }} />
+
+                <RiskCard item={{
+                  product: "Supply coverage onbekend",
+                  riskLevel: "MEDIUM",
+                  description: "Leveringsdekking kan niet worden bepaald — supply data nog niet aangesloten",
+                  department: "Inkoop",
+                  rootCauses: ["Supply coverage bron niet beschikbaar", "Contractvolumes niet gekoppeld aan forecast"],
+                  actions: ["Sluit supply coverage bron aan", "Valideer contractvolumes tegen forecastvraag"],
+                }} />
+
+                {/* Dependency status */}
+                <div className="rounded-lg border border-border bg-muted/10 p-3 space-y-2">
+                  <h4 className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">Afhankelijkheden</h4>
+                  <DependencyStatus label="Receptkoppelingen" maturity="unresolved" detail="149 orders" />
+                  <DependencyStatus label="Supply coverage" maturity="missing" />
+                  <DependencyStatus label="Inkoopprijzen" maturity="partial" detail="Alleen offerte" />
+                </div>
               </div>
             </IHSectionShell>
           </DataStateWrapper>

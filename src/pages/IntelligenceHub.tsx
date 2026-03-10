@@ -5,6 +5,7 @@ import IHMarginIntelligence from "@/components/intelligence-hub/IHMarginIntellig
 import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcurementIntelligence";
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
 import IHActionCenter from "@/components/intelligence-hub/IHActionCenter";
+import IHForecastIntelligence from "@/components/intelligence-hub/IHForecastIntelligence";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import type { IntelligenceData } from "@/types/intelligence";
@@ -18,7 +19,6 @@ const IntelligenceHub = ({ intelligence }: Props) => {
   const objectsState = intelligence?.objects.state ?? "complete";
   const objects = intelligence?.objects.items ?? [];
 
-  // Group by signal_type for section awareness
   const productionObjects = filterBySignalType(objects, ["production"]);
   const financialObjects = filterBySignalType(objects, ["financial", "margin"]);
   const procurementObjects = filterBySignalType(objects, ["procurement"]);
@@ -70,7 +70,10 @@ const IntelligenceHub = ({ intelligence }: Props) => {
             <IHFlowerForecast />
           </DataStateWrapper>
 
-          {/* 6. AI Action Center */}
+          {/* 6. Forecast Intelligence — Procurement Forecast Readiness */}
+          <IHForecastIntelligence />
+
+          {/* 7. AI Action Center */}
           <DataStateWrapper state={objectsState} skeletonCount={1}>
             <IHActionCenter />
           </DataStateWrapper>

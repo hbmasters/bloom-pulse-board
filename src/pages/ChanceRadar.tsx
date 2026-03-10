@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter } from "lucide-react";
+import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter, CalendarClock, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
@@ -7,6 +7,8 @@ import { MCHologramBackground } from "@/components/mission-control/MCHologramBac
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { DepartmentBadge, DepartmentFilter, DeptAccentBorder, mapLegacyDept, type Department } from "@/components/department/DepartmentBadge";
+import { DataMaturityBadge, ForecastEmptyState } from "@/components/intelligence-hub/DataMaturityBadge";
+import { DemandConcentrationCard } from "@/components/intelligence-hub/ProcurementForecastCards";
 import type { IntelligenceData } from "@/types/intelligence";
 
 /* ── Opportunity Card ── */
@@ -233,7 +235,34 @@ const ChanceRadar = ({ intelligence }: Props) => {
               </div>
             </IHSectionShell>
 
-            {/* 5. Action Engine */}
+            {/* 5. Future Demand Opportunity */}
+            <IHSectionShell icon={CalendarClock} title="Future Demand Opportunity" subtitle="Toekomstige vraag als kans voor inkoop-timing" badge="VOORBEREIDING" badgeVariant="warning">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                  <IHMetricCard metric={{ label: "Toekomstige orders", value: "—", status: "neutral", change: "Forecastbron gedeeltelijk", changeDir: "neutral" }} />
+                  <IHMetricCard metric={{ label: "Inkoop timing kansen", value: "—", status: "neutral", change: "Wacht op forecastdata", changeDir: "neutral" }} />
+                  <IHMetricCard metric={{ label: "Vraagconcentratie", value: "—", status: "neutral", change: "Per klant/datum", changeDir: "neutral" }} />
+                </div>
+                <DemandConcentrationCard />
+                <ForecastEmptyState
+                  title="Procurement timing opportunities"
+                  message="Zodra forecastdata volledig is, worden hier inkoop-timing kansen getoond: vroeg inkopen bij verwachte prijsstijging, volume bundelen bij concentratie, en seizoensinkoopoptimalisatie."
+                  maturity="missing"
+                />
+              </div>
+            </IHSectionShell>
+
+            {/* 6. Procurement Opportunity */}
+            <IHSectionShell icon={ShoppingCart} title="Procurement Forecast Opportunity" subtitle="Inkoopkansen op basis van toekomstige vraag" badge="PREPARATION" badgeVariant="warning">
+              <div className="space-y-3">
+                <ForecastEmptyState
+                  message="Inkoopkansen worden zichtbaar zodra receptkoppelingen, supply coverage en actuele prijsdata beschikbaar zijn. Het systeem kan dan volume-bundeling, leveranciersalternatieven en prijsvoordelen identificeren."
+                  maturity="partial"
+                />
+              </div>
+            </IHSectionShell>
+
+            {/* 7. Action Engine */}
             <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
               <DepartmentFilter departments={allDepts} active={deptFilter} onChange={setDeptFilter} className="mb-4" />
               <div className="space-y-3">
