@@ -156,11 +156,24 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2">
-        <ul className="space-y-0.5">
-          {navEntries.map(entry =>
-            isGroup(entry) ? renderGroup(entry) : renderItem(entry)
-          )}
-        </ul>
+        {navSections.map((section, si) => (
+          <div key={section.label}>
+            {si > 0 && <div className="my-2 mx-2 border-t border-sidebar-border" />}
+            {!collapsed && (
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-sidebar-foreground/40">
+                  {section.label}
+                </span>
+              </div>
+            )}
+            {collapsed && si > 0 && <div className="my-1" />}
+            <ul className="space-y-0.5">
+              {section.entries.map(entry =>
+                isGroup(entry) ? renderGroup(entry) : renderItem(entry)
+              )}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom status button */}
