@@ -7,7 +7,7 @@ import {
   Clock, Package, Truck, DollarSign, CheckCircle2, X,
   Wifi, WifiOff, RefreshCw, Shield, Zap,
   ArrowUpRight, ArrowDownRight, Boxes, Loader2,
-  Star, AlertCircle, Check, User
+  Star, AlertCircle, Check, User, Activity
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,43 @@ import {
 } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+
+/* ------------------------------------------------------------------ */
+/*  SHOP STATUS DATA                                                    */
+/* ------------------------------------------------------------------ */
+interface ShopStatus {
+  name: string;
+  lastSync: string;
+  articles: number;
+  status: "connected" | "delayed" | "stale";
+}
+
+const shopStatuses: ShopStatus[] = [
+  { name: "Colorígniz", lastSync: "08:41", articles: 342, status: "connected" },
+  { name: "Hove de Mooy", lastSync: "08:40", articles: 218, status: "connected" },
+  { name: "Bart Baardse", lastSync: "08:38", articles: 156, status: "connected" },
+  { name: "Mijo", lastSync: "08:35", articles: 89, status: "connected" },
+  { name: "Farm Direct", lastSync: "08:42", articles: 412, status: "connected" },
+  { name: "Greenflor", lastSync: "08:30", articles: 267, status: "connected" },
+  { name: "GFS", lastSync: "08:28", articles: 134, status: "connected" },
+  { name: "Jac Oudijk", lastSync: "08:39", articles: 198, status: "connected" },
+  { name: "Summit", lastSync: "07:55", articles: 76, status: "delayed" },
+  { name: "Kingstar", lastSync: "08:41", articles: 305, status: "connected" },
+  { name: "Vip Roses", lastSync: "08:37", articles: 144, status: "connected" },
+  { name: "Adomex", lastSync: "08:40", articles: 523, status: "connected" },
+  { name: "Multi Color", lastSync: "08:36", articles: 187, status: "connected" },
+  { name: "Dobbe Flowers", lastSync: "08:33", articles: 92, status: "connected" },
+  { name: "Goedegebuure", lastSync: "08:29", articles: 64, status: "connected" },
+  { name: "Euros en Greens", lastSync: "08:42", articles: 231, status: "connected" },
+  { name: "LGFlowers", lastSync: "06:12", articles: 48, status: "stale" },
+  { name: "Canaraflor", lastSync: "08:34", articles: 112, status: "connected" },
+  { name: "Zandbergen", lastSync: "08:31", articles: 76, status: "connected" },
+  { name: "Rosalink", lastSync: "08:38", articles: 198, status: "connected" },
+  { name: "Zentoo", lastSync: "08:41", articles: 456, status: "connected" },
+];
 
 /* ------------------------------------------------------------------ */
 /*  TYPES                                                              */
