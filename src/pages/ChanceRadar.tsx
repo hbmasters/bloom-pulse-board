@@ -261,8 +261,6 @@ const ChanceRadar = ({ intelligence }: Props) => {
                 />
               </div>
             </IHSectionShell>
-
-            {/* 7. Action Engine */}
             <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
               <DepartmentFilter departments={allDepts} active={deptFilter} onChange={setDeptFilter} className="mb-4" />
               <div className="space-y-3">

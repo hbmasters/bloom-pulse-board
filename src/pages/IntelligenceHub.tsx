@@ -67,14 +67,6 @@ const IntelligenceHub = ({ intelligence }: Props) => {
           <DataStateWrapper state={objectsState} skeletonCount={1}>
             <IHFlowerForecast />
           </DataStateWrapper>
-
-          {/* 6. Forecast Intelligence — Procurement Forecast Readiness */}
-          <IHForecastIntelligence />
-
-          {/* 7. AI Action Center */}
-          <DataStateWrapper state={objectsState} skeletonCount={1}>
-            <IHActionCenter />
-          </DataStateWrapper>
         </div>
       </div>
     </div>
