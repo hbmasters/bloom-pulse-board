@@ -482,7 +482,7 @@ const ProcurementCockpit = () => {
               <h1 className="text-sm md:text-base font-black text-foreground uppercase tracking-wider">Procurement Cockpit</h1>
               <p className="text-[10px] font-mono text-muted-foreground">Operationeel inkoopoverzicht — real-time vraag & leveranciersdekking</p>
             </div>
-            <DataMaturityBadge maturity="partial" size="sm" label="Forecast gedeeltelijk beschikbaar" />
+            <DataMaturityBadge maturity="partial" size="sm" />
           </div>
 
           {/* KPI Cards */}
