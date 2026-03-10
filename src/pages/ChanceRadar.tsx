@@ -268,11 +268,5 @@ const ChanceRadar = ({ intelligence }: Props) => {
   );
 };
 
-export default ChanceRadar;
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default ChanceRadar;
