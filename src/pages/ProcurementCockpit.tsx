@@ -674,4 +674,19 @@ const DetailRow = ({ label, value, accent, warn, primary, muted, icon }: {
   </>
 );
 
+/* ------------------------------------------------------------------ */
+/*  DOTTED ROW HELPER (label ···· value)                               */
+/* ------------------------------------------------------------------ */
+const DottedRow = ({ label, value, cls, icon }: {
+  label: string; value: string; cls?: string; icon?: React.ReactNode;
+}) => (
+  <div className="flex items-baseline gap-1">
+    <span className="text-muted-foreground whitespace-nowrap">{label}</span>
+    <span className="flex-1 border-b border-dotted border-muted-foreground/20 min-w-[20px] translate-y-[-3px]" />
+    <span className={cn("font-semibold whitespace-nowrap flex items-center gap-1", cls || "text-foreground")}>
+      {icon}{value}
+    </span>
+  </div>
+);
+
 export default ProcurementCockpit;
