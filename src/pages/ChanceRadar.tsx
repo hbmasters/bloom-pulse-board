@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, ArrowRight, Star, Zap, Filter, CalendarClock, ShoppingCart } from "lucide-react";
+import { Sparkles, TrendingUp, ArrowRight, Star, CalendarClock, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
