@@ -541,14 +541,14 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 {/* Right: prijzen + meta */}
                 <div className="px-5 py-3">
                   <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Prijzen & info</h4>
-                  <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-[11px] font-mono">
-                    <DetailRow label="Historisch" value={fmtPrice(row.historicalPrice)} muted />
-                    <DetailRow label="Offerte" value={fmtPrice(row.offerPrice)} accent={row.offerPrice > 0 && row.offerPrice <= row.historicalPrice} />
-                    <DetailRow label="Adviesprijs" value={fmtPrice(row.advicePrice)} primary />
-                    <DetailRow label="Verwacht" value={fmtPrice(row.expectedPrice)} />
-                    <DetailRow label="Klant" value={row.customer} />
-                    <DetailRow label="Leverdatum" value={row.deliveryDate} />
-                    <DetailRow label="Bron" value={row.demandSource} icon={<SourceIcon h={row.sourceHealth} />} />
+                  <div className="space-y-1 text-[11px] font-mono">
+                    <DottedRow label="Historisch" value={fmtPrice(row.historicalPrice)} cls="text-muted-foreground/60" />
+                    <DottedRow label="Offerte" value={fmtPrice(row.offerPrice)} cls={row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : "text-foreground"} />
+                    <DottedRow label="Adviesprijs" value={fmtPrice(row.advicePrice)} cls="text-primary font-bold" />
+                    <DottedRow label="Verwacht" value={fmtPrice(row.expectedPrice)} />
+                    <DottedRow label="Klant" value={row.customer} />
+                    <DottedRow label="Leverdatum" value={row.deliveryDate} />
+                    <DottedRow label="Bron" value={row.demandSource} icon={<SourceIcon h={row.sourceHealth} />} />
                   </div>
                 </div>
               </div>
