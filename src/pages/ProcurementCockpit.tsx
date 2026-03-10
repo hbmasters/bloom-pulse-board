@@ -320,7 +320,7 @@ const ProcurementTableRow = ({ row }: { row: ProcurementRow }) => {
 
               {/* Meta */}
               <div className="flex flex-wrap gap-3 px-4 py-2 border-b border-border text-[10px] font-mono text-muted-foreground">
-                <span>Bron: <SourceLabel source={row.demandSource} /></span>
+                <span>Bron: <SourceLabel source={row.demandSource} maturity={row.coverageStatus === "open" ? "unresolved" : row.coverageStatus === "partial" ? "partial" : "live"} /></span>
                 <span>Klant: <span className="text-foreground">{row.customer}</span></span>
                 <span>Leverdatum: <span className="text-foreground">{row.deliveryDate}</span></span>
                 <DataMaturityBadge maturity={row.coverageStatus === "open" ? "unresolved" : row.coverageStatus === "partial" ? "partial" : "live"} size="sm" />
