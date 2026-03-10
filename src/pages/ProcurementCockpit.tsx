@@ -182,7 +182,7 @@ const SourceIcon = ({ h }: { h: SourceHealth }) => {
     manual: { Icon: User, c: "text-primary/60", t: "Handmatig" },
   };
   const { Icon, c, t } = m[h];
-  return <Icon className={cn("w-3 h-3", c)} title={t} />;
+  return <span title={t}><Icon className={cn("w-3 h-3", c)} /></span>;
 };
 
 /* ------------------------------------------------------------------ */
