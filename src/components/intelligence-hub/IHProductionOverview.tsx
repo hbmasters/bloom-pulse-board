@@ -99,7 +99,7 @@ const IHProductionOverview = () => (
           {/* Metrics */}
           <div className="grid grid-cols-3 gap-2">
             {dept.metrics.map((m) => (
-              <IHMetricCard key={m.label} metric={m} compact />
+              <IHMetricCard key={m.label} metric={m} />
             ))}
           </div>
         </div>

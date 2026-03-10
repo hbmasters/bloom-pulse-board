@@ -35,6 +35,7 @@ const App = () => (
            <Route path="/command-radar" element={<MissionControl />} />
            <Route path="/action-engine" element={<MissionControl />} />
            <Route path="/procurement" element={<MissionControl />} />
+           <Route path="/production-cockpit" element={<MissionControl />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

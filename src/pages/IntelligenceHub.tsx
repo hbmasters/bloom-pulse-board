@@ -48,9 +48,9 @@ const IntelligenceHub = ({ intelligence }: Props) => {
             <IHBusinessHealth />
           </DataStateWrapper>
 
-          {/* 2. Production Intelligence */}
+          {/* 2. Production Intelligence – High-level overview */}
           <DataStateWrapper state={objectsState} skeletonCount={1}>
-            <IHProductionIntelligence />
+            <IHProductionOverview />
           </DataStateWrapper>
 
           {/* 3. Margin Intelligence */}
