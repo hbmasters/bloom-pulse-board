@@ -138,38 +138,6 @@ const designOpps: OpportunityItem[] = [
   },
 ];
 
-/* ── Action Engine (static fallback) ── */
-interface ActionItem {
-  action_title: string;
-  department: "Procurement" | "Production" | "Sales" | "Design" | "Planning";
-  priority: "High" | "Medium" | "Low";
-  driver: string;
-  flower?: string;
-  recommended_action: string;
-  expected_impact: string;
-  constraints?: string;
-  data_sources_used: string[];
-}
-
-const actionItems: ActionItem[] = [
-  { action_title: "Secure flower supply", department: "Procurement", priority: "High", driver: "forecast_gap", flower: "Germini Franky", recommended_action: "Secure 45,000 stems before week 38", expected_impact: "+1.2% margin improvement", constraints: "Maintain orange color palette", data_sources_used: ["HBM Production", "Picklist", "Axerrio DW"] },
-  { action_title: "Shift high-margin products to B3", department: "Production", priority: "High", driver: "production_efficiency", recommended_action: "Verplaats BQ Elegance en Charme XL naar lijn B3 (350 st/u)", expected_impact: "+€2.1K/week extra output", constraints: "B3 capaciteit max 8 uur/dag", data_sources_used: ["HBM Production"] },
-  { action_title: "Increase price BQ Fleur", department: "Sales", priority: "High", driver: "margin_gap", flower: "BQ Fleur", recommended_action: "Verhoog verkoopprijs met €0.05 richting Vomar", expected_impact: "+0.8% marge-verbetering", data_sources_used: ["Axerrio DW", "Picklist"] },
-  { action_title: "Optimize bouquet recipe", department: "Design", priority: "Medium", driver: "design_efficiency", flower: "Boeket Charme XL", recommended_action: "Vervang Alstroemeria door Chrysant – 18% snellere productie", expected_impact: "−€0.006 arbeid/bos", constraints: "Kleurpalet behouden", data_sources_used: ["Picklist", "HBM Production"] },
-  { action_title: "Plan extra weekend shift", department: "Planning", priority: "Medium", driver: "demand_surge", recommended_action: "Plan zaterdagshift voor week 39 – orders 14% boven forecast", expected_impact: "+4.200 extra boeketten", constraints: "Personeelsbeschikbaarheid", data_sources_used: ["HBM Production", "Axerrio DW"] },
-  { action_title: "Extend tulip contract volume", department: "Procurement", priority: "Medium", driver: "supply_risk", flower: "Tulp Premium Mix", recommended_action: "Verleng contractvolume met 20.000 stelen voor Q4", expected_impact: "Leveringszekerheid +15%", data_sources_used: ["Picklist", "Axerrio DW"] },
-  { action_title: "Monitor rose quality", department: "Procurement", priority: "Low", driver: "quality_signal", flower: "Roos Avalanche 60cm", recommended_action: "Track uitval% komende 3 leveringen partij KE-2024-0834", expected_impact: "Preventie afkeur −2%", data_sources_used: ["HBM Production"] },
-];
-
-const allDepts: (Department | "All")[] = ["All", "Verkoop", "Inkoop", "Productie", "Administratie", "Financieel"];
-
-const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-const priorityStyle = {
-  High: "text-red-500 bg-red-500/10 border-red-500/20",
-  Medium: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
-  Low: "text-muted-foreground bg-muted/20 border-border",
-};
-
 interface Props {
   intelligence?: IntelligenceData;
 }
