@@ -146,7 +146,9 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 95, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 4600, purchasedAt: "08:12", section: "completed",
-    suppliers: [{ supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true }],
+    bestHistoricalSupplier: "ChrysantenKwekerij",
+    trackTrace: { status: "Onderweg", location: "Aalsmeer → DC Naaldwijk", eta: "14:30" },
+    suppliers: [{ supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/chrysantenkwekerij" }],
   },
   {
     id: "p7", article: "Eucalyptus Parvifolia", stemLength: "60cm", quality: "A2", species: "Eucalyptus",
@@ -157,7 +159,9 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 98, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 3600, purchasedAt: "07:48", section: "completed",
-    suppliers: [{ supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true }],
+    bestHistoricalSupplier: "Green Direct",
+    trackTrace: { status: "Geleverd", location: "DC Naaldwijk", eta: "Ontvangen 09:15" },
+    suppliers: [{ supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true, url: "https://greendirect.nl" }],
   },
 ];
 
