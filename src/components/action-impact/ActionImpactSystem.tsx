@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Zap, BarChart3, Kanban } from "lucide-react";
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { ActionImpactSummary } from "./ActionImpactSummary";
@@ -10,7 +11,6 @@ import { actionItems as staticActionItems } from "./data";
 import type { IntelligenceData, IntelligenceAction } from "@/types/intelligence";
 import type { ActionItem } from "./types";
 
-/** Map IntelligenceAction to ActionItem for existing components */
 function mapToActionItem(a: IntelligenceAction): ActionItem {
   return {
     id: a.id,
@@ -35,11 +35,20 @@ function mapToActionItem(a: IntelligenceAction): ActionItem {
   };
 }
 
+type TabId = "priority" | "pipeline";
+
+const tabs: { id: TabId; label: string; icon: typeof BarChart3; shortLabel: string }[] = [
+  { id: "priority", label: "Action Priority Board", icon: BarChart3, shortLabel: "Priority" },
+  { id: "pipeline", label: "Action Pipeline", icon: Kanban, shortLabel: "Pipeline" },
+];
+
 interface Props {
   intelligence?: IntelligenceData;
 }
 
 export const ActionImpactSystem = ({ intelligence }: Props) => {
+  const [activeTab, setActiveTab] = useState<TabId>("priority");
+
   const actionsState = intelligence?.actions.state ?? "complete";
   const actions: ActionItem[] =
     intelligence?.actions.items && intelligence.actions.items.length > 0
@@ -47,18 +56,20 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
       : staticActionItems;
 
   return (
-    <div className="relative min-h-0 h-full overflow-y-auto">
-      <div className="relative z-10">
-        <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto pb-8">
-          {/* Page header */}
-          <div className="flex items-center gap-3 mb-2">
+    <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
+      <MCHologramBackground />
+
+      {/* ── Header + Summary Bar ── */}
+      <div className="relative z-10 border-b border-border bg-card/60 backdrop-blur-xl px-4 md:px-6 py-3 shrink-0">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex items-center gap-3 mb-3">
             <div className="w-2 h-8 rounded-full bg-primary" />
             <div>
               <h1 className="text-lg md:text-xl font-black tracking-tight text-foreground uppercase">
                 Action Impact System
               </h1>
               <p className="text-[11px] font-mono text-muted-foreground">
-                Data → Root Cause → Actie → Meetbare Impact
+                Data → Root Cause → Actie → Meetbare Impact • {actions.length} acties
                 {actionsState === "partial" && (
                   <span className="text-yellow-500 ml-2">⚠ partial</span>
                 )}
@@ -66,66 +77,68 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
             </div>
           </div>
 
-          {/* Layer 1 — Impact Summary (always visible) */}
+          {/* Inline summary */}
           <DataStateWrapper state={actionsState} skeletonCount={1}>
-            <IHSectionShell
-              icon={Zap}
-              title="Improvement Potential"
-              subtitle="Executive overzicht van alle acties en hun verwachte impact"
-              badge="SUMMARY"
-              badgeVariant="success"
-            >
-              <ActionImpactSummary actions={actions} />
-            </IHSectionShell>
+            <ActionImpactSummary actions={actions} />
           </DataStateWrapper>
+        </div>
+      </div>
 
-          {/* Tabs for Priority Board & Pipeline */}
-          <Tabs defaultValue="priority" className="w-full">
-            <TabsList className="w-full justify-start bg-card/60 border border-border rounded-xl h-11 p-1 gap-1">
-              <TabsTrigger
-                value="priority"
-                className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4 text-xs font-bold uppercase tracking-wider"
-              >
-                <BarChart3 className="w-3.5 h-3.5" />
-                Action Priority Board
-              </TabsTrigger>
-              <TabsTrigger
-                value="pipeline"
-                className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4 text-xs font-bold uppercase tracking-wider"
-              >
-                <Kanban className="w-3.5 h-3.5" />
-                Action Pipeline
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="priority" className="mt-4">
-              <DataStateWrapper state={actionsState} skeletonCount={2}>
-                <IHSectionShell
-                  icon={BarChart3}
-                  title="Action Priority Board"
-                  subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
-                  badge={`${actions.length} ACTIES`}
-                  badgeVariant="warning"
+      {/* ── Tab Navigation (same style as Command Radar) ── */}
+      <div className="relative z-10 border-b border-border bg-card/40 backdrop-blur-sm px-4 md:px-6 shrink-0">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex gap-0 overflow-x-auto scrollbar-hide">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+                    isActive
+                      ? "border-primary text-primary bg-primary/5"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                  }`}
                 >
-                  <ActionPriorityBoard actions={actions} />
-                </IHSectionShell>
-              </DataStateWrapper>
-            </TabsContent>
+                  <tab.icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-            <TabsContent value="pipeline" className="mt-4">
-              <DataStateWrapper state={actionsState} skeletonCount={1}>
-                <IHSectionShell
-                  icon={Kanban}
-                  title="Action Pipeline"
-                  subtitle="Uitvoeringsstatus per actie"
-                  badge="PIPELINE"
-                  badgeVariant="default"
-                >
-                  <ActionPipeline actions={actions} />
-                </IHSectionShell>
-              </DataStateWrapper>
-            </TabsContent>
-          </Tabs>
+      {/* ── Tab Content ── */}
+      <div className="flex-1 min-h-0 relative z-10 overflow-y-auto">
+        <div className="p-4 md:p-6 max-w-[1600px] mx-auto pb-8">
+          {activeTab === "priority" && (
+            <DataStateWrapper state={actionsState} skeletonCount={2}>
+              <IHSectionShell
+                icon={BarChart3}
+                title="Action Priority Board"
+                subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
+                badge={`${actions.length} ACTIES`}
+                badgeVariant="warning"
+              >
+                <ActionPriorityBoard actions={actions} />
+              </IHSectionShell>
+            </DataStateWrapper>
+          )}
+          {activeTab === "pipeline" && (
+            <DataStateWrapper state={actionsState} skeletonCount={1}>
+              <IHSectionShell
+                icon={Kanban}
+                title="Action Pipeline"
+                subtitle="Uitvoeringsstatus per actie"
+                badge="PIPELINE"
+                badgeVariant="default"
+              >
+                <ActionPipeline actions={actions} />
+              </IHSectionShell>
+            </DataStateWrapper>
+          )}
         </div>
       </div>
     </div>
