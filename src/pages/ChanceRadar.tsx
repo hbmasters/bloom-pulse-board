@@ -261,65 +261,14 @@ const ChanceRadar = ({ intelligence }: Props) => {
                 />
               </div>
             </IHSectionShell>
-            <IHSectionShell icon={Zap} title="Action Engine" subtitle="Intelligence → Concrete operationele acties per afdeling" badge={`${filteredActions.length} ACTIES`} badgeVariant="success">
-              <DepartmentFilter departments={allDepts} active={deptFilter} onChange={setDeptFilter} className="mb-4" />
-              <div className="space-y-3">
-                {filteredActions.map((action) => (
-                  <div key={action.action_title} className={`rounded-xl border p-4 ${
-                    action.priority === "High" ? "border-red-500/30 bg-red-500/5" :
-                    action.priority === "Medium" ? "border-yellow-500/30 bg-yellow-500/5" :
-                    "border-border bg-muted/10"
-                  }`}>
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Zap className={`w-3.5 h-3.5 ${action.priority === "High" ? "text-red-500" : "text-primary"}`} />
-                        <span className="text-sm font-bold text-foreground">{action.action_title}</span>
-                        <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${priorityStyle[action.priority]}`}>
-                          {action.priority.toUpperCase()}
-                        </span>
-                        <DepartmentBadge department={mapLegacyDept(action.department)} />
-                      </div>
-                    </div>
-                    {action.flower && (
-                      <div className="text-[10px] font-mono text-muted-foreground mb-2">
-                        Bloem: <span className="text-foreground font-semibold">{action.flower}</span>
-                        <span className="mx-2 text-border">|</span>
-                        Driver: <span className="text-foreground font-semibold">{action.driver.replace(/_/g, " ")}</span>
-                      </div>
-                    )}
-                    {!action.flower && (
-                      <div className="text-[10px] font-mono text-muted-foreground mb-2">
-                        Driver: <span className="text-foreground font-semibold">{action.driver.replace(/_/g, " ")}</span>
-                      </div>
-                    )}
-                    <div className="grid md:grid-cols-2 gap-3">
-                      <div>
-                        <h4 className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider mb-1">Aanbevolen actie</h4>
-                        <div className="flex items-start gap-1.5 text-[11px]">
-                          <ArrowRight className="w-3 h-3 mt-0.5 text-accent shrink-0" />
-                          <span className="text-foreground/80">{action.recommended_action}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-[10px] font-bold text-foreground/60 uppercase tracking-wider mb-1">Verwacht effect</h4>
-                        <span className="text-[11px] font-mono font-bold text-accent">{action.expected_impact}</span>
-                        {action.constraints && (
-                          <div className="mt-1 text-[10px] text-muted-foreground">
-                            <span className="text-foreground/50">Constraint:</span> {action.constraints}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {action.data_sources_used.map((ds) => (
-                        <Badge key={ds} variant="outline" className="text-[8px] font-mono px-1.5 py-0 h-4">{ds}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </IHSectionShell>
           </DataStateWrapper>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChanceRadar;
         </div>
       </div>
     </div>
