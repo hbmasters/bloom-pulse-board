@@ -26,9 +26,10 @@ import CommandRadar from "@/pages/CommandRadar";
 import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
 import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import ProductionCockpit from "@/pages/ProductionCockpit";
+import CommercialCockpit from "@/pages/CommercialCockpit";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
