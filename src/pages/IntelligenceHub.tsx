@@ -1,11 +1,9 @@
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import IHBusinessHealth from "@/components/intelligence-hub/IHBusinessHealth";
-import IHProductionIntelligence from "@/components/intelligence-hub/IHProductionIntelligence";
+import IHProductionOverview from "@/components/intelligence-hub/IHProductionOverview";
 import IHMarginIntelligence from "@/components/intelligence-hub/IHMarginIntelligence";
 import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcurementIntelligence";
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
-import IHActionCenter from "@/components/intelligence-hub/IHActionCenter";
-import IHForecastIntelligence from "@/components/intelligence-hub/IHForecastIntelligence";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import type { IntelligenceData } from "@/types/intelligence";
@@ -50,9 +48,9 @@ const IntelligenceHub = ({ intelligence }: Props) => {
             <IHBusinessHealth />
           </DataStateWrapper>
 
-          {/* 2. Production Intelligence */}
+          {/* 2. Production Intelligence – High-level overview */}
           <DataStateWrapper state={objectsState} skeletonCount={1}>
-            <IHProductionIntelligence />
+            <IHProductionOverview />
           </DataStateWrapper>
 
           {/* 3. Margin Intelligence */}
@@ -68,14 +66,6 @@ const IntelligenceHub = ({ intelligence }: Props) => {
           {/* 5. Flower Forecast */}
           <DataStateWrapper state={objectsState} skeletonCount={1}>
             <IHFlowerForecast />
-          </DataStateWrapper>
-
-          {/* 6. Forecast Intelligence — Procurement Forecast Readiness */}
-          <IHForecastIntelligence />
-
-          {/* 7. AI Action Center */}
-          <DataStateWrapper state={objectsState} skeletonCount={1}>
-            <IHActionCenter />
           </DataStateWrapper>
         </div>
       </div>
