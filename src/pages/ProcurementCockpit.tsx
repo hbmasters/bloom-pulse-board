@@ -281,6 +281,66 @@ const ProcurementCockpit = () => {
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-sm font-black text-foreground uppercase tracking-wider">Procurement Cockpit</h1>
             <div className="flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1 relative">
+                    <Activity className="w-3 h-3" /> Status
+                    {shopStatuses.some(s => s.status !== "connected") && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-destructive" />
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-primary" /> Bron Status
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground border-b border-border pb-2 mb-1">
+                    <span>{shopStatuses.filter(s => s.status === "connected").length} verbonden</span>
+                    <span>{shopStatuses.filter(s => s.status === "delayed").length} vertraagd</span>
+                    <span>{shopStatuses.filter(s => s.status === "stale").length} verouderd</span>
+                    <span className="ml-auto font-bold text-foreground">{shopStatuses.reduce((s, sh) => s + sh.articles, 0).toLocaleString("nl-NL")} artikelen</span>
+                  </div>
+                  <div className="overflow-y-auto flex-1 -mx-1">
+                    <table className="w-full text-[11px] font-mono">
+                      <thead>
+                        <tr className="text-[9px] uppercase tracking-wider text-muted-foreground border-b border-border">
+                          <th className="text-left px-2 py-2">Shop</th>
+                          <th className="text-right px-2 py-2">Artikelen</th>
+                          <th className="text-right px-2 py-2">Laatste sync</th>
+                          <th className="text-center px-2 py-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shopStatuses.map((shop, i) => (
+                          <tr key={i} className={cn(
+                            "border-b border-border/40 transition-colors hover:bg-muted/30",
+                            shop.status === "stale" && "bg-destructive/[0.04]",
+                            shop.status === "delayed" && "bg-primary/[0.04]",
+                          )}>
+                            <td className="px-2 py-2 font-semibold text-foreground">{shop.name}</td>
+                            <td className="px-2 py-2 text-right tabular-nums text-foreground">{shop.articles}</td>
+                            <td className="px-2 py-2 text-right tabular-nums text-muted-foreground">{shop.lastSync}</td>
+                            <td className="px-2 py-2 text-center">
+                              {shop.status === "connected" ? (
+                                <Wifi className="w-3 h-3 text-accent inline" />
+                              ) : shop.status === "delayed" ? (
+                                <Clock className="w-3 h-3 text-primary inline" />
+                              ) : (
+                                <WifiOff className="w-3 h-3 text-destructive inline" />
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-[9px] font-mono text-muted-foreground pt-2 border-t border-border">
+                    Automatische sync elke 5 minuten · Laatst gecontroleerd: 08:42
+                  </p>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1" onClick={() => setShowFilters(!showFilters)}>
                 <Filter className="w-3 h-3" /> Filters
               </Button>
