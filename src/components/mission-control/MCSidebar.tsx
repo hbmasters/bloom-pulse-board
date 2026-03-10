@@ -34,6 +34,7 @@ const navSections: NavSection[] = [
         children: [
           { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
           { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+          { id: "commercial", icon: DollarSign, label: "Commercial Cockpit" },
         ],
       },
       { id: "action-engine", icon: Zap, label: "Action Engine" },
