@@ -576,20 +576,34 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
               {row.suppliers.length > 0 ? (
                 <div className="px-5 py-3 border-t border-border/60">
                   <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Leveranciers</h4>
-                  <div className="grid grid-cols-5 gap-1 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                    <span>Leverancier</span><span className="text-right">Beschikbaar</span><span className="text-right">Prijs</span><span className="text-right">Levertijd</span><span className="text-center">Bron</span>
+                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                    <span>Leverancier</span><span className="text-right">Beschikbaar</span><span className="text-right">Prijs</span><span className="text-right">Levertijd</span><span className="text-center">Bron</span><span></span>
                   </div>
                   {row.suppliers.map((s, i) => (
-                    <div key={i} className={cn("grid grid-cols-5 gap-1 text-[11px] font-mono py-1.5 border-t border-border/30", s.isBestPrice && "bg-accent/5")}>
+                    <div key={i} className={cn("grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 items-center text-[11px] font-mono py-1.5 border-t border-border/30", s.isBestPrice && "bg-accent/5")}>
                       <span className="font-semibold text-foreground flex items-center gap-1.5">
                         {s.supplier}
                         <Badge variant="outline" className="text-[7px] font-mono h-4 px-1">{s.channel}</Badge>
                         {s.isBestPrice && <span className="text-[7px] text-accent font-bold">BEST</span>}
+                        {s.supplier === row.bestHistoricalSupplier && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                        {s.url && (
+                          <a href={s.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} title="Open leverancier">
+                            <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
+                          </a>
+                        )}
                       </span>
-                      <span className="text-right text-foreground">{fmt(s.available)}</span>
-                      <span className={cn("text-right font-bold", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
-                      <span className="text-right text-foreground">{s.deliveryDays}d</span>
-                      <span className="text-center"><SourceIcon h={s.sourceHealth} /></span>
+                      <span className="text-right text-foreground w-16">{fmt(s.available)}</span>
+                      <span className={cn("text-right font-bold w-14", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
+                      <span className="text-right text-foreground w-10">{s.deliveryDays}d</span>
+                      <span className="text-center w-8"><SourceIcon h={s.sourceHealth} /></span>
+                      <span className="w-16 text-right">
+                        {row.purchaseState === "open" && (
+                          <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[8px] font-mono text-primary hover:bg-primary/10"
+                            onClick={e => { e.stopPropagation(); onBuy(row.id); }}>
+                            <ShoppingCart className="w-2.5 h-2.5 mr-0.5" /> Koop
+                          </Button>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -599,15 +613,27 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 </div>
               )}
 
+              {/* Track & Trace for completed */}
+              {isPurchased && row.trackTrace && (
+                <div className="px-5 py-3 border-t border-border/60 bg-accent/[0.03]">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Track & Trace</h4>
+                  <div className="flex items-center gap-4 text-[11px] font-mono">
+                    <span className="flex items-center gap-1.5">
+                      <Truck className={cn("w-4 h-4", row.trackTrace.status === "Geleverd" ? "text-accent" : "text-primary")} />
+                      <span className={cn("font-bold", row.trackTrace.status === "Geleverd" ? "text-accent" : "text-primary")}>{row.trackTrace.status}</span>
+                    </span>
+                    <span className="text-muted-foreground">{row.trackTrace.location}</span>
+                    <span className="text-foreground font-semibold">{row.trackTrace.eta}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex items-center gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
                 {row.supplierCount > 0 && row.purchaseState === "open" && (
                   <>
                     <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
                       <ShoppingCart className="w-3 h-3" /> Koop — AI advies
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
-                      <ExternalLink className="w-3 h-3" /> Leverancier
                     </Button>
                     <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Markeer ingekocht
