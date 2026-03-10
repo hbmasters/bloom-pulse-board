@@ -6,7 +6,7 @@ import IHMetricCard, { IHMetric } from "@/components/intelligence-hub/IHMetricCa
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
-import { DepartmentBadge, DepartmentFilter, DeptAccentBorder, mapLegacyDept, type Department } from "@/components/department/DepartmentBadge";
+import { type Department } from "@/components/department/DepartmentBadge";
 import { DataMaturityBadge, ForecastEmptyState } from "@/components/intelligence-hub/DataMaturityBadge";
 import { DemandConcentrationCard } from "@/components/intelligence-hub/ProcurementForecastCards";
 import type { IntelligenceData } from "@/types/intelligence";
