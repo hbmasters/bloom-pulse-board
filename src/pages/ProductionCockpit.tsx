@@ -3,12 +3,11 @@ import { cn } from "@/lib/utils";
 import {
   Factory, AlertTriangle, Clock, TrendingUp, TrendingDown, Minus,
   ChevronDown, ChevronRight, Filter, Users, Gauge, Package,
-  Zap, Activity, BarChart3, Truck, CheckCircle2, XCircle,
-  AlertCircle, ArrowUpRight, ArrowDownRight, Layers
+  Zap, Activity, BarChart3, Layers, AlertCircle, XCircle,
+  ArrowUpDown, Flame, Star, Brain
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -18,103 +17,143 @@ import { MCHologramBackground } from "@/components/mission-control/MCHologramBac
 /* ------------------------------------------------------------------ */
 /*  TYPES                                                              */
 /* ------------------------------------------------------------------ */
-type LineStatus = "running" | "slow" | "stopped" | "idle";
-type OrderStatus = "planned" | "in-progress" | "delayed" | "completed" | "at-risk" | "waiting";
-type AlertSeverity = "critical" | "warning" | "info";
-type UrgencyLevel = "high" | "medium" | "low";
+type Severity = "critical" | "warning" | "info";
+type EffStatus = "efficient" | "moderate" | "inefficient";
 
-interface ProductionOrder {
+interface Bottleneck {
   id: string;
-  product: string;
-  family: string;
-  customer: string;
-  program: string;
-  plannedUnits: number;
-  completedUnits: number;
-  line: string;
-  apuTarget: number;
-  apuActual: number;
-  labour: number;
-  complexity: "low" | "medium" | "high";
-  status: OrderStatus;
-  risk: "none" | "low" | "medium" | "high";
-  urgency: UrgencyLevel;
-  departure: string;
-  stemsPerBouquet: number;
-  actions?: string[];
-}
-
-interface LineData {
-  id: string;
-  name: string;
-  dept: "hand" | "band" | "inpak";
-  load: number;
-  orders: number;
-  apuTarget: number;
-  apuActual: number;
-  labour: number;
-  complexity: "low" | "medium" | "high";
-  status: LineStatus;
-  product?: string;
-}
-
-interface ProductionAlert {
-  id: string;
-  severity: AlertSeverity;
+  severity: Severity;
   title: string;
-  description: string;
+  what: string;
+  why: string;
+  impact: string;
   line?: string;
+  family?: string;
   time: string;
 }
 
+interface PressureCell {
+  id: string;
+  label: string;
+  pressure: number; // 0-10
+  orders: number;
+  avgStems: number;
+  fragmentation: boolean;
+  lateCluster: boolean;
+}
+
+interface ComplexityRow {
+  family: string;
+  avgStems: number;
+  complexityIndex: number; // 0-10
+  assemblyDifficulty: "low" | "medium" | "high";
+  apuTarget: number;
+  apuActual: number;
+  efficiencyPct: number;
+  volume: number;
+}
+
+interface LabourRow {
+  line: string;
+  dept: string;
+  labour: number;
+  labourTarget: number;
+  per1000Stems: number;
+  per1000Target: number;
+  effPct: number;
+  product: string;
+  signal: "overstaffed" | "balanced" | "understaffed";
+}
+
+interface EfficiencyTableRow {
+  id: string;
+  family: string;
+  orders: number;
+  units: number;
+  avgStems: number;
+  apuTarget: number;
+  apuActual: number;
+  labour: number;
+  labourEff: number;
+  pressureIndex: number;
+  complexityScore: number;
+  bottleneck: boolean;
+  action: string;
+}
+
 /* ------------------------------------------------------------------ */
-/*  DEMO DATA                                                          */
+/*  DATA                                                               */
 /* ------------------------------------------------------------------ */
 const summaryMetrics = [
-  { label: "Orders gepland", value: "34", icon: Package, status: "healthy" as const },
-  { label: "Boeketten gepland", value: "48.2K", icon: Layers, status: "healthy" as const, target: "52K" },
-  { label: "Gereed", value: "18.6K", icon: CheckCircle2, status: "healthy" as const, change: "+2.4K/u", changeDir: "up" as const },
-  { label: "Resterend", value: "29.6K", icon: Clock, status: "warning" as const },
-  { label: "Actieve lijnen", value: "10/12", icon: Factory, status: "healthy" as const },
+  { label: "Output vandaag", value: "18.6K", unit: "st", icon: Package, status: "healthy" as const },
+  { label: "W-APU actueel", value: "208", unit: "st/u", icon: Gauge, status: "warning" as const, target: "220", change: "−5.5%", changeDir: "down" as const },
+  { label: "APU gap", value: "−12", unit: "st/u", icon: TrendingDown, status: "warning" as const },
   { label: "Arbeid ingezet", value: "68", unit: "pers", icon: Users, status: "healthy" as const },
-  { label: "APU target", value: "220", unit: "st/u", icon: Gauge, status: "healthy" as const, sub: "Actueel: 208" },
-  { label: "Druk index", value: "7.2", unit: "/10", icon: Activity, status: "warning" as const, change: "+0.8", changeDir: "up" as const },
+  { label: "Arbeid / 1000 st", value: "3.7", unit: "pers", icon: Users, status: "warning" as const, target: "3.2" },
+  { label: "Drukindex", value: "7.2", unit: "/10", icon: Flame, status: "warning" as const, change: "+0.8", changeDir: "up" as const },
+  { label: "Eff. trend vs gisteren", value: "−2.4", unit: "%", icon: Activity, status: "warning" as const, change: "Dalend", changeDir: "down" as const },
+  { label: "Lijn-onbalans", value: "3", unit: "lijnen", icon: AlertTriangle, status: "critical" as const },
 ];
 
-const productionOrders: ProductionOrder[] = [
-  { id: "PO-001", product: "Charme XL", family: "Premium", customer: "Albert Heijn", program: "Wk12 — AH", plannedUnits: 4200, completedUnits: 2800, line: "H1", apuTarget: 220, apuActual: 228, labour: 8, complexity: "medium", status: "in-progress", risk: "none", urgency: "high", departure: "14:00", stemsPerBouquet: 12, actions: ["Versnellen"] },
-  { id: "PO-002", product: "Lovely", family: "Standard", customer: "Jumbo", program: "Wk12 — Jumbo", plannedUnits: 6800, completedUnits: 1200, line: "H3", apuTarget: 220, apuActual: 172, labour: 10, complexity: "high", status: "delayed", risk: "high", urgency: "high", departure: "13:00", stemsPerBouquet: 15, actions: ["Extra arbeid", "Herplannen"] },
-  { id: "PO-003", product: "De Luxe", family: "Premium", customer: "Aldi", program: "Wk12 — Aldi", plannedUnits: 3600, completedUnits: 3600, line: "B1", apuTarget: 330, apuActual: 345, labour: 6, complexity: "low", status: "completed", risk: "none", urgency: "low", departure: "11:00", stemsPerBouquet: 10 },
-  { id: "PO-004", product: "Trend", family: "Budget", customer: "Lidl", program: "Wk12 — Lidl", plannedUnits: 5200, completedUnits: 0, line: "H5", apuTarget: 220, apuActual: 0, labour: 8, complexity: "medium", status: "planned", risk: "low", urgency: "medium", departure: "16:00", stemsPerBouquet: 8 },
-  { id: "PO-005", product: "Field M", family: "Field", customer: "Dekamarkt", program: "Wk12 — Deka", plannedUnits: 2400, completedUnits: 1600, line: "B3", apuTarget: 330, apuActual: 310, labour: 5, complexity: "low", status: "in-progress", risk: "none", urgency: "medium", departure: "15:00", stemsPerBouquet: 7 },
-  { id: "PO-006", product: "Elegance", family: "Premium", customer: "Albert Heijn", program: "Wk12 — AH", plannedUnits: 1800, completedUnits: 400, line: "H6", apuTarget: 220, apuActual: 195, labour: 6, complexity: "high", status: "at-risk", risk: "medium", urgency: "high", departure: "14:30", stemsPerBouquet: 14, actions: ["Monitor", "Bijsturen"] },
-  { id: "PO-007", product: "Chique", family: "Standard", customer: "Jumbo", program: "Wk12 — Jumbo", plannedUnits: 4800, completedUnits: 0, line: "—", apuTarget: 220, apuActual: 0, labour: 0, complexity: "medium", status: "waiting", risk: "medium", urgency: "medium", departure: "17:00", stemsPerBouquet: 11, actions: ["Materiaal checken"] },
-  { id: "PO-008", product: "Spring Bouquet", family: "Seasonal", customer: "Aldi", program: "Wk12 — Aldi", plannedUnits: 3200, completedUnits: 2100, line: "H4", apuTarget: 220, apuActual: 232, labour: 7, complexity: "medium", status: "in-progress", risk: "none", urgency: "medium", departure: "15:30", stemsPerBouquet: 9 },
-  { id: "PO-009", product: "Moederdag Mix", family: "Seasonal", customer: "Albert Heijn", program: "Wk12 — AH", plannedUnits: 2000, completedUnits: 800, line: "B4", apuTarget: 330, apuActual: 328, labour: 4, complexity: "high", status: "in-progress", risk: "low", urgency: "low", departure: "16:30", stemsPerBouquet: 13 },
+const pressureLines: PressureCell[] = [
+  { id: "H1", label: "Hand 1", pressure: 5.2, orders: 3, avgStems: 11, fragmentation: false, lateCluster: false },
+  { id: "H2", label: "Hand 2", pressure: 4.8, orders: 2, avgStems: 9, fragmentation: false, lateCluster: false },
+  { id: "H3", label: "Hand 3", pressure: 9.1, orders: 4, avgStems: 15, fragmentation: true, lateCluster: true },
+  { id: "H4", label: "Hand 4", pressure: 4.0, orders: 2, avgStems: 9, fragmentation: false, lateCluster: false },
+  { id: "H5", label: "Hand 5", pressure: 6.5, orders: 3, avgStems: 12, fragmentation: true, lateCluster: false },
+  { id: "H6", label: "Hand 6", pressure: 8.4, orders: 3, avgStems: 14, fragmentation: false, lateCluster: true },
+  { id: "H7", label: "Hand 7", pressure: 2.0, orders: 0, avgStems: 0, fragmentation: false, lateCluster: false },
+  { id: "B1", label: "Band 1", pressure: 3.2, orders: 1, avgStems: 7, fragmentation: false, lateCluster: false },
+  { id: "B2", label: "Band 2", pressure: 5.8, orders: 2, avgStems: 8, fragmentation: false, lateCluster: false },
+  { id: "B3", label: "Band 3", pressure: 4.5, orders: 2, avgStems: 7, fragmentation: false, lateCluster: false },
+  { id: "B4", label: "Band 4", pressure: 7.6, orders: 3, avgStems: 13, fragmentation: true, lateCluster: false },
+  { id: "B5", label: "Band 5", pressure: 1.5, orders: 0, avgStems: 0, fragmentation: false, lateCluster: false },
 ];
 
-const lines: LineData[] = [
-  { id: "H1", name: "Hand 1", dept: "hand", load: 92, orders: 2, apuTarget: 220, apuActual: 228, labour: 8, complexity: "medium", status: "running", product: "Charme XL" },
-  { id: "H2", name: "Hand 2", dept: "hand", load: 88, orders: 1, apuTarget: 220, apuActual: 218, labour: 7, complexity: "low", status: "running", product: "Pastel" },
-  { id: "H3", name: "Hand 3", dept: "hand", load: 98, orders: 1, apuTarget: 220, apuActual: 172, labour: 10, complexity: "high", status: "slow", product: "Lovely" },
-  { id: "H4", name: "Hand 4", dept: "hand", load: 85, orders: 1, apuTarget: 220, apuActual: 232, labour: 7, complexity: "medium", status: "running", product: "Spring Bouquet" },
-  { id: "H5", name: "Hand 5", dept: "hand", load: 60, orders: 1, apuTarget: 220, apuActual: 0, labour: 8, complexity: "medium", status: "idle", product: "Trend" },
-  { id: "H6", name: "Hand 6", dept: "hand", load: 95, orders: 1, apuTarget: 220, apuActual: 195, labour: 6, complexity: "high", status: "slow", product: "Elegance" },
-  { id: "H7", name: "Hand 7", dept: "hand", load: 0, orders: 0, apuTarget: 220, apuActual: 0, labour: 0, complexity: "low", status: "stopped" },
-  { id: "B1", name: "Band 1", dept: "band", load: 45, orders: 0, apuTarget: 330, apuActual: 345, labour: 6, complexity: "low", status: "running", product: "De Luxe ✓" },
-  { id: "B2", name: "Band 2", dept: "band", load: 78, orders: 1, apuTarget: 330, apuActual: 310, labour: 5, complexity: "low", status: "running", product: "Zomermix" },
-  { id: "B3", name: "Band 3", dept: "band", load: 82, orders: 1, apuTarget: 330, apuActual: 352, labour: 5, complexity: "low", status: "running", product: "Field M" },
-  { id: "B4", name: "Band 4", dept: "band", load: 70, orders: 1, apuTarget: 330, apuActual: 328, labour: 4, complexity: "high", status: "running", product: "Moederdag Mix" },
-  { id: "B5", name: "Band 5", dept: "band", load: 0, orders: 0, apuTarget: 330, apuActual: 0, labour: 0, complexity: "low", status: "stopped" },
+const pressureFamilies: PressureCell[] = [
+  { id: "prem", label: "Premium", pressure: 7.8, orders: 8, avgStems: 13, fragmentation: true, lateCluster: true },
+  { id: "std", label: "Standard", pressure: 5.2, orders: 6, avgStems: 10, fragmentation: false, lateCluster: false },
+  { id: "budg", label: "Budget", pressure: 4.0, orders: 5, avgStems: 8, fragmentation: false, lateCluster: false },
+  { id: "seas", label: "Seasonal", pressure: 8.5, orders: 4, avgStems: 14, fragmentation: true, lateCluster: true },
+  { id: "field", label: "Field", pressure: 3.4, orders: 3, avgStems: 7, fragmentation: false, lateCluster: false },
 ];
 
-const alerts: ProductionAlert[] = [
-  { id: "a1", severity: "critical", title: "H3 — APU 22% onder norm", description: "Lijn H3 produceert 172 st/u i.p.v. 220. Product Lovely met hoge complexiteit. Overweeg extra arbeid of herplanning.", line: "H3", time: "10:12" },
-  { id: "a2", severity: "critical", title: "PO-002 vertraging — vertrek 13:00 niet haalbaar", description: "Order Lovely voor Jumbo ligt achter op schema. 1.200 van 6.800 gereed. Verwachte afronding: 17:30.", line: "H3", time: "10:15" },
-  { id: "a3", severity: "warning", title: "H6 — Efficiëntie onder druk", description: "Lijn H6 op 195 APU (target 220). Product Elegance met hoge steelcomplexiteit.", line: "H6", time: "09:45" },
-  { id: "a4", severity: "warning", title: "PO-007 wacht op materiaal", description: "Order Chique kan niet starten — Alstroemeria Virginia recept onopgelost.", time: "08:30" },
-  { id: "a5", severity: "warning", title: "Arbeiddruk hoog op Hand-afdeling", description: "68 medewerkers ingezet, 6 van 7 handlijnen actief. Geen reserve beschikbaar.", time: "09:00" },
-  { id: "a6", severity: "info", title: "B1 — Order De Luxe afgerond", description: "3.600 boeketten gereed. Lijn beschikbaar voor volgende order.", line: "B1", time: "10:30" },
+const bottlenecks: Bottleneck[] = [
+  { id: "b1", severity: "critical", title: "H3 — Extreme steelcomplexiteit", what: "Lijn H3 verwerkt 'Lovely' met 15 stelen/boeket en 4 gelijktijdige orders.", why: "Hoge steelcomplexiteit gecombineerd met orderfragmentatie verlaagt APU naar 172 (norm 220).", impact: "22% efficiëntieverlies, €840 extra arbeidskosten per dag.", line: "H3", family: "Premium", time: "10:12" },
+  { id: "b2", severity: "critical", title: "Seasonal producten verstoren ritme", what: "Productfamilie Seasonal heeft complexiteitsscore 8.2/10 en veroorzaakt APU-daling op 3 lijnen.", why: "Hoge steelvariatie, onbekende recepten en kleine orderseries.", impact: "Gemiddeld −18% APU op betrokken lijnen.", family: "Seasonal", time: "09:30" },
+  { id: "b3", severity: "warning", title: "H6 — Late order clustering", what: "3 orders met vertrek 14:00-14:30 geconcentreerd op H6.", why: "Ongelijke orderverdeling creëert piekdruk in de middag.", impact: "Risico op vertraging en kwaliteitsverlies.", line: "H6", time: "09:45" },
+  { id: "b4", severity: "warning", title: "Arbeiddruk Hand-afdeling", what: "68 medewerkers ingezet, 3.7 per 1000 stelen vs norm 3.2.", why: "Hoge complexiteit vereist meer arbeid maar levert minder output.", impact: "15.6% arbeids-inefficiëntie, ~€1.200/dag overbesteding.", time: "09:00" },
+  { id: "b5", severity: "warning", title: "B4 — Orderfragmentatie", what: "3 kleine orders van verschillende klanten op Band 4.", why: "Frequente productwissels verlagen doorloopsnelheid.", impact: "APU 310 vs target 330, −6% efficiëntie.", line: "B4", time: "10:20" },
+  { id: "b6", severity: "info", title: "Materiaalrisico PO-007", what: "Order Chique wacht op Alstroemeria Virginia — recept onopgelost.", why: "Zonder receptidentificatie kan inkoop niet afronden.", impact: "Order geblokkeerd, lijn-slot onbenut.", time: "08:30" },
+];
+
+const complexityRows: ComplexityRow[] = [
+  { family: "Premium", avgStems: 13.2, complexityIndex: 7.8, assemblyDifficulty: "high", apuTarget: 220, apuActual: 195, efficiencyPct: 88.6, volume: 8200 },
+  { family: "Seasonal", avgStems: 14.1, complexityIndex: 8.2, assemblyDifficulty: "high", apuTarget: 220, apuActual: 188, efficiencyPct: 85.5, volume: 5200 },
+  { family: "Standard", avgStems: 10.4, complexityIndex: 5.0, assemblyDifficulty: "medium", apuTarget: 220, apuActual: 218, efficiencyPct: 99.1, volume: 11600 },
+  { family: "Budget", avgStems: 8.0, complexityIndex: 3.2, assemblyDifficulty: "low", apuTarget: 220, apuActual: 226, efficiencyPct: 102.7, volume: 9400 },
+  { family: "Field", avgStems: 7.2, complexityIndex: 2.8, assemblyDifficulty: "low", apuTarget: 330, apuActual: 342, efficiencyPct: 103.6, volume: 6800 },
+];
+
+const labourRows: LabourRow[] = [
+  { line: "H1", dept: "Hand", labour: 8, labourTarget: 7, per1000Stems: 3.2, per1000Target: 3.2, effPct: 100, product: "Charme XL", signal: "balanced" },
+  { line: "H2", dept: "Hand", labour: 7, labourTarget: 7, per1000Stems: 3.1, per1000Target: 3.2, effPct: 103, product: "Pastel", signal: "balanced" },
+  { line: "H3", dept: "Hand", labour: 10, labourTarget: 7, per1000Stems: 5.8, per1000Target: 3.2, effPct: 55, product: "Lovely", signal: "overstaffed" },
+  { line: "H4", dept: "Hand", labour: 7, labourTarget: 7, per1000Stems: 3.0, per1000Target: 3.2, effPct: 107, product: "Spring Bouquet", signal: "balanced" },
+  { line: "H5", dept: "Hand", labour: 8, labourTarget: 8, per1000Stems: 3.4, per1000Target: 3.2, effPct: 94, product: "Trend", signal: "balanced" },
+  { line: "H6", dept: "Hand", labour: 6, labourTarget: 8, per1000Stems: 3.6, per1000Target: 3.2, effPct: 89, product: "Elegance", signal: "understaffed" },
+  { line: "B1", dept: "Band", labour: 6, labourTarget: 5, per1000Stems: 2.4, per1000Target: 2.2, effPct: 92, product: "De Luxe ✓", signal: "balanced" },
+  { line: "B2", dept: "Band", labour: 5, labourTarget: 5, per1000Stems: 2.3, per1000Target: 2.2, effPct: 96, product: "Zomermix", signal: "balanced" },
+  { line: "B3", dept: "Band", labour: 5, labourTarget: 5, per1000Stems: 2.1, per1000Target: 2.2, effPct: 105, product: "Field M", signal: "balanced" },
+  { line: "B4", dept: "Band", labour: 4, labourTarget: 5, per1000Stems: 2.8, per1000Target: 2.2, effPct: 79, product: "Moederdag Mix", signal: "understaffed" },
+];
+
+const efficiencyTable: EfficiencyTableRow[] = [
+  { id: "e1", family: "Premium", orders: 8, units: 8200, avgStems: 13.2, apuTarget: 220, apuActual: 195, labour: 24, labourEff: 81, pressureIndex: 7.8, complexityScore: 7.8, bottleneck: true, action: "Complexiteit spreiden" },
+  { id: "e2", family: "Seasonal", orders: 4, units: 5200, avgStems: 14.1, apuTarget: 220, apuActual: 188, labour: 14, labourEff: 76, pressureIndex: 8.5, complexityScore: 8.2, bottleneck: true, action: "Orderbundeling" },
+  { id: "e3", family: "Standard", orders: 6, units: 11600, avgStems: 10.4, apuTarget: 220, apuActual: 218, labour: 14, labourEff: 98, pressureIndex: 5.2, complexityScore: 5.0, bottleneck: false, action: "—" },
+  { id: "e4", family: "Budget", orders: 5, units: 9400, avgStems: 8.0, apuTarget: 220, apuActual: 226, labour: 10, labourEff: 104, pressureIndex: 4.0, complexityScore: 3.2, bottleneck: false, action: "Schaalbaar" },
+  { id: "e5", family: "Field", orders: 3, units: 6800, avgStems: 7.2, apuTarget: 330, apuActual: 342, labour: 10, labourEff: 106, pressureIndex: 3.4, complexityScore: 2.8, bottleneck: false, action: "Schaalbaar" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -122,40 +161,38 @@ const alerts: ProductionAlert[] = [
 /* ------------------------------------------------------------------ */
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 
-const statusCls: Record<OrderStatus, string> = {
-  planned: "text-muted-foreground bg-muted/50",
-  "in-progress": "text-primary bg-primary/10",
-  delayed: "text-destructive bg-destructive/10",
-  completed: "text-accent bg-accent/10",
-  "at-risk": "text-yellow-500 bg-yellow-500/10",
-  waiting: "text-muted-foreground bg-muted/30",
-};
-const statusLabel: Record<OrderStatus, string> = {
-  planned: "Gepland", "in-progress": "In productie", delayed: "Vertraagd",
-  completed: "Gereed", "at-risk": "At Risk", waiting: "Wachtend",
+const pressureColor = (p: number) =>
+  p >= 8 ? "bg-destructive" : p >= 6 ? "bg-yellow-500" : p >= 4 ? "bg-primary/60" : "bg-accent/60";
+
+const pressureTextColor = (p: number) =>
+  p >= 8 ? "text-destructive" : p >= 6 ? "text-yellow-500" : "text-accent";
+
+const effColor = (pct: number) =>
+  pct >= 100 ? "text-accent" : pct >= 90 ? "text-yellow-500" : "text-destructive";
+
+const signalCls: Record<string, { bg: string; text: string; label: string }> = {
+  overstaffed: { bg: "bg-destructive/10 border-destructive/20", text: "text-destructive", label: "Overbezet" },
+  balanced: { bg: "bg-accent/10 border-accent/20", text: "text-accent", label: "Gebalanceerd" },
+  understaffed: { bg: "bg-yellow-500/10 border-yellow-500/20", text: "text-yellow-500", label: "Onderbezet" },
 };
 
-const lineStatusCls: Record<LineStatus, string> = {
-  running: "bg-accent", slow: "bg-yellow-500 animate-pulse", stopped: "bg-muted-foreground/30", idle: "bg-primary/40",
+const difficultyLabel: Record<string, { cls: string }> = {
+  low: { cls: "text-accent bg-accent/10" },
+  medium: { cls: "text-yellow-500 bg-yellow-500/10" },
+  high: { cls: "text-destructive bg-destructive/10" },
 };
 
-const riskCls: Record<string, string> = {
-  none: "text-accent", low: "text-primary", medium: "text-yellow-500", high: "text-destructive",
-};
-
-const complexityCls: Record<string, string> = {
-  low: "text-accent bg-accent/10", medium: "text-yellow-500 bg-yellow-500/10", high: "text-destructive bg-destructive/10",
-};
-
-const alertIcon: Record<AlertSeverity, typeof AlertTriangle> = {
+const alertIcon: Record<Severity, typeof AlertTriangle> = {
   critical: XCircle, warning: AlertTriangle, info: AlertCircle,
 };
-const alertCls: Record<AlertSeverity, string> = {
-  critical: "border-destructive/30 bg-destructive/5", warning: "border-yellow-500/30 bg-yellow-500/5", info: "border-border bg-card/50",
+const alertCls: Record<Severity, string> = {
+  critical: "border-destructive/30 bg-destructive/5",
+  warning: "border-yellow-500/30 bg-yellow-500/5",
+  info: "border-border bg-card/50",
 };
 
 /* ------------------------------------------------------------------ */
-/*  SECTION WRAPPER                                                    */
+/*  REUSABLE COMPONENTS                                                */
 /* ------------------------------------------------------------------ */
 const Section = ({ title, icon: Icon, children, badge }: { title: string; icon: typeof Factory; children: React.ReactNode; badge?: string }) => (
   <section className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm overflow-hidden">
@@ -170,17 +207,14 @@ const Section = ({ title, icon: Icon, children, badge }: { title: string; icon: 
   </section>
 );
 
-/* ------------------------------------------------------------------ */
-/*  METRIC CARD (compact)                                              */
-/* ------------------------------------------------------------------ */
-const MetricCard = ({ label, value, unit, icon: Icon, status, change, changeDir, target, sub }: {
+const MetricCard = ({ label, value, unit, icon: Icon, status, change, changeDir, target }: {
   label: string; value: string; unit?: string; icon: typeof Factory;
   status: "healthy" | "warning" | "critical";
-  change?: string; changeDir?: "up" | "down"; target?: string; sub?: string;
+  change?: string; changeDir?: "up" | "down"; target?: string;
 }) => {
   const bg = status === "healthy" ? "bg-accent/5 border-accent/20" : status === "warning" ? "bg-yellow-500/5 border-yellow-500/20" : "bg-destructive/5 border-destructive/20";
   const dot = status === "healthy" ? "bg-accent" : status === "warning" ? "bg-yellow-500" : "bg-destructive";
-  const ChangeDirIcon = changeDir === "up" ? TrendingUp : changeDir === "down" ? TrendingDown : Minus;
+  const DirIcon = changeDir === "up" ? TrendingUp : changeDir === "down" ? TrendingDown : Minus;
   const changeColor = status === "healthy" ? "text-accent" : status === "warning" ? "text-yellow-500" : "text-destructive";
   return (
     <div className={cn("p-3 rounded-xl border transition-all hover:shadow-md", bg)}>
@@ -195,10 +229,9 @@ const MetricCard = ({ label, value, unit, icon: Icon, status, change, changeDir,
             {unit && <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">{unit}</span>}
           </div>
           {target && <div className="text-[10px] text-muted-foreground/40 mt-0.5">Target: {target}</div>}
-          {sub && <div className="text-[10px] text-muted-foreground/50 mt-0.5">{sub}</div>}
           {change && (
             <div className={cn("flex items-center gap-0.5 mt-1", changeColor)}>
-              <ChangeDirIcon className="w-3 h-3" />
+              <DirIcon className="w-3 h-3" />
               <span className="text-[10px] font-semibold">{change}</span>
             </div>
           )}
@@ -210,27 +243,61 @@ const MetricCard = ({ label, value, unit, icon: Icon, status, change, changeDir,
 };
 
 /* ------------------------------------------------------------------ */
+/*  PRESSURE HEATMAP CELL                                              */
+/* ------------------------------------------------------------------ */
+const PressureCard = ({ cell }: { cell: PressureCell }) => (
+  <div className={cn(
+    "rounded-xl border p-3 transition-all hover:shadow-md",
+    cell.pressure >= 8 ? "border-destructive/30 bg-destructive/5" :
+    cell.pressure >= 6 ? "border-yellow-500/30 bg-yellow-500/5" :
+    "border-border bg-card/50"
+  )}>
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center gap-1.5">
+        <div className={cn("w-2 h-2 rounded-full", pressureColor(cell.pressure))} />
+        <span className="text-[12px] font-bold text-foreground">{cell.label}</span>
+      </div>
+      <span className={cn("text-[13px] font-extrabold font-mono", pressureTextColor(cell.pressure))}>{cell.pressure.toFixed(1)}</span>
+    </div>
+    <div className="space-y-1">
+      <div className="flex justify-between text-[10px]">
+        <span className="text-muted-foreground/50">Orders</span>
+        <span className="text-foreground/70">{cell.orders}</span>
+      </div>
+      <div className="flex justify-between text-[10px]">
+        <span className="text-muted-foreground/50">Gem. stelen</span>
+        <span className={cn("font-medium", cell.avgStems >= 13 ? "text-destructive" : cell.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{cell.avgStems || "—"}</span>
+      </div>
+    </div>
+    {(cell.fragmentation || cell.lateCluster) && (
+      <div className="flex gap-1 mt-2">
+        {cell.fragmentation && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Fragment</span>}
+        {cell.lateCluster && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">Late cluster</span>}
+      </div>
+    )}
+    {/* Pressure bar */}
+    <div className="mt-2 h-1.5 rounded-full bg-border/30 overflow-hidden">
+      <div className={cn("h-full rounded-full transition-all", pressureColor(cell.pressure))} style={{ width: `${cell.pressure * 10}%` }} />
+    </div>
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
 /*  MAIN PAGE                                                          */
 /* ------------------------------------------------------------------ */
 const ProductionCockpit = () => {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [filterLine, setFilterLine] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterUrgency, setFilterUrgency] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState("pressure");
+  const [pressureView, setPressureView] = useState<"lines" | "families">("lines");
 
   const toggle = (id: string) => setExpanded(prev => prev === id ? null : id);
 
-  const filtered = productionOrders.filter(o => {
-    if (filterLine !== "all" && o.line !== filterLine) return false;
-    if (filterStatus !== "all" && o.status !== filterStatus) return false;
-    if (filterUrgency !== "all" && o.urgency !== filterUrgency) return false;
-    return true;
+  const sortedTable = [...efficiencyTable].sort((a, b) => {
+    if (sortBy === "pressure") return b.pressureIndex - a.pressureIndex;
+    if (sortBy === "efficiency") return a.labourEff - b.labourEff;
+    if (sortBy === "deviation") return (a.apuActual - a.apuTarget) - (b.apuActual - b.apuTarget);
+    return 0;
   });
-
-  const totalPlanned = productionOrders.reduce((s, o) => s + o.plannedUnits, 0);
-  const totalCompleted = productionOrders.reduce((s, o) => s + o.completedUnits, 0);
-  const progressPct = Math.round((totalCompleted / totalPlanned) * 100);
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -244,112 +311,64 @@ const ProductionCockpit = () => {
               <div className="w-2 h-8 rounded-full bg-gradient-brand" />
               <div>
                 <h1 className="text-sm font-black text-foreground uppercase tracking-wider">Production Cockpit</h1>
-                <p className="text-[10px] font-mono text-muted-foreground">Operationele productie controle • {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })}</p>
+                <p className="text-[10px] font-mono text-muted-foreground">Efficiëntie · Complexiteit · Druk · Knelpunten</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] font-mono gap-1 border-accent/30 text-accent">
-                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                LIVE
-              </Badge>
-            </div>
+            <Badge variant="outline" className="text-[10px] font-mono gap-1 border-accent/30 text-accent">
+              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              LIVE
+            </Badge>
           </div>
 
-          {/* ── SECTION 1: PRODUCTION SUMMARY ── */}
+          {/* ── SECTION 1: OPERATIONAL EFFICIENCY SUMMARY ── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            {summaryMetrics.map(m => (
-              <MetricCard key={m.label} {...m} />
-            ))}
+            {summaryMetrics.map(m => <MetricCard key={m.label} {...m} />)}
           </div>
 
-          {/* ── SECTION 5: EXECUTION PROGRESS (compact bar) ── */}
-          <div className="rounded-xl border border-border bg-card/70 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-3.5 h-3.5 text-primary/70" />
-                <span className="text-[12px] font-semibold text-foreground">Dagvoortgang</span>
-              </div>
-              <span className="text-[11px] font-mono font-bold text-foreground">{progressPct}%</span>
+          {/* ── SECTION 2: PRODUCTION PRESSURE MAP ── */}
+          <Section title="Production Pressure Map" icon={Flame} badge={`${pressureLines.filter(l => l.pressure >= 7).length} hoge druk`}>
+            <div className="flex gap-2 mb-4">
+              <Button variant={pressureView === "lines" ? "default" : "outline"} size="sm" className="h-7 text-[10px] font-mono" onClick={() => setPressureView("lines")}>Per lijn</Button>
+              <Button variant={pressureView === "families" ? "default" : "outline"} size="sm" className="h-7 text-[10px] font-mono" onClick={() => setPressureView("families")}>Per productfamilie</Button>
             </div>
-            <Progress value={progressPct} className="h-2.5" />
-            <div className="flex justify-between mt-2 text-[10px] text-muted-foreground/50 font-mono">
-              <span>{fmt(totalCompleted)} gereed</span>
-              <span>{fmt(totalPlanned - totalCompleted)} resterend</span>
-              <span>{fmt(totalPlanned)} totaal</span>
-            </div>
-            <div className="grid grid-cols-4 gap-3 mt-3">
-              {[
-                { label: "In productie", count: productionOrders.filter(o => o.status === "in-progress").length, cls: "text-primary" },
-                { label: "Vertraagd", count: productionOrders.filter(o => o.status === "delayed").length, cls: "text-destructive" },
-                { label: "At Risk", count: productionOrders.filter(o => o.status === "at-risk").length, cls: "text-yellow-500" },
-                { label: "Wachtend", count: productionOrders.filter(o => o.status === "waiting" || o.status === "planned").length, cls: "text-muted-foreground" },
-              ].map(s => (
-                <div key={s.label} className="text-center">
-                  <div className={cn("text-lg font-bold", s.cls)}>{s.count}</div>
-                  <div className="text-[10px] text-muted-foreground/50">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── SECTION 4: BOTTLENECKS / ALERTS ── */}
-          <Section title="Bottlenecks & Alerts" icon={AlertTriangle} badge={`${alerts.filter(a => a.severity === "critical").length} kritiek`}>
-            <div className="space-y-2">
-              {alerts.map(a => {
-                const AIcon = alertIcon[a.severity];
-                return (
-                  <div key={a.id} className={cn("flex items-start gap-3 p-3 rounded-xl border", alertCls[a.severity])}>
-                    <AIcon className={cn("w-4 h-4 shrink-0 mt-0.5", a.severity === "critical" ? "text-destructive" : a.severity === "warning" ? "text-yellow-500" : "text-muted-foreground")} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-semibold text-foreground">{a.title}</span>
-                        {a.line && <span className="text-[9px] font-mono text-muted-foreground/50 border border-border/50 px-1.5 rounded">{a.line}</span>}
-                      </div>
-                      <p className="text-[11px] text-muted-foreground/70 mt-0.5 leading-relaxed">{a.description}</p>
-                    </div>
-                    <span className="text-[10px] font-mono text-muted-foreground/40 shrink-0">{a.time}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </Section>
-
-          {/* ── SECTION 3: LINE / WORKSTATION VIEW ── */}
-          <Section title="Lijn & Werkplek Overzicht" icon={Factory} badge="12 lijnen">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-              {lines.map(l => {
-                const loadColor = l.load >= 90 ? "text-destructive" : l.load >= 70 ? "text-yellow-500" : l.load > 0 ? "text-accent" : "text-muted-foreground/30";
-                const apuColor = l.apuActual === 0 ? "text-muted-foreground/30" : l.apuActual >= l.apuTarget ? "text-accent" : l.apuActual >= l.apuTarget * 0.9 ? "text-yellow-500" : "text-destructive";
+              {(pressureView === "lines" ? pressureLines : pressureFamilies).map(cell => (
+                <PressureCard key={cell.id} cell={cell} />
+              ))}
+            </div>
+          </Section>
+
+          {/* ── SECTION 3: BOTTLENECK INTELLIGENCE ── */}
+          <Section title="Bottleneck Intelligence" icon={AlertTriangle} badge={`${bottlenecks.filter(b => b.severity === "critical").length} kritiek`}>
+            <div className="space-y-2">
+              {bottlenecks.map(b => {
+                const BIcon = alertIcon[b.severity];
                 return (
-                  <div key={l.id} className="rounded-xl border border-border bg-card/50 p-3 hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1.5">
-                        <div className={cn("w-2 h-2 rounded-full", lineStatusCls[l.status])} />
-                        <span className="text-[12px] font-bold text-foreground">{l.id}</span>
+                  <div key={b.id} className={cn("p-3.5 rounded-xl border", alertCls[b.severity])}>
+                    <div className="flex items-start gap-3">
+                      <BIcon className={cn("w-4 h-4 shrink-0 mt-0.5", b.severity === "critical" ? "text-destructive" : b.severity === "warning" ? "text-yellow-500" : "text-muted-foreground")} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[12px] font-semibold text-foreground">{b.title}</span>
+                          {b.line && <span className="text-[9px] font-mono text-muted-foreground/50 border border-border/50 px-1.5 rounded">{b.line}</span>}
+                          {b.family && <span className="text-[9px] font-mono text-muted-foreground/50 border border-border/50 px-1.5 rounded">{b.family}</span>}
+                        </div>
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div>
+                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Wat</span>
+                            <p className="text-[11px] text-foreground/70 leading-relaxed">{b.what}</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Waarom</span>
+                            <p className="text-[11px] text-foreground/70 leading-relaxed">{b.why}</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Impact</span>
+                            <p className={cn("text-[11px] leading-relaxed font-medium", b.severity === "critical" ? "text-destructive" : b.severity === "warning" ? "text-yellow-500" : "text-foreground/70")}>{b.impact}</p>
+                          </div>
+                        </div>
                       </div>
-                      <span className={cn("text-[10px] font-mono font-semibold", loadColor)}>{l.load}%</span>
-                    </div>
-                    {l.product && <div className="text-[10px] text-muted-foreground/60 truncate mb-2">{l.product}</div>}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-muted-foreground/50">APU</span>
-                        <span className={cn("font-semibold", apuColor)}>{l.apuActual || "—"}<span className="text-muted-foreground/30">/{l.apuTarget}</span></span>
-                      </div>
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-muted-foreground/50">Arbeid</span>
-                        <span className="text-foreground/70 font-medium">{l.labour || "—"}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-muted-foreground/50">Orders</span>
-                        <span className="text-foreground/70 font-medium">{l.orders}</span>
-                      </div>
-                    </div>
-                    {/* Load bar */}
-                    <div className="mt-2 h-1 rounded-full bg-border/30 overflow-hidden">
-                      <div
-                        className={cn("h-full rounded-full transition-all", l.load >= 90 ? "bg-destructive/60" : l.load >= 70 ? "bg-yellow-500/60" : l.load > 0 ? "bg-accent/60" : "bg-transparent")}
-                        style={{ width: `${l.load}%` }}
-                      />
+                      <span className="text-[10px] font-mono text-muted-foreground/40 shrink-0">{b.time}</span>
                     </div>
                   </div>
                 );
@@ -357,171 +376,131 @@ const ProductionCockpit = () => {
             </div>
           </Section>
 
-          {/* ── SECTION 6: PRODUCTIVITY / EFFICIENCY ── */}
-          <Section title="Productiviteit & Efficiëntie" icon={Gauge}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-              {[
-                { label: "Output vandaag", value: fmt(totalCompleted), unit: "bq", status: "healthy" as const },
-                { label: "Gem. ordergrootte", value: "1.4K", unit: "bq", status: "healthy" as const },
-                { label: "Gem. stelen/boeket", value: "11.2", unit: "st", status: "healthy" as const },
-                { label: "APU actueel", value: "208", unit: "st/u", status: "warning" as const, target: "220" },
-                { label: "Arbeidsefficiëntie", value: "94.5", unit: "%", status: "warning" as const },
-                { label: "Drukindex", value: "7.2", unit: "/10", status: "warning" as const },
-              ].map(m => (
-                <div key={m.label} className={cn("p-3 rounded-xl border", m.status === "healthy" ? "bg-accent/5 border-accent/20" : "bg-yellow-500/5 border-yellow-500/20")}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className={cn("w-1.5 h-1.5 rounded-full", m.status === "healthy" ? "bg-accent" : "bg-yellow-500")} />
-                    <span className="text-[10px] text-foreground/50">{m.label}</span>
+          {/* ── SECTION 4: PRODUCT COMPLEXITY ANALYSIS ── */}
+          <Section title="Product Complexity Analysis" icon={Brain}>
+            <div className="space-y-1">
+              <div className="hidden md:grid grid-cols-[1.2fr_0.5fr_0.6fr_0.6fr_0.6fr_0.5fr_0.6fr_0.5fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
+                <span>Productfamilie</span><span>Gem. stelen</span><span>Complexiteit</span><span>Assemblage</span><span>APU act/target</span><span>Efficiëntie</span><span>Volume</span><span>Impact</span>
+              </div>
+              {complexityRows.sort((a, b) => b.complexityIndex - a.complexityIndex).map(r => {
+                const eff = effColor(r.efficiencyPct);
+                return (
+                  <div key={r.family} className={cn(
+                    "grid grid-cols-1 md:grid-cols-[1.2fr_0.5fr_0.6fr_0.6fr_0.6fr_0.5fr_0.6fr_0.5fr] items-center text-[12px] py-2.5 px-3 rounded-lg gap-2 transition-colors hover:bg-muted/30",
+                    r.complexityIndex >= 7 && "bg-destructive/3 border border-destructive/15",
+                  )}>
+                    <span className="font-semibold text-foreground">{r.family}</span>
+                    <span className={cn("hidden md:block font-mono", r.avgStems >= 13 ? "text-destructive font-semibold" : r.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{r.avgStems}</span>
+                    <div className="hidden md:flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-border/30 overflow-hidden">
+                        <div className={cn("h-full rounded-full", pressureColor(r.complexityIndex))} style={{ width: `${r.complexityIndex * 10}%` }} />
+                      </div>
+                      <span className={cn("text-[10px] font-mono font-bold", pressureTextColor(r.complexityIndex))}>{r.complexityIndex}</span>
+                    </div>
+                    <div className="hidden md:block">
+                      <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded", difficultyLabel[r.assemblyDifficulty].cls)}>{r.assemblyDifficulty}</span>
+                    </div>
+                    <span className="hidden md:block font-mono">
+                      <span className={eff}>{r.apuActual}</span>
+                      <span className="text-muted-foreground/30">/{r.apuTarget}</span>
+                    </span>
+                    <span className={cn("hidden md:block font-mono font-semibold", eff)}>{r.efficiencyPct}%</span>
+                    <span className="hidden md:block font-mono text-foreground/60">{fmt(r.volume)}</span>
+                    <span className="hidden md:block">
+                      {r.complexityIndex >= 7 ? <AlertTriangle className="w-3.5 h-3.5 text-destructive" /> : r.complexityIndex >= 5 ? <AlertCircle className="w-3.5 h-3.5 text-yellow-500" /> : <span className="text-accent text-[10px]">OK</span>}
+                    </span>
                   </div>
-                  <div className="text-lg font-extrabold text-foreground leading-none">
-                    {m.value}
-                    {m.unit && <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">{m.unit}</span>}
-                  </div>
-                  {m.target && <div className="text-[10px] text-muted-foreground/40 mt-0.5">Target: {m.target}</div>}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Section>
 
-          {/* ── SECTION 2 & 7: WORKLOAD + DETAILED TABLE ── */}
-          <Section title="Productie Orders" icon={Package} badge={`${filtered.length} orders`}>
-            {/* Filters */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-              <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1" onClick={() => setShowFilters(!showFilters)}>
-                <Filter className="w-3 h-3" /> Filter
-              </Button>
-              {showFilters && (
-                <>
-                  <Select value={filterLine} onValueChange={setFilterLine}>
-                    <SelectTrigger className="h-7 w-24 text-[10px] font-mono"><SelectValue placeholder="Lijn" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle lijnen</SelectItem>
-                      {lines.map(l => <SelectItem key={l.id} value={l.id}>{l.id}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="h-7 w-28 text-[10px] font-mono"><SelectValue placeholder="Status" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle statussen</SelectItem>
-                      {Object.entries(statusLabel).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterUrgency} onValueChange={setFilterUrgency}>
-                    <SelectTrigger className="h-7 w-24 text-[10px] font-mono"><SelectValue placeholder="Urgentie" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle</SelectItem>
-                      <SelectItem value="high">Hoog</SelectItem>
-                      <SelectItem value="medium">Middel</SelectItem>
-                      <SelectItem value="low">Laag</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            </div>
-
-            {/* Table header */}
-            <div className="hidden md:grid grid-cols-[1fr_0.8fr_0.6fr_0.8fr_0.5fr_0.5fr_0.4fr_0.5fr_0.4fr_0.5fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
-              <span>Order / Product</span>
-              <span>Klant / Programma</span>
-              <span>Volume</span>
-              <span>Voortgang</span>
-              <span>Lijn</span>
-              <span>APU</span>
-              <span>Arbeid</span>
-              <span>Complexiteit</span>
-              <span>Risico</span>
-              <span>Status</span>
-            </div>
-
-            {/* Rows */}
-            <div className="space-y-1 mt-1">
-              {filtered.map(o => {
-                const pct = o.plannedUnits > 0 ? Math.round((o.completedUnits / o.plannedUnits) * 100) : 0;
-                const isExpanded = expanded === o.id;
-                const apuColor = o.apuActual === 0 ? "text-muted-foreground/30" : o.apuActual >= o.apuTarget ? "text-accent" : o.apuActual >= o.apuTarget * 0.9 ? "text-yellow-500" : "text-destructive";
-
+          {/* ── SECTION 5: LABOUR EFFICIENCY VIEW ── */}
+          <Section title="Labour Efficiency" icon={Users}>
+            <div className="space-y-1">
+              <div className="hidden md:grid grid-cols-[0.4fr_0.5fr_0.9fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.6fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
+                <span>Lijn</span><span>Afd.</span><span>Product</span><span>Arbeid</span><span>Target</span><span>/1000 st</span><span>Target</span><span>Eff %</span><span>Signaal</span>
+              </div>
+              {labourRows.map(r => {
+                const s = signalCls[r.signal];
                 return (
-                  <Collapsible key={o.id} open={isExpanded} onOpenChange={() => toggle(o.id)}>
+                  <div key={r.line} className={cn(
+                    "grid grid-cols-1 md:grid-cols-[0.4fr_0.5fr_0.9fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.6fr] items-center text-[12px] py-2 px-3 rounded-lg gap-2 transition-colors hover:bg-muted/30",
+                    r.signal !== "balanced" && `border ${s.bg}`,
+                  )}>
+                    <span className="font-bold text-foreground">{r.line}</span>
+                    <span className="hidden md:block text-muted-foreground/60 text-[11px]">{r.dept}</span>
+                    <span className="hidden md:block text-foreground/70 text-[11px] truncate">{r.product}</span>
+                    <span className={cn("hidden md:block font-mono", r.labour > r.labourTarget ? "text-destructive font-semibold" : "text-foreground/70")}>{r.labour}</span>
+                    <span className="hidden md:block font-mono text-muted-foreground/50">{r.labourTarget}</span>
+                    <span className={cn("hidden md:block font-mono", r.per1000Stems > r.per1000Target * 1.1 ? "text-destructive font-semibold" : "text-foreground/70")}>{r.per1000Stems}</span>
+                    <span className="hidden md:block font-mono text-muted-foreground/50">{r.per1000Target}</span>
+                    <span className={cn("hidden md:block font-mono font-semibold", effColor(r.effPct))}>{r.effPct}%</span>
+                    <div className="hidden md:block">
+                      <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full border", s.bg, s.text)}>{s.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+
+          {/* ── SECTION 6: DETAILED EFFICIENCY TABLE ── */}
+          <Section title="Efficiëntie Detail" icon={BarChart3} badge={`${efficiencyTable.length} families`}>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[10px] text-muted-foreground/50">Sorteer:</span>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-7 w-36 text-[10px] font-mono"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pressure">Hoogste druk</SelectItem>
+                  <SelectItem value="efficiency">Laagste efficiëntie</SelectItem>
+                  <SelectItem value="deviation">Grootste afwijking</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="hidden md:grid grid-cols-[1fr_0.4fr_0.5fr_0.5fr_0.6fr_0.4fr_0.5fr_0.5fr_0.5fr_0.4fr_0.8fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
+              <span>Familie</span><span>Orders</span><span>Units</span><span>St/bq</span><span>APU act/tgt</span><span>Arbeid</span><span>Arb.eff</span><span>Druk</span><span>Compl.</span><span>Knelp.</span><span>Actie</span>
+            </div>
+
+            <div className="space-y-1 mt-1">
+              {sortedTable.map(r => {
+                const isExp = expanded === r.id;
+                return (
+                  <Collapsible key={r.id} open={isExp} onOpenChange={() => toggle(r.id)}>
                     <CollapsibleTrigger asChild>
                       <div className={cn(
-                        "grid grid-cols-1 md:grid-cols-[1fr_0.8fr_0.6fr_0.8fr_0.5fr_0.5fr_0.4fr_0.5fr_0.4fr_0.5fr] items-center text-[12px] py-2.5 px-3 rounded-lg gap-2 cursor-pointer transition-colors",
-                        isExpanded ? "bg-primary/5 border border-primary/20" : "hover:bg-muted/30 border border-transparent",
-                        o.status === "delayed" && "border-destructive/20 bg-destructive/3",
-                        o.status === "at-risk" && "border-yellow-500/15 bg-yellow-500/3",
+                        "grid grid-cols-1 md:grid-cols-[1fr_0.4fr_0.5fr_0.5fr_0.6fr_0.4fr_0.5fr_0.5fr_0.5fr_0.4fr_0.8fr] items-center text-[12px] py-2.5 px-3 rounded-lg gap-2 cursor-pointer transition-colors",
+                        isExp ? "bg-primary/5 border border-primary/20" : "hover:bg-muted/30 border border-transparent",
+                        r.bottleneck && !isExp && "border-destructive/15 bg-destructive/3",
                       )}>
-                        {/* Order / Product */}
                         <div className="flex items-center gap-2">
-                          {isExpanded ? <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0" /> : <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />}
-                          <div>
-                            <div className="font-semibold text-foreground">{o.product}</div>
-                            <div className="text-[10px] text-muted-foreground/40 font-mono">{o.id} • {o.family}</div>
-                          </div>
+                          {isExp ? <ChevronDown className="w-3 h-3 text-muted-foreground/40" /> : <ChevronRight className="w-3 h-3 text-muted-foreground/40" />}
+                          <span className="font-semibold text-foreground">{r.family}</span>
                         </div>
-                        {/* Klant */}
-                        <div className="hidden md:block">
-                          <div className="text-foreground/70 text-[11px]">{o.customer}</div>
-                          <div className="text-[10px] text-muted-foreground/40">{o.program}</div>
-                        </div>
-                        {/* Volume */}
-                        <div className="hidden md:block text-[11px] font-mono">
-                          <span className="text-foreground/70">{fmt(o.completedUnits)}</span>
-                          <span className="text-muted-foreground/30">/{fmt(o.plannedUnits)}</span>
-                        </div>
-                        {/* Voortgang */}
-                        <div className="hidden md:block">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 h-1.5 rounded-full bg-border/30 overflow-hidden">
-                              <div className={cn("h-full rounded-full", pct >= 100 ? "bg-accent" : pct >= 50 ? "bg-primary" : "bg-yellow-500/60")} style={{ width: `${pct}%` }} />
-                            </div>
-                            <span className="text-[10px] font-mono text-muted-foreground/50 w-8 text-right">{pct}%</span>
-                          </div>
-                        </div>
-                        {/* Lijn */}
-                        <span className="hidden md:block text-[11px] font-mono text-foreground/60">{o.line}</span>
-                        {/* APU */}
-                        <span className={cn("hidden md:block text-[11px] font-mono font-semibold", apuColor)}>
-                          {o.apuActual || "—"}<span className="text-muted-foreground/30 font-normal">/{o.apuTarget}</span>
+                        <span className="hidden md:block font-mono text-foreground/60">{r.orders}</span>
+                        <span className="hidden md:block font-mono text-foreground/60">{fmt(r.units)}</span>
+                        <span className={cn("hidden md:block font-mono", r.avgStems >= 13 ? "text-destructive font-semibold" : r.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{r.avgStems}</span>
+                        <span className="hidden md:block font-mono">
+                          <span className={effColor((r.apuActual / r.apuTarget) * 100)}>{r.apuActual}</span>
+                          <span className="text-muted-foreground/30">/{r.apuTarget}</span>
                         </span>
-                        {/* Arbeid */}
-                        <span className="hidden md:block text-[11px] font-mono text-foreground/60">{o.labour || "—"}</span>
-                        {/* Complexiteit */}
-                        <div className="hidden md:block">
-                          <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded", complexityCls[o.complexity])}>{o.complexity}</span>
-                        </div>
-                        {/* Risico */}
-                        <span className={cn("hidden md:block text-[11px] font-semibold", riskCls[o.risk])}>{o.risk === "none" ? "—" : o.risk}</span>
-                        {/* Status */}
-                        <div className="hidden md:block">
-                          <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full", statusCls[o.status])}>{statusLabel[o.status]}</span>
-                        </div>
+                        <span className="hidden md:block font-mono text-foreground/60">{r.labour}</span>
+                        <span className={cn("hidden md:block font-mono font-semibold", effColor(r.labourEff))}>{r.labourEff}%</span>
+                        <span className={cn("hidden md:block font-mono font-bold", pressureTextColor(r.pressureIndex))}>{r.pressureIndex}</span>
+                        <span className={cn("hidden md:block font-mono font-bold", pressureTextColor(r.complexityScore))}>{r.complexityScore}</span>
+                        <span className="hidden md:block">{r.bottleneck ? <AlertTriangle className="w-3.5 h-3.5 text-destructive" /> : <span className="text-accent text-[10px]">—</span>}</span>
+                        <span className="hidden md:block text-[10px] text-muted-foreground/60">{r.action}</span>
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="ml-5 md:ml-8 p-3 rounded-lg bg-muted/20 border border-border/30 mt-1 mb-2 space-y-2">
-                        {/* Mobile summary */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:hidden">
-                          <div><span className="text-[10px] text-muted-foreground/40">Klant</span><div className="text-[11px] text-foreground">{o.customer}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Volume</span><div className="text-[11px] font-mono">{fmt(o.completedUnits)}/{fmt(o.plannedUnits)}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Lijn</span><div className="text-[11px] font-mono">{o.line}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Status</span><div><span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full", statusCls[o.status])}>{statusLabel[o.status]}</span></div></div>
-                        </div>
-                        {/* Detail grid */}
+                      <div className="ml-5 md:ml-8 p-3 rounded-lg bg-muted/20 border border-border/30 mt-1 mb-2">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div><span className="text-[10px] text-muted-foreground/40">Vertrek</span><div className="text-[11px] font-semibold text-foreground">{o.departure}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Stelen/boeket</span><div className="text-[11px] font-mono text-foreground">{o.stemsPerBouquet}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Resterend</span><div className="text-[11px] font-mono text-foreground">{fmt(o.plannedUnits - o.completedUnits)}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Urgentie</span><div className={cn("text-[11px] font-semibold", o.urgency === "high" ? "text-destructive" : o.urgency === "medium" ? "text-yellow-500" : "text-accent")}>{o.urgency}</div></div>
+                          <div><span className="text-[10px] text-muted-foreground/40">APU gap</span><div className={cn("text-[12px] font-mono font-bold", r.apuActual >= r.apuTarget ? "text-accent" : "text-destructive")}>{r.apuActual - r.apuTarget} st/u</div></div>
+                          <div><span className="text-[10px] text-muted-foreground/40">Arbeid / 1000 st</span><div className="text-[12px] font-mono text-foreground">{(r.labour / (r.units / 1000)).toFixed(1)}</div></div>
+                          <div><span className="text-[10px] text-muted-foreground/40">Druk classificatie</span><div className={cn("text-[12px] font-semibold", pressureTextColor(r.pressureIndex))}>{r.pressureIndex >= 8 ? "Kritiek" : r.pressureIndex >= 6 ? "Hoog" : r.pressureIndex >= 4 ? "Gemiddeld" : "Laag"}</div></div>
+                          <div><span className="text-[10px] text-muted-foreground/40">Aanbeveling</span><div className="text-[12px] text-foreground font-medium">{r.action}</div></div>
                         </div>
-                        {/* Actions */}
-                        {o.actions && o.actions.length > 0 && (
-                          <div className="flex gap-2 pt-1">
-                            {o.actions.map(a => (
-                              <Button key={a} variant="outline" size="sm" className="h-6 text-[10px] font-mono">
-                                <Zap className="w-3 h-3 mr-1" />{a}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
