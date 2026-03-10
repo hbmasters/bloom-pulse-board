@@ -1,5 +1,6 @@
 import { Zap, BarChart3, Kanban } from "lucide-react";
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import { ActionImpactSummary } from "./ActionImpactSummary";
@@ -65,7 +66,7 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
             </div>
           </div>
 
-          {/* Layer 1 — Impact Summary */}
+          {/* Layer 1 — Impact Summary (always visible) */}
           <DataStateWrapper state={actionsState} skeletonCount={1}>
             <IHSectionShell
               icon={Zap}
@@ -78,31 +79,53 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
             </IHSectionShell>
           </DataStateWrapper>
 
-          {/* Layer 2 — Priority Board */}
-          <DataStateWrapper state={actionsState} skeletonCount={2}>
-            <IHSectionShell
-              icon={BarChart3}
-              title="Action Priority Board"
-              subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
-              badge={`${actions.length} ACTIES`}
-              badgeVariant="warning"
-            >
-              <ActionPriorityBoard actions={actions} />
-            </IHSectionShell>
-          </DataStateWrapper>
+          {/* Tabs for Priority Board & Pipeline */}
+          <Tabs defaultValue="priority" className="w-full">
+            <TabsList className="w-full justify-start bg-card/60 border border-border rounded-xl h-11 p-1 gap-1">
+              <TabsTrigger
+                value="priority"
+                className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4 text-xs font-bold uppercase tracking-wider"
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                Action Priority Board
+              </TabsTrigger>
+              <TabsTrigger
+                value="pipeline"
+                className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4 text-xs font-bold uppercase tracking-wider"
+              >
+                <Kanban className="w-3.5 h-3.5" />
+                Action Pipeline
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Layer 3 — Pipeline */}
-          <DataStateWrapper state={actionsState} skeletonCount={1}>
-            <IHSectionShell
-              icon={Kanban}
-              title="Action Pipeline"
-              subtitle="Uitvoeringsstatus per actie"
-              badge="PIPELINE"
-              badgeVariant="default"
-            >
-              <ActionPipeline actions={actions} />
-            </IHSectionShell>
-          </DataStateWrapper>
+            <TabsContent value="priority" className="mt-4">
+              <DataStateWrapper state={actionsState} skeletonCount={2}>
+                <IHSectionShell
+                  icon={BarChart3}
+                  title="Action Priority Board"
+                  subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
+                  badge={`${actions.length} ACTIES`}
+                  badgeVariant="warning"
+                >
+                  <ActionPriorityBoard actions={actions} />
+                </IHSectionShell>
+              </DataStateWrapper>
+            </TabsContent>
+
+            <TabsContent value="pipeline" className="mt-4">
+              <DataStateWrapper state={actionsState} skeletonCount={1}>
+                <IHSectionShell
+                  icon={Kanban}
+                  title="Action Pipeline"
+                  subtitle="Uitvoeringsstatus per actie"
+                  badge="PIPELINE"
+                  badgeVariant="default"
+                >
+                  <ActionPipeline actions={actions} />
+                </IHSectionShell>
+              </DataStateWrapper>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
