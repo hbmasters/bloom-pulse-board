@@ -30,6 +30,7 @@ type ProcurementTab = "all" | "urgent" | "today" | "upcoming" | "completed";
 interface SupplierOption {
   supplier: string; channel: string; available: number; price: number;
   deliveryDays: number; confidence: number; sourceHealth: SourceHealth; isBestPrice?: boolean;
+  url?: string;
 }
 
 interface ProcurementRow {
@@ -44,6 +45,8 @@ interface ProcurementRow {
   suppliers: SupplierOption[];
   variants?: { length: string; demand: number; covered: number; stock: number }[];
   section: "urgent" | "today" | "upcoming" | "completed";
+  bestHistoricalSupplier?: string;
+  trackTrace?: { status: string; location: string; eta: string };
 }
 
 /* ------------------------------------------------------------------ */
@@ -59,11 +62,12 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "at-risk", demandChange: "up", demandChangePercent: 24,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 72, forecastHorizonDays: 1,
     purchaseState: "open", purchasedQuantity: 0, section: "urgent",
+    bestHistoricalSupplier: "Germini World",
     suppliers: [
-      { supplier: "Germini World", channel: "Floriday", available: 4000, price: 0.10, deliveryDays: 2, confidence: 85, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "FlowerLink", channel: "Marketplace", available: 2500, price: 0.12, deliveryDays: 2, confidence: 72, sourceHealth: "stale" },
-      { supplier: "Direct Grower", channel: "Webshop", available: 3000, price: 0.11, deliveryDays: 3, confidence: 80, sourceHealth: "connected" },
-      { supplier: "BloemenVeiling", channel: "Floriday", available: 1500, price: 0.13, deliveryDays: 1, confidence: 90, sourceHealth: "connected" },
+      { supplier: "Germini World", channel: "Floriday", available: 4000, price: 0.10, deliveryDays: 2, confidence: 85, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/germini-world" },
+      { supplier: "FlowerLink", channel: "Marketplace", available: 2500, price: 0.12, deliveryDays: 2, confidence: 72, sourceHealth: "stale", url: "https://flowerlink.nl" },
+      { supplier: "Direct Grower", channel: "Webshop", available: 3000, price: 0.11, deliveryDays: 3, confidence: 80, sourceHealth: "connected", url: "https://directgrower.nl" },
+      { supplier: "BloemenVeiling", channel: "Floriday", available: 1500, price: 0.13, deliveryDays: 1, confidence: 90, sourceHealth: "connected", url: "https://floriday.io/supplier/bloemenveiling" },
     ],
   },
   {
@@ -86,10 +90,11 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "up", demandChangePercent: 8,
     demandSource: "Axerrio forecast", sourceHealth: "connected", forecastConfidence: 88, forecastHorizonDays: 3,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
+    bestHistoricalSupplier: "Van der Berg Roses",
     suppliers: [
-      { supplier: "Van der Berg Roses", channel: "Floriday", available: 5000, price: 0.22, deliveryDays: 2, confidence: 92, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "Porta Nova", channel: "Contract", available: 3000, price: 0.26, deliveryDays: 1, confidence: 98, sourceHealth: "connected" },
-      { supplier: "Marktplaats NL", channel: "Marketplace", available: 2000, price: 0.28, deliveryDays: 3, confidence: 75, sourceHealth: "delayed" },
+      { supplier: "Van der Berg Roses", channel: "Floriday", available: 5000, price: 0.22, deliveryDays: 2, confidence: 92, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/vdberg" },
+      { supplier: "Porta Nova", channel: "Contract", available: 3000, price: 0.26, deliveryDays: 1, confidence: 98, sourceHealth: "connected", url: "https://portanova.nl" },
+      { supplier: "Marktplaats NL", channel: "Marketplace", available: 2000, price: 0.28, deliveryDays: 3, confidence: 75, sourceHealth: "delayed", url: "https://marktplaats.nl" },
     ],
     variants: [
       { length: "50cm", demand: 3200, covered: 3200, stock: 400 },
@@ -106,9 +111,10 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-16", coverageStatus: "partial", demandChange: "down", demandChangePercent: -5,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 91, forecastHorizonDays: 4,
     purchaseState: "open", purchasedQuantity: 0, section: "today",
+    bestHistoricalSupplier: "Carnation BV",
     suppliers: [
-      { supplier: "Carnation BV", channel: "Contract", available: 2000, price: 0.17, deliveryDays: 1, confidence: 95, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "FloriTrade", channel: "Floriday", available: 1500, price: 0.20, deliveryDays: 2, confidence: 82, sourceHealth: "connected" },
+      { supplier: "Carnation BV", channel: "Contract", available: 2000, price: 0.17, deliveryDays: 1, confidence: 95, sourceHealth: "connected", isBestPrice: true, url: "https://carnationbv.nl" },
+      { supplier: "FloriTrade", channel: "Floriday", available: 1500, price: 0.20, deliveryDays: 2, confidence: 82, sourceHealth: "connected", url: "https://floriday.io/supplier/floritrade" },
     ],
   },
   {
@@ -120,9 +126,10 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-17", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 96, forecastHorizonDays: 5,
     purchaseState: "open", purchasedQuantity: 0, section: "upcoming",
+    bestHistoricalSupplier: "Green Team",
     suppliers: [
-      { supplier: "Green Team", channel: "Contract", available: 7000, price: 0.14, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true },
-      { supplier: "Flora Direct", channel: "Webshop", available: 3000, price: 0.16, deliveryDays: 2, confidence: 88, sourceHealth: "connected" },
+      { supplier: "Green Team", channel: "Contract", available: 7000, price: 0.14, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true, url: "https://greenteam.nl" },
+      { supplier: "Flora Direct", channel: "Webshop", available: 3000, price: 0.16, deliveryDays: 2, confidence: 88, sourceHealth: "connected", url: "https://floradirect.nl" },
     ],
     variants: [
       { length: "40cm", demand: 1800, covered: 1800, stock: 600 },
@@ -139,7 +146,9 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 95, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 4600, purchasedAt: "08:12", section: "completed",
-    suppliers: [{ supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true }],
+    bestHistoricalSupplier: "ChrysantenKwekerij",
+    trackTrace: { status: "Onderweg", location: "Aalsmeer → DC Naaldwijk", eta: "14:30" },
+    suppliers: [{ supplier: "ChrysantenKwekerij", channel: "Floriday", available: 6000, price: 0.11, deliveryDays: 1, confidence: 97, sourceHealth: "connected", isBestPrice: true, url: "https://floriday.io/supplier/chrysantenkwekerij" }],
   },
   {
     id: "p7", article: "Eucalyptus Parvifolia", stemLength: "60cm", quality: "A2", species: "Eucalyptus",
@@ -150,7 +159,9 @@ const demoRows: ProcurementRow[] = [
     deliveryDate: "2026-03-15", coverageStatus: "covered", demandChange: "stable", demandChangePercent: 0,
     demandSource: "Productieorder", sourceHealth: "connected", forecastConfidence: 98, forecastHorizonDays: 2,
     purchaseState: "purchased", purchasedQuantity: 3600, purchasedAt: "07:48", section: "completed",
-    suppliers: [{ supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true }],
+    bestHistoricalSupplier: "Green Direct",
+    trackTrace: { status: "Geleverd", location: "DC Naaldwijk", eta: "Ontvangen 09:15" },
+    suppliers: [{ supplier: "Green Direct", channel: "Contract", available: 5000, price: 0.07, deliveryDays: 1, confidence: 99, sourceHealth: "connected", isBestPrice: true, url: "https://greendirect.nl" }],
   },
 ];
 
@@ -500,6 +511,11 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 <div className="flex-1">
                   <span className="text-xs font-semibold text-foreground">AI Advies: </span>
                   <span className="text-xs text-muted-foreground">{row.aiRecommendation}</span>
+                  {row.bestHistoricalSupplier && (
+                    <span className="text-[10px] text-muted-foreground ml-2">
+                      · Best historisch: <span className="font-bold text-accent">{row.bestHistoricalSupplier}</span>
+                    </span>
+                  )}
                 </div>
                 {row.supplierCount > 0 && row.purchaseState === "open" && (
                   <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
@@ -525,14 +541,14 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 {/* Right: prijzen + meta */}
                 <div className="px-5 py-3">
                   <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Prijzen & info</h4>
-                  <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 text-[11px] font-mono">
-                    <DetailRow label="Historisch" value={fmtPrice(row.historicalPrice)} muted />
-                    <DetailRow label="Offerte" value={fmtPrice(row.offerPrice)} accent={row.offerPrice > 0 && row.offerPrice <= row.historicalPrice} />
-                    <DetailRow label="Adviesprijs" value={fmtPrice(row.advicePrice)} primary />
-                    <DetailRow label="Verwacht" value={fmtPrice(row.expectedPrice)} />
-                    <DetailRow label="Klant" value={row.customer} />
-                    <DetailRow label="Leverdatum" value={row.deliveryDate} />
-                    <DetailRow label="Bron" value={row.demandSource} icon={<SourceIcon h={row.sourceHealth} />} />
+                  <div className="space-y-1 text-[11px] font-mono">
+                    <DottedRow label="Historisch" value={fmtPrice(row.historicalPrice)} cls="text-muted-foreground/60" />
+                    <DottedRow label="Offerte" value={fmtPrice(row.offerPrice)} cls={row.offerPrice > 0 && row.offerPrice <= row.historicalPrice ? "text-accent" : "text-foreground"} />
+                    <DottedRow label="Adviesprijs" value={fmtPrice(row.advicePrice)} cls="text-primary font-bold" />
+                    <DottedRow label="Verwacht" value={fmtPrice(row.expectedPrice)} />
+                    <DottedRow label="Klant" value={row.customer} />
+                    <DottedRow label="Leverdatum" value={row.deliveryDate} />
+                    <DottedRow label="Bron" value={row.demandSource} icon={<SourceIcon h={row.sourceHealth} />} />
                   </div>
                 </div>
               </div>
@@ -560,20 +576,34 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
               {row.suppliers.length > 0 ? (
                 <div className="px-5 py-3 border-t border-border/60">
                   <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Leveranciers</h4>
-                  <div className="grid grid-cols-5 gap-1 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                    <span>Leverancier</span><span className="text-right">Beschikbaar</span><span className="text-right">Prijs</span><span className="text-right">Levertijd</span><span className="text-center">Bron</span>
+                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                    <span>Leverancier</span><span className="text-right">Beschikbaar</span><span className="text-right">Prijs</span><span className="text-right">Levertijd</span><span className="text-center">Bron</span><span></span>
                   </div>
                   {row.suppliers.map((s, i) => (
-                    <div key={i} className={cn("grid grid-cols-5 gap-1 text-[11px] font-mono py-1.5 border-t border-border/30", s.isBestPrice && "bg-accent/5")}>
+                    <div key={i} className={cn("grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 items-center text-[11px] font-mono py-1.5 border-t border-border/30", s.isBestPrice && "bg-accent/5")}>
                       <span className="font-semibold text-foreground flex items-center gap-1.5">
                         {s.supplier}
                         <Badge variant="outline" className="text-[7px] font-mono h-4 px-1">{s.channel}</Badge>
                         {s.isBestPrice && <span className="text-[7px] text-accent font-bold">BEST</span>}
+                        {s.supplier === row.bestHistoricalSupplier && <Star className="w-3 h-3 text-primary fill-primary" />}
+                        {s.url && (
+                          <a href={s.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} title="Open leverancier">
+                            <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary transition-colors" />
+                          </a>
+                        )}
                       </span>
-                      <span className="text-right text-foreground">{fmt(s.available)}</span>
-                      <span className={cn("text-right font-bold", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
-                      <span className="text-right text-foreground">{s.deliveryDays}d</span>
-                      <span className="text-center"><SourceIcon h={s.sourceHealth} /></span>
+                      <span className="text-right text-foreground w-16">{fmt(s.available)}</span>
+                      <span className={cn("text-right font-bold w-14", s.isBestPrice ? "text-accent" : "text-foreground")}>{fmtPrice(s.price)}</span>
+                      <span className="text-right text-foreground w-10">{s.deliveryDays}d</span>
+                      <span className="text-center w-8"><SourceIcon h={s.sourceHealth} /></span>
+                      <span className="w-16 text-right">
+                        {row.purchaseState === "open" && (
+                          <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[8px] font-mono text-primary hover:bg-primary/10"
+                            onClick={e => { e.stopPropagation(); onBuy(row.id); }}>
+                            <ShoppingCart className="w-2.5 h-2.5 mr-0.5" /> Koop
+                          </Button>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -583,15 +613,27 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 </div>
               )}
 
+              {/* Track & Trace for completed */}
+              {isPurchased && row.trackTrace && (
+                <div className="px-5 py-3 border-t border-border/60 bg-accent/[0.03]">
+                  <h4 className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-2">Track & Trace</h4>
+                  <div className="flex items-center gap-4 text-[11px] font-mono">
+                    <span className="flex items-center gap-1.5">
+                      <Truck className={cn("w-4 h-4", row.trackTrace.status === "Geleverd" ? "text-accent" : "text-primary")} />
+                      <span className={cn("font-bold", row.trackTrace.status === "Geleverd" ? "text-accent" : "text-primary")}>{row.trackTrace.status}</span>
+                    </span>
+                    <span className="text-muted-foreground">{row.trackTrace.location}</span>
+                    <span className="text-foreground font-semibold">{row.trackTrace.eta}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex items-center gap-2 px-5 py-3 border-t border-border/60 bg-muted/20">
                 {row.supplierCount > 0 && row.purchaseState === "open" && (
                   <>
                     <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
                       <ShoppingCart className="w-3 h-3" /> Koop — AI advies
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
-                      <ExternalLink className="w-3 h-3" /> Leverancier
                     </Button>
                     <Button variant="outline" size="sm" className="h-7 text-[10px] font-mono gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Markeer ingekocht
@@ -630,6 +672,21 @@ const DetailRow = ({ label, value, accent, warn, primary, muted, icon }: {
       {icon}{value}
     </span>
   </>
+);
+
+/* ------------------------------------------------------------------ */
+/*  DOTTED ROW HELPER (label ···· value)                               */
+/* ------------------------------------------------------------------ */
+const DottedRow = ({ label, value, cls, icon }: {
+  label: string; value: string; cls?: string; icon?: React.ReactNode;
+}) => (
+  <div className="flex items-baseline gap-1">
+    <span className="text-muted-foreground whitespace-nowrap">{label}</span>
+    <span className="flex-1 border-b border-dotted border-muted-foreground/20 min-w-[20px] translate-y-[-3px]" />
+    <span className={cn("font-semibold whitespace-nowrap flex items-center gap-1", cls || "text-foreground")}>
+      {icon}{value}
+    </span>
+  </div>
 );
 
 export default ProcurementCockpit;
