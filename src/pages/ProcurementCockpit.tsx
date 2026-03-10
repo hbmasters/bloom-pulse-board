@@ -511,6 +511,11 @@ const Row = ({ row, isOpen, onToggle, onBuy }: {
                 <div className="flex-1">
                   <span className="text-xs font-semibold text-foreground">AI Advies: </span>
                   <span className="text-xs text-muted-foreground">{row.aiRecommendation}</span>
+                  {row.bestHistoricalSupplier && (
+                    <span className="text-[10px] text-muted-foreground ml-2">
+                      · Best historisch: <span className="font-bold text-accent">{row.bestHistoricalSupplier}</span>
+                    </span>
+                  )}
                 </div>
                 {row.supplierCount > 0 && row.purchaseState === "open" && (
                   <Button size="sm" className="h-7 text-[10px] font-mono font-bold gap-1" onClick={() => onBuy(row.id)}>
