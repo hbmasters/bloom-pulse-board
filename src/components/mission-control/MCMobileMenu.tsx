@@ -93,68 +93,78 @@ const MCMobileMenu = ({ active, onNavigate, open, onClose }: MCMobileMenuProps) 
         </div>
 
         <nav className="flex-1 py-3 px-2 overflow-y-auto">
-          <ul className="space-y-0.5">
-            {navEntries.map(entry => {
-              if (isGroup(entry)) {
-                const isOpen = openGroups[entry.id] ?? isChildActive(entry);
-                return (
-                  <li key={entry.id}>
-                    <button
-                      onClick={() => toggleGroup(entry.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
-                        isChildActive(entry)
-                          ? "text-sidebar-accent-foreground font-medium"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                      )}
-                    >
-                      <entry.icon className="w-4 h-4 shrink-0" />
-                      <span className="flex-1 text-left">{entry.label}</span>
-                      <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
-                    </button>
-                    {isOpen && (
-                      <ul className="mt-0.5 space-y-0.5">
-                        {entry.children.map(child => (
-                          <li key={child.id}>
-                            <button
-                              onClick={() => handleNav(child.id)}
-                              className={cn(
-                                "w-full flex items-center gap-3 pl-9 pr-3 py-2.5 text-sm rounded-md transition-colors",
-                                active === child.id
-                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                              )}
-                            >
-                              <child.icon className="w-4 h-4 shrink-0" />
-                              <span>{child.label}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              }
+          {navSections.map((section, si) => (
+            <div key={section.label}>
+              {si > 0 && <div className="my-2 mx-2 border-t border-sidebar-border" />}
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-sidebar-foreground/40">
+                  {section.label}
+                </span>
+              </div>
+              <ul className="space-y-0.5">
+                {section.entries.map(entry => {
+                  if (isGroup(entry)) {
+                    const isOpen = openGroups[entry.id] ?? isChildActive(entry);
+                    return (
+                      <li key={entry.id}>
+                        <button
+                          onClick={() => toggleGroup(entry.id)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
+                            isChildActive(entry)
+                              ? "text-sidebar-accent-foreground font-medium"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                          )}
+                        >
+                          <entry.icon className="w-4 h-4 shrink-0" />
+                          <span className="flex-1 text-left">{entry.label}</span>
+                          <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
+                        </button>
+                        {isOpen && (
+                          <ul className="mt-0.5 space-y-0.5">
+                            {entry.children.map(child => (
+                              <li key={child.id}>
+                                <button
+                                  onClick={() => handleNav(child.id)}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 pl-9 pr-3 py-2.5 text-sm rounded-md transition-colors",
+                                    active === child.id
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                                  )}
+                                >
+                                  <child.icon className="w-4 h-4 shrink-0" />
+                                  <span>{child.label}</span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  }
 
-              const isActive = active === entry.id;
-              return (
-                <li key={entry.id}>
-                  <button
-                    onClick={() => handleNav(entry.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    )}
-                  >
-                    <entry.icon className="w-4 h-4 shrink-0" />
-                    <span>{entry.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                  const isActive = active === entry.id;
+                  return (
+                    <li key={entry.id}>
+                      <button
+                        onClick={() => handleNav(entry.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors",
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                        )}
+                      >
+                        <entry.icon className="w-4 h-4 shrink-0" />
+                        <span>{entry.label}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-sidebar-border">
