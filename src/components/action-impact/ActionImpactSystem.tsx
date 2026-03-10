@@ -38,8 +38,8 @@ function mapToActionItem(a: IntelligenceAction): ActionItem {
 type TabId = "priority" | "pipeline";
 
 const tabs: { id: TabId; label: string; icon: typeof BarChart3; shortLabel: string }[] = [
-  { id: "priority", label: "Action Priority Board", icon: BarChart3, shortLabel: "Priority" },
-  { id: "pipeline", label: "Action Pipeline", icon: Kanban, shortLabel: "Pipeline" },
+  { id: "priority", label: "Priority Board", icon: BarChart3, shortLabel: "Priority" },
+  { id: "pipeline", label: "Action Kanban", icon: Kanban, shortLabel: "Kanban" },
 ];
 
 interface Props {
