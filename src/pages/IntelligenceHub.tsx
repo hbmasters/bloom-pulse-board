@@ -1,6 +1,6 @@
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import IHBusinessHealth from "@/components/intelligence-hub/IHBusinessHealth";
-import IHProductionIntelligence from "@/components/intelligence-hub/IHProductionIntelligence";
+import IHProductionOverview from "@/components/intelligence-hub/IHProductionOverview";
 import IHMarginIntelligence from "@/components/intelligence-hub/IHMarginIntelligence";
 import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcurementIntelligence";
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
