@@ -26,9 +26,10 @@ import CommandRadar from "@/pages/CommandRadar";
 import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSystem";
 import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import ProductionCockpit from "@/pages/ProductionCockpit";
+import CommercialCockpit from "@/pages/CommercialCockpit";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -50,6 +51,7 @@ const routeToView: Record<string, MCView> = {
   "/action-engine": "action-engine",
   "/procurement": "procurement",
   "/production-cockpit": "production-cockpit",
+  "/commercial": "commercial",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -72,6 +74,7 @@ export const viewToRoute: Record<MCView, string> = {
   "action-engine": "/action-engine",
   procurement: "/procurement",
   "production-cockpit": "/production-cockpit",
+  commercial: "/commercial",
 };
 
 const MissionControl = () => {
@@ -148,6 +151,7 @@ const MissionControl = () => {
             {view === "action-engine" && <ActionImpactSystem />}
             {view === "procurement" && <ProcurementCockpit />}
             {view === "production-cockpit" && <ProductionCockpit />}
+            {view === "commercial" && <CommercialCockpit />}
           </div>
 
           {view === "chat" && (
