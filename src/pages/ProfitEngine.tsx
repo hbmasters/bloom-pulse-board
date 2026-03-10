@@ -303,6 +303,11 @@ const ProfitEngine = ({ intelligence }: Props) => {
               </div>
             </IHSectionShell>
           </DataStateWrapper>
+
+            {/* 6 ── Procurement Value Exposure */}
+            <IHSectionShell icon={ShoppingCart} title="Procurement Value Exposure" subtitle="Verwachte inkoopwaarde & ontbrekende prijsimpact" badge="VOORBEREIDING" badgeVariant="warning">
+              <ForecastValueExposure />
+            </IHSectionShell>
         </div>
       </div>
     </div>
