@@ -115,28 +115,12 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
         <div className="p-4 md:p-6 max-w-[1600px] mx-auto pb-8">
           {activeTab === "priority" && (
             <DataStateWrapper state={actionsState} skeletonCount={2}>
-              <IHSectionShell
-                icon={BarChart3}
-                title="Action Priority Board"
-                subtitle="Gesorteerd op priority score: financial_impact × probability / effort"
-                badge={`${actions.length} ACTIES`}
-                badgeVariant="warning"
-              >
-                <ActionPriorityBoard actions={actions} />
-              </IHSectionShell>
+              <ActionPriorityBoard actions={actions} />
             </DataStateWrapper>
           )}
           {activeTab === "pipeline" && (
             <DataStateWrapper state={actionsState} skeletonCount={1}>
-              <IHSectionShell
-                icon={Kanban}
-                title="Action Pipeline"
-                subtitle="Uitvoeringsstatus per actie"
-                badge="PIPELINE"
-                badgeVariant="default"
-              >
-                <ActionPipeline actions={actions} />
-              </IHSectionShell>
+              <ActionPipeline actions={actions} />
             </DataStateWrapper>
           )}
         </div>
