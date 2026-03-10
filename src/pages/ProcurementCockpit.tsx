@@ -30,6 +30,7 @@ type ProcurementTab = "all" | "urgent" | "today" | "upcoming" | "completed";
 interface SupplierOption {
   supplier: string; channel: string; available: number; price: number;
   deliveryDays: number; confidence: number; sourceHealth: SourceHealth; isBestPrice?: boolean;
+  url?: string;
 }
 
 interface ProcurementRow {
