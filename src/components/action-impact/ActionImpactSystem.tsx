@@ -46,7 +46,7 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
       : staticActionItems;
 
   return (
-    <div className="relative min-h-0">
+    <div className="relative min-h-0 h-full overflow-y-auto">
       <div className="relative z-10">
         <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto pb-8">
           {/* Page header */}
