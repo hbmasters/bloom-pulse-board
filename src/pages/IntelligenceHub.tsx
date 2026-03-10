@@ -4,8 +4,6 @@ import IHProductionIntelligence from "@/components/intelligence-hub/IHProduction
 import IHMarginIntelligence from "@/components/intelligence-hub/IHMarginIntelligence";
 import IHProcurementIntelligence from "@/components/intelligence-hub/IHProcurementIntelligence";
 import IHFlowerForecast from "@/components/intelligence-hub/IHFlowerForecast";
-import IHActionCenter from "@/components/intelligence-hub/IHActionCenter";
-import IHForecastIntelligence from "@/components/intelligence-hub/IHForecastIntelligence";
 
 import { DataStateWrapper } from "@/components/intelligence-hub/DataStateWrapper";
 import type { IntelligenceData } from "@/types/intelligence";
