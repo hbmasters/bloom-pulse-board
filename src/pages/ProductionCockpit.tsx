@@ -1029,13 +1029,14 @@ const ProductionCockpit = () => {
             {/* PDI composition explanation */}
             <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
               <span className="text-[10px] font-mono text-muted-foreground/50 block mb-2">PDI samenstelling</span>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px]">
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-[10px]">
                 {[
-                  { label: "Uurdruk", weight: "25%", icon: Clock },
-                  { label: "Stelenvolume", weight: "25%", icon: Layers },
-                  { label: "Checks / sturing", weight: "15%", icon: ClipboardCheck },
-                  { label: "W vs O-APU afw.", weight: "20%", icon: Gauge },
-                  { label: "W vs P-APU afw.", weight: "15%", icon: Brain },
+                  { label: "Uurdruk", weight: "20%", icon: Clock },
+                  { label: "Stelenvolume", weight: "20%", icon: Layers },
+                  { label: "Checks / sturing", weight: "12%", icon: ClipboardCheck },
+                  { label: "W vs O-APU afw.", weight: "18%", icon: Gauge },
+                  { label: "W vs P-APU afw.", weight: "12%", icon: Brain },
+                  { label: "Orderdruk", weight: "18%", icon: BoxSelect },
                 ].map(c => (
                   <div key={c.label} className="flex items-center gap-2">
                     <c.icon className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
