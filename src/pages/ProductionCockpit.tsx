@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, Users, Gauge, Package,
   Activity, BarChart3, Flame, Brain, Info, CheckCircle2,
   ArrowUpRight, ArrowDownRight, Eye, Shield, Lightbulb,
-  ClipboardCheck, CalendarClock, Layers
+  ClipboardCheck, CalendarClock, Layers, BoxSelect
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
