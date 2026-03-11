@@ -99,64 +99,120 @@ interface OrderBucket {
   range: string;
   count: number;
   volume: number;
+  pctOrders: number;
   inefficient: boolean;
+}
+
+interface OrderdrukPeriod {
+  label: string;
+  totalOrders: number;
+  avgSize: number;
+  medianSize: number;
+  inefficientOrders: number;
+  inefficientPct: number;
+  totalVolume: number;
+  inefficientVolume: number;
 }
 
 interface OrderdrukData {
   dept: string;
+  threshold: number;
   totalOrders: number;
   avgSize: number;
   medianSize: number;
+  totalVolume: number;
   buckets: OrderBucket[];
   inefficientOrders: number;
   inefficientVolume: number;
   inefficientPct: number;
+  periods: OrderdrukPeriod[];
+  // Correlations
+  wapuImpact: number; // estimated APU loss from small orders
+  opstartverliesUren: number; // estimated lost hours from startups
+  fragmentatieIndex: number; // 0-10, how fragmented
 }
 
+type OrderdrukLevel = "laag" | "normaal" | "verhoogd" | "kritisch";
+
+const calcOrderdrukScore = (d: OrderdrukData): { score: number; level: OrderdrukLevel } => {
+  // Weighted: ineffPct (35%), avgSize inverse (25%), fragmentation (20%), opstartloss (20%)
+  const ineffScore = Math.min(d.inefficientPct / 10, 10); // 30% → 3.0
+  const sizeScore = Math.max(0, 10 - d.avgSize / (d.threshold * 0.5)); // smaller avg = higher score
+  const fragScore = d.fragmentatieIndex;
+  const opstart = Math.min(d.opstartverliesUren / 5, 10);
+  const score = Math.min(10, ineffScore * 0.35 + sizeScore * 0.25 + fragScore * 0.20 + opstart * 0.20);
+  const rounded = Math.round(score * 10) / 10;
+  const level: OrderdrukLevel = rounded >= 8 ? "kritisch" : rounded >= 6 ? "verhoogd" : rounded >= 4 ? "normaal" : "laag";
+  return { score: rounded, level };
+};
+
 const orderdrukHand: OrderdrukData = {
-  dept: "Hand",
-  totalOrders: 186,
-  avgSize: 87,
-  medianSize: 62,
+  dept: "Hand", threshold: 40,
+  totalOrders: 186, avgSize: 87, medianSize: 62, totalVolume: 20808,
   buckets: [
-    { range: "0 – 40", count: 54, volume: 1188, inefficient: true },
-    { range: "40 – 100", count: 68, volume: 4760, inefficient: false },
-    { range: "100 – 250", count: 42, volume: 6720, inefficient: false },
-    { range: "250+", count: 22, volume: 8140, inefficient: false },
+    { range: "0 – 40", count: 54, volume: 1188, pctOrders: 29.0, inefficient: true },
+    { range: "40 – 100", count: 68, volume: 4760, pctOrders: 36.6, inefficient: false },
+    { range: "100 – 250", count: 42, volume: 6720, pctOrders: 22.6, inefficient: false },
+    { range: "250+", count: 22, volume: 8140, pctOrders: 11.8, inefficient: false },
   ],
-  inefficientOrders: 54,
-  inefficientVolume: 1188,
-  inefficientPct: 29.0,
+  inefficientOrders: 54, inefficientVolume: 1188, inefficientPct: 29.0,
+  periods: [
+    { label: "Afgelopen week", totalOrders: 186, avgSize: 87, medianSize: 62, inefficientOrders: 54, inefficientPct: 29.0, totalVolume: 20808, inefficientVolume: 1188 },
+    { label: "Komende week", totalOrders: 212, avgSize: 78, medianSize: 55, inefficientOrders: 72, inefficientPct: 34.0, totalVolume: 22360, inefficientVolume: 1656 },
+    { label: "Week +2", totalOrders: 195, avgSize: 82, medianSize: 58, inefficientOrders: 60, inefficientPct: 30.8, totalVolume: 21120, inefficientVolume: 1380 },
+  ],
+  wapuImpact: -8, // APU loss in st/u
+  opstartverliesUren: 12.5,
+  fragmentatieIndex: 6.2,
 };
 
 const orderdrukBand: OrderdrukData = {
-  dept: "Band",
-  totalOrders: 124,
-  avgSize: 412,
-  medianSize: 320,
+  dept: "Band", threshold: 250,
+  totalOrders: 124, avgSize: 412, medianSize: 320, totalVolume: 59680,
   buckets: [
-    { range: "0 – 250", count: 38, volume: 5320, inefficient: true },
-    { range: "250 – 500", count: 44, volume: 16280, inefficient: false },
-    { range: "500 – 1000", count: 28, volume: 18480, inefficient: false },
-    { range: "1000+", count: 14, volume: 19600, inefficient: false },
+    { range: "0 – 250", count: 38, volume: 5320, pctOrders: 30.6, inefficient: true },
+    { range: "250 – 500", count: 44, volume: 16280, pctOrders: 35.5, inefficient: false },
+    { range: "500 – 1000", count: 28, volume: 18480, pctOrders: 22.6, inefficient: false },
+    { range: "1000+", count: 14, volume: 19600, pctOrders: 11.3, inefficient: false },
   ],
-  inefficientOrders: 38,
-  inefficientVolume: 5320,
-  inefficientPct: 30.6,
+  inefficientOrders: 38, inefficientVolume: 5320, inefficientPct: 30.6,
+  periods: [
+    { label: "Afgelopen week", totalOrders: 124, avgSize: 412, medianSize: 320, inefficientOrders: 38, inefficientPct: 30.6, totalVolume: 59680, inefficientVolume: 5320 },
+    { label: "Komende week", totalOrders: 138, avgSize: 385, medianSize: 295, inefficientOrders: 48, inefficientPct: 34.8, totalVolume: 62540, inefficientVolume: 6720 },
+    { label: "Week +2", totalOrders: 130, avgSize: 398, medianSize: 310, inefficientOrders: 42, inefficientPct: 32.3, totalVolume: 60840, inefficientVolume: 5880 },
+  ],
+  wapuImpact: -5,
+  opstartverliesUren: 8.2,
+  fragmentatieIndex: 5.4,
 };
 
 const orderdrukTotaal: OrderdrukData = {
-  dept: "Totaal",
+  dept: "Totaal", threshold: 0,
   totalOrders: orderdrukHand.totalOrders + orderdrukBand.totalOrders,
   avgSize: Math.round((orderdrukHand.avgSize * orderdrukHand.totalOrders + orderdrukBand.avgSize * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders)),
   medianSize: Math.round((orderdrukHand.medianSize + orderdrukBand.medianSize) / 2),
+  totalVolume: orderdrukHand.totalVolume + orderdrukBand.totalVolume,
   buckets: [],
   inefficientOrders: orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders,
   inefficientVolume: orderdrukHand.inefficientVolume + orderdrukBand.inefficientVolume,
   inefficientPct: Math.round((orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 1000) / 10,
+  periods: [0, 1, 2].map(i => ({
+    label: orderdrukHand.periods[i].label,
+    totalOrders: orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders,
+    avgSize: Math.round((orderdrukHand.periods[i].avgSize * orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].avgSize * orderdrukBand.periods[i].totalOrders) / (orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders)),
+    medianSize: Math.round((orderdrukHand.periods[i].medianSize + orderdrukBand.periods[i].medianSize) / 2),
+    inefficientOrders: orderdrukHand.periods[i].inefficientOrders + orderdrukBand.periods[i].inefficientOrders,
+    inefficientPct: Math.round((orderdrukHand.periods[i].inefficientOrders + orderdrukBand.periods[i].inefficientOrders) / (orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders) * 1000) / 10,
+    totalVolume: orderdrukHand.periods[i].totalVolume + orderdrukBand.periods[i].totalVolume,
+    inefficientVolume: orderdrukHand.periods[i].inefficientVolume + orderdrukBand.periods[i].inefficientVolume,
+  })),
+  wapuImpact: -7,
+  opstartverliesUren: orderdrukHand.opstartverliesUren + orderdrukBand.opstartverliesUren,
+  fragmentatieIndex: Math.round((orderdrukHand.fragmentatieIndex * orderdrukHand.totalOrders + orderdrukBand.fragmentatieIndex * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 10) / 10,
 };
 
 const allOrderdruk = [orderdrukHand, orderdrukBand, orderdrukTotaal];
+const orderdrukScores = allOrderdruk.map(d => ({ dept: d.dept, ...calcOrderdrukScore(d) }));
 
 const advisories = [
   { icon: AlertTriangle, severity: "critical" as const, text: "Werkdruk Band stijgt +16.7% komende week — overweeg extra capaciteit of orderspreiding." },
