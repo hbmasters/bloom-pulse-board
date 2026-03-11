@@ -47,13 +47,7 @@ const navSections: NavSection[] = [
 
 const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-
-  const toggleGroup = (id: string) => setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const isChildActive = (group: NavGroup) => group.children.some(c => c.id === active);
-
-  const renderItem = (item: NavItem, indent = false) => {
+  const renderItem = (item: NavItem) => {
     const isActive = active === item.id;
     const linkContent = (
       <button
