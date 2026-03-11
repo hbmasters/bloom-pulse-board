@@ -2,199 +2,135 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   Factory, AlertTriangle, Clock, TrendingUp, TrendingDown, Minus,
-  ChevronDown, ChevronRight, Filter, Users, Gauge, Package,
-  Zap, Activity, BarChart3, Layers, AlertCircle, XCircle,
-  ArrowUpDown, Flame, Star, Brain
+  ChevronDown, ChevronRight, Users, Gauge, Package,
+  Activity, BarChart3, Flame, Brain, Info, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, Eye, Shield, Lightbulb,
+  ClipboardCheck, CalendarClock, Layers
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 
 /* ------------------------------------------------------------------ */
 /*  TYPES                                                              */
 /* ------------------------------------------------------------------ */
-type Severity = "critical" | "warning" | "info";
-type EffStatus = "efficient" | "moderate" | "inefficient";
+type PDILevel = "laag" | "normaal" | "verhoogd" | "kritisch";
+type Dept = "hand" | "band" | "totaal";
+
+interface APURow {
+  dept: string;
+  oapu: number;
+  wapu: number;
+  papu: number;
+  wVsO: number; // %
+  wVsP: number; // %
+}
+
+interface CheckLine {
+  line: string;
+  dept: string;
+  checks: number;
+  checksPerDay: number;
+  checksPerHour: number;
+  lastCheck: string;
+}
+
+interface PeriodData {
+  label: string;
+  handUren: number;
+  bandUren: number;
+  totaalUren: number;
+  handStelen: number;
+  bandStelen: number;
+  totaalStelen: number;
+  pdiHand: number;
+  pdiBand: number;
+  pdiTotaal: number;
+}
 
 interface Bottleneck {
   id: string;
-  severity: Severity;
+  severity: "critical" | "warning" | "info";
   title: string;
-  what: string;
-  why: string;
+  description: string;
   impact: string;
-  line?: string;
-  family?: string;
-  time: string;
-}
-
-interface PressureCell {
-  id: string;
-  label: string;
-  pressure: number; // 0-10
-  orders: number;
-  avgStems: number;
-  fragmentation: boolean;
-  lateCluster: boolean;
-}
-
-interface ComplexityRow {
-  family: string;
-  avgStems: number;
-  complexityIndex: number; // 0-10
-  assemblyDifficulty: "low" | "medium" | "high";
-  apuTarget: number;
-  apuActual: number;
-  efficiencyPct: number;
-  volume: number;
-}
-
-interface LabourRow {
-  line: string;
-  dept: string;
-  labour: number;
-  labourTarget: number;
-  per1000Stems: number;
-  per1000Target: number;
-  effPct: number;
-  product: string;
-  signal: "overstaffed" | "balanced" | "understaffed";
-}
-
-interface EfficiencyTableRow {
-  id: string;
-  family: string;
-  orders: number;
-  units: number;
-  avgStems: number;
-  apuTarget: number;
-  apuActual: number;
-  labour: number;
-  labourEff: number;
-  pressureIndex: number;
-  complexityScore: number;
-  bottleneck: boolean;
-  action: string;
 }
 
 /* ------------------------------------------------------------------ */
 /*  DATA                                                               */
 /* ------------------------------------------------------------------ */
-const summaryMetrics = [
-  { label: "Output vandaag", value: "18.6K", unit: "st", icon: Package, status: "healthy" as const },
-  { label: "W-APU actueel", value: "208", unit: "st/u", icon: Gauge, status: "warning" as const, target: "220", change: "−5.5%", changeDir: "down" as const },
-  { label: "APU gap", value: "−12", unit: "st/u", icon: TrendingDown, status: "warning" as const },
-  { label: "Arbeid ingezet", value: "68", unit: "pers", icon: Users, status: "healthy" as const },
-  { label: "Arbeid / 1000 st", value: "3.7", unit: "pers", icon: Users, status: "warning" as const, target: "3.2" },
-  { label: "Drukindex", value: "7.2", unit: "/10", icon: Flame, status: "warning" as const, change: "+0.8", changeDir: "up" as const },
-  { label: "Eff. trend vs gisteren", value: "−2.4", unit: "%", icon: Activity, status: "warning" as const, change: "Dalend", changeDir: "down" as const },
-  { label: "Lijn-onbalans", value: "3", unit: "lijnen", icon: AlertTriangle, status: "critical" as const },
+const apuData: APURow[] = [
+  { dept: "Hand", oapu: 220, wapu: 208, papu: 215, wVsO: -5.5, wVsP: -3.3 },
+  { dept: "Band", oapu: 330, wapu: 318, papu: 325, wVsO: -3.6, wVsP: -2.2 },
+  { dept: "Totaal", oapu: 258, wapu: 248, papu: 254, wVsO: -3.9, wVsP: -2.4 },
 ];
 
-const pressureLines: PressureCell[] = [
-  { id: "H1", label: "Hand 1", pressure: 5.2, orders: 3, avgStems: 11, fragmentation: false, lateCluster: false },
-  { id: "H2", label: "Hand 2", pressure: 4.8, orders: 2, avgStems: 9, fragmentation: false, lateCluster: false },
-  { id: "H3", label: "Hand 3", pressure: 9.1, orders: 4, avgStems: 15, fragmentation: true, lateCluster: true },
-  { id: "H4", label: "Hand 4", pressure: 4.0, orders: 2, avgStems: 9, fragmentation: false, lateCluster: false },
-  { id: "H5", label: "Hand 5", pressure: 6.5, orders: 3, avgStems: 12, fragmentation: true, lateCluster: false },
-  { id: "H6", label: "Hand 6", pressure: 8.4, orders: 3, avgStems: 14, fragmentation: false, lateCluster: true },
-  { id: "H7", label: "Hand 7", pressure: 2.0, orders: 0, avgStems: 0, fragmentation: false, lateCluster: false },
-  { id: "B1", label: "Band 1", pressure: 3.2, orders: 1, avgStems: 7, fragmentation: false, lateCluster: false },
-  { id: "B2", label: "Band 2", pressure: 5.8, orders: 2, avgStems: 8, fragmentation: false, lateCluster: false },
-  { id: "B3", label: "Band 3", pressure: 4.5, orders: 2, avgStems: 7, fragmentation: false, lateCluster: false },
-  { id: "B4", label: "Band 4", pressure: 7.6, orders: 3, avgStems: 13, fragmentation: true, lateCluster: false },
-  { id: "B5", label: "Band 5", pressure: 1.5, orders: 0, avgStems: 0, fragmentation: false, lateCluster: false },
+const checksData: CheckLine[] = [
+  { line: "H1", dept: "Hand", checks: 14, checksPerDay: 14, checksPerHour: 1.8, lastCheck: "11:42" },
+  { line: "H2", dept: "Hand", checks: 12, checksPerDay: 12, checksPerHour: 1.5, lastCheck: "11:38" },
+  { line: "H3", dept: "Hand", checks: 4, checksPerDay: 4, checksPerHour: 0.5, lastCheck: "09:15" },
+  { line: "H4", dept: "Hand", checks: 11, checksPerDay: 11, checksPerHour: 1.4, lastCheck: "11:30" },
+  { line: "H5", dept: "Hand", checks: 9, checksPerDay: 9, checksPerHour: 1.1, lastCheck: "11:20" },
+  { line: "H6", dept: "Hand", checks: 6, checksPerDay: 6, checksPerHour: 0.8, lastCheck: "10:45" },
+  { line: "H7", dept: "Hand", checks: 13, checksPerDay: 13, checksPerHour: 1.6, lastCheck: "11:40" },
+  { line: "B1", dept: "Band", checks: 10, checksPerDay: 10, checksPerHour: 1.3, lastCheck: "11:35" },
+  { line: "B2", dept: "Band", checks: 8, checksPerDay: 8, checksPerHour: 1.0, lastCheck: "11:10" },
+  { line: "B3", dept: "Band", checks: 11, checksPerDay: 11, checksPerHour: 1.4, lastCheck: "11:28" },
+  { line: "B4", dept: "Band", checks: 5, checksPerDay: 5, checksPerHour: 0.6, lastCheck: "10:00" },
+  { line: "B5", dept: "Band", checks: 9, checksPerDay: 9, checksPerHour: 1.1, lastCheck: "11:22" },
 ];
 
-const pressureFamilies: PressureCell[] = [
-  { id: "prem", label: "Premium", pressure: 7.8, orders: 8, avgStems: 13, fragmentation: true, lateCluster: true },
-  { id: "std", label: "Standard", pressure: 5.2, orders: 6, avgStems: 10, fragmentation: false, lateCluster: false },
-  { id: "budg", label: "Budget", pressure: 4.0, orders: 5, avgStems: 8, fragmentation: false, lateCluster: false },
-  { id: "seas", label: "Seasonal", pressure: 8.5, orders: 4, avgStems: 14, fragmentation: true, lateCluster: true },
-  { id: "field", label: "Field", pressure: 3.4, orders: 3, avgStems: 7, fragmentation: false, lateCluster: false },
+const totalChecks = checksData.reduce((s, c) => s + c.checks, 0);
+const avgChecks = totalChecks / checksData.length;
+
+const periods: PeriodData[] = [
+  { label: "Afgelopen week", handUren: 320, bandUren: 210, totaalUren: 530, handStelen: 142000, bandStelen: 98000, totaalStelen: 240000, pdiHand: 5.8, pdiBand: 4.2, pdiTotaal: 5.2 },
+  { label: "Komende week", handUren: 365, bandUren: 245, totaalUren: 610, handStelen: 168000, bandStelen: 118000, totaalStelen: 286000, pdiHand: 7.4, pdiBand: 6.1, pdiTotaal: 6.9 },
+  { label: "Week +2", handUren: 340, bandUren: 225, totaalUren: 565, handStelen: 155000, bandStelen: 105000, totaalStelen: 260000, pdiHand: 6.5, pdiBand: 5.3, pdiTotaal: 6.0 },
 ];
 
-const bottlenecks: Bottleneck[] = [
-  { id: "b1", severity: "critical", title: "H3 — Extreme steelcomplexiteit", what: "Lijn H3 verwerkt 'Lovely' met 15 stelen/boeket en 4 gelijktijdige orders.", why: "Hoge steelcomplexiteit gecombineerd met orderfragmentatie verlaagt APU naar 172 (norm 220).", impact: "22% efficiëntieverlies, €840 extra arbeidskosten per dag.", line: "H3", family: "Premium", time: "10:12" },
-  { id: "b2", severity: "critical", title: "Seasonal producten verstoren ritme", what: "Productfamilie Seasonal heeft complexiteitsscore 8.2/10 en veroorzaakt APU-daling op 3 lijnen.", why: "Hoge steelvariatie, onbekende recepten en kleine orderseries.", impact: "Gemiddeld −18% APU op betrokken lijnen.", family: "Seasonal", time: "09:30" },
-  { id: "b3", severity: "warning", title: "H6 — Late order clustering", what: "3 orders met vertrek 14:00-14:30 geconcentreerd op H6.", why: "Ongelijke orderverdeling creëert piekdruk in de middag.", impact: "Risico op vertraging en kwaliteitsverlies.", line: "H6", time: "09:45" },
-  { id: "b4", severity: "warning", title: "Arbeiddruk Hand-afdeling", what: "68 medewerkers ingezet, 3.7 per 1000 stelen vs norm 3.2.", why: "Hoge complexiteit vereist meer arbeid maar levert minder output.", impact: "15.6% arbeids-inefficiëntie, ~€1.200/dag overbesteding.", time: "09:00" },
-  { id: "b5", severity: "warning", title: "B4 — Orderfragmentatie", what: "3 kleine orders van verschillende klanten op Band 4.", why: "Frequente productwissels verlagen doorloopsnelheid.", impact: "APU 310 vs target 330, −6% efficiëntie.", line: "B4", time: "10:20" },
-  { id: "b6", severity: "info", title: "Materiaalrisico PO-007", what: "Order Chique wacht op Alstroemeria Virginia — recept onopgelost.", why: "Zonder receptidentificatie kan inkoop niet afronden.", impact: "Order geblokkeerd, lijn-slot onbenut.", time: "08:30" },
-];
-
-const complexityRows: ComplexityRow[] = [
-  { family: "Premium", avgStems: 13.2, complexityIndex: 7.8, assemblyDifficulty: "high", apuTarget: 220, apuActual: 195, efficiencyPct: 88.6, volume: 8200 },
-  { family: "Seasonal", avgStems: 14.1, complexityIndex: 8.2, assemblyDifficulty: "high", apuTarget: 220, apuActual: 188, efficiencyPct: 85.5, volume: 5200 },
-  { family: "Standard", avgStems: 10.4, complexityIndex: 5.0, assemblyDifficulty: "medium", apuTarget: 220, apuActual: 218, efficiencyPct: 99.1, volume: 11600 },
-  { family: "Budget", avgStems: 8.0, complexityIndex: 3.2, assemblyDifficulty: "low", apuTarget: 220, apuActual: 226, efficiencyPct: 102.7, volume: 9400 },
-  { family: "Field", avgStems: 7.2, complexityIndex: 2.8, assemblyDifficulty: "low", apuTarget: 330, apuActual: 342, efficiencyPct: 103.6, volume: 6800 },
-];
-
-const labourRows: LabourRow[] = [
-  { line: "H1", dept: "Hand", labour: 8, labourTarget: 7, per1000Stems: 3.2, per1000Target: 3.2, effPct: 100, product: "Charme XL", signal: "balanced" },
-  { line: "H2", dept: "Hand", labour: 7, labourTarget: 7, per1000Stems: 3.1, per1000Target: 3.2, effPct: 103, product: "Pastel", signal: "balanced" },
-  { line: "H3", dept: "Hand", labour: 10, labourTarget: 7, per1000Stems: 5.8, per1000Target: 3.2, effPct: 55, product: "Lovely", signal: "overstaffed" },
-  { line: "H4", dept: "Hand", labour: 7, labourTarget: 7, per1000Stems: 3.0, per1000Target: 3.2, effPct: 107, product: "Spring Bouquet", signal: "balanced" },
-  { line: "H5", dept: "Hand", labour: 8, labourTarget: 8, per1000Stems: 3.4, per1000Target: 3.2, effPct: 94, product: "Trend", signal: "balanced" },
-  { line: "H6", dept: "Hand", labour: 6, labourTarget: 8, per1000Stems: 3.6, per1000Target: 3.2, effPct: 89, product: "Elegance", signal: "understaffed" },
-  { line: "B1", dept: "Band", labour: 6, labourTarget: 5, per1000Stems: 2.4, per1000Target: 2.2, effPct: 92, product: "De Luxe ✓", signal: "balanced" },
-  { line: "B2", dept: "Band", labour: 5, labourTarget: 5, per1000Stems: 2.3, per1000Target: 2.2, effPct: 96, product: "Zomermix", signal: "balanced" },
-  { line: "B3", dept: "Band", labour: 5, labourTarget: 5, per1000Stems: 2.1, per1000Target: 2.2, effPct: 105, product: "Field M", signal: "balanced" },
-  { line: "B4", dept: "Band", labour: 4, labourTarget: 5, per1000Stems: 2.8, per1000Target: 2.2, effPct: 79, product: "Moederdag Mix", signal: "understaffed" },
-];
-
-const efficiencyTable: EfficiencyTableRow[] = [
-  { id: "e1", family: "Premium", orders: 8, units: 8200, avgStems: 13.2, apuTarget: 220, apuActual: 195, labour: 24, labourEff: 81, pressureIndex: 7.8, complexityScore: 7.8, bottleneck: true, action: "Complexiteit spreiden" },
-  { id: "e2", family: "Seasonal", orders: 4, units: 5200, avgStems: 14.1, apuTarget: 220, apuActual: 188, labour: 14, labourEff: 76, pressureIndex: 8.5, complexityScore: 8.2, bottleneck: true, action: "Orderbundeling" },
-  { id: "e3", family: "Standard", orders: 6, units: 11600, avgStems: 10.4, apuTarget: 220, apuActual: 218, labour: 14, labourEff: 98, pressureIndex: 5.2, complexityScore: 5.0, bottleneck: false, action: "—" },
-  { id: "e4", family: "Budget", orders: 5, units: 9400, avgStems: 8.0, apuTarget: 220, apuActual: 226, labour: 10, labourEff: 104, pressureIndex: 4.0, complexityScore: 3.2, bottleneck: false, action: "Schaalbaar" },
-  { id: "e5", family: "Field", orders: 3, units: 6800, avgStems: 7.2, apuTarget: 330, apuActual: 342, labour: 10, labourEff: 106, pressureIndex: 3.4, complexityScore: 2.8, bottleneck: false, action: "Schaalbaar" },
+const advisories = [
+  { icon: AlertTriangle, severity: "critical" as const, text: "Werkdruk Band stijgt +16.7% komende week — overweeg extra capaciteit of orderspreiding." },
+  { icon: TrendingUp, severity: "warning" as const, text: "Stelenvolume stijgt +19.2% (Hand) terwijl uren slechts +14.1% stijgen — verwacht druk op APU." },
+  { icon: Eye, severity: "warning" as const, text: "Checks op H3 en B4 significant lager dan gemiddeld — bandleiders sturen daar te weinig bij." },
+  { icon: TrendingDown, severity: "warning" as const, text: "W-APU (208) ligt onder zowel O-APU (220) als P-APU (215) — efficiency- en planningsdruk." },
+  { icon: Shield, severity: "critical" as const, text: "PDI stijgt naar 6.9 komende week (verhoogd) — extra managementaandacht vereist." },
+  { icon: Lightbulb, severity: "info" as const, text: "Band-afdeling draait relatief stabiel — potentie om orders van Hand naar Band te verschuiven." },
 ];
 
 /* ------------------------------------------------------------------ */
 /*  HELPERS                                                            */
 /* ------------------------------------------------------------------ */
 const fmt = (n: number) => n.toLocaleString("nl-NL");
+const pct = (v: number) => `${v > 0 ? "+" : ""}${v.toFixed(1)}%`;
+const pctDiff = (current: number, prev: number) => ((current - prev) / prev * 100);
 
-const pressureColor = (p: number) =>
-  p >= 8 ? "bg-destructive" : p >= 6 ? "bg-yellow-500" : p >= 4 ? "bg-primary/60" : "bg-accent/60";
+const deviationColor = (v: number) =>
+  v >= 0 ? "text-accent" : v >= -3 ? "text-yellow-500" : "text-destructive";
 
-const pressureTextColor = (p: number) =>
-  p >= 8 ? "text-destructive" : p >= 6 ? "text-yellow-500" : "text-accent";
+const pdiColor = (v: number): { text: string; bg: string; border: string; level: PDILevel } =>
+  v >= 8 ? { text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", level: "kritisch" } :
+  v >= 6 ? { text: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30", level: "verhoogd" } :
+  v >= 4 ? { text: "text-primary", bg: "bg-primary/10", border: "border-primary/30", level: "normaal" } :
+  { text: "text-accent", bg: "bg-accent/10", border: "border-accent/30", level: "laag" };
 
-const effColor = (pct: number) =>
-  pct >= 100 ? "text-accent" : pct >= 90 ? "text-yellow-500" : "text-destructive";
-
-const signalCls: Record<string, { bg: string; text: string; label: string }> = {
-  overstaffed: { bg: "bg-destructive/10 border-destructive/20", text: "text-destructive", label: "Overbezet" },
-  balanced: { bg: "bg-accent/10 border-accent/20", text: "text-accent", label: "Gebalanceerd" },
-  understaffed: { bg: "bg-yellow-500/10 border-yellow-500/20", text: "text-yellow-500", label: "Onderbezet" },
-};
-
-const difficultyLabel: Record<string, { cls: string }> = {
-  low: { cls: "text-accent bg-accent/10" },
-  medium: { cls: "text-yellow-500 bg-yellow-500/10" },
-  high: { cls: "text-destructive bg-destructive/10" },
-};
-
-const alertIcon: Record<Severity, typeof AlertTriangle> = {
-  critical: XCircle, warning: AlertTriangle, info: AlertCircle,
-};
-const alertCls: Record<Severity, string> = {
-  critical: "border-destructive/30 bg-destructive/5",
-  warning: "border-yellow-500/30 bg-yellow-500/5",
-  info: "border-border bg-card/50",
+const alertSeverity: Record<string, { bg: string; text: string }> = {
+  critical: { bg: "bg-destructive/5 border-destructive/25", text: "text-destructive" },
+  warning: { bg: "bg-yellow-500/5 border-yellow-500/25", text: "text-yellow-500" },
+  info: { bg: "bg-primary/5 border-primary/25", text: "text-primary" },
 };
 
 /* ------------------------------------------------------------------ */
 /*  REUSABLE COMPONENTS                                                */
 /* ------------------------------------------------------------------ */
-const Section = ({ title, icon: Icon, children, badge }: { title: string; icon: typeof Factory; children: React.ReactNode; badge?: string }) => (
+const Section = ({ title, icon: Icon, children, badge, tooltip }: {
+  title: string; icon: typeof Factory; children: React.ReactNode; badge?: string; tooltip?: string;
+}) => (
   <section className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm overflow-hidden">
     <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border">
       <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10">
@@ -202,102 +138,70 @@ const Section = ({ title, icon: Icon, children, badge }: { title: string; icon: 
       </div>
       <h2 className="text-[13px] font-bold text-foreground tracking-tight">{title}</h2>
       {badge && <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10 text-primary">{badge}</span>}
+      {tooltip && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild><Info className="w-3.5 h-3.5 text-muted-foreground/40 cursor-help" /></TooltipTrigger>
+            <TooltipContent className="max-w-[280px] text-[11px]"><p>{tooltip}</p></TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
     <div className="p-4 md:p-5">{children}</div>
   </section>
 );
 
-const MetricCard = ({ label, value, unit, icon: Icon, status, change, changeDir, target }: {
-  label: string; value: string; unit?: string; icon: typeof Factory;
-  status: "healthy" | "warning" | "critical";
-  change?: string; changeDir?: "up" | "down"; target?: string;
+const KPITile = ({ label, value, unit, tooltip, status, change }: {
+  label: string; value: string; unit?: string; tooltip?: string;
+  status: "healthy" | "warning" | "critical"; change?: string;
 }) => {
   const bg = status === "healthy" ? "bg-accent/5 border-accent/20" : status === "warning" ? "bg-yellow-500/5 border-yellow-500/20" : "bg-destructive/5 border-destructive/20";
   const dot = status === "healthy" ? "bg-accent" : status === "warning" ? "bg-yellow-500" : "bg-destructive";
-  const DirIcon = changeDir === "up" ? TrendingUp : changeDir === "down" ? TrendingDown : Minus;
   const changeColor = status === "healthy" ? "text-accent" : status === "warning" ? "text-yellow-500" : "text-destructive";
-  return (
-    <div className={cn("p-3 rounded-xl border transition-all hover:shadow-md", bg)}>
+  const content = (
+    <div className={cn("p-3 rounded-xl border transition-all hover:shadow-md cursor-default", bg)}>
       <div className="flex items-center gap-1.5 mb-1.5">
         <div className={cn("w-1.5 h-1.5 rounded-full", dot)} />
         <span className="text-[10px] font-medium text-foreground/50 tracking-tight truncate">{label}</span>
       </div>
-      <div className="flex items-end justify-between gap-1">
-        <div>
-          <div className="text-lg font-extrabold text-foreground leading-none">
-            {value}
-            {unit && <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">{unit}</span>}
-          </div>
-          {target && <div className="text-[10px] text-muted-foreground/40 mt-0.5">Target: {target}</div>}
-          {change && (
-            <div className={cn("flex items-center gap-0.5 mt-1", changeColor)}>
-              <DirIcon className="w-3 h-3" />
-              <span className="text-[10px] font-semibold">{change}</span>
-            </div>
-          )}
-        </div>
-        <Icon className="w-5 h-5 text-muted-foreground/20 shrink-0" />
+      <div className="text-lg font-extrabold text-foreground leading-none">
+        {value}
+        {unit && <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">{unit}</span>}
       </div>
+      {change && <div className={cn("text-[10px] font-semibold mt-1", changeColor)}>{change}</div>}
     </div>
+  );
+  if (!tooltip) return content;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent className="max-w-[260px] text-[11px]"><p>{tooltip}</p></TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
-/* ------------------------------------------------------------------ */
-/*  PRESSURE HEATMAP CELL                                              */
-/* ------------------------------------------------------------------ */
-const PressureCard = ({ cell }: { cell: PressureCell }) => (
-  <div className={cn(
-    "rounded-xl border p-3 transition-all hover:shadow-md",
-    cell.pressure >= 8 ? "border-destructive/30 bg-destructive/5" :
-    cell.pressure >= 6 ? "border-yellow-500/30 bg-yellow-500/5" :
-    "border-border bg-card/50"
-  )}>
-    <div className="flex items-center justify-between mb-2">
-      <div className="flex items-center gap-1.5">
-        <div className={cn("w-2 h-2 rounded-full", pressureColor(cell.pressure))} />
-        <span className="text-[12px] font-bold text-foreground">{cell.label}</span>
-      </div>
-      <span className={cn("text-[13px] font-extrabold font-mono", pressureTextColor(cell.pressure))}>{cell.pressure.toFixed(1)}</span>
-    </div>
-    <div className="space-y-1">
-      <div className="flex justify-between text-[10px]">
-        <span className="text-muted-foreground/50">Orders</span>
-        <span className="text-foreground/70">{cell.orders}</span>
-      </div>
-      <div className="flex justify-between text-[10px]">
-        <span className="text-muted-foreground/50">Gem. stelen</span>
-        <span className={cn("font-medium", cell.avgStems >= 13 ? "text-destructive" : cell.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{cell.avgStems || "—"}</span>
-      </div>
-    </div>
-    {(cell.fragmentation || cell.lateCluster) && (
-      <div className="flex gap-1 mt-2">
-        {cell.fragmentation && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">Fragment</span>}
-        {cell.lateCluster && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">Late cluster</span>}
-      </div>
-    )}
-    {/* Pressure bar */}
-    <div className="mt-2 h-1.5 rounded-full bg-border/30 overflow-hidden">
-      <div className={cn("h-full rounded-full transition-all", pressureColor(cell.pressure))} style={{ width: `${cell.pressure * 10}%` }} />
-    </div>
-  </div>
-);
+const TrendArrow = ({ value, suffix = "%" }: { value: number; suffix?: string }) => {
+  const Icon = value > 0 ? ArrowUpRight : value < 0 ? ArrowDownRight : Minus;
+  const color = value > 0 ? "text-destructive" : value < 0 ? "text-accent" : "text-muted-foreground/50";
+  // For hours/stems, increase = pressure = red. Decrease = green.
+  return (
+    <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-mono font-semibold", color)}>
+      <Icon className="w-3 h-3" />
+      {value > 0 ? "+" : ""}{value.toFixed(1)}{suffix}
+    </span>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /*  MAIN PAGE                                                          */
 /* ------------------------------------------------------------------ */
 const ProductionCockpit = () => {
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState("pressure");
-  const [pressureView, setPressureView] = useState<"lines" | "families">("lines");
+  const [deptFilter, setDeptFilter] = useState<"all" | Dept>("all");
 
-  const toggle = (id: string) => setExpanded(prev => prev === id ? null : id);
-
-  const sortedTable = [...efficiencyTable].sort((a, b) => {
-    if (sortBy === "pressure") return b.pressureIndex - a.pressureIndex;
-    if (sortBy === "efficiency") return a.labourEff - b.labourEff;
-    if (sortBy === "deviation") return (a.apuActual - a.apuTarget) - (b.apuActual - b.apuTarget);
-    return 0;
-  });
+  const currentPeriod = periods[1]; // komende week
+  const prevPeriod = periods[0]; // afgelopen week
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -306,206 +210,417 @@ const ProductionCockpit = () => {
         <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-5 space-y-4">
 
           {/* ── HEADER ── */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="w-2 h-8 rounded-full bg-gradient-brand" />
               <div>
                 <h1 className="text-sm font-black text-foreground uppercase tracking-wider">Production Cockpit</h1>
-                <p className="text-[10px] font-mono text-muted-foreground">Efficiëntie · Complexiteit · Druk · Knelpunten</p>
+                <p className="text-[10px] font-mono text-muted-foreground">Efficiëntie · Capaciteitsdruk · Lijnsturing · Productiedruk Index</p>
               </div>
             </div>
-            <Badge variant="outline" className="text-[10px] font-mono gap-1 border-accent/30 text-accent">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              LIVE
-            </Badge>
-          </div>
-
-          {/* ── SECTION 1: OPERATIONAL EFFICIENCY SUMMARY ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            {summaryMetrics.map(m => <MetricCard key={m.label} {...m} />)}
-          </div>
-
-          {/* ── SECTION 2: PRODUCTION PRESSURE MAP ── */}
-          <Section title="Production Pressure Map" icon={Flame} badge={`${pressureLines.filter(l => l.pressure >= 7).length} hoge druk`}>
-            <div className="flex gap-2 mb-4">
-              <Button variant={pressureView === "lines" ? "default" : "outline"} size="sm" className="h-7 text-[10px] font-mono" onClick={() => setPressureView("lines")}>Per lijn</Button>
-              <Button variant={pressureView === "families" ? "default" : "outline"} size="sm" className="h-7 text-[10px] font-mono" onClick={() => setPressureView("families")}>Per productfamilie</Button>
+            <div className="flex items-center gap-2">
+              <Select value={deptFilter} onValueChange={v => setDeptFilter(v as any)}>
+                <SelectTrigger className="h-7 w-28 text-[10px] font-mono"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle afd.</SelectItem>
+                  <SelectItem value="hand">Hand</SelectItem>
+                  <SelectItem value="band">Band</SelectItem>
+                  <SelectItem value="totaal">Totaal</SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge variant="outline" className="text-[10px] font-mono gap-1 border-accent/30 text-accent">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                LIVE
+              </Badge>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-              {(pressureView === "lines" ? pressureLines : pressureFamilies).map(cell => (
-                <PressureCard key={cell.id} cell={cell} />
+          </div>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1 — KPI HEADER / TOP SUMMARY                     */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2.5">
+            <KPITile label="W-APU gem." value="248" unit="st/u" status="warning"
+              tooltip="Werkelijke APU: de productiviteit gemeten via handmatige checks op de vloer." change="vs O-APU: −3.9%" />
+            <KPITile label="O-APU gem." value="258" unit="st/u" status="healthy"
+              tooltip="Klant-APU: de productiviteitsnorm die door de klant wordt betaald." />
+            <KPITile label="P-APU gem." value="254" unit="st/u" status="healthy"
+              tooltip="Plan-APU: de productiviteit waarmee planning rekent voor benodigde uren." />
+            <KPITile label="W vs O-APU" value="-3.9" unit="%" status="warning"
+              tooltip="Verschil tussen werkelijke APU en klantnorm. Negatief = minder productief dan betaald." />
+            <KPITile label="W vs P-APU" value="-2.4" unit="%" status="warning"
+              tooltip="Verschil tussen werkelijke APU en plan-APU. Negatief = meer uren nodig dan gepland." />
+            <KPITile label="Checks totaal" value={String(totalChecks)} status={totalChecks < 100 ? "warning" : "healthy"}
+              tooltip="Totaal checks over alle lijnen. Indicator van actieve operationele sturing door bandleiders." />
+            <KPITile label="Uren komende 2w" value={fmt(currentPeriod.totaalUren + periods[2].totaalUren)} unit="uur" status="warning"
+              tooltip="Verwachte productie-uren komende 2 weken op basis van vertrekdatum. Let op: vertrekdatum ≠ productiedatum, maar geeft een goede indicatie." />
+            <KPITile label="Stelen komende 2w" value={`${((currentPeriod.totaalStelen + periods[2].totaalStelen) / 1000).toFixed(0)}K`} unit="st" status="warning"
+              tooltip="Verwacht stelenvolume komende 2 weken. Indicator voor fysieke verwerkingsdruk." />
+            <KPITile label="PDI totaal" value={currentPeriod.pdiTotaal.toFixed(1)} unit="/10" status={currentPeriod.pdiTotaal >= 8 ? "critical" : currentPeriod.pdiTotaal >= 6 ? "warning" : "healthy"}
+              tooltip="Productiedruk Index: samengestelde score op basis van uren, stelen, checks en APU-afwijkingen." />
+          </div>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 2 — EFFICIENCY OVERVIEW                          */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Efficiency Overzicht" icon={Gauge} tooltip="Vergelijking O-APU (klantnorm), W-APU (werkelijk) en P-APU (planning) per afdeling.">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {apuData.filter(r => deptFilter === "all" || r.dept.toLowerCase() === deptFilter).map(r => (
+                <div key={r.dept} className={cn(
+                  "rounded-xl border p-4 transition-all",
+                  r.wVsO >= 0 ? "border-accent/20 bg-accent/5" : r.wVsO >= -3 ? "border-yellow-500/20 bg-yellow-500/5" : "border-destructive/20 bg-destructive/5"
+                )}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[13px] font-bold text-foreground">{r.dept}</span>
+                    <Badge variant="outline" className={cn("text-[9px] font-mono",
+                      r.wVsO >= 0 ? "border-accent/30 text-accent" : r.wVsO >= -3 ? "border-yellow-500/30 text-yellow-500" : "border-destructive/30 text-destructive"
+                    )}>
+                      {r.wVsO >= 0 ? "Op norm" : r.wVsO >= -3 ? "Licht onder" : "Onder norm"}
+                    </Badge>
+                  </div>
+
+                  {/* APU bars */}
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "O-APU", sublabel: "Klantnorm", value: r.oapu, color: "bg-primary" },
+                      { label: "W-APU", sublabel: "Werkelijk", value: r.wapu, color: r.wVsO >= 0 ? "bg-accent" : r.wVsO >= -3 ? "bg-yellow-500" : "bg-destructive" },
+                      { label: "P-APU", sublabel: "Planning", value: r.papu, color: "bg-primary/50" },
+                    ].map(bar => {
+                      const maxVal = Math.max(r.oapu, r.wapu, r.papu) * 1.05;
+                      return (
+                        <div key={bar.label}>
+                          <div className="flex items-center justify-between mb-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="text-[10px] font-mono text-muted-foreground/60 cursor-help">{bar.label}</span>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-[11px]"><p>{bar.sublabel}</p></TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <span className="text-[12px] font-mono font-bold text-foreground">{bar.value} <span className="text-muted-foreground/40 font-normal">st/u</span></span>
+                          </div>
+                          <div className="h-2 rounded-full bg-border/30 overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all", bar.color)} style={{ width: `${(bar.value / maxVal) * 100}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Deviations */}
+                  <div className="mt-3 pt-3 border-t border-border/30 grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[9px] font-mono text-muted-foreground/40">W vs O-APU</span>
+                      <div className={cn("text-[13px] font-mono font-bold", deviationColor(r.wVsO))}>{pct(r.wVsO)}</div>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-mono text-muted-foreground/40">W vs P-APU</span>
+                      <div className={cn("text-[13px] font-mono font-bold", deviationColor(r.wVsP))}>{pct(r.wVsP)}</div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </Section>
 
-          {/* ── SECTION 3: BOTTLENECK INTELLIGENCE ── */}
-          <Section title="Bottleneck Intelligence" icon={AlertTriangle} badge={`${bottlenecks.filter(b => b.severity === "critical").length} kritiek`}>
-            <div className="space-y-2">
-              {bottlenecks.map(b => {
-                const BIcon = alertIcon[b.severity];
-                return (
-                  <div key={b.id} className={cn("p-3.5 rounded-xl border", alertCls[b.severity])}>
-                    <div className="flex items-start gap-3">
-                      <BIcon className={cn("w-4 h-4 shrink-0 mt-0.5", b.severity === "critical" ? "text-destructive" : b.severity === "warning" ? "text-yellow-500" : "text-muted-foreground")} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[12px] font-semibold text-foreground">{b.title}</span>
-                          {b.line && <span className="text-[9px] font-mono text-muted-foreground/50 border border-border/50 px-1.5 rounded">{b.line}</span>}
-                          {b.family && <span className="text-[9px] font-mono text-muted-foreground/50 border border-border/50 px-1.5 rounded">{b.family}</span>}
-                        </div>
-                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div>
-                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Wat</span>
-                            <p className="text-[11px] text-foreground/70 leading-relaxed">{b.what}</p>
-                          </div>
-                          <div>
-                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Waarom</span>
-                            <p className="text-[11px] text-foreground/70 leading-relaxed">{b.why}</p>
-                          </div>
-                          <div>
-                            <span className="text-[9px] font-mono uppercase text-muted-foreground/40">Impact</span>
-                            <p className={cn("text-[11px] leading-relaxed font-medium", b.severity === "critical" ? "text-destructive" : b.severity === "warning" ? "text-yellow-500" : "text-foreground/70")}>{b.impact}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono text-muted-foreground/40 shrink-0">{b.time}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Section>
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 3 — CHECKS & LIJNSTURING                         */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Checks & Lijnsturing" icon={ClipboardCheck}
+            badge={`${totalChecks} checks`}
+            tooltip="Aantal handmatige checks per lijn door bandleiders. Indicator voor actieve sturing en operationele druk op de productie.">
 
-          {/* ── SECTION 4: PRODUCT COMPLEXITY ANALYSIS ── */}
-          <Section title="Product Complexity Analysis" icon={Brain}>
-            <div className="space-y-1">
-              <div className="hidden md:grid grid-cols-[1.2fr_0.5fr_0.6fr_0.6fr_0.6fr_0.5fr_0.6fr_0.5fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
-                <span>Productfamilie</span><span>Gem. stelen</span><span>Complexiteit</span><span>Assemblage</span><span>APU act/target</span><span>Efficiëntie</span><span>Volume</span><span>Impact</span>
+            {/* Total tile */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Checks totaal</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{totalChecks}</div>
               </div>
-              {complexityRows.sort((a, b) => b.complexityIndex - a.complexityIndex).map(r => {
-                const eff = effColor(r.efficiencyPct);
-                return (
-                  <div key={r.family} className={cn(
-                    "grid grid-cols-1 md:grid-cols-[1.2fr_0.5fr_0.6fr_0.6fr_0.6fr_0.5fr_0.6fr_0.5fr] items-center text-[12px] py-2.5 px-3 rounded-lg gap-2 transition-colors hover:bg-muted/30",
-                    r.complexityIndex >= 7 && "bg-destructive/3 border border-destructive/15",
-                  )}>
-                    <span className="font-semibold text-foreground">{r.family}</span>
-                    <span className={cn("hidden md:block font-mono", r.avgStems >= 13 ? "text-destructive font-semibold" : r.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{r.avgStems}</span>
-                    <div className="hidden md:flex items-center gap-2">
-                      <div className="flex-1 h-1.5 rounded-full bg-border/30 overflow-hidden">
-                        <div className={cn("h-full rounded-full", pressureColor(r.complexityIndex))} style={{ width: `${r.complexityIndex * 10}%` }} />
-                      </div>
-                      <span className={cn("text-[10px] font-mono font-bold", pressureTextColor(r.complexityIndex))}>{r.complexityIndex}</span>
-                    </div>
-                    <div className="hidden md:block">
-                      <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded", difficultyLabel[r.assemblyDifficulty].cls)}>{r.assemblyDifficulty}</span>
-                    </div>
-                    <span className="hidden md:block font-mono">
-                      <span className={eff}>{r.apuActual}</span>
-                      <span className="text-muted-foreground/30">/{r.apuTarget}</span>
-                    </span>
-                    <span className={cn("hidden md:block font-mono font-semibold", eff)}>{r.efficiencyPct}%</span>
-                    <span className="hidden md:block font-mono text-foreground/60">{fmt(r.volume)}</span>
-                    <span className="hidden md:block">
-                      {r.complexityIndex >= 7 ? <AlertTriangle className="w-3.5 h-3.5 text-destructive" /> : r.complexityIndex >= 5 ? <AlertCircle className="w-3.5 h-3.5 text-yellow-500" /> : <span className="text-accent text-[10px]">OK</span>}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </Section>
-
-          {/* ── SECTION 5: LABOUR EFFICIENCY VIEW ── */}
-          <Section title="Labour Efficiency" icon={Users}>
-            <div className="space-y-1">
-              <div className="hidden md:grid grid-cols-[0.4fr_0.5fr_0.9fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.6fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
-                <span>Lijn</span><span>Afd.</span><span>Product</span><span>Arbeid</span><span>Target</span><span>/1000 st</span><span>Target</span><span>Eff %</span><span>Signaal</span>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Gem. per lijn</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{avgChecks.toFixed(1)}</div>
               </div>
-              {labourRows.map(r => {
-                const s = signalCls[r.signal];
-                return (
-                  <div key={r.line} className={cn(
-                    "grid grid-cols-1 md:grid-cols-[0.4fr_0.5fr_0.9fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.6fr] items-center text-[12px] py-2 px-3 rounded-lg gap-2 transition-colors hover:bg-muted/30",
-                    r.signal !== "balanced" && `border ${s.bg}`,
-                  )}>
-                    <span className="font-bold text-foreground">{r.line}</span>
-                    <span className="hidden md:block text-muted-foreground/60 text-[11px]">{r.dept}</span>
-                    <span className="hidden md:block text-foreground/70 text-[11px] truncate">{r.product}</span>
-                    <span className={cn("hidden md:block font-mono", r.labour > r.labourTarget ? "text-destructive font-semibold" : "text-foreground/70")}>{r.labour}</span>
-                    <span className="hidden md:block font-mono text-muted-foreground/50">{r.labourTarget}</span>
-                    <span className={cn("hidden md:block font-mono", r.per1000Stems > r.per1000Target * 1.1 ? "text-destructive font-semibold" : "text-foreground/70")}>{r.per1000Stems}</span>
-                    <span className="hidden md:block font-mono text-muted-foreground/50">{r.per1000Target}</span>
-                    <span className={cn("hidden md:block font-mono font-semibold", effColor(r.effPct))}>{r.effPct}%</span>
-                    <div className="hidden md:block">
-                      <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full border", s.bg, s.text)}>{s.label}</span>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Checks Hand</span>
+                <div className="text-lg font-extrabold text-foreground mt-1">{checksData.filter(c => c.dept === "Hand").reduce((s, c) => s + c.checks, 0)}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Checks Band</span>
+                <div className="text-lg font-extrabold text-foreground mt-1">{checksData.filter(c => c.dept === "Band").reduce((s, c) => s + c.checks, 0)}</div>
+              </div>
+            </div>
+
+            {/* Bar chart per lijn */}
+            <div className="mb-4">
+              <span className="text-[10px] font-mono text-muted-foreground/40 mb-2 block">Checks per lijn (gesorteerd)</span>
+              <div className="space-y-1.5">
+                {[...checksData].sort((a, b) => b.checks - a.checks).map(c => {
+                  const maxChecks = Math.max(...checksData.map(x => x.checks));
+                  const isLow = c.checks < avgChecks * 0.6;
+                  return (
+                    <div key={c.line} className="flex items-center gap-3">
+                      <span className={cn("text-[11px] font-mono font-bold w-6", isLow ? "text-destructive" : "text-foreground")}>{c.line}</span>
+                      <div className="flex-1 h-4 rounded bg-border/20 overflow-hidden relative">
+                        <div
+                          className={cn("h-full rounded transition-all", isLow ? "bg-destructive/60" : "bg-primary/50")}
+                          style={{ width: `${(c.checks / maxChecks) * 100}%` }}
+                        />
+                        {/* avg line */}
+                        <div
+                          className="absolute top-0 bottom-0 w-px bg-accent/60"
+                          style={{ left: `${(avgChecks / maxChecks) * 100}%` }}
+                        />
+                      </div>
+                      <span className={cn("text-[11px] font-mono font-semibold w-6 text-right", isLow ? "text-destructive" : "text-foreground/70")}>{c.checks}</span>
+                      <span className="text-[9px] font-mono text-muted-foreground/40 w-12 text-right">{c.checksPerHour}/uur</span>
+                      <span className="text-[9px] font-mono text-muted-foreground/30 w-12 text-right">{c.lastCheck}</span>
+                      {isLow && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild><AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" /></TooltipTrigger>
+                            <TooltipContent className="text-[11px]"><p>Significant minder checks dan gemiddeld — mogelijke blinde vlek in sturing.</p></TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-1 mt-2">
+                <div className="w-px h-3 bg-accent/60" />
+                <span className="text-[9px] font-mono text-accent/60">gem. {avgChecks.toFixed(1)}</span>
+              </div>
             </div>
           </Section>
 
-          {/* ── SECTION 6: DETAILED EFFICIENCY TABLE ── */}
-          <Section title="Efficiëntie Detail" icon={BarChart3} badge={`${efficiencyTable.length} families`}>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-[10px] text-muted-foreground/50">Sorteer:</span>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-7 w-36 text-[10px] font-mono"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pressure">Hoogste druk</SelectItem>
-                  <SelectItem value="efficiency">Laagste efficiëntie</SelectItem>
-                  <SelectItem value="deviation">Grootste afwijking</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 4 — UURDRUK VOORUITBLIK                          */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Uurdruk Vooruitblik" icon={CalendarClock}
+            tooltip="Verwachte productie-uren op basis van vertrekdatum. Let op: vertrekdatum is niet altijd gelijk aan productiedatum, maar geeft een goede indicatie van de uren die op de productie afkomen.">
+            <div className="overflow-x-auto">
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="border-b border-border/30">
+                    <th className="text-left text-[10px] font-mono text-muted-foreground/40 pb-2 pr-4">Periode</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Hand uren</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Band uren</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3 font-bold">Totaal uren</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Δ vs vorige week</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {periods.map((p, i) => {
+                    const diffTotal = i > 0 ? pctDiff(p.totaalUren, periods[0].totaalUren) : 0;
+                    return (
+                      <tr key={p.label} className={cn("border-b border-border/20", i === 1 && "bg-primary/3")}>
+                        <td className="py-2.5 pr-4">
+                          <span className={cn("font-semibold", i === 0 ? "text-muted-foreground/60" : "text-foreground")}>{p.label}</span>
+                          {i === 1 && <span className="text-[8px] ml-1 font-mono text-primary">▸ focus</span>}
+                        </td>
+                        <td className="text-right px-3 font-mono font-semibold">{fmt(p.handUren)}</td>
+                        <td className="text-right px-3 font-mono font-semibold">{fmt(p.bandUren)}</td>
+                        <td className="text-right px-3 font-mono font-bold text-foreground">{fmt(p.totaalUren)}</td>
+                        <td className="text-right px-3">
+                          {i > 0 ? <TrendArrow value={diffTotal} /> : <span className="text-[10px] text-muted-foreground/30">—</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-
-            <div className="hidden md:grid grid-cols-[1fr_0.4fr_0.5fr_0.5fr_0.6fr_0.4fr_0.5fr_0.5fr_0.5fr_0.4fr_0.8fr] text-[10px] text-muted-foreground/40 font-mono pb-2 border-b border-border/30 gap-2 px-3">
-              <span>Familie</span><span>Orders</span><span>Units</span><span>St/bq</span><span>APU act/tgt</span><span>Arbeid</span><span>Arb.eff</span><span>Druk</span><span>Compl.</span><span>Knelp.</span><span>Actie</span>
+            <div className="mt-3 flex items-start gap-2 p-2 rounded-lg bg-muted/30 border border-border/30">
+              <Info className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                Uurdruk is berekend op basis van vertrekdatum. Vertrekdatum is niet altijd gelijk aan de feitelijke productiedatum, maar geeft wel een betrouwbare indicatie van het urenvolume dat op de productie afkomt.
+              </p>
             </div>
+          </Section>
 
-            <div className="space-y-1 mt-1">
-              {sortedTable.map(r => {
-                const isExp = expanded === r.id;
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 5 — STELENDRUK VOORUITBLIK                       */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Stelendruk Vooruitblik" icon={Layers}
+            tooltip="Verwacht stelenvolume per afdeling. Naast uren is het fysieke volume (stelen) een kritische indicator voor verwerkingsdruk en complexiteit.">
+            <div className="overflow-x-auto">
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="border-b border-border/30">
+                    <th className="text-left text-[10px] font-mono text-muted-foreground/40 pb-2 pr-4">Periode</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Hand stelen</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Band stelen</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3 font-bold">Totaal stelen</th>
+                    <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Δ vs vorige week</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {periods.map((p, i) => {
+                    const diffTotal = i > 0 ? pctDiff(p.totaalStelen, periods[0].totaalStelen) : 0;
+                    return (
+                      <tr key={p.label} className={cn("border-b border-border/20", i === 1 && "bg-primary/3")}>
+                        <td className="py-2.5 pr-4">
+                          <span className={cn("font-semibold", i === 0 ? "text-muted-foreground/60" : "text-foreground")}>{p.label}</span>
+                        </td>
+                        <td className="text-right px-3 font-mono font-semibold">{fmt(p.handStelen)}</td>
+                        <td className="text-right px-3 font-mono font-semibold">{fmt(p.bandStelen)}</td>
+                        <td className="text-right px-3 font-mono font-bold text-foreground">{fmt(p.totaalStelen)}</td>
+                        <td className="text-right px-3">
+                          {i > 0 ? <TrendArrow value={diffTotal} /> : <span className="text-[10px] text-muted-foreground/30">—</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 6 — VERGELIJKING (UREN + STELEN + PDI COMBINED)  */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Vergelijking: Afgelopen week vs Komende 2 weken" icon={BarChart3}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {periods.map((p, i) => {
+                const pdi = pdiColor(p.pdiTotaal);
                 return (
-                  <Collapsible key={r.id} open={isExp} onOpenChange={() => toggle(r.id)}>
-                    <CollapsibleTrigger asChild>
-                      <div className={cn(
-                        "grid grid-cols-1 md:grid-cols-[1fr_0.4fr_0.5fr_0.5fr_0.6fr_0.4fr_0.5fr_0.5fr_0.5fr_0.4fr_0.8fr] items-center text-[12px] py-2.5 px-3 rounded-lg gap-2 cursor-pointer transition-colors",
-                        isExp ? "bg-primary/5 border border-primary/20" : "hover:bg-muted/30 border border-transparent",
-                        r.bottleneck && !isExp && "border-destructive/15 bg-destructive/3",
-                      )}>
+                  <div key={p.label} className={cn(
+                    "rounded-xl border p-4",
+                    i === 0 ? "border-border bg-card/50 opacity-80" : i === 1 ? `${pdi.border} ${pdi.bg}` : "border-border bg-card/50"
+                  )}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[12px] font-bold text-foreground">{p.label}</span>
+                      {i === 1 && <Badge variant="outline" className="text-[8px] font-mono border-primary/30 text-primary">Focus</Badge>}
+                    </div>
+
+                    <div className="space-y-2 text-[11px]">
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">Uren totaal</span><span className="font-mono font-bold">{fmt(p.totaalUren)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">↳ Hand</span><span className="font-mono">{fmt(p.handUren)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">↳ Band</span><span className="font-mono">{fmt(p.bandUren)}</span></div>
+                      <div className="border-t border-border/20 my-1" />
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">Stelen totaal</span><span className="font-mono font-bold">{fmt(p.totaalStelen)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">↳ Hand</span><span className="font-mono">{fmt(p.handStelen)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground/60">↳ Band</span><span className="font-mono">{fmt(p.bandStelen)}</span></div>
+                      <div className="border-t border-border/20 my-1" />
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground/60">PDI</span>
                         <div className="flex items-center gap-2">
-                          {isExp ? <ChevronDown className="w-3 h-3 text-muted-foreground/40" /> : <ChevronRight className="w-3 h-3 text-muted-foreground/40" />}
-                          <span className="font-semibold text-foreground">{r.family}</span>
-                        </div>
-                        <span className="hidden md:block font-mono text-foreground/60">{r.orders}</span>
-                        <span className="hidden md:block font-mono text-foreground/60">{fmt(r.units)}</span>
-                        <span className={cn("hidden md:block font-mono", r.avgStems >= 13 ? "text-destructive font-semibold" : r.avgStems >= 10 ? "text-yellow-500" : "text-foreground/70")}>{r.avgStems}</span>
-                        <span className="hidden md:block font-mono">
-                          <span className={effColor((r.apuActual / r.apuTarget) * 100)}>{r.apuActual}</span>
-                          <span className="text-muted-foreground/30">/{r.apuTarget}</span>
-                        </span>
-                        <span className="hidden md:block font-mono text-foreground/60">{r.labour}</span>
-                        <span className={cn("hidden md:block font-mono font-semibold", effColor(r.labourEff))}>{r.labourEff}%</span>
-                        <span className={cn("hidden md:block font-mono font-bold", pressureTextColor(r.pressureIndex))}>{r.pressureIndex}</span>
-                        <span className={cn("hidden md:block font-mono font-bold", pressureTextColor(r.complexityScore))}>{r.complexityScore}</span>
-                        <span className="hidden md:block">{r.bottleneck ? <AlertTriangle className="w-3.5 h-3.5 text-destructive" /> : <span className="text-accent text-[10px]">—</span>}</span>
-                        <span className="hidden md:block text-[10px] text-muted-foreground/60">{r.action}</span>
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="ml-5 md:ml-8 p-3 rounded-lg bg-muted/20 border border-border/30 mt-1 mb-2">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div><span className="text-[10px] text-muted-foreground/40">APU gap</span><div className={cn("text-[12px] font-mono font-bold", r.apuActual >= r.apuTarget ? "text-accent" : "text-destructive")}>{r.apuActual - r.apuTarget} st/u</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Arbeid / 1000 st</span><div className="text-[12px] font-mono text-foreground">{(r.labour / (r.units / 1000)).toFixed(1)}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Druk classificatie</span><div className={cn("text-[12px] font-semibold", pressureTextColor(r.pressureIndex))}>{r.pressureIndex >= 8 ? "Kritiek" : r.pressureIndex >= 6 ? "Hoog" : r.pressureIndex >= 4 ? "Gemiddeld" : "Laag"}</div></div>
-                          <div><span className="text-[10px] text-muted-foreground/40">Aanbeveling</span><div className="text-[12px] text-foreground font-medium">{r.action}</div></div>
+                          <span className={cn("font-mono font-bold text-[13px]", pdiColor(p.pdiTotaal).text)}>{p.pdiTotaal.toFixed(1)}</span>
+                          <Badge variant="outline" className={cn("text-[8px] font-mono", pdiColor(p.pdiTotaal).border, pdiColor(p.pdiTotaal).text)}>
+                            {pdiColor(p.pdiTotaal).level}
+                          </Badge>
                         </div>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                    </div>
+
+                    {i > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/30 grid grid-cols-2 gap-2 text-[10px]">
+                        <div>
+                          <span className="text-muted-foreground/40 font-mono">Δ Uren</span>
+                          <div><TrendArrow value={pctDiff(p.totaalUren, periods[0].totaalUren)} /></div>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground/40 font-mono">Δ Stelen</span>
+                          <div><TrendArrow value={pctDiff(p.totaalStelen, periods[0].totaalStelen)} /></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 7 — PRODUCTIEDRUK INDEX (PDI)                    */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Productiedruk Index (PDI)" icon={Activity}
+            tooltip="Samengestelde drukscore op basis van uurdruk, stelenvolume, checks per lijn, en afwijkingen W-APU vs O-APU en P-APU. Schaal 0-10.">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+              {(["Hand", "Band", "Totaal"] as const).map(dept => {
+                const deptKey = dept.toLowerCase() as "hand" | "band" | "totaal";
+                const weekData = periods.map(p => ({
+                  label: p.label,
+                  value: deptKey === "hand" ? p.pdiHand : deptKey === "band" ? p.pdiBand : p.pdiTotaal,
+                }));
+                const current = weekData[1].value;
+                const pdi = pdiColor(current);
+                return (
+                  <div key={dept} className={cn("rounded-xl border p-4", pdi.border, pdi.bg)}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13px] font-bold text-foreground">{dept}</span>
+                      <Badge variant="outline" className={cn("text-[9px] font-mono uppercase", pdi.border, pdi.text)}>{pdi.level}</Badge>
+                    </div>
+                    <div className={cn("text-3xl font-extrabold font-mono leading-none mb-3", pdi.text)}>{current.toFixed(1)}</div>
+                    {/* Mini gauge */}
+                    <div className="h-2.5 rounded-full bg-border/30 overflow-hidden mb-3">
+                      <div className={cn("h-full rounded-full transition-all",
+                        current >= 8 ? "bg-destructive" : current >= 6 ? "bg-yellow-500" : current >= 4 ? "bg-primary" : "bg-accent"
+                      )} style={{ width: `${current * 10}%` }} />
+                    </div>
+                    {/* Trend per week */}
+                    <div className="space-y-1">
+                      {weekData.map((w, i) => (
+                        <div key={w.label} className="flex justify-between text-[10px]">
+                          <span className={cn("font-mono", i === 0 ? "text-muted-foreground/40" : "text-foreground/70")}>{w.label}</span>
+                          <span className={cn("font-mono font-semibold", pdiColor(w.value).text)}>{w.value.toFixed(1)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* PDI composition explanation */}
+            <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
+              <span className="text-[10px] font-mono text-muted-foreground/50 block mb-2">PDI samenstelling</span>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px]">
+                {[
+                  { label: "Uurdruk", weight: "25%", icon: Clock },
+                  { label: "Stelenvolume", weight: "25%", icon: Layers },
+                  { label: "Checks / sturing", weight: "15%", icon: ClipboardCheck },
+                  { label: "W vs O-APU afw.", weight: "20%", icon: Gauge },
+                  { label: "W vs P-APU afw.", weight: "15%", icon: Brain },
+                ].map(c => (
+                  <div key={c.label} className="flex items-center gap-2">
+                    <c.icon className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                    <div>
+                      <span className="text-foreground/70 block">{c.label}</span>
+                      <span className="font-mono font-bold text-primary">{c.weight}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 8 — ADVIESBLOK / CONCLUSIE                       */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Management Advies" icon={Lightbulb} badge="Auto-gegenereerd">
+            <div className="space-y-2">
+              {advisories.map((a, i) => {
+                const s = alertSeverity[a.severity];
+                return (
+                  <div key={i} className={cn("flex items-start gap-3 p-3 rounded-xl border", s.bg)}>
+                    <a.icon className={cn("w-4 h-4 shrink-0 mt-0.5", s.text)} />
+                    <p className="text-[12px] text-foreground/80 leading-relaxed">{a.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span className="text-[12px] font-bold text-foreground">Conclusie</span>
+              </div>
+              <p className="text-[12px] text-foreground/70 leading-relaxed">
+                De productie staat onder verhoogde druk komende week. Het stelenvolume stijgt sneller dan de beschikbare uren, wat wijst op toenemende verwerkingscomplexiteit.
+                De W-APU ligt onder zowel de klantnorm (O-APU) als de planningsnorm (P-APU), wat betekent dat er meer uren nodig zijn dan gepland én betaald.
+                Checks op lijnen H3 en B4 zijn significant lager dan gemiddeld — dit zijn potentiële blinde vlekken in de sturing.
+                De PDI stijgt naar {currentPeriod.pdiTotaal.toFixed(1)} (verhoogd). Aanbevolen wordt om extra capaciteitsmaatregelen te overwegen en de bandleiders te briefen over de focus-lijnen.
+              </p>
             </div>
           </Section>
 
