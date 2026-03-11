@@ -99,64 +99,120 @@ interface OrderBucket {
   range: string;
   count: number;
   volume: number;
+  pctOrders: number;
   inefficient: boolean;
+}
+
+interface OrderdrukPeriod {
+  label: string;
+  totalOrders: number;
+  avgSize: number;
+  medianSize: number;
+  inefficientOrders: number;
+  inefficientPct: number;
+  totalVolume: number;
+  inefficientVolume: number;
 }
 
 interface OrderdrukData {
   dept: string;
+  threshold: number;
   totalOrders: number;
   avgSize: number;
   medianSize: number;
+  totalVolume: number;
   buckets: OrderBucket[];
   inefficientOrders: number;
   inefficientVolume: number;
   inefficientPct: number;
+  periods: OrderdrukPeriod[];
+  // Correlations
+  wapuImpact: number; // estimated APU loss from small orders
+  opstartverliesUren: number; // estimated lost hours from startups
+  fragmentatieIndex: number; // 0-10, how fragmented
 }
 
+type OrderdrukLevel = "laag" | "normaal" | "verhoogd" | "kritisch";
+
+const calcOrderdrukScore = (d: OrderdrukData): { score: number; level: OrderdrukLevel } => {
+  // Weighted: ineffPct (35%), avgSize inverse (25%), fragmentation (20%), opstartloss (20%)
+  const ineffScore = Math.min(d.inefficientPct / 10, 10); // 30% → 3.0
+  const sizeScore = Math.max(0, 10 - d.avgSize / (d.threshold * 0.5)); // smaller avg = higher score
+  const fragScore = d.fragmentatieIndex;
+  const opstart = Math.min(d.opstartverliesUren / 5, 10);
+  const score = Math.min(10, ineffScore * 0.35 + sizeScore * 0.25 + fragScore * 0.20 + opstart * 0.20);
+  const rounded = Math.round(score * 10) / 10;
+  const level: OrderdrukLevel = rounded >= 8 ? "kritisch" : rounded >= 6 ? "verhoogd" : rounded >= 4 ? "normaal" : "laag";
+  return { score: rounded, level };
+};
+
 const orderdrukHand: OrderdrukData = {
-  dept: "Hand",
-  totalOrders: 186,
-  avgSize: 87,
-  medianSize: 62,
+  dept: "Hand", threshold: 40,
+  totalOrders: 186, avgSize: 87, medianSize: 62, totalVolume: 20808,
   buckets: [
-    { range: "0 – 40", count: 54, volume: 1188, inefficient: true },
-    { range: "40 – 100", count: 68, volume: 4760, inefficient: false },
-    { range: "100 – 250", count: 42, volume: 6720, inefficient: false },
-    { range: "250+", count: 22, volume: 8140, inefficient: false },
+    { range: "0 – 40", count: 54, volume: 1188, pctOrders: 29.0, inefficient: true },
+    { range: "40 – 100", count: 68, volume: 4760, pctOrders: 36.6, inefficient: false },
+    { range: "100 – 250", count: 42, volume: 6720, pctOrders: 22.6, inefficient: false },
+    { range: "250+", count: 22, volume: 8140, pctOrders: 11.8, inefficient: false },
   ],
-  inefficientOrders: 54,
-  inefficientVolume: 1188,
-  inefficientPct: 29.0,
+  inefficientOrders: 54, inefficientVolume: 1188, inefficientPct: 29.0,
+  periods: [
+    { label: "Afgelopen week", totalOrders: 186, avgSize: 87, medianSize: 62, inefficientOrders: 54, inefficientPct: 29.0, totalVolume: 20808, inefficientVolume: 1188 },
+    { label: "Komende week", totalOrders: 212, avgSize: 78, medianSize: 55, inefficientOrders: 72, inefficientPct: 34.0, totalVolume: 22360, inefficientVolume: 1656 },
+    { label: "Week +2", totalOrders: 195, avgSize: 82, medianSize: 58, inefficientOrders: 60, inefficientPct: 30.8, totalVolume: 21120, inefficientVolume: 1380 },
+  ],
+  wapuImpact: -8, // APU loss in st/u
+  opstartverliesUren: 12.5,
+  fragmentatieIndex: 6.2,
 };
 
 const orderdrukBand: OrderdrukData = {
-  dept: "Band",
-  totalOrders: 124,
-  avgSize: 412,
-  medianSize: 320,
+  dept: "Band", threshold: 250,
+  totalOrders: 124, avgSize: 412, medianSize: 320, totalVolume: 59680,
   buckets: [
-    { range: "0 – 250", count: 38, volume: 5320, inefficient: true },
-    { range: "250 – 500", count: 44, volume: 16280, inefficient: false },
-    { range: "500 – 1000", count: 28, volume: 18480, inefficient: false },
-    { range: "1000+", count: 14, volume: 19600, inefficient: false },
+    { range: "0 – 250", count: 38, volume: 5320, pctOrders: 30.6, inefficient: true },
+    { range: "250 – 500", count: 44, volume: 16280, pctOrders: 35.5, inefficient: false },
+    { range: "500 – 1000", count: 28, volume: 18480, pctOrders: 22.6, inefficient: false },
+    { range: "1000+", count: 14, volume: 19600, pctOrders: 11.3, inefficient: false },
   ],
-  inefficientOrders: 38,
-  inefficientVolume: 5320,
-  inefficientPct: 30.6,
+  inefficientOrders: 38, inefficientVolume: 5320, inefficientPct: 30.6,
+  periods: [
+    { label: "Afgelopen week", totalOrders: 124, avgSize: 412, medianSize: 320, inefficientOrders: 38, inefficientPct: 30.6, totalVolume: 59680, inefficientVolume: 5320 },
+    { label: "Komende week", totalOrders: 138, avgSize: 385, medianSize: 295, inefficientOrders: 48, inefficientPct: 34.8, totalVolume: 62540, inefficientVolume: 6720 },
+    { label: "Week +2", totalOrders: 130, avgSize: 398, medianSize: 310, inefficientOrders: 42, inefficientPct: 32.3, totalVolume: 60840, inefficientVolume: 5880 },
+  ],
+  wapuImpact: -5,
+  opstartverliesUren: 8.2,
+  fragmentatieIndex: 5.4,
 };
 
 const orderdrukTotaal: OrderdrukData = {
-  dept: "Totaal",
+  dept: "Totaal", threshold: 0,
   totalOrders: orderdrukHand.totalOrders + orderdrukBand.totalOrders,
   avgSize: Math.round((orderdrukHand.avgSize * orderdrukHand.totalOrders + orderdrukBand.avgSize * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders)),
   medianSize: Math.round((orderdrukHand.medianSize + orderdrukBand.medianSize) / 2),
+  totalVolume: orderdrukHand.totalVolume + orderdrukBand.totalVolume,
   buckets: [],
   inefficientOrders: orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders,
   inefficientVolume: orderdrukHand.inefficientVolume + orderdrukBand.inefficientVolume,
   inefficientPct: Math.round((orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 1000) / 10,
+  periods: [0, 1, 2].map(i => ({
+    label: orderdrukHand.periods[i].label,
+    totalOrders: orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders,
+    avgSize: Math.round((orderdrukHand.periods[i].avgSize * orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].avgSize * orderdrukBand.periods[i].totalOrders) / (orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders)),
+    medianSize: Math.round((orderdrukHand.periods[i].medianSize + orderdrukBand.periods[i].medianSize) / 2),
+    inefficientOrders: orderdrukHand.periods[i].inefficientOrders + orderdrukBand.periods[i].inefficientOrders,
+    inefficientPct: Math.round((orderdrukHand.periods[i].inefficientOrders + orderdrukBand.periods[i].inefficientOrders) / (orderdrukHand.periods[i].totalOrders + orderdrukBand.periods[i].totalOrders) * 1000) / 10,
+    totalVolume: orderdrukHand.periods[i].totalVolume + orderdrukBand.periods[i].totalVolume,
+    inefficientVolume: orderdrukHand.periods[i].inefficientVolume + orderdrukBand.periods[i].inefficientVolume,
+  })),
+  wapuImpact: -7,
+  opstartverliesUren: orderdrukHand.opstartverliesUren + orderdrukBand.opstartverliesUren,
+  fragmentatieIndex: Math.round((orderdrukHand.fragmentatieIndex * orderdrukHand.totalOrders + orderdrukBand.fragmentatieIndex * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 10) / 10,
 };
 
 const allOrderdruk = [orderdrukHand, orderdrukBand, orderdrukTotaal];
+const orderdrukScores = allOrderdruk.map(d => ({ dept: d.dept, ...calcOrderdrukScore(d) }));
 
 const advisories = [
   { icon: AlertTriangle, severity: "critical" as const, text: "Werkdruk Band stijgt +16.7% komende week — overweeg extra capaciteit of orderspreiding." },
@@ -165,6 +221,8 @@ const advisories = [
   { icon: TrendingDown, severity: "warning" as const, text: "W-APU (208) ligt onder zowel O-APU (220) als P-APU (215) — efficiency- en planningsdruk." },
   { icon: Shield, severity: "critical" as const, text: "PDI stijgt naar 6.9 komende week (verhoogd) — extra managementaandacht vereist." },
   { icon: Lightbulb, severity: "info" as const, text: "Band-afdeling draait relatief stabiel — potentie om orders van Hand naar Band te verschuiven." },
+  { icon: BoxSelect, severity: "critical" as const, text: `Orderdruk stijgt: ${orderdrukTotaal.periods[1].inefficientPct}% inefficiënte orders komende week (was ${orderdrukTotaal.periods[0].inefficientPct}%). Geschat opstartverlies: ${orderdrukTotaal.opstartverliesUren} uur.` },
+  { icon: Package, severity: "warning" as const, text: `Fragmentatie Hand (${orderdrukHand.fragmentatieIndex}/10) hoger dan Band (${orderdrukBand.fragmentatieIndex}/10) — Hand productie kampt met meer orderwissels en opstartverlies.` },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -541,43 +599,58 @@ const ProductionCockpit = () => {
           </Section>
 
           {/* ══════════════════════════════════════════════════════════ */}
-          {/* SECTION 5B — ORDERDRUK                                    */}
+          {/* SECTION 5B — ORDERDRUK (EXPANDED)                         */}
           {/* ══════════════════════════════════════════════════════════ */}
           <Section title="Orderdruk" icon={BoxSelect}
-            badge={`${orderdrukTotaal.inefficientPct}% inefficiënt`}
-            tooltip="Orderdruk meet de inefficiency door kleine orders. Hand: rendabel vanaf 40 stuks. Band: rendabel vanaf 250 stuks. Kleine orders veroorzaken meer opstartmomenten, lijnwissels en handling.">
+            badge={`Score: ${orderdrukScores.find(s => s.dept === "Totaal")?.score.toFixed(1)} / 10`}
+            tooltip="Orderdruk meet de inefficiency die ontstaat door veel kleine orders. Kleine orders veroorzaken meer opstartmomenten, lijnwissels, handling, lagere APU en hogere organisatorische druk. Hand: rendabel vanaf 40 stuks. Band: rendabel vanaf 250 stuks.">
 
-            {/* Summary tiles */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            {/* ── 1. ORDERSTRUCTUUR SAMENVATTING ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-5">
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
                 <span className="text-[10px] font-mono text-muted-foreground/50">Orders totaal</span>
-                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.totalOrders}</div>
+                <div className="text-xl font-extrabold text-foreground mt-1">{orderdrukTotaal.totalOrders}</div>
               </div>
               <div className="rounded-xl border border-border bg-card/50 p-3">
                 <span className="text-[10px] font-mono text-muted-foreground/50">Gem. ordergrootte</span>
-                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.avgSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+                <div className="text-xl font-extrabold text-foreground mt-1">{orderdrukTotaal.avgSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
               </div>
               <div className="rounded-xl border border-border bg-card/50 p-3">
-                <span className="text-[10px] font-mono text-muted-foreground/50">Mediaan ordergrootte</span>
-                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.medianSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+                <span className="text-[10px] font-mono text-muted-foreground/50">Mediaan</span>
+                <div className="text-xl font-extrabold text-foreground mt-1">{orderdrukTotaal.medianSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Totaal boeketten</span>
+                <div className="text-xl font-extrabold text-foreground mt-1">{(orderdrukTotaal.totalVolume / 1000).toFixed(1)}K</div>
               </div>
               <div className={cn("rounded-xl border p-3", orderdrukTotaal.inefficientPct >= 25 ? "border-destructive/20 bg-destructive/5" : "border-yellow-500/20 bg-yellow-500/5")}>
                 <span className="text-[10px] font-mono text-muted-foreground/50">Inefficiënte orders</span>
-                <div className={cn("text-2xl font-extrabold mt-1", orderdrukTotaal.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")}>
+                <div className={cn("text-xl font-extrabold mt-1", orderdrukTotaal.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")}>
                   {orderdrukTotaal.inefficientOrders} <span className="text-[10px] font-normal text-muted-foreground/50">({orderdrukTotaal.inefficientPct}%)</span>
                 </div>
               </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Opstartverlies</span>
+                <div className="text-xl font-extrabold text-destructive mt-1">{orderdrukTotaal.opstartverliesUren} <span className="text-[10px] font-normal text-muted-foreground/50">uur</span></div>
+              </div>
             </div>
 
-            {/* Per department breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ── 2. ORDERVERDELING PER AFDELING ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               {[orderdrukHand, orderdrukBand].filter(d => deptFilter === "all" || d.dept.toLowerCase() === deptFilter || deptFilter === "totaal").map(od => {
                 const maxCount = Math.max(...od.buckets.map(b => b.count));
                 const threshold = od.dept === "Hand" ? "40 stuks" : "250 stuks";
+                const score = calcOrderdrukScore(od);
+                const scoreStyle = pdiColor(score.score);
                 return (
                   <div key={od.dept} className="rounded-xl border border-border bg-card/50 p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-[13px] font-bold text-foreground">{od.dept}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-bold text-foreground">{od.dept}</span>
+                        <Badge variant="outline" className={cn("text-[9px] font-mono", scoreStyle.border, scoreStyle.text)}>
+                          Score: {score.score.toFixed(1)} — {score.level}
+                        </Badge>
+                      </div>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -595,7 +668,7 @@ const ProductionCockpit = () => {
                     </div>
 
                     {/* Stats row */}
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-[10px]">
+                    <div className="grid grid-cols-4 gap-2 mb-4 text-[10px]">
                       <div>
                         <span className="text-muted-foreground/40 font-mono block">Orders</span>
                         <span className="font-mono font-bold text-foreground">{od.totalOrders}</span>
@@ -607,6 +680,10 @@ const ProductionCockpit = () => {
                       <div>
                         <span className="text-muted-foreground/40 font-mono block">Mediaan</span>
                         <span className="font-mono font-bold text-foreground">{od.medianSize} st</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Fragmentatie</span>
+                        <span className={cn("font-mono font-bold", od.fragmentatieIndex >= 6 ? "text-destructive" : "text-foreground")}>{od.fragmentatieIndex}/10</span>
                       </div>
                     </div>
 
@@ -622,7 +699,7 @@ const ProductionCockpit = () => {
                                 <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">inefficiënt</span>
                               )}
                             </div>
-                            <span className="text-[10px] font-mono text-muted-foreground/60">{b.count} orders · {fmt(b.volume)} st</span>
+                            <span className="text-[10px] font-mono text-muted-foreground/60">{b.count} orders ({b.pctOrders}%) · {fmt(b.volume)} st</span>
                           </div>
                           <div className="h-3.5 rounded bg-border/20 overflow-hidden">
                             <div
@@ -634,8 +711,8 @@ const ProductionCockpit = () => {
                       ))}
                     </div>
 
-                    {/* Inefficiency summary */}
-                    <div className={cn("mt-4 p-2.5 rounded-lg border",
+                    {/* Inefficiency + impact summary */}
+                    <div className={cn("mt-4 p-2.5 rounded-lg border space-y-1.5",
                       od.inefficientPct >= 25 ? "bg-destructive/5 border-destructive/20" : "bg-yellow-500/5 border-yellow-500/20"
                     )}>
                       <div className="flex items-center gap-2">
@@ -644,18 +721,211 @@ const ProductionCockpit = () => {
                           <span className="font-bold">{od.inefficientOrders}</span> orders ({od.inefficientPct}%) onder rendabiliteitsgrens — <span className="font-bold">{fmt(od.inefficientVolume)}</span> stuks inefficiënt volume
                         </span>
                       </div>
+                      <div className="flex items-center gap-4 text-[10px] pl-5">
+                        <span className="text-muted-foreground/60">APU impact: <span className="font-bold text-destructive">{od.wapuImpact} st/u</span></span>
+                        <span className="text-muted-foreground/60">Opstartverlies: <span className="font-bold text-destructive">{od.opstartverliesUren} uur</span></span>
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
 
+            {/* ── 3. INEFFICIËNTIE ANALYSE — correlatie met APU/checks/uurdruk ── */}
+            <div className="rounded-xl border border-border bg-card/50 p-4 mb-5">
+              <span className="text-[12px] font-bold text-foreground block mb-3">Inefficiëntie Analyse — Impact op Productie</span>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border/30">
+                      <th className="text-left text-[10px] font-mono text-muted-foreground/40 pb-2">Afdeling</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Ineff. orders</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Ineff. %</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Ineff. volume</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">
+                        <TooltipProvider><Tooltip><TooltipTrigger asChild><span className="cursor-help">APU impact</span></TooltipTrigger>
+                        <TooltipContent className="text-[11px]"><p>Geschatte APU-daling door extra opstarttijd en lijnwissels van kleine orders.</p></TooltipContent></Tooltip></TooltipProvider>
+                      </th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Opstartverlies</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-3">Fragmentatie</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allOrderdruk.filter(d => d.buckets.length > 0 || d.dept === "Totaal").map(od => (
+                      <tr key={od.dept} className={cn("border-b border-border/20", od.dept === "Totaal" && "font-bold bg-muted/10")}>
+                        <td className="py-2">{od.dept}</td>
+                        <td className="text-right px-3 font-mono">{od.inefficientOrders}</td>
+                        <td className={cn("text-right px-3 font-mono", od.inefficientPct >= 30 ? "text-destructive" : od.inefficientPct >= 25 ? "text-yellow-500" : "text-foreground")}>{od.inefficientPct}%</td>
+                        <td className="text-right px-3 font-mono">{fmt(od.inefficientVolume)} st</td>
+                        <td className="text-right px-3 font-mono text-destructive">{od.wapuImpact} st/u</td>
+                        <td className="text-right px-3 font-mono text-destructive">{od.opstartverliesUren} uur</td>
+                        <td className={cn("text-right px-3 font-mono", od.fragmentatieIndex >= 6 ? "text-destructive" : "text-foreground")}>{od.fragmentatieIndex}/10</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-2.5 rounded-lg border border-border/30 bg-muted/20">
+                  <span className="text-[9px] font-mono text-muted-foreground/50 block mb-1">Relatie met W-APU</span>
+                  <p className="text-[10px] text-foreground/70">Kleine orders verlagen de W-APU door extra opstarttijd. Geschat APU-verlies van <span className="font-bold text-destructive">{orderdrukTotaal.wapuImpact} st/u</span> door orderdruk.</p>
+                </div>
+                <div className="p-2.5 rounded-lg border border-border/30 bg-muted/20">
+                  <span className="text-[9px] font-mono text-muted-foreground/50 block mb-1">Relatie met Uurdruk</span>
+                  <p className="text-[10px] text-foreground/70">Opstartverlies door kleine orders (<span className="font-bold text-destructive">{orderdrukTotaal.opstartverliesUren} uur/week</span>) vergroot de effectieve uurdruk bovenop de geplande productie-uren.</p>
+                </div>
+                <div className="p-2.5 rounded-lg border border-border/30 bg-muted/20">
+                  <span className="text-[9px] font-mono text-muted-foreground/50 block mb-1">Relatie met Checks</span>
+                  <p className="text-[10px] text-foreground/70">Kleine orders vereisen meer controle per boekettype. Meer fragmentatie = meer checks nodig voor kwaliteitsborging.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 4. TIJDSANALYSE — orderdruk per periode ── */}
+            <div className="rounded-xl border border-border bg-card/50 p-4 mb-5">
+              <span className="text-[12px] font-bold text-foreground block mb-3">Tijdsanalyse — Orderdruk per Periode</span>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border/30">
+                      <th className="text-left text-[10px] font-mono text-muted-foreground/40 pb-2">Periode</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Orders</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Gem. grootte</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Mediaan</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Ineff. orders</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Ineff. %</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Δ orders</th>
+                      <th className="text-right text-[10px] font-mono text-muted-foreground/40 pb-2 px-2">Δ ineff. %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Show per dept filtered */}
+                    {(deptFilter === "all" || deptFilter === "totaal"
+                      ? [orderdrukTotaal]
+                      : allOrderdruk.filter(d => d.dept.toLowerCase() === deptFilter)
+                    ).map(od =>
+                      od.periods.map((p, i) => {
+                        const prev = od.periods[0];
+                        const orderDiff = i > 0 ? pctDiff(p.totalOrders, prev.totalOrders) : 0;
+                        const ineffDiff = i > 0 ? (p.inefficientPct - prev.inefficientPct) : 0;
+                        return (
+                          <tr key={`${od.dept}-${p.label}`} className={cn("border-b border-border/20", i === 1 && "bg-primary/3")}>
+                            <td className="py-2">
+                              <span className={cn("font-semibold", i === 0 ? "text-muted-foreground/60" : "text-foreground")}>{p.label}</span>
+                              {i === 0 && od.dept !== "Totaal" && <span className="text-[8px] ml-1 text-muted-foreground/40">({od.dept})</span>}
+                              {i === 1 && <span className="text-[8px] ml-1 font-mono text-primary">▸ focus</span>}
+                            </td>
+                            <td className="text-right px-2 font-mono font-semibold">{p.totalOrders}</td>
+                            <td className="text-right px-2 font-mono">{p.avgSize} st</td>
+                            <td className="text-right px-2 font-mono">{p.medianSize} st</td>
+                            <td className="text-right px-2 font-mono">{p.inefficientOrders}</td>
+                            <td className={cn("text-right px-2 font-mono font-semibold", p.inefficientPct >= 30 ? "text-destructive" : p.inefficientPct >= 25 ? "text-yellow-500" : "text-foreground")}>
+                              {p.inefficientPct}%
+                            </td>
+                            <td className="text-right px-2">
+                              {i > 0 ? <TrendArrow value={orderDiff} /> : <span className="text-muted-foreground/30">—</span>}
+                            </td>
+                            <td className="text-right px-2">
+                              {i > 0 ? (
+                                <span className={cn("text-[10px] font-mono font-semibold", ineffDiff > 0 ? "text-destructive" : "text-accent")}>
+                                  {ineffDiff > 0 ? "+" : ""}{ineffDiff.toFixed(1)}pp
+                                </span>
+                              ) : <span className="text-muted-foreground/30">—</span>}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 flex items-start gap-2 p-2 rounded-lg bg-muted/30 border border-border/30">
+                <Info className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                  Tijdsanalyse op basis van vertrekdatum. Vertrekdatum ≠ productiedatum, maar geeft een goede indicatie van de orderdruk die op de productie afkomt.
+                </p>
+              </div>
+            </div>
+
+            {/* ── 5. ORDERDRUK SCORE ── */}
+            <div className="rounded-xl border border-border bg-card/50 p-4 mb-5">
+              <span className="text-[12px] font-bold text-foreground block mb-3">Orderdruk Score</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {allOrderdruk.filter(d => d.buckets.length > 0 || d.dept === "Totaal").map(od => {
+                  const score = calcOrderdrukScore(od);
+                  const style = pdiColor(score.score);
+                  return (
+                    <div key={od.dept} className={cn("rounded-xl border p-4", style.border, style.bg)}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[13px] font-bold text-foreground">{od.dept}</span>
+                        <Badge variant="outline" className={cn("text-[9px] font-mono uppercase", style.border, style.text)}>{score.level}</Badge>
+                      </div>
+                      <div className={cn("text-3xl font-extrabold font-mono leading-none mb-3", style.text)}>{score.score.toFixed(1)}</div>
+                      <div className="h-2.5 rounded-full bg-border/30 overflow-hidden mb-3">
+                        <div className={cn("h-full rounded-full transition-all",
+                          score.score >= 8 ? "bg-destructive" : score.score >= 6 ? "bg-yellow-500" : score.score >= 4 ? "bg-primary" : "bg-accent"
+                        )} style={{ width: `${score.score * 10}%` }} />
+                      </div>
+                      <div className="space-y-1 text-[10px]">
+                        <div className="flex justify-between"><span className="text-muted-foreground/60">Ineff. %</span><span className="font-mono font-semibold">{od.inefficientPct}%</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground/60">Gem. grootte</span><span className="font-mono">{od.avgSize} st</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground/60">Fragmentatie</span><span className="font-mono">{od.fragmentatieIndex}/10</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground/60">Opstartverlies</span><span className="font-mono">{od.opstartverliesUren} uur</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-3 rounded-lg border border-border/30 bg-muted/20 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50 block mb-2">Orderdruk Score samenstelling</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[10px]">
+                  {[
+                    { label: "Ineff. aandeel", weight: "35%", icon: AlertTriangle },
+                    { label: "Gem. ordergrootte", weight: "25%", icon: Package },
+                    { label: "Fragmentatie-index", weight: "20%", icon: Layers },
+                    { label: "Opstartverlies", weight: "20%", icon: Clock },
+                  ].map(c => (
+                    <div key={c.label} className="flex items-center gap-2">
+                      <c.icon className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                      <div>
+                        <span className="text-foreground/70 block">{c.label}</span>
+                        <span className="font-mono font-bold text-primary">{c.weight}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ── 6. AANVULLENDE INZICHTEN ── */}
+            <div className="rounded-xl border border-border bg-card/50 p-4">
+              <span className="text-[12px] font-bold text-foreground block mb-3">Aanvullende Inzichten</span>
+              <div className="space-y-2">
+                {[
+                  { icon: Clock, severity: "critical" as const, text: `Geschat opstartverlies door kleine orders: ${orderdrukTotaal.opstartverliesUren} uur/week. Dit equivalent staat aan ${((orderdrukTotaal.opstartverliesUren / periods[1].totaalUren) * 100).toFixed(1)}% van de totale productie-uren.` },
+                  { icon: Layers, severity: "warning" as const, text: `Fragmentatie-index Hand (${orderdrukHand.fragmentatieIndex}) is significant hoger dan Band (${orderdrukBand.fragmentatieIndex}). Hand productie kampt met meer unieke ordertypen en dus meer wisselingen.` },
+                  { icon: TrendingUp, severity: "critical" as const, text: `Orderdruk stijgt komende week: inefficiënt aandeel groeit van ${orderdrukTotaal.periods[0].inefficientPct}% naar ${orderdrukTotaal.periods[1].inefficientPct}% (+${(orderdrukTotaal.periods[1].inefficientPct - orderdrukTotaal.periods[0].inefficientPct).toFixed(1)}pp).` },
+                  { icon: Gauge, severity: "warning" as const, text: `Verband orderdruk en lijnprestatie: lijnen met veel kleine orders presteren gemiddeld ${Math.abs(orderdrukTotaal.wapuImpact)} st/u lager in W-APU door opstarttijd en complexiteit.` },
+                  { icon: Users, severity: "info" as const, text: `Concentratie: top-5 klanten zijn verantwoordelijk voor ~40% van de kleine orders. Ordersamenvoeging of minimale ordergrenzen bij deze klanten kan opstartverlies met ~30% reduceren.` },
+                ].map((a, i) => {
+                  const s = alertSeverity[a.severity];
+                  return (
+                    <div key={i} className={cn("flex items-start gap-3 p-3 rounded-xl border", s.bg)}>
+                      <a.icon className={cn("w-4 h-4 shrink-0 mt-0.5", s.text)} />
+                      <p className="text-[11px] text-foreground/80 leading-relaxed">{a.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Explanation */}
             <div className="mt-4 flex items-start gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
               <Info className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
               <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-                Orderdruk geeft aan hoeveel orders onder de rendabiliteitsdrempel vallen. Kleine orders genereren meer opstartmomenten, lijnwissels, handling en organisatorische druk.
+                Orderdruk geeft aan hoeveel orders onder de rendabiliteitsdrempel vallen en welke impact dat heeft op productie-efficiëntie.
                 Hand productie is rendabel vanaf <span className="font-bold text-foreground/70">40 stuks</span> per order. Band productie is rendabel vanaf <span className="font-bold text-foreground/70">250 stuks</span> per order.
+                Kleine orders genereren meer opstartmomenten, lijnwissels, handling en organisatorische druk, wat leidt tot lagere APU en hogere effectieve uurdruk.
               </p>
             </div>
           </Section>
@@ -759,13 +1029,14 @@ const ProductionCockpit = () => {
             {/* PDI composition explanation */}
             <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
               <span className="text-[10px] font-mono text-muted-foreground/50 block mb-2">PDI samenstelling</span>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px]">
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 text-[10px]">
                 {[
-                  { label: "Uurdruk", weight: "25%", icon: Clock },
-                  { label: "Stelenvolume", weight: "25%", icon: Layers },
-                  { label: "Checks / sturing", weight: "15%", icon: ClipboardCheck },
-                  { label: "W vs O-APU afw.", weight: "20%", icon: Gauge },
-                  { label: "W vs P-APU afw.", weight: "15%", icon: Brain },
+                  { label: "Uurdruk", weight: "20%", icon: Clock },
+                  { label: "Stelenvolume", weight: "20%", icon: Layers },
+                  { label: "Checks / sturing", weight: "12%", icon: ClipboardCheck },
+                  { label: "W vs O-APU afw.", weight: "18%", icon: Gauge },
+                  { label: "W vs P-APU afw.", weight: "12%", icon: Brain },
+                  { label: "Orderdruk", weight: "18%", icon: BoxSelect },
                 ].map(c => (
                   <div key={c.label} className="flex items-center gap-2">
                     <c.icon className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
