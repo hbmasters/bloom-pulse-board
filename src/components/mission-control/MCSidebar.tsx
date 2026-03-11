@@ -21,6 +21,7 @@ const navSections: NavSection[] = [
   {
     label: "Directie",
     entries: [
+      { id: "kpis", icon: BarChart3, label: "Key Performance Indicator" },
       { id: "command-radar", icon: Crosshair, label: "Command Radar" },
       { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
       { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
@@ -33,7 +34,6 @@ const navSections: NavSection[] = [
     entries: [
       { id: "chat", icon: MessageSquare, label: "Chat" },
       { id: "kanban", icon: LayoutGrid, label: "Kanban" },
-      { id: "kpis", icon: BarChart3, label: "KPI's" },
       { id: "notifications", icon: Bell, label: "Notificaties" },
       { id: "planner", icon: CalendarDays, label: "Weekplanner" },
       { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
