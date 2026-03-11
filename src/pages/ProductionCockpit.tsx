@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, Users, Gauge, Package,
   Activity, BarChart3, Flame, Brain, Info, CheckCircle2,
   ArrowUpRight, ArrowDownRight, Eye, Shield, Lightbulb,
-  ClipboardCheck, CalendarClock, Layers
+  ClipboardCheck, CalendarClock, Layers, BoxSelect
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,70 @@ const periods: PeriodData[] = [
   { label: "Komende week", handUren: 365, bandUren: 245, totaalUren: 610, handStelen: 168000, bandStelen: 118000, totaalStelen: 286000, pdiHand: 7.4, pdiBand: 6.1, pdiTotaal: 6.9 },
   { label: "Week +2", handUren: 340, bandUren: 225, totaalUren: 565, handStelen: 155000, bandStelen: 105000, totaalStelen: 260000, pdiHand: 6.5, pdiBand: 5.3, pdiTotaal: 6.0 },
 ];
+
+/* ── ORDERDRUK DATA ── */
+interface OrderBucket {
+  range: string;
+  count: number;
+  volume: number;
+  inefficient: boolean;
+}
+
+interface OrderdrukData {
+  dept: string;
+  totalOrders: number;
+  avgSize: number;
+  medianSize: number;
+  buckets: OrderBucket[];
+  inefficientOrders: number;
+  inefficientVolume: number;
+  inefficientPct: number;
+}
+
+const orderdrukHand: OrderdrukData = {
+  dept: "Hand",
+  totalOrders: 186,
+  avgSize: 87,
+  medianSize: 62,
+  buckets: [
+    { range: "0 – 40", count: 54, volume: 1188, inefficient: true },
+    { range: "40 – 100", count: 68, volume: 4760, inefficient: false },
+    { range: "100 – 250", count: 42, volume: 6720, inefficient: false },
+    { range: "250+", count: 22, volume: 8140, inefficient: false },
+  ],
+  inefficientOrders: 54,
+  inefficientVolume: 1188,
+  inefficientPct: 29.0,
+};
+
+const orderdrukBand: OrderdrukData = {
+  dept: "Band",
+  totalOrders: 124,
+  avgSize: 412,
+  medianSize: 320,
+  buckets: [
+    { range: "0 – 250", count: 38, volume: 5320, inefficient: true },
+    { range: "250 – 500", count: 44, volume: 16280, inefficient: false },
+    { range: "500 – 1000", count: 28, volume: 18480, inefficient: false },
+    { range: "1000+", count: 14, volume: 19600, inefficient: false },
+  ],
+  inefficientOrders: 38,
+  inefficientVolume: 5320,
+  inefficientPct: 30.6,
+};
+
+const orderdrukTotaal: OrderdrukData = {
+  dept: "Totaal",
+  totalOrders: orderdrukHand.totalOrders + orderdrukBand.totalOrders,
+  avgSize: Math.round((orderdrukHand.avgSize * orderdrukHand.totalOrders + orderdrukBand.avgSize * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders)),
+  medianSize: Math.round((orderdrukHand.medianSize + orderdrukBand.medianSize) / 2),
+  buckets: [],
+  inefficientOrders: orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders,
+  inefficientVolume: orderdrukHand.inefficientVolume + orderdrukBand.inefficientVolume,
+  inefficientPct: Math.round((orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 1000) / 10,
+};
+
+const allOrderdruk = [orderdrukHand, orderdrukBand, orderdrukTotaal];
 
 const advisories = [
   { icon: AlertTriangle, severity: "critical" as const, text: "Werkdruk Band stijgt +16.7% komende week — overweeg extra capaciteit of orderspreiding." },
@@ -473,6 +537,126 @@ const ProductionCockpit = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 5B — ORDERDRUK                                    */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Orderdruk" icon={BoxSelect}
+            badge={`${orderdrukTotaal.inefficientPct}% inefficiënt`}
+            tooltip="Orderdruk meet de inefficiency door kleine orders. Hand: rendabel vanaf 40 stuks. Band: rendabel vanaf 250 stuks. Kleine orders veroorzaken meer opstartmomenten, lijnwissels en handling.">
+
+            {/* Summary tiles */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Orders totaal</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.totalOrders}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Gem. ordergrootte</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.avgSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Mediaan ordergrootte</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.medianSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+              </div>
+              <div className={cn("rounded-xl border p-3", orderdrukTotaal.inefficientPct >= 25 ? "border-destructive/20 bg-destructive/5" : "border-yellow-500/20 bg-yellow-500/5")}>
+                <span className="text-[10px] font-mono text-muted-foreground/50">Inefficiënte orders</span>
+                <div className={cn("text-2xl font-extrabold mt-1", orderdrukTotaal.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")}>
+                  {orderdrukTotaal.inefficientOrders} <span className="text-[10px] font-normal text-muted-foreground/50">({orderdrukTotaal.inefficientPct}%)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Per department breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[orderdrukHand, orderdrukBand].filter(d => deptFilter === "all" || d.dept.toLowerCase() === deptFilter || deptFilter === "totaal").map(od => {
+                const maxCount = Math.max(...od.buckets.map(b => b.count));
+                const threshold = od.dept === "Hand" ? "40 stuks" : "250 stuks";
+                return (
+                  <div key={od.dept} className="rounded-xl border border-border bg-card/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13px] font-bold text-foreground">{od.dept}</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className={cn("text-[9px] font-mono",
+                              od.inefficientPct >= 25 ? "border-destructive/30 text-destructive" : "border-yellow-500/30 text-yellow-500"
+                            )}>
+                              Rendabel vanaf {threshold}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[240px] text-[11px]">
+                            <p>Orders onder {threshold} per stuk veroorzaken relatief meer inefficiency door opstartverliezen, extra handling en lijnwissels.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-2 mb-4 text-[10px]">
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Orders</span>
+                        <span className="font-mono font-bold text-foreground">{od.totalOrders}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Gem.</span>
+                        <span className="font-mono font-bold text-foreground">{od.avgSize} st</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Mediaan</span>
+                        <span className="font-mono font-bold text-foreground">{od.medianSize} st</span>
+                      </div>
+                    </div>
+
+                    {/* Distribution bars */}
+                    <span className="text-[10px] font-mono text-muted-foreground/40 mb-2 block">Orderverdeling</span>
+                    <div className="space-y-2">
+                      {od.buckets.map(b => (
+                        <div key={b.range}>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className={cn("text-[11px] font-mono font-semibold", b.inefficient ? "text-destructive" : "text-foreground/70")}>{b.range}</span>
+                              {b.inefficient && (
+                                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">inefficiënt</span>
+                              )}
+                            </div>
+                            <span className="text-[10px] font-mono text-muted-foreground/60">{b.count} orders · {fmt(b.volume)} st</span>
+                          </div>
+                          <div className="h-3.5 rounded bg-border/20 overflow-hidden">
+                            <div
+                              className={cn("h-full rounded transition-all", b.inefficient ? "bg-destructive/60" : "bg-primary/40")}
+                              style={{ width: `${(b.count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Inefficiency summary */}
+                    <div className={cn("mt-4 p-2.5 rounded-lg border",
+                      od.inefficientPct >= 25 ? "bg-destructive/5 border-destructive/20" : "bg-yellow-500/5 border-yellow-500/20"
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className={cn("w-3.5 h-3.5 shrink-0", od.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")} />
+                        <span className="text-[11px] text-foreground/80">
+                          <span className="font-bold">{od.inefficientOrders}</span> orders ({od.inefficientPct}%) onder rendabiliteitsgrens — <span className="font-bold">{fmt(od.inefficientVolume)}</span> stuks inefficiënt volume
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Explanation */}
+            <div className="mt-4 flex items-start gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
+              <Info className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                Orderdruk geeft aan hoeveel orders onder de rendabiliteitsdrempel vallen. Kleine orders genereren meer opstartmomenten, lijnwissels, handling en organisatorische druk.
+                Hand productie is rendabel vanaf <span className="font-bold text-foreground/70">40 stuks</span> per order. Band productie is rendabel vanaf <span className="font-bold text-foreground/70">250 stuks</span> per order.
+              </p>
             </div>
           </Section>
 
