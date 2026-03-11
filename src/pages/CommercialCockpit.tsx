@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
+import CustomerIntelligence from "@/components/commercial/CustomerIntelligence";
 import ProductLineIntelligence from "@/components/commercial/ProductLineIntelligence";
 import {
   summaryMetrics, commercialRows, alerts,
@@ -93,7 +94,7 @@ const alertCls: Record<AlertSeverity, string> = {
 };
 
 /* ══════════════════════════════════════════════════ */
-/*  COMMERCIAL COCKPIT                               */
+/*  COMMERCIAL COCKPIT — CUSTOMER-FIRST             */
 /* ══════════════════════════════════════════════════ */
 const CommercialCockpit = () => {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -134,7 +135,7 @@ const CommercialCockpit = () => {
               <div className="w-2 h-8 rounded-full bg-gradient-brand" />
               <div>
                 <h1 className="text-sm font-black text-foreground uppercase tracking-wider">Commercial Cockpit</h1>
-                <p className="text-[10px] font-mono text-muted-foreground">Revenue • Marge • Product Line Intelligence • Seizoensinzicht</p>
+                <p className="text-[10px] font-mono text-muted-foreground">Klant → Programma → Product → Recept • Customer-First Intelligence</p>
               </div>
             </div>
             <Badge variant="outline" className="text-[10px] font-mono gap-1 border-accent/30 text-accent">
@@ -143,11 +144,31 @@ const CommercialCockpit = () => {
             </Badge>
           </div>
 
-          {/* ═══ SECTION 1: REVENUE & MARGIN KPIs ═══ */}
+          {/* ═══ TOP KPIs ═══ */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             {summaryMetrics.map(m => (
               <MetricCard key={m.label} {...m} />
             ))}
+          </div>
+
+          {/* ═══ PRIMARY LAYER: CUSTOMER INTELLIGENCE ═══ */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-1">
+              <div className="w-1 h-5 rounded-full bg-primary" />
+              <span className="text-[11px] font-black text-foreground uppercase tracking-widest">Primair: Klantanalyse</span>
+              <span className="text-[9px] font-mono text-muted-foreground/40">Klant → Stabiliteit → Marge → Productie-impact</span>
+            </div>
+            <CustomerIntelligence />
+          </div>
+
+          {/* ═══ SECONDARY LAYER: PRODUCT LINE INTELLIGENCE ═══ */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-1">
+              <div className="w-1 h-5 rounded-full bg-muted-foreground/30" />
+              <span className="text-[11px] font-black text-foreground/60 uppercase tracking-widest">Secundair: Productlijn Analyse</span>
+              <span className="text-[9px] font-mono text-muted-foreground/40">Product Family → Stabiliteit → Recept → Seizoen</span>
+            </div>
+            <ProductLineIntelligence />
           </div>
 
           {/* ── Marge & Omzet Overzicht ── */}
@@ -238,9 +259,6 @@ const CommercialCockpit = () => {
               </div>
             </Section>
           </div>
-
-          {/* ═══ SECTIONS 2-7: PRODUCT LINE INTELLIGENCE ═══ */}
-          <ProductLineIntelligence />
 
           {/* ── Commercieel Detail Table ── */}
           <Section title="Commercieel Detail" icon={Briefcase} badge={`${filtered.length} programma's`}>
