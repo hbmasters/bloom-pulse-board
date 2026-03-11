@@ -54,8 +54,7 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
         onClick={() => onNavigate(item.id)}
         className={cn(
           "w-full flex items-center rounded-md transition-colors",
-          collapsed ? "justify-center px-0 py-2.5" : "gap-3 py-2 text-sm",
-          indent && !collapsed ? "pl-9 pr-3" : collapsed ? "" : "px-3",
+          collapsed ? "justify-center px-0 py-2.5" : "gap-3 py-2 text-sm px-3",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
             : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
