@@ -79,39 +79,6 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
     );
   };
 
-  const renderGroup = (group: NavGroup) => {
-    const isOpen = openGroups[group.id] ?? isChildActive(group);
-    const childActive = isChildActive(group);
-
-    if (collapsed) {
-      // Show children as flat items when collapsed
-      return group.children.map(child => renderItem(child));
-    }
-
-    return (
-      <li key={group.id}>
-        <button
-          onClick={() => toggleGroup(group.id)}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
-            childActive
-              ? "text-sidebar-accent-foreground font-medium"
-              : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-          )}
-        >
-          <group.icon className="h-4 w-4 flex-shrink-0" />
-          <span className="flex-1 text-left">{group.label}</span>
-          <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
-        </button>
-        {isOpen && (
-          <ul className="mt-0.5 space-y-0.5">
-            {group.children.map(child => renderItem(child, true))}
-          </ul>
-        )}
-      </li>
-    );
-  };
-
   return (
     <aside
       className={cn(
