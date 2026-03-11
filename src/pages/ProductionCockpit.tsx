@@ -541,6 +541,126 @@ const ProductionCockpit = () => {
           </Section>
 
           {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 5B — ORDERDRUK                                    */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Orderdruk" icon={BoxSelect}
+            badge={`${orderdrukTotaal.inefficientPct}% inefficiënt`}
+            tooltip="Orderdruk meet de inefficiency door kleine orders. Hand: rendabel vanaf 40 stuks. Band: rendabel vanaf 250 stuks. Kleine orders veroorzaken meer opstartmomenten, lijnwissels en handling.">
+
+            {/* Summary tiles */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Orders totaal</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.totalOrders}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Gem. ordergrootte</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.avgSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/50 p-3">
+                <span className="text-[10px] font-mono text-muted-foreground/50">Mediaan ordergrootte</span>
+                <div className="text-2xl font-extrabold text-foreground mt-1">{orderdrukTotaal.medianSize} <span className="text-[10px] font-normal text-muted-foreground/50">st</span></div>
+              </div>
+              <div className={cn("rounded-xl border p-3", orderdrukTotaal.inefficientPct >= 25 ? "border-destructive/20 bg-destructive/5" : "border-yellow-500/20 bg-yellow-500/5")}>
+                <span className="text-[10px] font-mono text-muted-foreground/50">Inefficiënte orders</span>
+                <div className={cn("text-2xl font-extrabold mt-1", orderdrukTotaal.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")}>
+                  {orderdrukTotaal.inefficientOrders} <span className="text-[10px] font-normal text-muted-foreground/50">({orderdrukTotaal.inefficientPct}%)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Per department breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[orderdrukHand, orderdrukBand].filter(d => deptFilter === "all" || d.dept.toLowerCase() === deptFilter || deptFilter === "totaal").map(od => {
+                const maxCount = Math.max(...od.buckets.map(b => b.count));
+                const threshold = od.dept === "Hand" ? "40 stuks" : "250 stuks";
+                return (
+                  <div key={od.dept} className="rounded-xl border border-border bg-card/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13px] font-bold text-foreground">{od.dept}</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className={cn("text-[9px] font-mono",
+                              od.inefficientPct >= 25 ? "border-destructive/30 text-destructive" : "border-yellow-500/30 text-yellow-500"
+                            )}>
+                              Rendabel vanaf {threshold}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[240px] text-[11px]">
+                            <p>Orders onder {threshold} per stuk veroorzaken relatief meer inefficiency door opstartverliezen, extra handling en lijnwissels.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-2 mb-4 text-[10px]">
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Orders</span>
+                        <span className="font-mono font-bold text-foreground">{od.totalOrders}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Gem.</span>
+                        <span className="font-mono font-bold text-foreground">{od.avgSize} st</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground/40 font-mono block">Mediaan</span>
+                        <span className="font-mono font-bold text-foreground">{od.medianSize} st</span>
+                      </div>
+                    </div>
+
+                    {/* Distribution bars */}
+                    <span className="text-[10px] font-mono text-muted-foreground/40 mb-2 block">Orderverdeling</span>
+                    <div className="space-y-2">
+                      {od.buckets.map(b => (
+                        <div key={b.range}>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className={cn("text-[11px] font-mono font-semibold", b.inefficient ? "text-destructive" : "text-foreground/70")}>{b.range}</span>
+                              {b.inefficient && (
+                                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">inefficiënt</span>
+                              )}
+                            </div>
+                            <span className="text-[10px] font-mono text-muted-foreground/60">{b.count} orders · {fmt(b.volume)} st</span>
+                          </div>
+                          <div className="h-3.5 rounded bg-border/20 overflow-hidden">
+                            <div
+                              className={cn("h-full rounded transition-all", b.inefficient ? "bg-destructive/60" : "bg-primary/40")}
+                              style={{ width: `${(b.count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Inefficiency summary */}
+                    <div className={cn("mt-4 p-2.5 rounded-lg border",
+                      od.inefficientPct >= 25 ? "bg-destructive/5 border-destructive/20" : "bg-yellow-500/5 border-yellow-500/20"
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className={cn("w-3.5 h-3.5 shrink-0", od.inefficientPct >= 25 ? "text-destructive" : "text-yellow-500")} />
+                        <span className="text-[11px] text-foreground/80">
+                          <span className="font-bold">{od.inefficientOrders}</span> orders ({od.inefficientPct}%) onder rendabiliteitsgrens — <span className="font-bold">{fmt(od.inefficientVolume)}</span> stuks inefficiënt volume
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Explanation */}
+            <div className="mt-4 flex items-start gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/30">
+              <Info className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                Orderdruk geeft aan hoeveel orders onder de rendabiliteitsdrempel vallen. Kleine orders genereren meer opstartmomenten, lijnwissels, handling en organisatorische druk.
+                Hand productie is rendabel vanaf <span className="font-bold text-foreground/70">40 stuks</span> per order. Band productie is rendabel vanaf <span className="font-bold text-foreground/70">250 stuks</span> per order.
+              </p>
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
           {/* SECTION 6 — VERGELIJKING (UREN + STELEN + PDI COMBINED)  */}
           {/* ══════════════════════════════════════════════════════════ */}
           <Section title="Vergelijking: Afgelopen week vs Komende 2 weken" icon={BarChart3}>
