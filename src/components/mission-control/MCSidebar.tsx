@@ -21,6 +21,7 @@ const navSections: NavSection[] = [
   {
     label: "Directie",
     entries: [
+      { id: "kpis", icon: BarChart3, label: "Key Performance Indicator" },
       { id: "command-radar", icon: Crosshair, label: "Command Radar" },
       { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
       { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
