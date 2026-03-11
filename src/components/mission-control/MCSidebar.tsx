@@ -117,9 +117,7 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
             )}
             {collapsed && si > 0 && <div className="my-1" />}
             <ul className="space-y-0.5">
-              {section.entries.map(entry =>
-                isGroup(entry) ? renderGroup(entry) : renderItem(entry)
-              )}
+              {section.entries.map(entry => renderItem(entry))}
             </ul>
           </div>
         ))}
