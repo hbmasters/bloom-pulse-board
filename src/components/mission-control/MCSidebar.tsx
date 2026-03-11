@@ -22,16 +22,9 @@ const navSections: NavSection[] = [
     label: "Directie",
     entries: [
       { id: "command-radar", icon: Crosshair, label: "Command Radar" },
-      {
-        id: "management-cockpit",
-        icon: Briefcase,
-        label: "Management Cockpit",
-        children: [
-          { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
-          { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
-          { id: "commercial", icon: DollarSign, label: "Commercial Cockpit" },
-        ],
-      },
+      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+      { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+      { id: "commercial", icon: DollarSign, label: "Commercial Cockpit" },
       { id: "action-engine", icon: Zap, label: "Action Engine" },
     ],
   },
