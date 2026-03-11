@@ -94,6 +94,70 @@ const periods: PeriodData[] = [
   { label: "Week +2", handUren: 340, bandUren: 225, totaalUren: 565, handStelen: 155000, bandStelen: 105000, totaalStelen: 260000, pdiHand: 6.5, pdiBand: 5.3, pdiTotaal: 6.0 },
 ];
 
+/* ── ORDERDRUK DATA ── */
+interface OrderBucket {
+  range: string;
+  count: number;
+  volume: number;
+  inefficient: boolean;
+}
+
+interface OrderdrukData {
+  dept: string;
+  totalOrders: number;
+  avgSize: number;
+  medianSize: number;
+  buckets: OrderBucket[];
+  inefficientOrders: number;
+  inefficientVolume: number;
+  inefficientPct: number;
+}
+
+const orderdrukHand: OrderdrukData = {
+  dept: "Hand",
+  totalOrders: 186,
+  avgSize: 87,
+  medianSize: 62,
+  buckets: [
+    { range: "0 – 40", count: 54, volume: 1188, inefficient: true },
+    { range: "40 – 100", count: 68, volume: 4760, inefficient: false },
+    { range: "100 – 250", count: 42, volume: 6720, inefficient: false },
+    { range: "250+", count: 22, volume: 8140, inefficient: false },
+  ],
+  inefficientOrders: 54,
+  inefficientVolume: 1188,
+  inefficientPct: 29.0,
+};
+
+const orderdrukBand: OrderdrukData = {
+  dept: "Band",
+  totalOrders: 124,
+  avgSize: 412,
+  medianSize: 320,
+  buckets: [
+    { range: "0 – 250", count: 38, volume: 5320, inefficient: true },
+    { range: "250 – 500", count: 44, volume: 16280, inefficient: false },
+    { range: "500 – 1000", count: 28, volume: 18480, inefficient: false },
+    { range: "1000+", count: 14, volume: 19600, inefficient: false },
+  ],
+  inefficientOrders: 38,
+  inefficientVolume: 5320,
+  inefficientPct: 30.6,
+};
+
+const orderdrukTotaal: OrderdrukData = {
+  dept: "Totaal",
+  totalOrders: orderdrukHand.totalOrders + orderdrukBand.totalOrders,
+  avgSize: Math.round((orderdrukHand.avgSize * orderdrukHand.totalOrders + orderdrukBand.avgSize * orderdrukBand.totalOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders)),
+  medianSize: Math.round((orderdrukHand.medianSize + orderdrukBand.medianSize) / 2),
+  buckets: [],
+  inefficientOrders: orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders,
+  inefficientVolume: orderdrukHand.inefficientVolume + orderdrukBand.inefficientVolume,
+  inefficientPct: Math.round((orderdrukHand.inefficientOrders + orderdrukBand.inefficientOrders) / (orderdrukHand.totalOrders + orderdrukBand.totalOrders) * 1000) / 10,
+};
+
+const allOrderdruk = [orderdrukHand, orderdrukBand, orderdrukTotaal];
+
 const advisories = [
   { icon: AlertTriangle, severity: "critical" as const, text: "Werkdruk Band stijgt +16.7% komende week — overweeg extra capaciteit of orderspreiding." },
   { icon: TrendingUp, severity: "warning" as const, text: "Stelenvolume stijgt +19.2% (Hand) terwijl uren slechts +14.1% stijgen — verwacht druk op APU." },
