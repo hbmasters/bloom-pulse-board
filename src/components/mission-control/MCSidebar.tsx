@@ -15,12 +15,7 @@ interface MCSidebarProps {
 }
 
 type NavItem = { id: MCView; icon: typeof MessageSquare; label: string };
-type NavGroup = { id: string; icon: typeof MessageSquare; label: string; children: NavItem[] };
-type NavEntry = NavItem | NavGroup;
-
-const isGroup = (entry: NavEntry): entry is NavGroup => "children" in entry;
-
-type NavSection = { label: string; entries: NavEntry[] };
+type NavSection = { label: string; entries: NavItem[] };
 
 const navSections: NavSection[] = [
   {
