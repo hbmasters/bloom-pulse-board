@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight, DollarSign } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -15,28 +15,16 @@ interface MCSidebarProps {
 }
 
 type NavItem = { id: MCView; icon: typeof MessageSquare; label: string };
-type NavGroup = { id: string; icon: typeof MessageSquare; label: string; children: NavItem[] };
-type NavEntry = NavItem | NavGroup;
-
-const isGroup = (entry: NavEntry): entry is NavGroup => "children" in entry;
-
-type NavSection = { label: string; entries: NavEntry[] };
+type NavSection = { label: string; entries: NavItem[] };
 
 const navSections: NavSection[] = [
   {
     label: "Directie",
     entries: [
       { id: "command-radar", icon: Crosshair, label: "Command Radar" },
-      {
-        id: "management-cockpit",
-        icon: Briefcase,
-        label: "Management Cockpit",
-        children: [
-          { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
-          { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
-          { id: "commercial", icon: DollarSign, label: "Commercial Cockpit" },
-        ],
-      },
+      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+      { id: "production-cockpit", icon: Factory, label: "Production Cockpit" },
+      { id: "commercial", icon: DollarSign, label: "Commercial Cockpit" },
       { id: "action-engine", icon: Zap, label: "Action Engine" },
     ],
   },
@@ -59,21 +47,14 @@ const navSections: NavSection[] = [
 
 const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-
-  const toggleGroup = (id: string) => setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const isChildActive = (group: NavGroup) => group.children.some(c => c.id === active);
-
-  const renderItem = (item: NavItem, indent = false) => {
+  const renderItem = (item: NavItem) => {
     const isActive = active === item.id;
     const linkContent = (
       <button
         onClick={() => onNavigate(item.id)}
         className={cn(
           "w-full flex items-center rounded-md transition-colors",
-          collapsed ? "justify-center px-0 py-2.5" : "gap-3 py-2 text-sm",
-          indent && !collapsed ? "pl-9 pr-3" : collapsed ? "" : "px-3",
+          collapsed ? "justify-center px-0 py-2.5" : "gap-3 py-2 text-sm px-3",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
             : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
@@ -93,39 +74,6 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
           </Tooltip>
         ) : (
           linkContent
-        )}
-      </li>
-    );
-  };
-
-  const renderGroup = (group: NavGroup) => {
-    const isOpen = openGroups[group.id] ?? isChildActive(group);
-    const childActive = isChildActive(group);
-
-    if (collapsed) {
-      // Show children as flat items when collapsed
-      return group.children.map(child => renderItem(child));
-    }
-
-    return (
-      <li key={group.id}>
-        <button
-          onClick={() => toggleGroup(group.id)}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
-            childActive
-              ? "text-sidebar-accent-foreground font-medium"
-              : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-          )}
-        >
-          <group.icon className="h-4 w-4 flex-shrink-0" />
-          <span className="flex-1 text-left">{group.label}</span>
-          <ChevronRight className={cn("h-3 w-3 transition-transform duration-200", isOpen && "rotate-90")} />
-        </button>
-        {isOpen && (
-          <ul className="mt-0.5 space-y-0.5">
-            {group.children.map(child => renderItem(child, true))}
-          </ul>
         )}
       </li>
     );
@@ -169,9 +117,7 @@ const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
             )}
             {collapsed && si > 0 && <div className="my-1" />}
             <ul className="space-y-0.5">
-              {section.entries.map(entry =>
-                isGroup(entry) ? renderGroup(entry) : renderItem(entry)
-              )}
+              {section.entries.map(entry => renderItem(entry))}
             </ul>
           </div>
         ))}
