@@ -221,6 +221,8 @@ const advisories = [
   { icon: TrendingDown, severity: "warning" as const, text: "W-APU (208) ligt onder zowel O-APU (220) als P-APU (215) — efficiency- en planningsdruk." },
   { icon: Shield, severity: "critical" as const, text: "PDI stijgt naar 6.9 komende week (verhoogd) — extra managementaandacht vereist." },
   { icon: Lightbulb, severity: "info" as const, text: "Band-afdeling draait relatief stabiel — potentie om orders van Hand naar Band te verschuiven." },
+  { icon: BoxSelect, severity: "critical" as const, text: `Orderdruk stijgt: ${orderdrukTotaal.periods[1].inefficientPct}% inefficiënte orders komende week (was ${orderdrukTotaal.periods[0].inefficientPct}%). Geschat opstartverlies: ${orderdrukTotaal.opstartverliesUren} uur.` },
+  { icon: Package, severity: "warning" as const, text: `Fragmentatie Hand (${orderdrukHand.fragmentatieIndex}/10) hoger dan Band (${orderdrukBand.fragmentatieIndex}/10) — Hand productie kampt met meer orderwissels en opstartverlies.` },
 ];
 
 /* ------------------------------------------------------------------ */
