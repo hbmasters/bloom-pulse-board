@@ -34,7 +34,6 @@ const navSections: NavSection[] = [
     entries: [
       { id: "chat", icon: MessageSquare, label: "Chat" },
       { id: "kanban", icon: LayoutGrid, label: "Kanban" },
-      { id: "kpis", icon: BarChart3, label: "KPI's" },
       { id: "notifications", icon: Bell, label: "Notificaties" },
       { id: "planner", icon: CalendarDays, label: "Weekplanner" },
       { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
