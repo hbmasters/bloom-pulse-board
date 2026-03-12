@@ -150,7 +150,7 @@ const ProcurementCockpitV1 = () => {
           <div className="relative">
             <button onClick={() => setShopPopup(!shopPopup)} className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-colors">
               <Wifi className="w-3.5 h-3.5 text-accent" />
-              Shops ({shopStatuses.filter(s => s.status === "connected").length}/{shopStatuses.length})
+              Koppelingen ({shopStatuses.filter(s => s.status === "connected").length}/{shopStatuses.length})
             </button>
             {shopPopup && (
               <div className="absolute right-0 top-full mt-1 z-50 w-80 rounded-xl border border-border bg-card shadow-lg p-3 space-y-2">
