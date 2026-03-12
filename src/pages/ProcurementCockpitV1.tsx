@@ -212,6 +212,10 @@ const ProcurementCockpitV1 = () => {
                   <input type="checkbox" checked={compactView} onChange={e => setCompactView(e.target.checked)} className="rounded border-border" />
                   <span className="text-[11px] text-foreground">Compacte weergave</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={largeView} onChange={e => setLargeView(e.target.checked)} className="rounded border-border" />
+                  <span className="text-[11px] text-foreground">Grote weergave</span>
+                </label>
 
                 <div className="border-t border-border pt-2 space-y-1.5">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Secties</span>
