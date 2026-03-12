@@ -319,7 +319,7 @@ const ProcurementCockpitV1 = () => {
                   ["advised_price", "Adviesprijs"],
                   ["variance_vs_calculated", "Δ Hist."],
                   ["preferred_supplier", "Lev. Voorkeur"],
-                ] as [SortKey, string][]).map(([key, label]) => (
+                ] as [SortKey, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                   <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort(key)}>
                     <span className="inline-flex items-center gap-0.5">
                       {label}
