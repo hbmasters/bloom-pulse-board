@@ -38,6 +38,7 @@ const App = () => (
            <Route path="/production-cockpit" element={<MissionControl />} />
            <Route path="/commercial" element={<MissionControl />} />
            <Route path="/labs/procurement-market-radar" element={<MissionControl />} />
+           <Route path="/labs/procurement-cockpit-v1" element={<MissionControl />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

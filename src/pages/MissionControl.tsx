@@ -28,9 +28,10 @@ import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import ProductionCockpit from "@/pages/ProductionCockpit";
 import CommercialCockpit from "@/pages/CommercialCockpit";
 import ProcurementMarketRadar from "@/pages/ProcurementMarketRadar";
+import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-market-radar";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-market-radar" | "procurement-cockpit-v1";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -54,6 +55,7 @@ const routeToView: Record<string, MCView> = {
   "/production-cockpit": "production-cockpit",
   "/commercial": "commercial",
   "/labs/procurement-market-radar": "procurement-market-radar",
+  "/labs/procurement-cockpit-v1": "procurement-cockpit-v1",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -78,6 +80,7 @@ export const viewToRoute: Record<MCView, string> = {
   "production-cockpit": "/production-cockpit",
   commercial: "/commercial",
   "procurement-market-radar": "/labs/procurement-market-radar",
+  "procurement-cockpit-v1": "/labs/procurement-cockpit-v1",
 };
 
 const MissionControl = () => {
@@ -156,6 +159,7 @@ const MissionControl = () => {
             {view === "production-cockpit" && <ProductionCockpit />}
             {view === "commercial" && <CommercialCockpit />}
             {view === "procurement-market-radar" && <ProcurementMarketRadar />}
+            {view === "procurement-cockpit-v1" && <ProcurementCockpitV1 />}
           </div>
 
           {view === "chat" && (
