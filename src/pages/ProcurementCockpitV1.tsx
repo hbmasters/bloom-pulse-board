@@ -252,7 +252,7 @@ const ProcurementCockpitV1 = () => {
       </div>
 
       {/* ── KPI Cards (tied to period) ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {showKPIs && <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
           { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
