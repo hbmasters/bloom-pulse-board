@@ -140,9 +140,9 @@ const ProcurementCockpitV1 = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <ShoppingCart className="w-5 h-5 text-primary" />
-          <h1 className="text-lg font-bold text-foreground tracking-tight">Procurement Cockpit</h1>
+          <h1 className="text-lg font-bold text-foreground tracking-tight">Purchasing List</h1>
           <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">
-            LABS · V1
+            LABS · V0.5
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ const ProcurementCockpitV1 = () => {
           <div className="relative">
             <button onClick={() => setShopPopup(!shopPopup)} className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-colors">
               <Wifi className="w-3.5 h-3.5 text-accent" />
-              Shops ({shopStatuses.filter(s => s.status === "connected").length}/{shopStatuses.length})
+              Koppelingen ({shopStatuses.filter(s => s.status === "connected").length}/{shopStatuses.length})
             </button>
             {shopPopup && (
               <div className="absolute right-0 top-full mt-1 z-50 w-80 rounded-xl border border-border bg-card shadow-lg p-3 space-y-2">
@@ -280,8 +280,7 @@ const ProcurementCockpitV1 = () => {
                     </span>
                   </th>
                 ))}
-                <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Kwaliteit</th>
-                <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Score</th>
+                <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Actie</th>
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Actie</th>
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort("urgency")}>
                   <span className="inline-flex items-center gap-0.5">
@@ -327,17 +326,6 @@ const ProcurementCockpitV1 = () => {
                       <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>
                       <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>
                       <td className={cn("px-3", rowPy)}>
-                        <div className="flex items-center gap-1.5">
-                          <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded border", p.external_quality === "A1" ? "bg-muted text-foreground border-border" : "bg-muted text-muted-foreground border-border")}>{p.external_quality}</span>
-                          <span className="text-[10px] font-mono text-muted-foreground">{p.internal_quality}%</span>
-                        </div>
-                      </td>
-                      <td className={cn("px-3", rowPy)}>
-                        <span className={cn("inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-full border", scoreBg(p.supplier_score))}>
-                          <Star className="w-2.5 h-2.5" />{p.supplier_score}
-                        </span>
-                      </td>
-                      <td className={cn("px-3", rowPy)}>
                         <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
                           <ShoppingBag className="w-2.5 h-2.5" /> Koop
                         </button>
@@ -354,13 +342,9 @@ const ProcurementCockpitV1 = () => {
                         <td colSpan={16} className="px-5 py-5">
                           <div className="space-y-5">
                             {/* Context cards */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                               {[
                                 { label: "Benodigd", value: fmt(p.required_volume) },
-                                { label: "Beschikbaar", value: fmt(p.available_stock) },
-                                { label: "Gereserveerd", value: fmt(p.reserved_stock) },
-                                { label: "Vrije voorraad", value: fmt(p.free_stock) },
-                                { label: "Open inkoop", value: fmt(p.open_buy_need) },
                                 { label: "Offerteprijs", value: fmtPrice(p.offer_price) },
                               ].map(c => (
                                 <div key={c.label} className="rounded-lg border border-border bg-background p-3">
@@ -394,19 +378,6 @@ const ProcurementCockpitV1 = () => {
                               </div>
                             </div>
 
-                            {/* Supplier context */}
-                            <div className="flex flex-wrap gap-4 text-[11px]">
-                              <div className="flex items-center gap-1.5">
-                                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Kwaliteit lev.:</span>
-                                <span className="font-mono text-foreground">{p.supplier_quality}%</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Betrouwb.:</span>
-                                <span className="font-mono text-foreground">{p.supplier_reliability}%</span>
-                              </div>
-                            </div>
 
                             {/* Supplier offers table */}
                             <div>
