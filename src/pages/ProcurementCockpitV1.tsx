@@ -60,6 +60,28 @@ const ProcurementCockpitV1 = () => {
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
+  const [showKPIs, setShowKPIs] = useState(true);
+  const [showPriceComparison, setShowPriceComparison] = useState(true);
+  const [showSupplierOffers, setShowSupplierOffers] = useState(true);
+
+  const allColumns = [
+    { key: "buyer", label: "Inkoper" },
+    { key: "required_volume", label: "Benodigd" },
+    { key: "historical_price", label: "Hist. Prijs" },
+    { key: "offer_price", label: "Offerteprijs" },
+    { key: "advised_price", label: "Adviesprijs" },
+    { key: "variance_vs_calculated", label: "Δ Hist." },
+    { key: "preferred_supplier", label: "Lev. Voorkeur" },
+  ] as const;
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   const families = useMemo(() => [...new Set(procurementRows.map(p => p.product_family))].sort(), []);
   const allBuyers = useMemo(() => [...new Set(procurementRows.map(p => p.buyer))].sort(), []);
