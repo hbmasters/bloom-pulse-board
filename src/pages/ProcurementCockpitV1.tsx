@@ -378,19 +378,6 @@ const ProcurementCockpitV1 = () => {
                               </div>
                             </div>
 
-                            {/* Supplier context */}
-                            <div className="flex flex-wrap gap-4 text-[11px]">
-                              <div className="flex items-center gap-1.5">
-                                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Kwaliteit lev.:</span>
-                                <span className="font-mono text-foreground">{p.supplier_quality}%</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Betrouwb.:</span>
-                                <span className="font-mono text-foreground">{p.supplier_reliability}%</span>
-                              </div>
-                            </div>
 
                             {/* Supplier offers table */}
                             <div>
