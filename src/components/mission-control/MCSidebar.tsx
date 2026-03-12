@@ -46,7 +46,6 @@ const navSections: NavSection[] = [
     label: "LABS",
     entries: [
       { id: "procurement-cockpit-v1", icon: ShoppingCart, label: "Purchasing List v0.5" },
-      { id: "procurement-market-radar", icon: Radar, label: "Procurement Market Radar" },
     ],
   },
 ];
