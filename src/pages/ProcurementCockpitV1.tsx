@@ -364,13 +364,13 @@ const ProcurementCockpitV1 = () => {
                           <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
                         </div>
                       </td>
-                      <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>
-                      <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>
+                      {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
+                      {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>}
+                      {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
+                      {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
+                      {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
+                      {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
+                      {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
                       <td className={cn("px-3", rowPy)}>
                         <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
                           <ShoppingBag className="w-2.5 h-2.5" /> Koop
