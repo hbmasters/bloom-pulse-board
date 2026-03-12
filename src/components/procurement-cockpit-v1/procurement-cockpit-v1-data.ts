@@ -5,15 +5,10 @@ export type AIAdvice = "buy_now" | "wait" | "use_stock" | "prefer_supplier" | "c
 export type ProcurementStatus = "current" | "urgent" | "today" | "completed";
 export type ShopSyncStatus = "connected" | "delayed" | "no_data" | "outdated" | "error";
 
-export interface BouquetProduct {
-  name: string;
+export interface CustomerProductLine {
+  customer: string;
+  product_name: string;
   stem_length: string;
-  quantity: number;
-  departure_date: string;
-}
-
-export interface CustomerOrder {
-  name: string;
   quantity: number;
   departure_date: string;
 }
