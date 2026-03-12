@@ -444,10 +444,10 @@ const ProcurementCockpitV1 = () => {
                                   );
                                 })}
                               </div>
-                            </div>
+                            </div>}
 
                             {/* Supplier offers table */}
-                            <div>
+                            {showSupplierOffers && <div>
                               <h4 className="text-xs font-semibold text-foreground mb-2.5 flex items-center gap-1.5">
                                 <Eye className="w-3.5 h-3.5 text-primary" />
                                 Leveranciersaanbod ({offers.length})
