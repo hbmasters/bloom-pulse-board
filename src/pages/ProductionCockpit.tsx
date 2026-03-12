@@ -387,6 +387,41 @@ const ProductionCockpit = () => {
           </div>
 
           {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1A — STEMS PER HOUR                               */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Stelen per Uur" icon={Zap}
+            tooltip="Stelenverwerking per lijn, per persoon en per afdeling. Stelen/uur is een betere indicator van werkelijke operationele belasting dan bouquets/uur."
+            badge="STELEN">
+            <StemsPerHourKPI deptFilter={deptFilter} />
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1B — RECIPE INTELLIGENCE                          */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Recipe Intelligence" icon={FlaskConical}
+            tooltip="Receptanalyse per boeket: stelen, bloementypes, componentenmix, variatie en handling. Verklaart waarom sommige lijnen operationeel zwaarder zijn."
+            badge="RECEPTEN">
+            <RecipeIntelligence />
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1C — OPERATIONAL COMPLEXITY                       */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Operationele Complexiteit" icon={Workflow}
+            tooltip="Vergelijking van complexiteit, stelen/uur en verwachte operationele druk per product. Maakt verborgen zwaarte zichtbaar."
+            badge="COMPLEXITY INDEX">
+            <OperationalComplexityView />
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1D — LINE OPERATION IMPACT                        */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Lijn Complexiteit & Impact" icon={Activity}
+            tooltip="Hoe complexiteit de lijnsnelheid, check-frequentie, vertragingsrisico en efficiency beïnvloedt. Ondersteunt beslissingen over lijnverdeling en orderspreiding."
+            badge="IMPACT">
+            <LineOperationImpact deptFilter={deptFilter} />
+          </Section>
+
           {/* SECTION 1B — PRODUCTION TIMELINE                          */}
           {/* ══════════════════════════════════════════════════════════ */}
           <Section title="Productie Timeline" icon={CalendarClock}
