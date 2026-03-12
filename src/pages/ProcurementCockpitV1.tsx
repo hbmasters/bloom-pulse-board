@@ -204,11 +204,10 @@ const ProcurementCockpitV1 = () => {
       </div>
 
       {/* ── KPI Cards (tied to period) ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
           { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
-          { label: "Gereserveerd", value: fmt(totals.reserved), icon: Clock },
           { label: "Open inkoopbehoefte", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
           { label: "Offerteprijs vs Inkoopprijs", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, sub: `Offerte ${fmtPrice(totals.avgOfferPrice)} · Inkoop ${fmtPrice(totals.avgHistoricalPrice)}`, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
           { label: "Actie nodig", value: `${totals.actionNeeded}`, icon: Zap },
