@@ -342,13 +342,9 @@ const ProcurementCockpitV1 = () => {
                         <td colSpan={16} className="px-5 py-5">
                           <div className="space-y-5">
                             {/* Context cards */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                               {[
                                 { label: "Benodigd", value: fmt(p.required_volume) },
-                                { label: "Beschikbaar", value: fmt(p.available_stock) },
-                                { label: "Gereserveerd", value: fmt(p.reserved_stock) },
-                                { label: "Vrije voorraad", value: fmt(p.free_stock) },
-                                { label: "Open inkoop", value: fmt(p.open_buy_need) },
                                 { label: "Offerteprijs", value: fmtPrice(p.offer_price) },
                               ].map(c => (
                                 <div key={c.label} className="rounded-lg border border-border bg-background p-3">
