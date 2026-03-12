@@ -321,9 +321,6 @@ const ProcurementCockpitV1 = () => {
                       </td>
                       <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmt(p.available_stock)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono", p.free_stock === 0 ? "text-destructive font-semibold" : "text-foreground")}>{fmt(p.free_stock)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono font-semibold text-foreground")}>{fmt(p.open_buy_need)}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>
