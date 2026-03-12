@@ -60,6 +60,7 @@ const ProcurementCockpitV1 = () => {
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
+  const [largeView, setLargeView] = useState(false);
   const [showKPIs, setShowKPIs] = useState(true);
   const [showPriceComparison, setShowPriceComparison] = useState(true);
   const [showSupplierOffers, setShowSupplierOffers] = useState(true);
@@ -211,6 +212,10 @@ const ProcurementCockpitV1 = () => {
                   <input type="checkbox" checked={compactView} onChange={e => setCompactView(e.target.checked)} className="rounded border-border" />
                   <span className="text-[11px] text-foreground">Compacte weergave</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={largeView} onChange={e => setLargeView(e.target.checked)} className="rounded border-border" />
+                  <span className="text-[11px] text-foreground">Grote weergave</span>
+                </label>
 
                 <div className="border-t border-border pt-2 space-y-1.5">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Secties</span>
@@ -305,7 +310,7 @@ const ProcurementCockpitV1 = () => {
       {/* ── Procurement List ── */}
       <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Klik op een rij voor detail" badge={`${filtered.length}`}>
         <div className="overflow-x-auto -mx-5">
-          <table className="w-full text-[11px]">
+          <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
             <thead>
               <tr className="border-b border-border">
                 <th className="px-2 py-2.5 w-6"></th>
@@ -341,7 +346,7 @@ const ProcurementCockpitV1 = () => {
                 const isExpanded = expandedId === p.id;
                 const offers = supplierOffers[p.id] || [];
                 const sLabel = statusLabels[p.status];
-                const rowPy = compactView ? "py-2" : "py-3";
+                const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
 
                 return (
                   <Fragment key={p.id}>
