@@ -272,7 +272,7 @@ const ProcurementCockpitV1 = () => {
             {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-2.5">
