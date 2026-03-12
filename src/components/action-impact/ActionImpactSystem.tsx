@@ -57,7 +57,7 @@ export const ActionImpactSystem = ({ intelligence }: Props) => {
 
   return (
     <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
-      <MCHologramBackground />
+      <div className="opacity-[0.15]"><MCHologramBackground /></div>
 
       {/* ── Header + Summary Bar ── */}
       <div className="relative z-10 border-b border-border bg-card/60 backdrop-blur-xl px-4 md:px-6 py-3 shrink-0">
