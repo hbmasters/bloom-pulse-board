@@ -485,7 +485,7 @@ const ProcurementCockpitV1 = () => {
                                   </table>
                                 </div>
                               )}
-                            </div>
+                            </div>}
                           </div>
                         </td>
                       </tr>
