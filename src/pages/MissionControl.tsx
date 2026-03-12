@@ -155,6 +155,7 @@ const MissionControl = () => {
             {view === "procurement" && <ProcurementCockpit />}
             {view === "production-cockpit" && <ProductionCockpit />}
             {view === "commercial" && <CommercialCockpit />}
+            {view === "procurement-market-radar" && <ProcurementMarketRadar />}
           </div>
 
           {view === "chat" && (
