@@ -2,11 +2,11 @@ import { useState, useMemo, Fragment } from "react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
-  ShoppingCart, FlaskConical, Package, AlertTriangle, CheckCircle2,
+  ShoppingCart, Package, AlertTriangle, CheckCircle2,
   TrendingDown, TrendingUp, ArrowUpDown, Search, ChevronDown,
   ChevronRight, Star, Shield, Clock, Zap, Eye, Users, X,
-  Wifi, WifiOff, AlertCircle, Settings2, RotateCcw, Filter,
-  Bot, ShoppingBag, Ruler, CalendarIcon,
+  Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
+  ShoppingBag, Ruler, CalendarIcon, Flower2,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import {
   procurementRows,
   supplierOffers,
-  aiAdviceLabels,
   statusLabels,
   shopStatuses,
   shopSyncStatusLabels,
@@ -55,7 +54,7 @@ const ProcurementCockpitV1 = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [urgencyFilter, setUrgencyFilter] = useState<string | null>(null);
-  const [customerFilter, setCustomerFilter] = useState<string | null>(null);
+  const [buyerFilter, setBuyerFilter] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date());
   const [dateTo, setDateTo] = useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 6); return d; });
   const [shopPopup, setShopPopup] = useState(false);
@@ -63,7 +62,7 @@ const ProcurementCockpitV1 = () => {
   const [compactView, setCompactView] = useState(false);
 
   const families = useMemo(() => [...new Set(procurementRows.map(p => p.product_family))].sort(), []);
-  const allCustomers = useMemo(() => [...new Set(procurementRows.flatMap(p => p.customers))].sort(), []);
+  const allBuyers = useMemo(() => [...new Set(procurementRows.map(p => p.buyer))].sort(), []);
 
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
@@ -72,7 +71,7 @@ const ProcurementCockpitV1 = () => {
       if (search && !p.product.toLowerCase().includes(search.toLowerCase()) && !p.product_family.toLowerCase().includes(search.toLowerCase())) return false;
       if (familyFilter && p.product_family !== familyFilter) return false;
       if (urgencyFilter && p.urgency !== urgencyFilter) return false;
-      if (customerFilter && !p.customers.includes(customerFilter)) return false;
+      if (buyerFilter && p.buyer !== buyerFilter) return false;
       return true;
     });
     list.sort((a, b) => {
@@ -84,7 +83,7 @@ const ProcurementCockpitV1 = () => {
       return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
     return list;
-  }, [search, sortKey, sortDir, familyFilter, urgencyFilter, customerFilter]);
+  }, [search, sortKey, sortDir, familyFilter, urgencyFilter, buyerFilter]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -95,14 +94,14 @@ const ProcurementCockpitV1 = () => {
     setSearch("");
     setFamilyFilter(null);
     setUrgencyFilter(null);
-    setCustomerFilter(null);
+    setBuyerFilter(null);
     const now = new Date();
     setDateFrom(now);
     const end = new Date(); end.setDate(end.getDate() + 6);
     setDateTo(end);
   };
 
-  const hasActiveFilters = search || familyFilter || urgencyFilter || customerFilter;
+  const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter;
 
   /* ── KPI totals ── */
   const totals = useMemo(() => {
@@ -238,9 +237,9 @@ const ProcurementCockpitV1 = () => {
           <option value="">Alle families</option>
           {families.map(f => <option key={f} value={f}>{f}</option>)}
         </select>
-        <select value={customerFilter || ""} onChange={e => setCustomerFilter(e.target.value || null)} className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
-          <option value="">Alle klanten</option>
-          {allCustomers.map(c => <option key={c} value={c}>{c}</option>)}
+        <select value={buyerFilter || ""} onChange={e => setBuyerFilter(e.target.value || null)} className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle inkopers</option>
+          {allBuyers.map(b => <option key={b} value={b}>{b}</option>)}
         </select>
         <div className="flex gap-1">
           {(["high", "medium", "low"] as const).map(u => (
@@ -266,6 +265,7 @@ const ProcurementCockpitV1 = () => {
                 <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Status</th>
                 {([
                   ["product", "Product"],
+                  ["buyer", "Inkoper"],
                   ["required_volume", "Benodigd"],
                   ["available_stock", "Voorraad"],
                   ["free_stock", "Vrij"],
@@ -285,7 +285,6 @@ const ProcurementCockpitV1 = () => {
                 ))}
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Kwaliteit</th>
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Score</th>
-                <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">AI Advies</th>
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Actie</th>
                 <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort("urgency")}>
                   <span className="inline-flex items-center gap-0.5">
@@ -299,7 +298,6 @@ const ProcurementCockpitV1 = () => {
               {filtered.map(p => {
                 const isExpanded = expandedId === p.id;
                 const offers = supplierOffers[p.id] || [];
-                const adviceStyle = aiAdviceLabels[p.ai_advice];
                 const sLabel = statusLabels[p.status];
                 const rowPy = compactView ? "py-2" : "py-3";
 
@@ -324,6 +322,7 @@ const ProcurementCockpitV1 = () => {
                           <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
                         </div>
                       </td>
+                      <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>
                       <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmt(p.available_stock)}</td>
                       <td className={cn("px-3", rowPy, "font-mono", p.free_stock === 0 ? "text-destructive font-semibold" : "text-foreground")}>{fmt(p.free_stock)}</td>
@@ -345,11 +344,6 @@ const ProcurementCockpitV1 = () => {
                         </span>
                       </td>
                       <td className={cn("px-3", rowPy)}>
-                        <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border border-border text-muted-foreground/50 bg-muted/30 cursor-not-allowed">
-                          <span className="flex items-center gap-1"><Bot className="w-2.5 h-2.5" />{adviceStyle.label}</span>
-                        </span>
-                      </td>
-                      <td className={cn("px-3", rowPy)}>
                         <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
                           <ShoppingBag className="w-2.5 h-2.5" /> Koop
                         </button>
@@ -363,7 +357,7 @@ const ProcurementCockpitV1 = () => {
 
                     {isExpanded && (
                       <tr className="border-b border-border/40 bg-muted/10">
-                        <td colSpan={17} className="px-5 py-5">
+                        <td colSpan={16} className="px-5 py-5">
                           <div className="space-y-5">
                             {/* Context cards */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -382,18 +376,41 @@ const ProcurementCockpitV1 = () => {
                               ))}
                             </div>
 
-                            {/* Customer + Program + Supplier info */}
+                            {/* Customers + Bouquet Products + Supplier info */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Customers */}
+                              <div className="rounded-lg border border-border bg-background p-3">
+                                <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-2">
+                                  <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                                  Klanten ({p.customers.length})
+                                </h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {p.customers.map(c => (
+                                    <span key={c} className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-border bg-muted/50 text-foreground">{c}</span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Bouquet Products (Producten) */}
+                              <div className="rounded-lg border border-border bg-background p-3">
+                                <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-2">
+                                  <Flower2 className="w-3.5 h-3.5 text-muted-foreground" />
+                                  Producten ({p.bouquet_products.length})
+                                </h4>
+                                <div className="space-y-1">
+                                  {p.bouquet_products.map((bp, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-[10px]">
+                                      <span className="font-medium text-foreground">{bp.name}</span>
+                                      <span className="text-muted-foreground">·</span>
+                                      <span className="text-muted-foreground font-mono">{bp.stem_length}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Supplier context */}
                             <div className="flex flex-wrap gap-4 text-[11px]">
-                              <div className="flex items-center gap-1.5">
-                                <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Klanten:</span>
-                                <span className="font-medium text-foreground">{p.customers.join(", ")}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground">Programma:</span>
-                                <span className="font-medium text-foreground">{p.programs.join(", ")}</span>
-                              </div>
                               <div className="flex items-center gap-1.5">
                                 <Shield className="w-3.5 h-3.5 text-muted-foreground" />
                                 <span className="text-muted-foreground">Kwaliteit lev.:</span>
@@ -403,6 +420,10 @@ const ProcurementCockpitV1 = () => {
                                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                                 <span className="text-muted-foreground">Betrouwb.:</span>
                                 <span className="font-mono text-foreground">{p.supplier_reliability}%</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-muted-foreground">Inkoper:</span>
+                                <span className="font-medium text-foreground">{p.buyer}</span>
                               </div>
                             </div>
 
