@@ -326,17 +326,6 @@ const ProcurementCockpitV1 = () => {
                       <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>
                       <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>
                       <td className={cn("px-3", rowPy)}>
-                        <div className="flex items-center gap-1.5">
-                          <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded border", p.external_quality === "A1" ? "bg-muted text-foreground border-border" : "bg-muted text-muted-foreground border-border")}>{p.external_quality}</span>
-                          <span className="text-[10px] font-mono text-muted-foreground">{p.internal_quality}%</span>
-                        </div>
-                      </td>
-                      <td className={cn("px-3", rowPy)}>
-                        <span className={cn("inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-full border", scoreBg(p.supplier_score))}>
-                          <Star className="w-2.5 h-2.5" />{p.supplier_score}
-                        </span>
-                      </td>
-                      <td className={cn("px-3", rowPy)}>
                         <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
                           <ShoppingBag className="w-2.5 h-2.5" /> Koop
                         </button>
