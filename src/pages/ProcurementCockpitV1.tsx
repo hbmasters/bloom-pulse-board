@@ -346,7 +346,7 @@ const ProcurementCockpitV1 = () => {
                 const isExpanded = expandedId === p.id;
                 const offers = supplierOffers[p.id] || [];
                 const sLabel = statusLabels[p.status];
-                const rowPy = compactView ? "py-2" : "py-3";
+                const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
 
                 return (
                   <Fragment key={p.id}>
