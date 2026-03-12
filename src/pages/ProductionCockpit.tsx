@@ -382,6 +382,56 @@ const ProductionCockpit = () => {
           </div>
 
           {/* ══════════════════════════════════════════════════════════ */}
+          {/* SECTION 1B — PRODUCTION TIMELINE                          */}
+          {/* ══════════════════════════════════════════════════════════ */}
+          <Section title="Productie Timeline" icon={CalendarClock}
+            tooltip="Geplande start, verwachte finish, actuele voortgang en vertragingsreden per lijn."
+            badge="LIVE">
+            <div className="space-y-2">
+              {[
+                { line: "H1", dept: "Hand", plannedStart: "06:00", expectedFinish: "14:30", progress: 72, delay: null, status: "healthy" as const },
+                { line: "H2", dept: "Hand", plannedStart: "06:00", expectedFinish: "14:00", progress: 68, delay: null, status: "healthy" as const },
+                { line: "H3", dept: "Hand", plannedStart: "06:00", expectedFinish: "15:45", progress: 45, delay: "Transportband storing", status: "critical" as const },
+                { line: "H4", dept: "Hand", plannedStart: "06:30", expectedFinish: "14:30", progress: 65, delay: null, status: "healthy" as const },
+                { line: "H5", dept: "Hand", plannedStart: "06:30", expectedFinish: "14:30", progress: 58, delay: null, status: "healthy" as const },
+                { line: "H6", dept: "Hand", plannedStart: "07:00", expectedFinish: "15:00", progress: 52, delay: "Nieuw personeel", status: "warning" as const },
+                { line: "H7", dept: "Hand", plannedStart: "06:00", expectedFinish: "14:00", progress: 70, delay: null, status: "healthy" as const },
+                { line: "B1", dept: "Band", plannedStart: "06:00", expectedFinish: "14:00", progress: 74, delay: null, status: "healthy" as const },
+                { line: "B2", dept: "Band", plannedStart: "06:00", expectedFinish: "14:30", progress: 62, delay: null, status: "healthy" as const },
+                { line: "B3", dept: "Band", plannedStart: "06:30", expectedFinish: "14:30", progress: 66, delay: null, status: "healthy" as const },
+                { line: "B4", dept: "Band", plannedStart: "06:00", expectedFinish: "15:30", progress: 48, delay: "Sensor kalibratie", status: "warning" as const },
+                { line: "B5", dept: "Band", plannedStart: "06:00", expectedFinish: "16:00", progress: 38, delay: "Sensor + orderwissels", status: "critical" as const },
+              ].filter(l => deptFilter === "all" || l.dept.toLowerCase() === deptFilter || deptFilter === "totaal").map(l => {
+                const barColor = l.status === "healthy" ? "bg-accent" : l.status === "warning" ? "bg-yellow-500" : "bg-destructive";
+                const bgColor = l.status === "healthy" ? "border-accent/20" : l.status === "warning" ? "border-yellow-500/20" : "border-destructive/20";
+                return (
+                  <div key={l.line} className={cn("grid grid-cols-[3rem_4rem_4rem_1fr_3rem_auto] items-center gap-3 px-3 py-2 rounded-lg border", bgColor, "bg-card/50")}>
+                    <span className={cn("text-[12px] font-mono font-bold", l.status === "critical" ? "text-destructive" : "text-foreground")}>{l.line}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/60">{l.plannedStart}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/60">{l.expectedFinish}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-3 rounded-full bg-border/30 overflow-hidden relative">
+                        <div className={cn("h-full rounded-full transition-all", barColor)} style={{ width: `${l.progress}%` }} />
+                      </div>
+                      <span className={cn("text-[11px] font-mono font-bold w-8 text-right", l.status === "critical" ? "text-destructive" : l.status === "warning" ? "text-yellow-500" : "text-foreground")}>{l.progress}%</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground/40">{l.dept}</span>
+                    {l.delay ? (
+                      <span className="text-[9px] font-mono text-destructive bg-destructive/10 px-2 py-0.5 rounded-full border border-destructive/20 truncate max-w-[140px]">{l.delay}</span>
+                    ) : (
+                      <span className="text-[9px] font-mono text-accent">Op schema</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Column headers */}
+            <div className="grid grid-cols-[3rem_4rem_4rem_1fr_3rem_auto] items-center gap-3 px-3 mt-2 text-[9px] font-mono text-muted-foreground/30">
+              <span>Lijn</span><span>Start</span><span>Finish</span><span>Voortgang</span><span>Afd.</span><span>Status</span>
+            </div>
+          </Section>
+
+          {/* ══════════════════════════════════════════════════════════ */}
           {/* SECTION 2 — EFFICIENCY OVERVIEW                          */}
           {/* ══════════════════════════════════════════════════════════ */}
           <Section title="Efficiency Overzicht" icon={Gauge} tooltip="Vergelijking O-APU (klantnorm), W-APU (werkelijk) en P-APU (planning) per afdeling.">
