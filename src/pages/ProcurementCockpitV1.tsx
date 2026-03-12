@@ -377,43 +377,23 @@ const ProcurementCockpitV1 = () => {
                             <div className="rounded-lg border border-border bg-background p-4">
                               <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-3">
                                 <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                                Klanten & Producten
+                                Klanten & Producten ({p.customer_product_lines.length})
                               </h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Klanten */}
-                                <div>
-                                  <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Klanten ({p.customer_orders.length})</span>
-                                  <div className="mt-1.5 space-y-1">
-                                    {p.customer_orders.map((co, i) => (
-                                      <div key={i} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
-                                        <span className="font-medium text-foreground">{co.name}</span>
-                                        <div className="flex items-center gap-3">
-                                          <span className="font-mono text-muted-foreground">{fmt(co.quantity)} st</span>
-                                          <span className="font-mono text-muted-foreground/70 text-[9px]">{co.departure_date}</span>
-                                        </div>
-                                      </div>
-                                    ))}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                                {p.customer_product_lines.map((cpl, i) => (
+                                  <div key={i} className="flex items-center justify-between text-[10px] py-1.5 border-b border-border/30 last:border-0">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <span className="font-semibold text-foreground">{cpl.customer}</span>
+                                      <span className="text-muted-foreground">–</span>
+                                      <span className="text-foreground">{cpl.product_name}</span>
+                                      <span className="font-mono text-muted-foreground">{cpl.stem_length}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                                      <span className="font-mono text-muted-foreground">{fmt(cpl.quantity)} st</span>
+                                      <span className="font-mono text-muted-foreground/70 text-[9px]">{cpl.departure_date}</span>
+                                    </div>
                                   </div>
-                                </div>
-                                {/* Producten (boeketten) */}
-                                <div>
-                                  <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Producten ({p.bouquet_products.length})</span>
-                                  <div className="mt-1.5 space-y-1">
-                                    {p.bouquet_products.map((bp, i) => (
-                                      <div key={i} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-medium text-foreground">{bp.name}</span>
-                                          <span className="text-muted-foreground">·</span>
-                                          <span className="font-mono text-muted-foreground">{bp.stem_length}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                          <span className="font-mono text-muted-foreground">{fmt(bp.quantity)} st</span>
-                                          <span className="font-mono text-muted-foreground/70 text-[9px]">{bp.departure_date}</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
+                                ))}
                               </div>
                             </div>
 
