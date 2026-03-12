@@ -425,7 +425,7 @@ const ProcurementCockpitV1 = () => {
 
 
                             {/* Price comparison */}
-                            <div>
+                            {showPriceComparison && <div>
                               <h4 className="text-xs font-semibold text-foreground mb-2.5">Prijsvergelijking</h4>
                               <div className="grid grid-cols-3 gap-3">
                                 {[
