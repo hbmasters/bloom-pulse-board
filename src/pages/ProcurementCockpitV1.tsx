@@ -376,35 +376,46 @@ const ProcurementCockpitV1 = () => {
                               ))}
                             </div>
 
-                            {/* Customers + Bouquet Products + Supplier info */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Customers */}
-                              <div className="rounded-lg border border-border bg-background p-3">
-                                <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-2">
-                                  <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                                  Klanten ({p.customers.length})
-                                </h4>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {p.customers.map(c => (
-                                    <span key={c} className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-border bg-muted/50 text-foreground">{c}</span>
-                                  ))}
+                            {/* Klanten & Producten gecombineerd */}
+                            <div className="rounded-lg border border-border bg-background p-4">
+                              <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-3">
+                                <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                                Klanten & Producten
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Klanten */}
+                                <div>
+                                  <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Klanten ({p.customer_orders.length})</span>
+                                  <div className="mt-1.5 space-y-1">
+                                    {p.customer_orders.map((co, i) => (
+                                      <div key={i} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
+                                        <span className="font-medium text-foreground">{co.name}</span>
+                                        <div className="flex items-center gap-3">
+                                          <span className="font-mono text-muted-foreground">{fmt(co.quantity)} st</span>
+                                          <span className="font-mono text-muted-foreground/70 text-[9px]">{co.departure_date}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-
-                              {/* Bouquet Products (Producten) */}
-                              <div className="rounded-lg border border-border bg-background p-3">
-                                <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-2">
-                                  <Flower2 className="w-3.5 h-3.5 text-muted-foreground" />
-                                  Producten ({p.bouquet_products.length})
-                                </h4>
-                                <div className="space-y-1">
-                                  {p.bouquet_products.map((bp, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-[10px]">
-                                      <span className="font-medium text-foreground">{bp.name}</span>
-                                      <span className="text-muted-foreground">·</span>
-                                      <span className="text-muted-foreground font-mono">{bp.stem_length}</span>
-                                    </div>
-                                  ))}
+                                {/* Producten (boeketten) */}
+                                <div>
+                                  <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Producten ({p.bouquet_products.length})</span>
+                                  <div className="mt-1.5 space-y-1">
+                                    {p.bouquet_products.map((bp, i) => (
+                                      <div key={i} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="font-medium text-foreground">{bp.name}</span>
+                                          <span className="text-muted-foreground">·</span>
+                                          <span className="font-mono text-muted-foreground">{bp.stem_length}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          <span className="font-mono text-muted-foreground">{fmt(bp.quantity)} st</span>
+                                          <span className="font-mono text-muted-foreground/70 text-[9px]">{bp.departure_date}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -420,10 +431,6 @@ const ProcurementCockpitV1 = () => {
                                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                                 <span className="text-muted-foreground">Betrouwb.:</span>
                                 <span className="font-mono text-foreground">{p.supplier_reliability}%</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-muted-foreground">Inkoper:</span>
-                                <span className="font-medium text-foreground">{p.buyer}</span>
                               </div>
                             </div>
 
