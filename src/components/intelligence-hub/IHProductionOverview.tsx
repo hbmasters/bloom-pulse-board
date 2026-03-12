@@ -1,4 +1,4 @@
-import { Factory, ArrowRight } from "lucide-react";
+import { Factory } from "lucide-react";
 import IHSectionShell from "./IHSectionShell";
 import IHMetricCard, { IHMetric } from "./IHMetricCard";
 
@@ -52,16 +52,12 @@ const departments: DeptOverview[] = [
       { label: "Wachttijd", value: "8", unit: "min", status: "warning", change: "+2 min", changeDir: "up" },
     ],
   },
-  {
-    name: "Verdelen",
-    status: "healthy",
-    summary: "Verdeelnauwkeurigheid 99.2% • Doorlooptijd op norm",
-    metrics: [
-      { label: "Nauwkeurigheid", value: "99.2", unit: "%", status: "healthy", target: "99%" },
-      { label: "Doorlooptijd", value: "14", unit: "min", status: "healthy", target: "15 min" },
-      { label: "Orders verdeeld", value: "384", status: "healthy", change: "+12", changeDir: "up" },
-    ],
-  },
+];
+
+/* ── Operational KPI tiles ── */
+const operationalKPIs: IHMetric[] = [
+  { label: "Order picking time", value: "14.2", unit: "min", target: "12 min", status: "warning", change: "+2.2 min", changeDir: "up", sparkline: [11, 12, 12.5, 13, 14, 14.2] },
+  { label: "Productieduur gem.", value: "6.4", unit: "uur", target: "6 uur", status: "warning", change: "+0.4 uur", changeDir: "up", sparkline: [5.8, 6.0, 6.1, 6.2, 6.3, 6.4] },
 ];
 
 const statusDot = (s: string) =>
@@ -75,8 +71,15 @@ const IHProductionOverview = () => (
     icon={Factory}
     title="Production Intelligence"
     subtitle="High-level overzicht per afdeling"
-    badge="5 AFDELINGEN"
+    badge="4 AFDELINGEN"
   >
+    {/* Operational KPIs */}
+    <div className="grid grid-cols-2 gap-3 mb-5">
+      {operationalKPIs.map((m) => (
+        <IHMetricCard key={m.label} metric={m} />
+      ))}
+    </div>
+
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {departments.map((dept) => (
         <div
