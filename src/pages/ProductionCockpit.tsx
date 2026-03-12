@@ -5,8 +5,13 @@ import {
   ChevronDown, ChevronRight, Users, Gauge, Package,
   Activity, BarChart3, Flame, Brain, Info, CheckCircle2,
   ArrowUpRight, ArrowDownRight, Eye, Shield, Lightbulb,
-  ClipboardCheck, CalendarClock, Layers, BoxSelect
+  ClipboardCheck, CalendarClock, Layers, BoxSelect,
+  FlaskConical, Workflow, Zap
 } from "lucide-react";
+import StemsPerHourKPI from "@/components/production/StemsPerHourKPI";
+import RecipeIntelligence from "@/components/production/RecipeIntelligence";
+import OperationalComplexityView from "@/components/production/OperationalComplexityView";
+import LineOperationImpact from "@/components/production/LineOperationImpact";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
