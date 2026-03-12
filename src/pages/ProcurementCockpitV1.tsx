@@ -60,6 +60,28 @@ const ProcurementCockpitV1 = () => {
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
+  const [showKPIs, setShowKPIs] = useState(true);
+  const [showPriceComparison, setShowPriceComparison] = useState(true);
+  const [showSupplierOffers, setShowSupplierOffers] = useState(true);
+
+  const allColumns = [
+    { key: "buyer", label: "Inkoper" },
+    { key: "required_volume", label: "Benodigd" },
+    { key: "historical_price", label: "Hist. Prijs" },
+    { key: "offer_price", label: "Offerteprijs" },
+    { key: "advised_price", label: "Adviesprijs" },
+    { key: "variance_vs_calculated", label: "Δ Hist." },
+    { key: "preferred_supplier", label: "Lev. Voorkeur" },
+  ] as const;
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   const families = useMemo(() => [...new Set(procurementRows.map(p => p.product_family))].sort(), []);
   const allBuyers = useMemo(() => [...new Set(procurementRows.map(p => p.buyer))].sort(), []);
@@ -180,7 +202,7 @@ const ProcurementCockpitV1 = () => {
               <Settings2 className="w-3.5 h-3.5" /> Weergave
             </button>
             {showViewSettings && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-xl border border-border bg-card shadow-lg p-3 space-y-3">
+              <div className="absolute right-0 top-full mt-1 z-50 w-64 rounded-xl border border-border bg-card shadow-lg p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-foreground">Weergave</span>
                   <button onClick={() => setShowViewSettings(false)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
@@ -189,6 +211,32 @@ const ProcurementCockpitV1 = () => {
                   <input type="checkbox" checked={compactView} onChange={e => setCompactView(e.target.checked)} className="rounded border-border" />
                   <span className="text-[11px] text-foreground">Compacte weergave</span>
                 </label>
+
+                <div className="border-t border-border pt-2 space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Secties</span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showKPIs} onChange={e => setShowKPIs(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Kop informatie (KPI's)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showPriceComparison} onChange={e => setShowPriceComparison(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Prijsvergelijking</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showSupplierOffers} onChange={e => setShowSupplierOffers(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Leveranciersaanbod</span>
+                  </label>
+                </div>
+
+                <div className="border-t border-border pt-2 space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Kolommen</span>
+                  {allColumns.map(c => (
+                    <label key={c.key} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={visibleColumns.has(c.key)} onChange={() => toggleColumn(c.key)} className="rounded border-border" />
+                      <span className="text-[11px] text-foreground">{c.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -204,7 +252,7 @@ const ProcurementCockpitV1 = () => {
       </div>
 
       {/* ── KPI Cards (tied to period) ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {showKPIs && <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
           { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
@@ -224,7 +272,7 @@ const ProcurementCockpitV1 = () => {
             {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-2.5">
@@ -271,7 +319,7 @@ const ProcurementCockpitV1 = () => {
                   ["advised_price", "Adviesprijs"],
                   ["variance_vs_calculated", "Δ Hist."],
                   ["preferred_supplier", "Lev. Voorkeur"],
-                ] as [SortKey, string][]).map(([key, label]) => (
+                ] as [SortKey, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                   <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort(key)}>
                     <span className="inline-flex items-center gap-0.5">
                       {label}
@@ -316,13 +364,13 @@ const ProcurementCockpitV1 = () => {
                           <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
                         </div>
                       </td>
-                      <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>
-                      <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>
-                      <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>
+                      {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
+                      {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>}
+                      {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
+                      {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
+                      {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
+                      {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
+                      {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
                       <td className={cn("px-3", rowPy)}>
                         <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
                           <ShoppingBag className="w-2.5 h-2.5" /> Koop
@@ -377,7 +425,7 @@ const ProcurementCockpitV1 = () => {
 
 
                             {/* Price comparison */}
-                            <div>
+                            {showPriceComparison && <div>
                               <h4 className="text-xs font-semibold text-foreground mb-2.5">Prijsvergelijking</h4>
                               <div className="grid grid-cols-3 gap-3">
                                 {[
@@ -396,10 +444,10 @@ const ProcurementCockpitV1 = () => {
                                   );
                                 })}
                               </div>
-                            </div>
+                            </div>}
 
                             {/* Supplier offers table */}
-                            <div>
+                            {showSupplierOffers && <div>
                               <h4 className="text-xs font-semibold text-foreground mb-2.5 flex items-center gap-1.5">
                                 <Eye className="w-3.5 h-3.5 text-primary" />
                                 Leveranciersaanbod ({offers.length})
@@ -437,7 +485,7 @@ const ProcurementCockpitV1 = () => {
                                   </table>
                                 </div>
                               )}
-                            </div>
+                            </div>}
                           </div>
                         </td>
                       </tr>
