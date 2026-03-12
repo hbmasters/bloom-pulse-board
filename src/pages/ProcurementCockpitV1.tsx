@@ -202,7 +202,7 @@ const ProcurementCockpitV1 = () => {
               <Settings2 className="w-3.5 h-3.5" /> Weergave
             </button>
             {showViewSettings && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-xl border border-border bg-card shadow-lg p-3 space-y-3">
+              <div className="absolute right-0 top-full mt-1 z-50 w-64 rounded-xl border border-border bg-card shadow-lg p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-foreground">Weergave</span>
                   <button onClick={() => setShowViewSettings(false)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
@@ -211,6 +211,32 @@ const ProcurementCockpitV1 = () => {
                   <input type="checkbox" checked={compactView} onChange={e => setCompactView(e.target.checked)} className="rounded border-border" />
                   <span className="text-[11px] text-foreground">Compacte weergave</span>
                 </label>
+
+                <div className="border-t border-border pt-2 space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Secties</span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showKPIs} onChange={e => setShowKPIs(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Kop informatie (KPI's)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showPriceComparison} onChange={e => setShowPriceComparison(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Prijsvergelijking</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={showSupplierOffers} onChange={e => setShowSupplierOffers(e.target.checked)} className="rounded border-border" />
+                    <span className="text-[11px] text-foreground">Leveranciersaanbod</span>
+                  </label>
+                </div>
+
+                <div className="border-t border-border pt-2 space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Kolommen</span>
+                  {allColumns.map(c => (
+                    <label key={c.key} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={visibleColumns.has(c.key)} onChange={() => toggleColumn(c.key)} className="rounded border-border" />
+                      <span className="text-[11px] text-foreground">{c.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
