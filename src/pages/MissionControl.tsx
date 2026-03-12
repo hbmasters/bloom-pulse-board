@@ -27,7 +27,7 @@ import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSyste
 import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import ProductionCockpit from "@/pages/ProductionCockpit";
 import CommercialCockpit from "@/pages/CommercialCockpit";
-import ProcurementMarketRadar from "@/pages/ProcurementMarketRadar";
+
 import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
