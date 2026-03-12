@@ -27,9 +27,10 @@ import { ActionImpactSystem } from "@/components/action-impact/ActionImpactSyste
 import ProcurementCockpit from "@/pages/ProcurementCockpit";
 import ProductionCockpit from "@/pages/ProductionCockpit";
 import CommercialCockpit from "@/pages/CommercialCockpit";
+import ProcurementMarketRadar from "@/pages/ProcurementMarketRadar";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-market-radar";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -52,6 +53,7 @@ const routeToView: Record<string, MCView> = {
   "/procurement": "procurement",
   "/production-cockpit": "production-cockpit",
   "/commercial": "commercial",
+  "/labs/procurement-market-radar": "procurement-market-radar",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -75,6 +77,7 @@ export const viewToRoute: Record<MCView, string> = {
   procurement: "/procurement",
   "production-cockpit": "/production-cockpit",
   commercial: "/commercial",
+  "procurement-market-radar": "/labs/procurement-market-radar",
 };
 
 const MissionControl = () => {
@@ -152,6 +155,7 @@ const MissionControl = () => {
             {view === "procurement" && <ProcurementCockpit />}
             {view === "production-cockpit" && <ProductionCockpit />}
             {view === "commercial" && <CommercialCockpit />}
+            {view === "procurement-market-radar" && <ProcurementMarketRadar />}
           </div>
 
           {view === "chat" && (
