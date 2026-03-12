@@ -43,6 +43,12 @@ const navSections: NavSection[] = [
       { id: "settings", icon: Settings, label: "Instellingen" },
     ],
   },
+  {
+    label: "LABS",
+    entries: [
+      { id: "procurement", icon: ShoppingCart, label: "Procurement Cockpit" },
+    ],
+  },
 ];
 
 const MCSidebar = ({ active, onNavigate }: MCSidebarProps) => {
