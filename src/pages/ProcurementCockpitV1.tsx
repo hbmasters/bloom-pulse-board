@@ -60,6 +60,7 @@ const ProcurementCockpitV1 = () => {
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
+  const [largeView, setLargeView] = useState(false);
   const [showKPIs, setShowKPIs] = useState(true);
   const [showPriceComparison, setShowPriceComparison] = useState(true);
   const [showSupplierOffers, setShowSupplierOffers] = useState(true);
