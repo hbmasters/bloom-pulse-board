@@ -161,6 +161,42 @@ const CommercialCockpit = () => {
             <CustomerIntelligence />
           </div>
 
+          {/* ═══ FORECAST COMPARISON PER CUSTOMER ═══ */}
+          <Section title="Forecast vs Werkelijke Orders" icon={BarChart3} badge="PER KLANT">
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="grid grid-cols-4 text-[10px] text-muted-foreground/40 font-mono pb-1.5 px-3 py-2 bg-muted/20 border-b border-border">
+                <span>Klant</span><span>Forecast volume</span><span>Werkelijke orders</span><span>Delta</span>
+              </div>
+              <div className="space-y-0">
+                {[
+                  { customer: "Albert Heijn", forecast: 175000, actual: 168000 },
+                  { customer: "Jumbo", forecast: 150000, actual: 142000 },
+                  { customer: "Aldi", forecast: 240000, actual: 228000 },
+                  { customer: "Lidl", forecast: 170000, actual: 162000 },
+                  { customer: "Dekamarkt", forecast: 92000, actual: 88000 },
+                  { customer: "Plus", forecast: 98000, actual: 96000 },
+                  { customer: "REWE", forecast: 145000, actual: 140000 },
+                  { customer: "Vomar", forecast: 68000, actual: 64800 },
+                  { customer: "Coop", forecast: 58000, actual: 48000 },
+                  { customer: "Dirk", forecast: 58000, actual: 56400 },
+                ].map(r => {
+                  const delta = r.actual - r.forecast;
+                  const deltaPct = ((delta / r.forecast) * 100).toFixed(1);
+                  return (
+                    <div key={r.customer} className="grid grid-cols-4 text-[12px] px-3 py-2 border-b border-border/50 last:border-0 hover:bg-muted/10 transition-colors items-center">
+                      <span className="font-semibold text-foreground">{r.customer}</span>
+                      <span className="font-mono text-foreground/70">{fmt(r.forecast)}</span>
+                      <span className="font-mono text-foreground/70">{fmt(r.actual)}</span>
+                      <span className={cn("font-mono font-semibold", delta >= 0 ? "text-accent" : Math.abs(Number(deltaPct)) > 10 ? "text-destructive" : "text-yellow-500")}>
+                        {delta >= 0 ? "+" : ""}{fmt(delta)} ({deltaPct}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </Section>
+
           {/* ═══ SECONDARY LAYER: PRODUCT LINE INTELLIGENCE ═══ */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 px-1">
