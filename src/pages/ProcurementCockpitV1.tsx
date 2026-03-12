@@ -376,6 +376,28 @@ const ProcurementCockpitV1 = () => {
                             </div>
 
 
+                            {/* Price comparison */}
+                            <div>
+                              <h4 className="text-xs font-semibold text-foreground mb-2.5">Prijsvergelijking</h4>
+                              <div className="grid grid-cols-3 gap-3">
+                                {[
+                                  { label: "Historische prijs", value: p.historical_price, baseline: true },
+                                  { label: "Offerteprijs", value: p.offer_price },
+                                  { label: "Adviesprijs", value: p.advised_price },
+                                ].map(pc => {
+                                  const diff = p.historical_price > 0 ? ((pc.value - p.historical_price) / p.historical_price * 100) : 0;
+                                  return (
+                                    <div key={pc.label} className={cn("rounded-lg border border-border bg-background p-3 flex flex-col gap-0.5", pc.baseline && "ring-1 ring-primary/20")}>
+                                      <span className="text-[9px] font-medium text-muted-foreground uppercase">{pc.label}</span>
+                                      <span className="text-sm font-bold font-mono text-foreground">{fmtPrice(pc.value)}</span>
+                                      {!pc.baseline && <span className={cn("text-[9px] font-mono", pctColor(diff))}>{diff > 0 ? "+" : ""}{diff.toFixed(1)}%</span>}
+                                      {pc.baseline && <span className="text-[9px] font-mono text-muted-foreground">referentie</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
                             {/* Supplier offers table */}
                             <div>
                               <h4 className="text-xs font-semibold text-foreground mb-2.5 flex items-center gap-1.5">
@@ -415,28 +437,6 @@ const ProcurementCockpitV1 = () => {
                                   </table>
                                 </div>
                               )}
-                            </div>
-
-                            {/* Price comparison */}
-                            <div>
-                              <h4 className="text-xs font-semibold text-foreground mb-2.5">Prijsvergelijking</h4>
-                              <div className="grid grid-cols-3 gap-3">
-                                {[
-                                  { label: "Historische prijs", value: p.historical_price, baseline: true },
-                                  { label: "Offerteprijs", value: p.offer_price },
-                                  { label: "Adviesprijs", value: p.advised_price },
-                                ].map(pc => {
-                                  const diff = p.historical_price > 0 ? ((pc.value - p.historical_price) / p.historical_price * 100) : 0;
-                                  return (
-                                    <div key={pc.label} className={cn("rounded-lg border border-border bg-background p-3 flex flex-col gap-0.5", pc.baseline && "ring-1 ring-primary/20")}>
-                                      <span className="text-[9px] font-medium text-muted-foreground uppercase">{pc.label}</span>
-                                      <span className="text-sm font-bold font-mono text-foreground">{fmtPrice(pc.value)}</span>
-                                      {!pc.baseline && <span className={cn("text-[9px] font-mono", pctColor(diff))}>{diff > 0 ? "+" : ""}{diff.toFixed(1)}%</span>}
-                                      {pc.baseline && <span className="text-[9px] font-mono text-muted-foreground">referentie</span>}
-                                    </div>
-                                  );
-                                })}
-                              </div>
                             </div>
                           </div>
                         </td>
