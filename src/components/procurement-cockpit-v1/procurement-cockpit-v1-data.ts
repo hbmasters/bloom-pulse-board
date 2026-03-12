@@ -18,8 +18,7 @@ export interface ProcurementRow {
   product: string;
   stem_length: string;
   product_family: string;
-  customer_orders: CustomerOrder[];
-  bouquet_products: BouquetProduct[];
+  customer_product_lines: CustomerProductLine[];
   buyer: string;
   required_volume: number;
   available_stock: number;
