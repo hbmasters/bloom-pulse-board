@@ -33,6 +33,7 @@ const viewTitles: Record<MCView, string> = {
   "production-cockpit": "Production Cockpit",
   commercial: "Commercial Cockpit",
   "procurement-market-radar": "Procurement Market Radar",
+  "procurement-cockpit-v1": "Procurement Cockpit v1",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {
