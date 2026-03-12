@@ -140,9 +140,9 @@ const ProcurementCockpitV1 = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <ShoppingCart className="w-5 h-5 text-primary" />
-          <h1 className="text-lg font-bold text-foreground tracking-tight">Procurement Cockpit</h1>
+          <h1 className="text-lg font-bold text-foreground tracking-tight">Purchasing List</h1>
           <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">
-            LABS · V1
+            LABS · V0.5
           </span>
         </div>
         <div className="flex items-center gap-2">
