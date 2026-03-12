@@ -343,7 +343,6 @@ const ProcurementCockpitV1 = () => {
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                               {[
                                 { label: "Benodigd", value: fmt(p.required_volume) },
-                                { label: "Offerteprijs", value: fmtPrice(p.offer_price) },
                               ].map(c => (
                                 <div key={c.label} className="rounded-lg border border-border bg-background p-3">
                                   <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>
