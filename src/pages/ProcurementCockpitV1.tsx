@@ -310,7 +310,7 @@ const ProcurementCockpitV1 = () => {
       {/* ── Procurement List ── */}
       <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Klik op een rij voor detail" badge={`${filtered.length}`}>
         <div className="overflow-x-auto -mx-5">
-          <table className="w-full text-[11px]">
+          <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
             <thead>
               <tr className="border-b border-border">
                 <th className="px-2 py-2.5 w-6"></th>
