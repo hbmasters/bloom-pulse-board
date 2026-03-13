@@ -171,16 +171,19 @@ const ProcurementCockpitV1 = () => {
             LABS · V0.5
           </span>
         </div>
-        <UploadControls
-          inkoopFile={matchState.inkoopFile}
-          voorraadFile={matchState.voorraadFile}
-          inkoopCount={matchState.inkoopCount}
-          voorraadCount={matchState.voorraadCount}
-          isProcessed={matchState.isProcessed}
-          onUpload={matchState.handleUpload}
-          onProcess={matchState.processMatch}
-          onReset={matchState.reset}
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <UploadControls
+            inkoopFile={matchState.inkoopFile}
+            voorraadFile={matchState.voorraadFile}
+            inkoopCount={matchState.inkoopCount}
+            voorraadCount={matchState.voorraadCount}
+            isProcessed={matchState.isProcessed}
+            onUpload={matchState.handleUpload}
+            onProcess={matchState.processMatch}
+            onReset={matchState.reset}
+          />
+          <div className="h-4 w-px bg-border" />
+          {/* Shop status */}
           <div className="relative">
             <button onClick={() => setShopPopup(!shopPopup)} className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-colors">
               <Wifi className="w-3.5 h-3.5 text-accent" />
@@ -227,7 +230,6 @@ const ProcurementCockpitV1 = () => {
                   <input type="checkbox" checked={largeView} onChange={e => setLargeView(e.target.checked)} className="rounded border-border" />
                   <span className="text-[11px] text-foreground">Grote weergave</span>
                 </label>
-
                 <div className="border-t border-border pt-2 space-y-1.5">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Secties</span>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -243,7 +245,6 @@ const ProcurementCockpitV1 = () => {
                     <span className="text-[11px] text-foreground">Leveranciersaanbod</span>
                   </label>
                 </div>
-
                 <div className="border-t border-border pt-2 space-y-1.5">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Kolommen</span>
                   {allColumns.map(c => (
