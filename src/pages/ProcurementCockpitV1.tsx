@@ -323,7 +323,10 @@ const ProcurementCockpitV1 = () => {
       </div>
 
       {/* ── Procurement List ── */}
-      <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Klik op een rij voor detail" badge={`${filtered.length}`}>
+      <IHSectionShell icon={ShoppingCart} title={matchState.isProcessed ? "Afstreepoverzicht" : "Inkooplijst"} subtitle={matchState.isProcessed ? "Behoefte vs voorraad per artikel" : "Klik op een rij voor detail"} badge={matchState.isProcessed ? `${matchState.matched.length}` : `${filtered.length}`}>
+        {matchState.isProcessed ? (
+          <MatchedTable matched={matchState.matched} largeView={largeView} />
+        ) : (
         <div className="overflow-x-auto -mx-5">
           <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
             <thead>
