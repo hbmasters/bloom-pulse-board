@@ -572,6 +572,8 @@ export const MatchedTable = ({
                 <SortHeader k="behoefte" label="Behoefte" align="text-right" />
                 <SortHeader k="voorraad" label="Voorraad" align="text-right" />
                 <SortHeader k="benodigd" label="Benodigd" align="text-right" />
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Datum / Week</th>
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Hist. Prijs</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
                   <Link2 className="w-3 h-3 inline" />
