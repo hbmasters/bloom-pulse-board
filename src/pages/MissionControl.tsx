@@ -163,6 +163,7 @@ const MissionControl = () => {
             {view === "commercial" && <CommercialCockpit />}
             
             {view === "procurement-cockpit-v1" && <ProcurementCockpitV1 />}
+            {view === "ai-architecture" && <AIArchitecture />}
           </div>
 
           {view === "chat" && (

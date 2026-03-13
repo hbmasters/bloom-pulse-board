@@ -38,6 +38,7 @@ interface EngineCard {
 interface ExecCard {
   title: string;
   icon: typeof Bot;
+  purpose: string;
   description: string;
   status: Status;
 }
