@@ -302,21 +302,30 @@ export const MatchedTable = ({
     else { setSortKey(key); setSortDir(key === "behoefte" || key === "voorraad" || key === "benodigd" ? "desc" : "asc"); }
   };
 
-  // Find matching voorraad for a behoefte item based on artikel + kleur + lengte
+  // Find matching voorraad: same artikelgroep + kleur, lengte >= current
   const findMatchingVoorraad = useCallback((m: MatchedLine) => {
-    const normKey = m.key;
+    const groep = extractArtikelgroep(m.artikel).toUpperCase();
     const kleurSet = new Set(m.kleurCodes.map(c => c.toUpperCase()));
+    const mLengte = parseInt(m.lengte) || 0;
 
     return voorraadRows.filter(vr => {
-      const vKey = normalizeArtikel(vr.artikel);
-      // Match on normalized article name
-      const artikelMatch = vKey === normKey || vKey.includes(normKey) || normKey.includes(vKey);
-      // Match on soort at minimum
-      const soortMatch = vr.soort.toUpperCase() === m.soort.toUpperCase();
-      // Lengte match (if both have lengte)
-      const lengteMatch = !m.lengte || !vr.lengte || vr.lengte === m.lengte;
-
-      return (artikelMatch || soortMatch) && lengteMatch;
+      const vGroep = extractArtikelgroep(vr.artikel).toUpperCase();
+      if (vGroep !== groep) return false;
+      // Kleur match if we have kleur info
+      if (kleurSet.size > 0) {
+        // Check if voorraad artikel contains any of the kleur codes
+        const vArtikelUpper = vr.artikel.toUpperCase();
+        const hasKleur = [...kleurSet].some(k => vArtikelUpper.includes(kleurLabels[k]?.toUpperCase() || k));
+        const soortKleur = vr.soort?.toUpperCase() || "";
+        const kleurInSoort = [...kleurSet].some(k => soortKleur.includes(k));
+        if (!hasKleur && !kleurInSoort) return false;
+      }
+      // Lengte: accept same or larger
+      if (mLengte > 0 && vr.lengte) {
+        const vLengte = parseInt(vr.lengte) || 0;
+        if (vLengte > 0 && vLengte < mLengte) return false;
+      }
+      return true;
     });
   }, [voorraadRows]);
 
@@ -341,18 +350,17 @@ export const MatchedTable = ({
       <Fragment key={m.key}>
         <tr
           onClick={() => setExpandedKey(isExpanded ? null : m.key)}
-          className={cn("border-b border-border/40 cursor-pointer transition-colors", isExpanded ? "bg-muted/30" : "hover:bg-muted/10")}
+          className={cn(
+            "border-b border-border/40 cursor-pointer transition-colors",
+            isExpanded ? "bg-muted/30" : "hover:bg-muted/10",
+            m.status === "niet_gedekt" && "bg-destructive/5",
+            m.status === "deels_gedekt" && "bg-yellow-500/5",
+          )}
         >
           <td className="px-1.5 py-2.5 text-muted-foreground">
             {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </td>
-          <td className="px-2 py-2.5">
-            <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full border inline-flex items-center gap-0.5", cfg.bg)}>
-              <cfg.icon className={cn("w-2.5 h-2.5", cfg.color)} />
-              {cfg.label}
-            </span>
-          </td>
-          <td className="px-2 py-2.5 text-[10px] text-muted-foreground font-mono">{extractArtikelgroep(m.artikel)}</td>
+          <td className="px-2 py-2.5 text-[10px] font-mono font-semibold text-foreground">{extractArtikelgroep(m.artikel)}</td>
           <td className="px-2 py-2.5">
             <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
           </td>
@@ -396,14 +404,11 @@ export const MatchedTable = ({
           <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
             {uniqueKlanten.join(", ") || "—"}
           </td>
-          <td className="px-2 py-2.5 text-center">
-            {hasLinks && <Link2 className="w-3 h-3 text-primary inline" />}
-          </td>
         </tr>
 
         {isExpanded && (
           <tr className="border-b border-border/40 bg-muted/10">
-            <td colSpan={13} className="px-4 py-3">
+            <td colSpan={11} className="px-4 py-3">
               <div className="space-y-3">
                 {/* Dekking bar */}
                 <div className="flex items-center gap-3">
@@ -423,7 +428,7 @@ export const MatchedTable = ({
                 <div>
                   <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
                     <Package className="w-3 h-3 text-primary" />
-                    Beschikbare voorraad (artikel + kleur + lengte)
+                    Beschikbare voorraad — {extractArtikelgroep(m.artikel)} {m.kleurCodes.length > 0 ? `/ ${m.kleurCodes.join(", ")}` : ""} {m.lengte ? `/ ${m.lengte}+` : ""}
                   </h4>
                   {/* Direct matched voorraad details */}
                   {m.voorraadDetails.length > 0 && (
@@ -564,25 +569,21 @@ export const MatchedTable = ({
             <thead>
               <tr className="border-b border-border">
                 <th className="px-1.5 py-2 w-5"></th>
-                <SortHeader k="status" label="Status" />
-                <SortHeader k="soort" label="Groep" />
-                <SortHeader k="artikel" label="Artikel" />
+                <SortHeader k="soort" label="Artikelgroep" />
+                <SortHeader k="artikel" label="Soort" />
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
                 <SortHeader k="behoefte" label="Behoefte" align="text-right" />
                 <SortHeader k="voorraad" label="Voorraad" align="text-right" />
                 <SortHeader k="benodigd" label="Benodigd" align="text-right" />
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Datum / Week</th>
-                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Hist. Prijs</th>
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Adviesprijs</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
-                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
-                  <Link2 className="w-3 h-3 inline" />
-                </th>
               </tr>
             </thead>
             <tbody>
               {behoefteItems.length === 0 ? (
-                <tr><td colSpan={13} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
+                <tr><td colSpan={11} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
               ) : behoefteItems.map(renderBehoefteRow)}
             </tbody>
           </table>
