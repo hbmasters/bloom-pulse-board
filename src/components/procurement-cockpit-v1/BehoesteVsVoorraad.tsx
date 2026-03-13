@@ -408,7 +408,7 @@ export const MatchedTable = ({
 
         {isExpanded && (
           <tr className="border-b border-border/40 bg-muted/10">
-            <td colSpan={13} className="px-4 py-3">
+            <td colSpan={11} className="px-4 py-3">
               <div className="space-y-3">
                 {/* Dekking bar */}
                 <div className="flex items-center gap-3">
