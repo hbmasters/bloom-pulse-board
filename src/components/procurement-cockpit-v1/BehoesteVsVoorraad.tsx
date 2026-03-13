@@ -302,21 +302,30 @@ export const MatchedTable = ({
     else { setSortKey(key); setSortDir(key === "behoefte" || key === "voorraad" || key === "benodigd" ? "desc" : "asc"); }
   };
 
-  // Find matching voorraad for a behoefte item based on artikel + kleur + lengte
+  // Find matching voorraad: same artikelgroep + kleur, lengte >= current
   const findMatchingVoorraad = useCallback((m: MatchedLine) => {
-    const normKey = m.key;
+    const groep = extractArtikelgroep(m.artikel).toUpperCase();
     const kleurSet = new Set(m.kleurCodes.map(c => c.toUpperCase()));
+    const mLengte = parseInt(m.lengte) || 0;
 
     return voorraadRows.filter(vr => {
-      const vKey = normalizeArtikel(vr.artikel);
-      // Match on normalized article name
-      const artikelMatch = vKey === normKey || vKey.includes(normKey) || normKey.includes(vKey);
-      // Match on soort at minimum
-      const soortMatch = vr.soort.toUpperCase() === m.soort.toUpperCase();
-      // Lengte match (if both have lengte)
-      const lengteMatch = !m.lengte || !vr.lengte || vr.lengte === m.lengte;
-
-      return (artikelMatch || soortMatch) && lengteMatch;
+      const vGroep = extractArtikelgroep(vr.artikel).toUpperCase();
+      if (vGroep !== groep) return false;
+      // Kleur match if we have kleur info
+      if (kleurSet.size > 0) {
+        // Check if voorraad artikel contains any of the kleur codes
+        const vArtikelUpper = vr.artikel.toUpperCase();
+        const hasKleur = [...kleurSet].some(k => vArtikelUpper.includes(kleurLabels[k]?.toUpperCase() || k));
+        const soortKleur = vr.soort?.toUpperCase() || "";
+        const kleurInSoort = [...kleurSet].some(k => soortKleur.includes(k));
+        if (!hasKleur && !kleurInSoort) return false;
+      }
+      // Lengte: accept same or larger
+      if (mLengte > 0 && vr.lengte) {
+        const vLengte = parseInt(vr.lengte) || 0;
+        if (vLengte > 0 && vLengte < mLengte) return false;
+      }
+      return true;
     });
   }, [voorraadRows]);
 
