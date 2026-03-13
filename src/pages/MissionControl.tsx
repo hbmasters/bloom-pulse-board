@@ -29,6 +29,7 @@ import ProductionCockpit from "@/pages/ProductionCockpit";
 import CommercialCockpit from "@/pages/CommercialCockpit";
 
 import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
+import AIArchitecture from "@/pages/AIArchitecture";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1";
