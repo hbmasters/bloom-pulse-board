@@ -34,11 +34,43 @@ export interface MatchedLine {
   voorraadDetails: { partij: string; aantal: number; prijs: number }[];
 }
 
-/* ── Number parsing helpers ── */
-// Dutch formatted number: dots = thousands, comma = decimal
-function parseDutchNumber(raw: string): number {
+/* ── Number parsing helpers ──
+   Auto-detects format:
+   - Dutch: 1.234,56 (dots = thousands, comma = decimal)
+   - English: 1,234.56 (commas = thousands, dot = decimal)
+*/
+function parseNumber(raw: string): number {
   if (!raw || raw.trim() === "") return 0;
-  const cleaned = raw.trim().replace(/\./g, "").replace(",", ".");
+  const trimmed = raw.trim();
+  
+  // Find last comma and last dot positions
+  const lastComma = trimmed.lastIndexOf(",");
+  const lastDot = trimmed.lastIndexOf(".");
+  
+  let cleaned: string;
+  
+  // Determine format based on last occurrence of separator
+  if (lastComma > lastDot && lastComma >= 0) {
+    // Comma is the rightmost separator → Dutch format (comma = decimal)
+    cleaned = trimmed.replace(/\./g, "").replace(",", ".");
+  } else if (lastDot > lastComma && lastDot >= 0) {
+    // Dot is the rightmost separator → English format (dot = decimal)
+    cleaned = trimmed.replace(/,/g, "");
+  } else if (lastComma >= 0 && lastDot === -1) {
+    // Only comma present - check if it's decimal (1-2 digits after) or thousands
+    const afterComma = trimmed.substring(lastComma + 1);
+    if (/^\d{1,2}$/.test(afterComma) && trimmed.length > lastComma + 3) {
+      // Likely decimal (1-2 digits after comma)
+      cleaned = trimmed.replace(",", ".");
+    } else {
+      // Likely thousands separator - remove it
+      cleaned = trimmed.replace(",", "");
+    }
+  } else {
+    // No separators or only dots - assume already clean
+    cleaned = trimmed;
+  }
+  
   const n = parseFloat(cleaned);
   return isNaN(n) ? 0 : n;
 }
