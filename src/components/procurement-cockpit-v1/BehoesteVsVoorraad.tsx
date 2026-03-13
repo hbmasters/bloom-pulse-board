@@ -428,7 +428,7 @@ export const MatchedTable = ({
                 <div>
                   <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
                     <Package className="w-3 h-3 text-primary" />
-                    Beschikbare voorraad (artikel + kleur + lengte)
+                    Beschikbare voorraad — {extractArtikelgroep(m.artikel)} {m.kleurCodes.length > 0 ? `/ ${m.kleurCodes.join(", ")}` : ""} {m.lengte ? `/ ${m.lengte}+` : ""}
                   </h4>
                   {/* Direct matched voorraad details */}
                   {m.voorraadDetails.length > 0 && (
