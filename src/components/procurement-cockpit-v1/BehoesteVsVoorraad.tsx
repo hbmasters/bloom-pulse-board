@@ -1,17 +1,23 @@
 import { useState, useMemo, useCallback, Fragment } from "react";
 import {
-  Upload, FileText, CheckCircle2, AlertTriangle, XCircle,
+  Upload, CheckCircle2, AlertTriangle, XCircle,
   Package, Search, ChevronDown, ChevronRight, ArrowUpDown,
-  RotateCcw, X,
+  RotateCcw, Link2, Unlink, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   parseInkooplijst,
   parseVoorraadlijst,
   matchLists,
+  findSuggestions,
+  normalizeArtikel,
+  loadManualLinks,
+  saveManualLinks,
   type InkoopRow,
   type VoorraadRow,
   type MatchedLine,
+  type ManualLink,
+  type MatchSuggestion,
 } from "./csv-parsers";
 
 const fmt = (n: number) => n.toLocaleString("nl-NL");
@@ -19,7 +25,7 @@ const fmtPrice = (n: number) => `€${n.toFixed(3).replace(".", ",")}`;
 
 const statusConfig = {
   gedekt: { label: "Gedekt", icon: CheckCircle2, color: "text-accent", bg: "bg-accent/10 border-accent/20" },
-  deels_gedekt: { label: "Deels gedekt", icon: AlertTriangle, color: "text-yellow-500", bg: "bg-yellow-500/10 border-yellow-500/20" },
+  deels_gedekt: { label: "Deels", icon: AlertTriangle, color: "text-yellow-500", bg: "bg-yellow-500/10 border-yellow-500/20" },
   niet_gedekt: { label: "Niet gedekt", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10 border-destructive/20" },
   overschot: { label: "Overschot", icon: Package, color: "text-muted-foreground", bg: "bg-muted/50 border-border" },
 };
@@ -35,14 +41,8 @@ type StatusFilter = MatchedLine["status"] | null;
 
 /** Upload controls rendered in the page header area */
 export const UploadControls = ({
-  inkoopFile,
-  voorraadFile,
-  inkoopCount,
-  voorraadCount,
-  isProcessed,
-  onUpload,
-  onProcess,
-  onReset,
+  inkoopFile, voorraadFile, inkoopCount, voorraadCount, isProcessed,
+  onUpload, onProcess, onReset, linkedCount,
 }: {
   inkoopFile: File | null;
   voorraadFile: File | null;
@@ -52,6 +52,7 @@ export const UploadControls = ({
   onUpload: (file: File, type: "inkoop" | "voorraad") => void;
   onProcess: () => void;
   onReset: () => void;
+  linkedCount?: number;
 }) => (
   <div className="flex items-center gap-2 flex-wrap">
     <label className={cn(
@@ -76,9 +77,16 @@ export const UploadControls = ({
       </button>
     )}
     {isProcessed && (
-      <button onClick={onReset} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5">
-        <RotateCcw className="w-3 h-3" /> Reset upload
-      </button>
+      <>
+        {(linkedCount ?? 0) > 0 && (
+          <span className="text-[10px] font-medium px-2 py-1 rounded-lg border border-primary/20 bg-primary/5 text-primary flex items-center gap-1">
+            <Link2 className="w-3 h-3" /> {linkedCount} gekoppeld
+          </span>
+        )}
+        <button onClick={onReset} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5">
+          <RotateCcw className="w-3 h-3" /> Reset
+        </button>
+      </>
     )}
   </div>
 );
@@ -119,8 +127,89 @@ export const MatchedKPIs = ({ matched }: { matched: MatchedLine[] }) => {
   );
 };
 
-/** Matched results table — renders inside the existing Inkooplijst section */
-export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; largeView?: boolean }) => {
+/** Suggestion panel for linking voorraad to inkoop */
+const LinkSuggestions = ({
+  suggestions, manualLinks, inkoopKey, onLink, onUnlink,
+}: {
+  suggestions: MatchSuggestion[];
+  manualLinks: ManualLink[];
+  inkoopKey: string;
+  onLink: (inkoopKey: string, voorraadKey: string) => void;
+  onUnlink: (inkoopKey: string, voorraadKey: string) => void;
+}) => {
+  const linked = manualLinks.filter(l => l.inkoopKey === inkoopKey);
+
+  return (
+    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+      <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+        <Sparkles className="w-3 h-3 text-primary" />
+        Voorraad koppelen — suggesties
+      </h4>
+
+      {/* Already linked */}
+      {linked.length > 0 && (
+        <div className="mb-2 space-y-1">
+          {linked.map(l => {
+            const sug = suggestions.find(s => s.voorraadKey === l.voorraadKey);
+            return (
+              <div key={l.voorraadKey} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-accent/10 border border-accent/20">
+                <div className="flex items-center gap-2">
+                  <Link2 className="w-3 h-3 text-accent" />
+                  <span className="font-medium text-foreground">{sug?.artikel || l.voorraadKey}</span>
+                  <span className="text-muted-foreground">{sug?.soort}</span>
+                  <span className="font-mono text-accent">{sug ? fmt(sug.aantal) : "—"}</span>
+                </div>
+                <button onClick={() => onUnlink(inkoopKey, l.voorraadKey)} className="text-destructive hover:text-destructive/80 transition-colors p-0.5" title="Ontkoppelen">
+                  <Unlink className="w-3 h-3" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Suggestions */}
+      {suggestions.length === 0 ? (
+        <p className="text-[10px] text-muted-foreground italic">Geen suggesties gevonden</p>
+      ) : (
+        <div className="space-y-1">
+          {suggestions.filter(s => !linked.some(l => l.voorraadKey === s.voorraadKey)).map(s => (
+            <div key={s.voorraadKey} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-medium text-foreground truncate">{s.artikel}</span>
+                <span className="text-muted-foreground flex-shrink-0">{s.soort}</span>
+                <span className="font-mono text-foreground flex-shrink-0">{fmt(s.aantal)}</span>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                <span className={cn(
+                  "text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full",
+                  s.score >= 60 ? "bg-accent/10 text-accent" : s.score >= 35 ? "bg-yellow-500/10 text-yellow-500" : "bg-muted text-muted-foreground"
+                )}>
+                  {s.score}%
+                </span>
+                <button onClick={() => onLink(inkoopKey, s.voorraadKey)} className="text-[9px] font-medium text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-2 py-0.5 transition-colors flex items-center gap-1">
+                  <Link2 className="w-2.5 h-2.5" /> Koppel
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/** Matched results table */
+export const MatchedTable = ({
+  matched, largeView, voorraadRows, manualLinks, onLink, onUnlink,
+}: {
+  matched: MatchedLine[];
+  largeView?: boolean;
+  voorraadRows: VoorraadRow[];
+  manualLinks: ManualLink[];
+  onLink: (inkoopKey: string, voorraadKey: string) => void;
+  onUnlink: (inkoopKey: string, voorraadKey: string) => void;
+}) => {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [soortFilter, setSoortFilter] = useState<string | null>(null);
@@ -129,6 +218,15 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].sort(), [matched]);
+
+  // Keys already auto-matched
+  const autoMatchedKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const m of matched) {
+      if (m.voorraad > 0 || m.behoefte > 0) keys.add(m.key);
+    }
+    return keys;
+  }, [matched]);
 
   const filtered = useMemo(() => {
     let list = matched;
@@ -157,15 +255,21 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
     else { setSortKey(key); setSortDir(key === "behoefte" || key === "voorraad" || key === "benodigd" ? "desc" : "asc"); }
   };
 
+  const SortHeader = ({ k, label, align }: { k: SortKey; label: string; align?: string }) => (
+    <th className={cn("px-2 py-2 font-medium text-muted-foreground cursor-pointer hover:text-foreground whitespace-nowrap", align)} onClick={() => toggleSort(k)}>
+      <span className="inline-flex items-center gap-0.5">{label} {sortKey === k && <ArrowUpDown className="w-3 h-3" />}</span>
+    </th>
+  );
+
   return (
     <>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <div className="relative flex-1 min-w-[140px] max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek artikel..." className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+        <div className="relative flex-1 min-w-[120px] max-w-[200px]">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek..." className="w-full pl-7 pr-2 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
-        <select value={soortFilter || ""} onChange={e => setSoortFilter(e.target.value || null)} className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+        <select value={soortFilter || ""} onChange={e => setSoortFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
           <option value="">Alle soorten</option>
           {soorten.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -173,42 +277,32 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
           {(["niet_gedekt", "deels_gedekt", "gedekt", "overschot"] as const).map(s => {
             const cfg = statusConfig[s];
             return (
-              <button key={s} onClick={() => setStatusFilter(statusFilter === s ? null : s)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border transition-colors font-medium", statusFilter === s ? cfg.bg : "border-border text-muted-foreground hover:bg-muted")}>
+              <button key={s} onClick={() => setStatusFilter(statusFilter === s ? null : s)} className={cn("text-[10px] px-2 py-1 rounded-lg border transition-colors font-medium", statusFilter === s ? cfg.bg : "border-border text-muted-foreground hover:bg-muted")}>
                 {cfg.label}
               </button>
             );
           })}
         </div>
-        <span className="text-[10px] font-mono text-muted-foreground ml-auto">{filtered.length} van {matched.length}</span>
+        <span className="text-[10px] font-mono text-muted-foreground ml-auto">{filtered.length}/{matched.length}</span>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto -mx-5">
-        <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
+        <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
           <thead>
             <tr className="border-b border-border">
-              <th className="px-2 py-2.5 w-6"></th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort("status")}>
-                <span className="inline-flex items-center gap-0.5">Status {sortKey === "status" && <ArrowUpDown className="w-3 h-3" />}</span>
+              <th className="px-1.5 py-2 w-5"></th>
+              <SortHeader k="status" label="Status" />
+              <SortHeader k="soort" label="Soort" />
+              <SortHeader k="artikel" label="Artikel" />
+              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
+              <SortHeader k="behoefte" label="Behoefte" align="text-right" />
+              <SortHeader k="voorraad" label="Voorraad" align="text-right" />
+              <SortHeader k="benodigd" label="Benodigd" align="text-right" />
+              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
+              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
+                <Link2 className="w-3 h-3 inline" />
               </th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort("soort")}>
-                <span className="inline-flex items-center gap-0.5">Soort {sortKey === "soort" && <ArrowUpDown className="w-3 h-3" />}</span>
-              </th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort("artikel")}>
-                <span className="inline-flex items-center gap-0.5">Artikel {sortKey === "artikel" && <ArrowUpDown className="w-3 h-3" />}</span>
-              </th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Lengte</th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Kleur</th>
-              <th className="px-3 py-2.5 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort("behoefte")}>
-                <span className="inline-flex items-center gap-0.5">Behoefte {sortKey === "behoefte" && <ArrowUpDown className="w-3 h-3" />}</span>
-              </th>
-              <th className="px-3 py-2.5 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort("voorraad")}>
-                <span className="inline-flex items-center gap-0.5">Voorraad {sortKey === "voorraad" && <ArrowUpDown className="w-3 h-3" />}</span>
-              </th>
-              <th className="px-3 py-2.5 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground font-bold" onClick={() => toggleSort("benodigd")}>
-                <span className="inline-flex items-center gap-0.5">Benodigd {sortKey === "benodigd" && <ArrowUpDown className="w-3 h-3" />}</span>
-              </th>
-              <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Klanten</th>
             </tr>
           </thead>
           <tbody>
@@ -217,6 +311,8 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
               const cfg = statusConfig[m.status];
               const uniqueKlanten = [...new Set(m.klanten.map(k => k.klant))];
               const dekkingPct = m.behoefte > 0 ? Math.min(100, Math.round((m.voorraad / m.behoefte) * 100)) : (m.voorraad > 0 ? 100 : 0);
+              const hasLinks = manualLinks.some(l => l.inkoopKey === m.key);
+              const suggestions = isExpanded && m.behoefte > 0 ? findSuggestions(m.key, m.soort, voorraadRows, autoMatchedKeys, manualLinks) : [];
 
               return (
                 <Fragment key={m.key}>
@@ -224,25 +320,24 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
                     onClick={() => setExpandedKey(isExpanded ? null : m.key)}
                     className={cn("border-b border-border/40 cursor-pointer transition-colors", isExpanded ? "bg-muted/30" : "hover:bg-muted/10")}
                   >
-                    <td className="px-2 py-3 text-muted-foreground">
-                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    <td className="px-1.5 py-2.5 text-muted-foreground">
+                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     </td>
-                    <td className="px-3 py-3">
-                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border inline-flex items-center gap-1", cfg.bg)}>
+                    <td className="px-2 py-2.5">
+                      <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full border inline-flex items-center gap-0.5", cfg.bg)}>
                         <cfg.icon className={cn("w-2.5 h-2.5", cfg.color)} />
                         {cfg.label}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-[10px] text-muted-foreground">{m.soort}</td>
-                    <td className="px-3 py-3">
-                      <span className="font-medium text-foreground text-[12px]">{m.artikel}</span>
+                    <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.soort}</td>
+                    <td className="px-2 py-2.5">
+                      <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
                     </td>
-                    <td className="px-3 py-3 font-mono text-[10px] text-muted-foreground">{m.lengte || "—"}</td>
-                    <td className="px-3 py-3">
-                      <div className="flex gap-1 flex-wrap">
+                    <td className="px-2 py-2.5">
+                      <div className="flex gap-0.5 flex-wrap">
                         {m.kleurCodes.length > 0
                           ? m.kleurCodes.map(c => (
-                            <span key={c} className="text-[8px] font-mono font-semibold px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground" title={kleurLabels[c] || c}>
+                            <span key={c} className="text-[8px] font-mono font-semibold px-1 py-0.5 rounded bg-muted border border-border text-muted-foreground" title={kleurLabels[c] || c}>
                               {c}
                             </span>
                           ))
@@ -250,24 +345,27 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
                         }
                       </div>
                     </td>
-                    <td className="px-3 py-3 font-mono text-right text-foreground">{fmt(m.behoefte)}</td>
-                    <td className="px-3 py-3 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
-                    <td className={cn("px-3 py-3 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
+                    <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.behoefte)}</td>
+                    <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
+                    <td className={cn("px-2 py-2.5 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
                       {m.benodigd > 0 ? fmt(m.benodigd) : <span className="flex items-center justify-end gap-0.5"><CheckCircle2 className="w-3 h-3" /> 0</span>}
                     </td>
-                    <td className="px-3 py-3 text-[10px] text-muted-foreground max-w-[160px] truncate">
+                    <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
                       {uniqueKlanten.join(", ") || "—"}
+                    </td>
+                    <td className="px-2 py-2.5 text-center">
+                      {hasLinks && <Link2 className="w-3 h-3 text-primary inline" />}
                     </td>
                   </tr>
 
                   {isExpanded && (
                     <tr className="border-b border-border/40 bg-muted/10">
-                      <td colSpan={10} className="px-5 py-4">
-                        <div className="space-y-4">
+                      <td colSpan={10} className="px-4 py-3">
+                        <div className="space-y-3">
                           {/* Dekking bar */}
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-medium text-muted-foreground w-16">Dekking</span>
-                            <div className="flex-1 max-w-xs bg-muted rounded-full h-2.5 overflow-hidden">
+                            <span className="text-[10px] font-medium text-muted-foreground w-14">Dekking</span>
+                            <div className="flex-1 max-w-xs bg-muted rounded-full h-2 overflow-hidden">
                               <div
                                 className={cn("h-full rounded-full transition-all", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")}
                                 style={{ width: `${dekkingPct}%` }}
@@ -278,6 +376,17 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
                             </span>
                           </div>
 
+                          {/* Link suggestions - show for items with behoefte that aren't fully covered */}
+                          {m.behoefte > 0 && (
+                            <LinkSuggestions
+                              suggestions={suggestions}
+                              manualLinks={manualLinks}
+                              inkoopKey={m.key}
+                              onLink={onLink}
+                              onUnlink={onUnlink}
+                            />
+                          )}
+
                           {/* Klanten detail */}
                           {m.klanten.length > 0 && (
                             <div>
@@ -287,10 +396,10 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
                                   const klantRows = m.klanten.filter(k => k.klant === klant);
                                   const klantTotal = klantRows.reduce((s, k) => s + k.aantal, 0);
                                   return (
-                                    <div key={klant} className="flex items-center justify-between text-[10px] py-1.5 border-b border-border/30 last:border-0">
+                                    <div key={klant} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
                                       <span className="font-semibold text-foreground">{klant}</span>
-                                      <div className="flex items-center gap-3">
-                                        <span className="text-muted-foreground">{klantRows.length} orders</span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground">{klantRows.length}x</span>
                                         <span className="font-mono font-bold text-foreground">{fmt(klantTotal)}</span>
                                       </div>
                                     </div>
@@ -308,7 +417,7 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
                                 {m.voorraadDetails.map((d, i) => (
                                   <div key={i} className="flex items-center justify-between text-[10px] py-1 px-2 rounded bg-background border border-border/50">
                                     <span className="font-mono text-muted-foreground">{d.partij}</span>
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
                                       <span className="font-mono text-foreground">{fmt(d.aantal)}</span>
                                       <span className="font-mono text-muted-foreground">{fmtPrice(d.prijs)}</span>
                                     </div>
@@ -331,7 +440,7 @@ export const MatchedTable = ({ matched, largeView }: { matched: MatchedLine[]; l
   );
 };
 
-/** Hook to manage upload + matching state */
+/** Hook to manage upload + matching state with manual linking */
 export function useMatchState() {
   const [inkoopFile, setInkoopFile] = useState<File | null>(null);
   const [voorraadFile, setVoorraadFile] = useState<File | null>(null);
@@ -339,23 +448,55 @@ export function useMatchState() {
   const [voorraadRows, setVoorraadRows] = useState<VoorraadRow[]>([]);
   const [matched, setMatched] = useState<MatchedLine[]>([]);
   const [isProcessed, setIsProcessed] = useState(false);
+  const [manualLinks, setManualLinks] = useState<ManualLink[]>(() => loadManualLinks());
+
+  const reMatch = useCallback((iRows: InkoopRow[], vRows: VoorraadRow[], links: ManualLink[]) => {
+    if (iRows.length === 0 || vRows.length === 0) return;
+    setMatched(matchLists(iRows, vRows, links));
+  }, []);
 
   const handleUpload = useCallback(async (file: File, type: "inkoop" | "voorraad") => {
     const text = await file.text();
     if (type === "inkoop") {
       setInkoopFile(file);
-      setInkoopRows(parseInkooplijst(text));
+      const rows = parseInkooplijst(text);
+      setInkoopRows(rows);
     } else {
       setVoorraadFile(file);
-      setVoorraadRows(parseVoorraadlijst(text));
+      const rows = parseVoorraadlijst(text);
+      setVoorraadRows(rows);
     }
     setIsProcessed(false);
   }, []);
 
   const processMatch = useCallback(() => {
     if (inkoopRows.length === 0 || voorraadRows.length === 0) return;
-    setMatched(matchLists(inkoopRows, voorraadRows));
+    setMatched(matchLists(inkoopRows, voorraadRows, manualLinks));
     setIsProcessed(true);
+  }, [inkoopRows, voorraadRows, manualLinks]);
+
+  const addLink = useCallback((inkoopKey: string, voorraadKey: string) => {
+    setManualLinks(prev => {
+      if (prev.some(l => l.inkoopKey === inkoopKey && l.voorraadKey === voorraadKey)) return prev;
+      const next = [...prev, { inkoopKey, voorraadKey }];
+      saveManualLinks(next);
+      // Re-match with updated links
+      if (inkoopRows.length > 0 && voorraadRows.length > 0) {
+        setMatched(matchLists(inkoopRows, voorraadRows, next));
+      }
+      return next;
+    });
+  }, [inkoopRows, voorraadRows]);
+
+  const removeLink = useCallback((inkoopKey: string, voorraadKey: string) => {
+    setManualLinks(prev => {
+      const next = prev.filter(l => !(l.inkoopKey === inkoopKey && l.voorraadKey === voorraadKey));
+      saveManualLinks(next);
+      if (inkoopRows.length > 0 && voorraadRows.length > 0) {
+        setMatched(matchLists(inkoopRows, voorraadRows, next));
+      }
+      return next;
+    });
   }, [inkoopRows, voorraadRows]);
 
   const reset = useCallback(() => {
@@ -370,5 +511,6 @@ export function useMatchState() {
   return {
     inkoopFile, voorraadFile, inkoopCount: inkoopRows.length, voorraadCount: voorraadRows.length,
     matched, isProcessed, handleUpload, processMatch, reset,
+    manualLinks, addLink, removeLink, voorraadRows,
   };
 }
