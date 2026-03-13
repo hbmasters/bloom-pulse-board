@@ -35,6 +35,7 @@ const viewTitles: Record<MCView, string> = {
   
   "procurement-cockpit-v1": "Purchasing List v0.5",
   "ai-architecture": "AI Architecture",
+  "dev-control": "Development Control Protocol",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {
