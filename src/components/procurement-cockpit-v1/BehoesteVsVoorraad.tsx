@@ -374,6 +374,25 @@ export const MatchedTable = ({
           <td className={cn("px-2 py-2.5 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
             {m.benodigd > 0 ? fmt(m.benodigd) : <span className="flex items-center justify-end gap-0.5"><CheckCircle2 className="w-3 h-3" /> 0</span>}
           </td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground whitespace-nowrap">
+            {(() => {
+              const { datum, week } = getEarliestDatum(m.klanten);
+              if (!datum) return "—";
+              return (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                  <span>{datum}</span>
+                  {week !== null && <span className="font-mono text-[8px] px-1 py-0.5 rounded bg-muted border border-border">W{week}</span>}
+                </span>
+              );
+            })()}
+          </td>
+          <td className="px-2 py-2.5 font-mono text-right text-muted-foreground">
+            {(() => {
+              const avg = getAvgPrice(m.klanten);
+              return avg !== null ? fmtPrice(avg) : "—";
+            })()}
+          </td>
           <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
             {uniqueKlanten.join(", ") || "—"}
           </td>
@@ -384,7 +403,7 @@ export const MatchedTable = ({
 
         {isExpanded && (
           <tr className="border-b border-border/40 bg-muted/10">
-            <td colSpan={11} className="px-4 py-3">
+            <td colSpan={13} className="px-4 py-3">
               <div className="space-y-3">
                 {/* Dekking bar */}
                 <div className="flex items-center gap-3">
