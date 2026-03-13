@@ -132,7 +132,7 @@ const ProcurementCockpitV1 = () => {
     const avgOffer = rows.reduce((s, p) => s + p.offer_price, 0) / rows.length;
     const avgHistorical = rows.reduce((s, p) => s + p.historical_price, 0) / rows.length;
     return {
-      required: rows.reduce((s, p) => s + p.required_volume, 0),
+      required: rows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
       freeStock: rows.reduce((s, p) => s + p.free_stock, 0),
       reserved: rows.reduce((s, p) => s + p.reserved_stock, 0),
       openBuy: rows.reduce((s, p) => s + p.open_buy_need, 0),
