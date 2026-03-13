@@ -478,9 +478,9 @@ export const MatchedTable = ({
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek..." className="w-full pl-7 pr-2 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
-        <select value={soortFilter || ""} onChange={e => setSoortFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
-          <option value="">Alle soorten</option>
-          {soorten.map(s => <option key={s} value={s}>{s}</option>)}
+        <select value={artikelgroepFilter || ""} onChange={e => setArtikelgroepFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle artikelgroepen</option>
+          {artikelgroepen.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={lengteFilter || ""} onChange={e => setLengteFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
           <option value="">Alle lengtes</option>
