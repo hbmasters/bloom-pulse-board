@@ -480,6 +480,10 @@ export const MatchedTable = ({
           <option value="">Alle lengtes</option>
           {lengtes.map(l => <option key={l} value={l}>{l}</option>)}
         </select>
+        <select value={kleurFilter || ""} onChange={e => setKleurFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle kleuren</option>
+          {kleuren.map(k => <option key={k} value={k}>{kleurLabels[k] || k}</option>)}
+        </select>
         <div className="flex gap-1">
           {(["niet_gedekt", "deels_gedekt", "gedekt", "overschot"] as const).map(s => {
             const cfg = statusConfig[s];
