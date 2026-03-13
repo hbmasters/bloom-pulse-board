@@ -30,9 +30,10 @@ import CommercialCockpit from "@/pages/CommercialCockpit";
 
 import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
 import AIArchitecture from "@/pages/AIArchitecture";
+import DevelopmentControl from "@/pages/DevelopmentControl";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -58,6 +59,7 @@ const routeToView: Record<string, MCView> = {
   
   "/labs/procurement-cockpit-v1": "procurement-cockpit-v1",
   "/ai-architecture": "ai-architecture",
+  "/dev-control": "dev-control",
 };
 
 export const viewToRoute: Record<MCView, string> = {
@@ -84,6 +86,7 @@ export const viewToRoute: Record<MCView, string> = {
   
   "procurement-cockpit-v1": "/labs/procurement-cockpit-v1",
   "ai-architecture": "/ai-architecture",
+  "dev-control": "/dev-control",
 };
 
 const MissionControl = () => {
@@ -164,6 +167,7 @@ const MissionControl = () => {
             
             {view === "procurement-cockpit-v1" && <ProcurementCockpitV1 />}
             {view === "ai-architecture" && <AIArchitecture />}
+            {view === "dev-control" && <DevelopmentControl />}
           </div>
 
           {view === "chat" && (
