@@ -559,7 +559,7 @@ export const MatchedTable = ({
               <tbody>
                 {voorraadItems.map(m => (
                   <tr key={m.key} className="border-b border-border/40 hover:bg-muted/10">
-                    <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.soort}</td>
+                    <td className="px-2 py-2 text-[10px] text-muted-foreground font-mono">{extractArtikelgroep(m.artikel)}</td>
                     <td className="px-2 py-2 font-medium text-foreground text-[11px]">{m.artikel}</td>
                     <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.lengte || "—"}</td>
                     <td className="px-2 py-2 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
