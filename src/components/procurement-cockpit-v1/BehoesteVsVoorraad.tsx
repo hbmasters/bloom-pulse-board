@@ -225,7 +225,7 @@ export const MatchedTable = ({
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].filter(Boolean).sort(), [matched]);
+  const artikelgroepen = useMemo(() => [...new Set(matched.map(m => extractArtikelgroep(m.artikel)))].filter(Boolean).sort(), [matched]);
   const lengtes = useMemo(() => [...new Set(matched.map(m => m.lengte).concat(voorraadRows.map(r => r.lengte)))].filter(Boolean).sort(), [matched, voorraadRows]);
   const kleuren = useMemo(() => [...new Set(matched.flatMap(m => m.kleurCodes))].filter(Boolean).sort(), [matched]);
 
