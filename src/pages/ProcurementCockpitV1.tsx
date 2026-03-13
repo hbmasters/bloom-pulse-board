@@ -171,8 +171,16 @@ const ProcurementCockpitV1 = () => {
             LABS · V0.5
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Shop status */}
+        <UploadControls
+          inkoopFile={matchState.inkoopFile}
+          voorraadFile={matchState.voorraadFile}
+          inkoopCount={matchState.inkoopCount}
+          voorraadCount={matchState.voorraadCount}
+          isProcessed={matchState.isProcessed}
+          onUpload={matchState.handleUpload}
+          onProcess={matchState.processMatch}
+          onReset={matchState.reset}
+        />
           <div className="relative">
             <button onClick={() => setShopPopup(!shopPopup)} className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground transition-colors">
               <Wifi className="w-3.5 h-3.5 text-accent" />
