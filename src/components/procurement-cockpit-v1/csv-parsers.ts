@@ -170,9 +170,9 @@ export function parseInkooplijst(csvText: string): InkoopRow[] {
       if (!datumRaw) continue;
 
       const datum = parseDatum(datumRaw);
-      const aantal = parseNumber(cols[1]);
+      const aantal = parseQuantity(cols[1]);
       const artikel = cols[2]?.trim() || "";
-      const prijs = cols.length >= 4 ? parseNumber(cols[3]) : 0;
+      const prijs = cols.length >= 4 ? parsePrice(cols[3]) : 0;
 
       if (!artikel || aantal === 0) continue;
 
