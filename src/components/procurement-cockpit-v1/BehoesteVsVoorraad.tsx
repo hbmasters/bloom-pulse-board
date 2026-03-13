@@ -424,63 +424,77 @@ export const MatchedTable = ({
                   </span>
                 </div>
 
-                {/* Matching voorraad partijen */}
+                {/* Voorraadlijst items */}
                 <div>
                   <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
                     <Package className="w-3 h-3 text-primary" />
-                    Beschikbare voorraad — {extractArtikelgroep(m.artikel)} {m.kleurCodes.length > 0 ? `/ ${m.kleurCodes.join(", ")}` : ""} {m.lengte ? `/ ${m.lengte}+` : ""}
+                    Voorraadlijst — {extractArtikelgroep(m.artikel)} {m.kleurCodes.length > 0 ? `/ ${m.kleurCodes.join(", ")}` : ""} {m.lengte ? `/ ${m.lengte}+` : ""}
                   </h4>
-                  {/* Direct matched voorraad details */}
-                  {m.voorraadDetails.length > 0 && (
-                    <div className="space-y-1 mb-2">
+                  <table className="w-full text-[10px]">
+                    <thead>
+                      <tr className="border-b border-border/50">
+                        <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Artikel</th>
+                        <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Partij</th>
+                        <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Lengte</th>
+                        <th className="px-2 py-1.5 text-right font-medium text-muted-foreground">Aantal</th>
+                        <th className="px-2 py-1.5 text-right font-medium text-muted-foreground">Inkoopprijs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Direct matched voorraad */}
                       {m.voorraadDetails.map((d, i) => (
-                        <div key={`direct-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-accent/5 border border-accent/20">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-3 h-3 text-accent" />
-                            <span className="font-medium text-foreground">{d.partij || "Direct match"}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-foreground">{fmt(d.aantal)}</span>
-                            <span className="font-mono text-muted-foreground">{fmtPrice(d.prijs)}</span>
-                          </div>
-                        </div>
+                        <tr key={`direct-${i}`} className="border-b border-border/20 bg-accent/5">
+                          <td className="px-2 py-1.5 font-medium text-foreground">{d.partij || m.artikel}</td>
+                          <td className="px-2 py-1.5 text-muted-foreground">{d.partij || "—"}</td>
+                          <td className="px-2 py-1.5 text-muted-foreground">{m.lengte || "—"}</td>
+                          <td className="px-2 py-1.5 font-mono text-right font-bold text-foreground">{fmt(d.aantal)}</td>
+                          <td className="px-2 py-1.5 font-mono text-right text-muted-foreground">{fmtPrice(d.prijs)}</td>
+                        </tr>
                       ))}
-                    </div>
-                  )}
-                  {/* Broader matching voorraad (same soort/lengte) */}
-                  {matchingVoorraad.length > 0 && (
-                    <div className="space-y-1">
+                      {/* Broader matching voorraad */}
                       {matchingVoorraad
-                        .filter(vr => {
-                          // Don't show already-shown direct matches
-                          const vKey = normalizeArtikel(vr.artikel);
-                          return vKey !== m.key;
-                        })
+                        .filter(vr => normalizeArtikel(vr.artikel) !== m.key)
                         .map((vr, i) => (
-                          <div key={`match-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-medium text-foreground truncate">{vr.artikel}</span>
-                              <span className="text-muted-foreground flex-shrink-0">{vr.soort}</span>
-                              {vr.lengte && <span className="text-[8px] font-mono px-1 py-0.5 rounded bg-muted border border-border text-muted-foreground">{vr.lengte}</span>}
-                            </div>
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                              <span className="font-mono text-foreground">{fmt(vr.aantal)}</span>
-                              <span className="font-mono text-muted-foreground">{fmtPrice(vr.inkoopprijs)}</span>
-                              {!manualLinks.some(l => l.inkoopKey === m.key && l.voorraadKey === normalizeArtikel(vr.artikel)) && (
-                                <button
-                                  onClick={e => { e.stopPropagation(); onLink(m.key, normalizeArtikel(vr.artikel)); }}
-                                  className="text-[9px] font-medium text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-2 py-0.5 transition-colors flex items-center gap-1"
-                                >
-                                  <Link2 className="w-2.5 h-2.5" /> Koppel
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                          <tr key={`match-${i}`} className="border-b border-border/20 hover:bg-muted/10">
+                            <td className="px-2 py-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-foreground">{vr.artikel}</span>
+                                {!manualLinks.some(l => l.inkoopKey === m.key && l.voorraadKey === normalizeArtikel(vr.artikel)) && (
+                                  <button
+                                    onClick={e => { e.stopPropagation(); onLink(m.key, normalizeArtikel(vr.artikel)); }}
+                                    className="text-[9px] font-medium text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-1.5 py-0.5 transition-colors flex items-center gap-0.5"
+                                  >
+                                    <Link2 className="w-2.5 h-2.5" /> Koppel
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{vr.partij || "—"}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{vr.lengte || "—"}</td>
+                            <td className="px-2 py-1.5 font-mono text-right text-foreground">{fmt(vr.aantal)}</td>
+                            <td className="px-2 py-1.5 font-mono text-right text-muted-foreground">{fmtPrice(vr.inkoopprijs)}</td>
+                          </tr>
                         ))}
-                    </div>
-                  )}
+                    </tbody>
+                    {/* Gemiddelde inkoopprijs footer */}
+                    {(() => {
+                      const allPrices = [
+                        ...m.voorraadDetails.map(d => d.prijs),
+                        ...matchingVoorraad.filter(vr => normalizeArtikel(vr.artikel) !== m.key).map(vr => vr.inkoopprijs),
+                      ].filter(p => p > 0);
+                      const avg = allPrices.length > 0 ? allPrices.reduce((s, p) => s + p, 0) / allPrices.length : null;
+                      return avg !== null ? (
+                        <tfoot>
+                          <tr className="border-t border-border">
+                            <td colSpan={4} className="px-2 py-1.5 text-right font-semibold text-muted-foreground">Gem. inkoopprijs</td>
+                            <td className="px-2 py-1.5 font-mono text-right font-bold text-foreground">{fmtPrice(avg)}</td>
+                          </tr>
+                        </tfoot>
+                      ) : null;
+                    })()}
+                  </table>
                   {m.voorraadDetails.length === 0 && matchingVoorraad.filter(vr => normalizeArtikel(vr.artikel) !== m.key).length === 0 && (
-                    <p className="text-[10px] text-muted-foreground italic">Geen voorraad gevonden voor dit artikel</p>
+                    <p className="text-[10px] text-muted-foreground italic mt-2">Geen voorraad gevonden</p>
                   )}
                 </div>
 
