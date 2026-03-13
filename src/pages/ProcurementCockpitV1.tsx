@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from "react";
+import { useState, useMemo, Fragment, lazy, Suspense } from "react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
