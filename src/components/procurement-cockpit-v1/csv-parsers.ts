@@ -225,9 +225,9 @@ export function parseVoorraadlijst(csvText: string): VoorraadRow[] {
       if (/^(datum|date|header)/i.test(datumRaw)) continue;
       if (!datumRaw) continue;
 
-      const aantal = parseNumber(cols[1]);
+      const aantal = parseQuantity(cols[1]);
       const artikel = cols[2]?.trim() || "";
-      const inkoopprijs = cols.length >= 4 ? parseNumber(cols[3]) : 0;
+      const inkoopprijs = cols.length >= 4 ? parsePrice(cols[3]) : 0;
 
       if (!artikel || aantal === 0) continue;
 
