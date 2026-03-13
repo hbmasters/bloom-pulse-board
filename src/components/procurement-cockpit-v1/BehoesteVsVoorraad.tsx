@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, Fragment } from "react";
 import {
   Upload, CheckCircle2, AlertTriangle, XCircle,
   Package, Search, ChevronDown, ChevronRight, ArrowUpDown,
-  RotateCcw, Link2, Unlink, Sparkles,
+  RotateCcw, Link2, Unlink, Sparkles, ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
