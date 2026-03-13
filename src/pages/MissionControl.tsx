@@ -86,6 +86,7 @@ export const viewToRoute: Record<MCView, string> = {
   
   "procurement-cockpit-v1": "/labs/procurement-cockpit-v1",
   "ai-architecture": "/ai-architecture",
+  "dev-control": "/dev-control",
 };
 
 const MissionControl = () => {
