@@ -131,8 +131,8 @@ export function parseInkooplijst(csvText: string): InkoopRow[] {
 
     if (!soort || !artikel) continue;
 
-    const aantal = parseDutchNumber(cols[4]);
-    const prijs = parseDutchNumber(cols[7]);
+    const aantal = parseNumber(cols[4]);
+    const prijs = parseNumber(cols[7]);
 
     rows.push({ soort, artikel, klant, prijs, kleurCode, datum, aantal });
   }
