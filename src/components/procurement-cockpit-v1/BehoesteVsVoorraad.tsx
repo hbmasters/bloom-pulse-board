@@ -550,7 +550,7 @@ export const MatchedTable = ({
             <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Soort</th>
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Groep</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Artikel</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Voorraad</th>
