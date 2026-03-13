@@ -167,8 +167,8 @@ export function parseVoorraadlijst(csvText: string): VoorraadRow[] {
 
     if (!soort || !artikel) continue;
 
-    const aantal = parseDutchNumber(cols[13]);
-    const inkoopprijs = parseDutchNumber(cols[15]);
+    const aantal = parseNumber(cols[13]);
+    const inkoopprijs = parseNumber(cols[15]);
     const opmerking = cols[16]?.trim() || "";
 
     rows.push({ soort, lengte, partij, aantal, artikel, inkoopprijs, opmerking });
