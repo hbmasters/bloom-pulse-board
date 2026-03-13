@@ -156,10 +156,84 @@ export function normalizeArtikel(name: string): string {
     .trim();
 }
 
+/* ── Manual link type ── */
+export interface ManualLink {
+  inkoopKey: string;   // normalized inkoop artikel key
+  voorraadKey: string; // normalized voorraad artikel key
+}
+
+/* ── Fuzzy match suggestions ── */
+export interface MatchSuggestion {
+  voorraadKey: string;
+  artikel: string;
+  soort: string;
+  aantal: number;
+  score: number; // 0-100 similarity
+}
+
+function wordSet(s: string): Set<string> {
+  return new Set(s.toUpperCase().replace(/[^A-Z0-9\s]/g, "").split(/\s+/).filter(Boolean));
+}
+
+function similarity(a: string, b: string): number {
+  const wa = wordSet(a), wb = wordSet(b);
+  if (wa.size === 0 && wb.size === 0) return 0;
+  let overlap = 0;
+  for (const w of wa) if (wb.has(w)) overlap++;
+  return Math.round((overlap / Math.max(wa.size, wb.size)) * 100);
+}
+
+export function findSuggestions(
+  inkoopKey: string,
+  inkoopSoort: string,
+  voorraad: VoorraadRow[],
+  alreadyMatchedKeys: Set<string>,
+  manualLinks: ManualLink[]
+): MatchSuggestion[] {
+  // Group voorraad
+  const groups = new Map<string, { soort: string; artikel: string; total: number }>();
+  for (const row of voorraad) {
+    const key = normalizeArtikel(row.artikel);
+    if (alreadyMatchedKeys.has(key)) continue; // already auto-matched
+    if (manualLinks.some(l => l.voorraadKey === key && l.inkoopKey !== inkoopKey)) continue; // already linked elsewhere
+    if (!groups.has(key)) groups.set(key, { soort: row.soort, artikel: row.artikel, total: 0 });
+    groups.get(key)!.total += row.aantal;
+  }
+
+  const suggestions: MatchSuggestion[] = [];
+  for (const [key, g] of groups) {
+    // Same soort gets a bonus
+    const nameSim = similarity(inkoopKey, key);
+    const soortBonus = g.soort.toUpperCase() === inkoopSoort.toUpperCase() ? 30 : 0;
+    const score = Math.min(100, nameSim + soortBonus);
+    if (score >= 15) {
+      suggestions.push({ voorraadKey: key, artikel: g.artikel, soort: g.soort, aantal: g.total, score });
+    }
+  }
+
+  suggestions.sort((a, b) => b.score - a.score);
+  return suggestions.slice(0, 8);
+}
+
+/* ── localStorage persistence for manual links ── */
+const LINKS_STORAGE_KEY = "hbm-voorraad-links";
+
+export function loadManualLinks(): ManualLink[] {
+  try {
+    const raw = localStorage.getItem(LINKS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveManualLinks(links: ManualLink[]): void {
+  localStorage.setItem(LINKS_STORAGE_KEY, JSON.stringify(links));
+}
+
 /* ── Match inkooplijst against voorraadlijst ── */
 export function matchLists(
   inkoop: InkoopRow[],
-  voorraad: VoorraadRow[]
+  voorraad: VoorraadRow[],
+  manualLinks: ManualLink[] = []
 ): MatchedLine[] {
   // Group inkoop by normalized artikel
   const inkoopGroups = new Map<string, {
@@ -213,7 +287,14 @@ export function matchLists(
     if (!g.lengte && row.lengte) g.lengte = row.lengte;
   }
 
-  // Merge: start with all inkoop items
+  // Build a map from inkoop key -> linked voorraad keys
+  const linkedVoorraad = new Map<string, string[]>();
+  for (const link of manualLinks) {
+    if (!linkedVoorraad.has(link.inkoopKey)) linkedVoorraad.set(link.inkoopKey, []);
+    linkedVoorraad.get(link.inkoopKey)!.push(link.voorraadKey);
+  }
+
+  // Merge: start with all inkoop items + unlinked voorraad
   const allKeys = new Set([...inkoopGroups.keys(), ...voorraadGroups.keys()]);
   const results: MatchedLine[] = [];
 
@@ -221,9 +302,27 @@ export function matchLists(
     const ig = inkoopGroups.get(key);
     const vg = voorraadGroups.get(key);
 
+    // Calculate voorraad: auto-matched + manually linked
+    let voorraadTotal = vg?.total ?? 0;
+    let voorraadDetails = vg?.details ? [...vg.details] : [];
+    let lengte = vg?.lengte ?? "";
+
+    // Add manually linked voorraad
+    const linkedKeys = linkedVoorraad.get(key) ?? [];
+    for (const lk of linkedKeys) {
+      const lvg = voorraadGroups.get(lk);
+      if (lvg && lk !== key) { // don't double-count auto-matches
+        voorraadTotal += lvg.total;
+        voorraadDetails.push(...lvg.details);
+        if (!lengte && lvg.lengte) lengte = lvg.lengte;
+      }
+    }
+
     const behoefte = ig?.total ?? 0;
-    const voorraadTotal = vg?.total ?? 0;
     const benodigd = behoefte - voorraadTotal;
+
+    // Skip voorraad-only items that are manually linked to an inkoop item
+    if (!ig && manualLinks.some(l => l.voorraadKey === key)) continue;
 
     let status: MatchedLine["status"];
     if (behoefte === 0) status = "overschot";
@@ -235,14 +334,14 @@ export function matchLists(
       key,
       soort: ig?.soort ?? vg?.soort ?? "",
       artikel: ig?.artikel ?? vg?.artikel ?? "",
-      lengte: vg?.lengte ?? "",
+      lengte,
       kleurCodes: ig ? [...ig.kleurCodes] : [],
       klanten: ig?.klanten ?? [],
       behoefte,
       voorraad: voorraadTotal,
       benodigd: Math.max(0, benodigd),
       status,
-      voorraadDetails: vg?.details ?? [],
+      voorraadDetails,
     });
   }
 
