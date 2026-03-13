@@ -22,7 +22,7 @@ import {
   type ProcurementRow,
   type ShopStatus,
 } from "@/components/procurement-cockpit-v1/procurement-cockpit-v1-data";
-import BehoesteVsVoorraad from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
+import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
 
 /* ── helpers ── */
 const fmt = (n: number) => n.toLocaleString("nl-NL");
