@@ -519,10 +519,8 @@ const ProcurementCockpitV1 = () => {
             </tbody>
           </table>
         </div>
+        )}
       </IHSectionShell>
-
-      {/* ── Behoefte vs Voorraad ── */}
-      <BehoesteVsVoorraad />
     </div>
   );
 };
