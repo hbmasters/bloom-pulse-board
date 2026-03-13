@@ -516,7 +516,7 @@ export const MatchedTable = ({
               <tr className="border-b border-border">
                 <th className="px-1.5 py-2 w-5"></th>
                 <SortHeader k="status" label="Status" />
-                <SortHeader k="soort" label="Soort" />
+                <SortHeader k="soort" label="Groep" />
                 <SortHeader k="artikel" label="Artikel" />
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
