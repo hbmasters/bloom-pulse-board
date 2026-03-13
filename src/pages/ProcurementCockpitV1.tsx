@@ -268,28 +268,31 @@ const ProcurementCockpitV1 = () => {
         <DatePicker value={dateTo} onChange={setDateTo} label="Tot" />
       </div>
 
-      {/* ── KPI Cards (tied to period) ── */}
-      {showKPIs && <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {[
-          { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
-          { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
-          { label: "Open inkoopbehoefte", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
-          { label: "Offerteprijs vs Inkoopprijs", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, sub: `Offerte ${fmtPrice(totals.avgOfferPrice)} · Inkoop ${fmtPrice(totals.avgHistoricalPrice)}`, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
-          { label: "Actie nodig", value: `${totals.actionNeeded}`, icon: Zap },
-        ].map(k => (
-          <div key={k.label} className={cn(
-            "rounded-xl border border-border bg-card p-3.5 flex flex-col gap-1",
-            k.highlight && "ring-1 ring-destructive/20"
-          )}>
-            <div className="flex items-center gap-1.5">
-              <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+      {/* ── KPI Cards ── */}
+      {showKPIs && (matchState.isProcessed
+        ? <MatchedKPIs matched={matchState.matched} />
+        : <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {[
+            { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
+            { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
+            { label: "Open inkoopbehoefte", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
+            { label: "Offerteprijs vs Inkoopprijs", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, sub: `Offerte ${fmtPrice(totals.avgOfferPrice)} · Inkoop ${fmtPrice(totals.avgHistoricalPrice)}`, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
+            { label: "Actie nodig", value: `${totals.actionNeeded}`, icon: Zap },
+          ].map(k => (
+            <div key={k.label} className={cn(
+              "rounded-xl border border-border bg-card p-3.5 flex flex-col gap-1",
+              k.highlight && "ring-1 ring-destructive/20"
+            )}>
+              <div className="flex items-center gap-1.5">
+                <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+              </div>
+              <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : "text-foreground")}>{k.value}</span>
+              {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
             </div>
-            <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : "text-foreground")}>{k.value}</span>
-            {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
-          </div>
-        ))}
-      </div>}
+          ))}
+        </div>
+      )}
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-2.5">
