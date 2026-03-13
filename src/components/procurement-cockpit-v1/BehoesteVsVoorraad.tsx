@@ -199,7 +199,7 @@ const LinkSuggestions = ({
   );
 };
 
-/** Matched results table */
+/** Matched results table — split into Behoefte (top) and Voorraad (bottom) */
 export const MatchedTable = ({
   matched, largeView, voorraadRows, manualLinks, onLink, onUnlink,
 }: {
@@ -213,11 +213,13 @@ export const MatchedTable = ({
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [soortFilter, setSoortFilter] = useState<string | null>(null);
+  const [lengteFilter, setLengteFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].sort(), [matched]);
+  const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].filter(Boolean).sort(), [matched]);
+  const lengtes = useMemo(() => [...new Set(matched.map(m => m.lengte).concat(voorraadRows.map(r => r.lengte)))].filter(Boolean).sort(), [matched, voorraadRows]);
 
   // Keys already auto-matched
   const autoMatchedKeys = useMemo(() => {
@@ -228,13 +230,15 @@ export const MatchedTable = ({
     return keys;
   }, [matched]);
 
-  const filtered = useMemo(() => {
+  // Split into behoefte (demand) and voorraad-only (surplus/stock)
+  const { behoefteItems, voorraadItems } = useMemo(() => {
     let list = matched;
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(m => m.artikel.toLowerCase().includes(q) || m.soort.toLowerCase().includes(q));
     }
     if (soortFilter) list = list.filter(m => m.soort === soortFilter);
+    if (lengteFilter) list = list.filter(m => m.lengte === lengteFilter);
     if (statusFilter) list = list.filter(m => m.status === statusFilter);
 
     const statusOrder: Record<string, number> = { niet_gedekt: 0, deels_gedekt: 1, gedekt: 2, overschot: 3 };
@@ -247,19 +251,215 @@ export const MatchedTable = ({
       if (typeof av === "number" && typeof bv === "number") return sortDir === "asc" ? av - bv : bv - av;
       return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
-    return list;
-  }, [matched, search, soortFilter, statusFilter, sortKey, sortDir]);
+
+    return {
+      behoefteItems: list.filter(m => m.behoefte > 0),
+      voorraadItems: list.filter(m => m.behoefte === 0 && m.voorraad > 0),
+    };
+  }, [matched, search, soortFilter, lengteFilter, statusFilter, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir(key === "behoefte" || key === "voorraad" || key === "benodigd" ? "desc" : "asc"); }
   };
 
+  // Find matching voorraad for a behoefte item based on artikel + kleur + lengte
+  const findMatchingVoorraad = useCallback((m: MatchedLine) => {
+    const normKey = m.key;
+    const kleurSet = new Set(m.kleurCodes.map(c => c.toUpperCase()));
+
+    return voorraadRows.filter(vr => {
+      const vKey = normalizeArtikel(vr.artikel);
+      // Match on normalized article name
+      const artikelMatch = vKey === normKey || vKey.includes(normKey) || normKey.includes(vKey);
+      // Match on soort at minimum
+      const soortMatch = vr.soort.toUpperCase() === m.soort.toUpperCase();
+      // Lengte match (if both have lengte)
+      const lengteMatch = !m.lengte || !vr.lengte || vr.lengte === m.lengte;
+
+      return (artikelMatch || soortMatch) && lengteMatch;
+    });
+  }, [voorraadRows]);
+
   const SortHeader = ({ k, label, align }: { k: SortKey; label: string; align?: string }) => (
     <th className={cn("px-2 py-2 font-medium text-muted-foreground cursor-pointer hover:text-foreground whitespace-nowrap", align)} onClick={() => toggleSort(k)}>
       <span className="inline-flex items-center gap-0.5">{label} {sortKey === k && <ArrowUpDown className="w-3 h-3" />}</span>
     </th>
   );
+
+  const totalFiltered = behoefteItems.length + voorraadItems.length;
+
+  const renderBehoefteRow = (m: MatchedLine) => {
+    const isExpanded = expandedKey === m.key;
+    const cfg = statusConfig[m.status];
+    const uniqueKlanten = [...new Set(m.klanten.map(k => k.klant))];
+    const dekkingPct = m.behoefte > 0 ? Math.min(100, Math.round((m.voorraad / m.behoefte) * 100)) : 0;
+    const hasLinks = manualLinks.some(l => l.inkoopKey === m.key);
+    const matchingVoorraad = isExpanded ? findMatchingVoorraad(m) : [];
+    const suggestions = isExpanded ? findSuggestions(m.key, m.soort, voorraadRows, autoMatchedKeys, manualLinks) : [];
+
+    return (
+      <Fragment key={m.key}>
+        <tr
+          onClick={() => setExpandedKey(isExpanded ? null : m.key)}
+          className={cn("border-b border-border/40 cursor-pointer transition-colors", isExpanded ? "bg-muted/30" : "hover:bg-muted/10")}
+        >
+          <td className="px-1.5 py-2.5 text-muted-foreground">
+            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </td>
+          <td className="px-2 py-2.5">
+            <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full border inline-flex items-center gap-0.5", cfg.bg)}>
+              <cfg.icon className={cn("w-2.5 h-2.5", cfg.color)} />
+              {cfg.label}
+            </span>
+          </td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.soort}</td>
+          <td className="px-2 py-2.5">
+            <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
+          </td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.lengte || "—"}</td>
+          <td className="px-2 py-2.5">
+            <div className="flex gap-0.5 flex-wrap">
+              {m.kleurCodes.length > 0
+                ? m.kleurCodes.map(c => (
+                  <span key={c} className="text-[8px] font-mono font-semibold px-1 py-0.5 rounded bg-muted border border-border text-muted-foreground" title={kleurLabels[c] || c}>
+                    {c}
+                  </span>
+                ))
+                : <span className="text-[10px] text-muted-foreground/50">—</span>
+              }
+            </div>
+          </td>
+          <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.behoefte)}</td>
+          <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
+          <td className={cn("px-2 py-2.5 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
+            {m.benodigd > 0 ? fmt(m.benodigd) : <span className="flex items-center justify-end gap-0.5"><CheckCircle2 className="w-3 h-3" /> 0</span>}
+          </td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
+            {uniqueKlanten.join(", ") || "—"}
+          </td>
+          <td className="px-2 py-2.5 text-center">
+            {hasLinks && <Link2 className="w-3 h-3 text-primary inline" />}
+          </td>
+        </tr>
+
+        {isExpanded && (
+          <tr className="border-b border-border/40 bg-muted/10">
+            <td colSpan={11} className="px-4 py-3">
+              <div className="space-y-3">
+                {/* Dekking bar */}
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-medium text-muted-foreground w-14">Dekking</span>
+                  <div className="flex-1 max-w-xs bg-muted rounded-full h-2 overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full transition-all", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")}
+                      style={{ width: `${dekkingPct}%` }}
+                    />
+                  </div>
+                  <span className={cn("text-[11px] font-mono font-bold", dekkingPct >= 100 ? "text-accent" : dekkingPct >= 50 ? "text-yellow-500" : "text-destructive")}>
+                    {dekkingPct}%
+                  </span>
+                </div>
+
+                {/* Matching voorraad partijen */}
+                <div>
+                  <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                    <Package className="w-3 h-3 text-primary" />
+                    Beschikbare voorraad (artikel + kleur + lengte)
+                  </h4>
+                  {/* Direct matched voorraad details */}
+                  {m.voorraadDetails.length > 0 && (
+                    <div className="space-y-1 mb-2">
+                      {m.voorraadDetails.map((d, i) => (
+                        <div key={`direct-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-accent/5 border border-accent/20">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-3 h-3 text-accent" />
+                            <span className="font-medium text-foreground">{d.partij || "Direct match"}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono font-bold text-foreground">{fmt(d.aantal)}</span>
+                            <span className="font-mono text-muted-foreground">{fmtPrice(d.prijs)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Broader matching voorraad (same soort/lengte) */}
+                  {matchingVoorraad.length > 0 && (
+                    <div className="space-y-1">
+                      {matchingVoorraad
+                        .filter(vr => {
+                          // Don't show already-shown direct matches
+                          const vKey = normalizeArtikel(vr.artikel);
+                          return vKey !== m.key;
+                        })
+                        .map((vr, i) => (
+                          <div key={`match-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-medium text-foreground truncate">{vr.artikel}</span>
+                              <span className="text-muted-foreground flex-shrink-0">{vr.soort}</span>
+                              {vr.lengte && <span className="text-[8px] font-mono px-1 py-0.5 rounded bg-muted border border-border text-muted-foreground">{vr.lengte}</span>}
+                            </div>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <span className="font-mono text-foreground">{fmt(vr.aantal)}</span>
+                              <span className="font-mono text-muted-foreground">{fmtPrice(vr.inkoopprijs)}</span>
+                              {!manualLinks.some(l => l.inkoopKey === m.key && l.voorraadKey === normalizeArtikel(vr.artikel)) && (
+                                <button
+                                  onClick={e => { e.stopPropagation(); onLink(m.key, normalizeArtikel(vr.artikel)); }}
+                                  className="text-[9px] font-medium text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-2 py-0.5 transition-colors flex items-center gap-1"
+                                >
+                                  <Link2 className="w-2.5 h-2.5" /> Koppel
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  {m.voorraadDetails.length === 0 && matchingVoorraad.filter(vr => normalizeArtikel(vr.artikel) !== m.key).length === 0 && (
+                    <p className="text-[10px] text-muted-foreground italic">Geen voorraad gevonden voor dit artikel</p>
+                  )}
+                </div>
+
+                {/* AI Link suggestions */}
+                {m.behoefte > 0 && suggestions.length > 0 && (
+                  <LinkSuggestions
+                    suggestions={suggestions}
+                    manualLinks={manualLinks}
+                    inkoopKey={m.key}
+                    onLink={onLink}
+                    onUnlink={onUnlink}
+                  />
+                )}
+
+                {/* Klanten detail */}
+                {m.klanten.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2">Klanten & Behoefte</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                      {[...new Map(m.klanten.map(k => [k.klant, k])).keys()].map(klant => {
+                        const klantRows = m.klanten.filter(k => k.klant === klant);
+                        const klantTotal = klantRows.reduce((s, k) => s + k.aantal, 0);
+                        return (
+                          <div key={klant} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
+                            <span className="font-semibold text-foreground">{klant}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">{klantRows.length}x</span>
+                              <span className="font-mono font-bold text-foreground">{fmt(klantTotal)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </td>
+          </tr>
+        )}
+      </Fragment>
+    );
+  };
 
   return (
     <>
@@ -273,6 +473,10 @@ export const MatchedTable = ({
           <option value="">Alle soorten</option>
           {soorten.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+        <select value={lengteFilter || ""} onChange={e => setLengteFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle lengtes</option>
+          {lengtes.map(l => <option key={l} value={l}>{l}</option>)}
+        </select>
         <div className="flex gap-1">
           {(["niet_gedekt", "deels_gedekt", "gedekt", "overschot"] as const).map(s => {
             const cfg = statusConfig[s];
@@ -283,159 +487,76 @@ export const MatchedTable = ({
             );
           })}
         </div>
-        <span className="text-[10px] font-mono text-muted-foreground ml-auto">{filtered.length}/{matched.length}</span>
+        <span className="text-[10px] font-mono text-muted-foreground ml-auto">{totalFiltered}/{matched.length}</span>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto -mx-5">
-        <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
-          <thead>
-            <tr className="border-b border-border">
-              <th className="px-1.5 py-2 w-5"></th>
-              <SortHeader k="status" label="Status" />
-              <SortHeader k="soort" label="Soort" />
-              <SortHeader k="artikel" label="Artikel" />
-              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
-              <SortHeader k="behoefte" label="Behoefte" align="text-right" />
-              <SortHeader k="voorraad" label="Voorraad" align="text-right" />
-              <SortHeader k="benodigd" label="Benodigd" align="text-right" />
-              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
-              <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
-                <Link2 className="w-3 h-3 inline" />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(m => {
-              const isExpanded = expandedKey === m.key;
-              const cfg = statusConfig[m.status];
-              const uniqueKlanten = [...new Set(m.klanten.map(k => k.klant))];
-              const dekkingPct = m.behoefte > 0 ? Math.min(100, Math.round((m.voorraad / m.behoefte) * 100)) : (m.voorraad > 0 ? 100 : 0);
-              const hasLinks = manualLinks.some(l => l.inkoopKey === m.key);
-              const suggestions = isExpanded && m.behoefte > 0 ? findSuggestions(m.key, m.soort, voorraadRows, autoMatchedKeys, manualLinks) : [];
+      {/* ── Behoefte Section ── */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <ShoppingCart className="w-4 h-4 text-primary" />
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-wide">Behoefte</h3>
+          <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{behoefteItems.length}</span>
+        </div>
+        <div className="overflow-x-auto -mx-5">
+          <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-1.5 py-2 w-5"></th>
+                <SortHeader k="status" label="Status" />
+                <SortHeader k="soort" label="Soort" />
+                <SortHeader k="artikel" label="Artikel" />
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
+                <SortHeader k="behoefte" label="Behoefte" align="text-right" />
+                <SortHeader k="voorraad" label="Voorraad" align="text-right" />
+                <SortHeader k="benodigd" label="Benodigd" align="text-right" />
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
+                  <Link2 className="w-3 h-3 inline" />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {behoefteItems.length === 0 ? (
+                <tr><td colSpan={11} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
+              ) : behoefteItems.map(renderBehoefteRow)}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-              return (
-                <Fragment key={m.key}>
-                  <tr
-                    onClick={() => setExpandedKey(isExpanded ? null : m.key)}
-                    className={cn("border-b border-border/40 cursor-pointer transition-colors", isExpanded ? "bg-muted/30" : "hover:bg-muted/10")}
-                  >
-                    <td className="px-1.5 py-2.5 text-muted-foreground">
-                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full border inline-flex items-center gap-0.5", cfg.bg)}>
-                        <cfg.icon className={cn("w-2.5 h-2.5", cfg.color)} />
-                        {cfg.label}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.soort}</td>
-                    <td className="px-2 py-2.5">
-                      <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <div className="flex gap-0.5 flex-wrap">
-                        {m.kleurCodes.length > 0
-                          ? m.kleurCodes.map(c => (
-                            <span key={c} className="text-[8px] font-mono font-semibold px-1 py-0.5 rounded bg-muted border border-border text-muted-foreground" title={kleurLabels[c] || c}>
-                              {c}
-                            </span>
-                          ))
-                          : <span className="text-[10px] text-muted-foreground/50">—</span>
-                        }
-                      </div>
-                    </td>
-                    <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.behoefte)}</td>
-                    <td className="px-2 py-2.5 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
-                    <td className={cn("px-2 py-2.5 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
-                      {m.benodigd > 0 ? fmt(m.benodigd) : <span className="flex items-center justify-end gap-0.5"><CheckCircle2 className="w-3 h-3" /> 0</span>}
-                    </td>
-                    <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
-                      {uniqueKlanten.join(", ") || "—"}
-                    </td>
-                    <td className="px-2 py-2.5 text-center">
-                      {hasLinks && <Link2 className="w-3 h-3 text-primary inline" />}
-                    </td>
+      {/* ── Voorraad Section ── */}
+      {voorraadItems.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Package className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wide">Voorraad (zonder behoefte)</h3>
+            <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{voorraadItems.length}</span>
+          </div>
+          <div className="overflow-x-auto -mx-5">
+            <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Soort</th>
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Artikel</th>
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Voorraad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {voorraadItems.map(m => (
+                  <tr key={m.key} className="border-b border-border/40 hover:bg-muted/10">
+                    <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.soort}</td>
+                    <td className="px-2 py-2 font-medium text-foreground text-[11px]">{m.artikel}</td>
+                    <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.lengte || "—"}</td>
+                    <td className="px-2 py-2 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
                   </tr>
-
-                  {isExpanded && (
-                    <tr className="border-b border-border/40 bg-muted/10">
-                      <td colSpan={10} className="px-4 py-3">
-                        <div className="space-y-3">
-                          {/* Dekking bar */}
-                          <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-medium text-muted-foreground w-14">Dekking</span>
-                            <div className="flex-1 max-w-xs bg-muted rounded-full h-2 overflow-hidden">
-                              <div
-                                className={cn("h-full rounded-full transition-all", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")}
-                                style={{ width: `${dekkingPct}%` }}
-                              />
-                            </div>
-                            <span className={cn("text-[11px] font-mono font-bold", dekkingPct >= 100 ? "text-accent" : dekkingPct >= 50 ? "text-yellow-500" : "text-destructive")}>
-                              {dekkingPct}%
-                            </span>
-                          </div>
-
-                          {/* Link suggestions - show for items with behoefte that aren't fully covered */}
-                          {m.behoefte > 0 && (
-                            <LinkSuggestions
-                              suggestions={suggestions}
-                              manualLinks={manualLinks}
-                              inkoopKey={m.key}
-                              onLink={onLink}
-                              onUnlink={onUnlink}
-                            />
-                          )}
-
-                          {/* Klanten detail */}
-                          {m.klanten.length > 0 && (
-                            <div>
-                              <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2">Klanten & Behoefte</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                                {[...new Map(m.klanten.map(k => [k.klant, k])).keys()].map(klant => {
-                                  const klantRows = m.klanten.filter(k => k.klant === klant);
-                                  const klantTotal = klantRows.reduce((s, k) => s + k.aantal, 0);
-                                  return (
-                                    <div key={klant} className="flex items-center justify-between text-[10px] py-1 border-b border-border/30 last:border-0">
-                                      <span className="font-semibold text-foreground">{klant}</span>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">{klantRows.length}x</span>
-                                        <span className="font-mono font-bold text-foreground">{fmt(klantTotal)}</span>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Voorraad partijen */}
-                          {m.voorraadDetails.length > 0 && (
-                            <div>
-                              <h4 className="text-[10px] font-semibold text-foreground uppercase tracking-wide mb-2">Voorraadpartijen</h4>
-                              <div className="space-y-1">
-                                {m.voorraadDetails.map((d, i) => (
-                                  <div key={i} className="flex items-center justify-between text-[10px] py-1 px-2 rounded bg-background border border-border/50">
-                                    <span className="font-mono text-muted-foreground">{d.partij}</span>
-                                    <div className="flex items-center gap-3">
-                                      <span className="font-mono text-foreground">{fmt(d.aantal)}</span>
-                                      <span className="font-mono text-muted-foreground">{fmtPrice(d.prijs)}</span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   );
 };
