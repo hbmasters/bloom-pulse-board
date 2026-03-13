@@ -181,6 +181,7 @@ const ProcurementCockpitV1 = () => {
             onUpload={matchState.handleUpload}
             onProcess={matchState.processMatch}
             onReset={matchState.reset}
+            linkedCount={matchState.manualLinks.length}
           />
           <div className="h-4 w-px bg-border" />
           {/* Shop status */}
@@ -325,7 +326,7 @@ const ProcurementCockpitV1 = () => {
       {/* ── Procurement List ── */}
       <IHSectionShell icon={ShoppingCart} title={matchState.isProcessed ? "Afstreepoverzicht" : "Inkooplijst"} subtitle={matchState.isProcessed ? "Behoefte vs voorraad per artikel" : "Klik op een rij voor detail"} badge={matchState.isProcessed ? `${matchState.matched.length}` : `${filtered.length}`}>
         {matchState.isProcessed ? (
-          <MatchedTable matched={matchState.matched} largeView={largeView} />
+          <MatchedTable matched={matchState.matched} largeView={largeView} voorraadRows={matchState.voorraadRows} manualLinks={matchState.manualLinks} onLink={matchState.addLink} onUnlink={matchState.removeLink} />
         ) : (
         <div className="overflow-x-auto -mx-5">
           <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
