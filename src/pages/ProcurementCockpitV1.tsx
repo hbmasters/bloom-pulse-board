@@ -132,7 +132,7 @@ const ProcurementCockpitV1 = () => {
     const avgOffer = rows.reduce((s, p) => s + p.offer_price, 0) / rows.length;
     const avgHistorical = rows.reduce((s, p) => s + p.historical_price, 0) / rows.length;
     return {
-      required: rows.reduce((s, p) => s + p.required_volume, 0),
+      required: rows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
       freeStock: rows.reduce((s, p) => s + p.free_stock, 0),
       reserved: rows.reduce((s, p) => s + p.reserved_stock, 0),
       openBuy: rows.reduce((s, p) => s + p.open_buy_need, 0),
@@ -370,7 +370,7 @@ const ProcurementCockpitV1 = () => {
                         </div>
                       </td>
                       {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
-                      {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume)}</td>}
+                      {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
                       {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
                       {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
                       {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
@@ -395,7 +395,7 @@ const ProcurementCockpitV1 = () => {
                             {/* Context cards */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                               {[
-                                { label: "Benodigd", value: fmt(p.required_volume) },
+                                { label: "Benodigd", value: fmt(p.required_volume - p.available_stock) },
                               ].map(c => (
                                 <div key={c.label} className="rounded-lg border border-border bg-background p-3">
                                   <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>
