@@ -241,6 +241,7 @@ export const MatchedTable = ({
     }
     if (soortFilter) list = list.filter(m => m.soort === soortFilter);
     if (lengteFilter) list = list.filter(m => m.lengte === lengteFilter);
+    if (kleurFilter) list = list.filter(m => m.kleurCodes.includes(kleurFilter));
     if (statusFilter) list = list.filter(m => m.status === statusFilter);
 
     const statusOrder: Record<string, number> = { niet_gedekt: 0, deels_gedekt: 1, gedekt: 2, overschot: 3 };
