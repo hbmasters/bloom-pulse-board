@@ -23,6 +23,12 @@ import {
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3).replace(".", ",")}`;
 
+/** Extract artikelgroep = first 2 words of artikel name, e.g. "R GR Furiosa 35cm" → "R GR" */
+const extractArtikelgroep = (artikel: string): string => {
+  const parts = artikel.trim().split(/\s+/);
+  return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0] || "";
+};
+
 const statusConfig = {
   gedekt: { label: "Gedekt", icon: CheckCircle2, color: "text-accent", bg: "bg-accent/10 border-accent/20" },
   deels_gedekt: { label: "Deels", icon: AlertTriangle, color: "text-yellow-500", bg: "bg-yellow-500/10 border-yellow-500/20" },
@@ -212,14 +218,14 @@ export const MatchedTable = ({
 }) => {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [soortFilter, setSoortFilter] = useState<string | null>(null);
+  const [artikelgroepFilter, setArtikelgroepFilter] = useState<string | null>(null);
   const [lengteFilter, setLengteFilter] = useState<string | null>(null);
   const [kleurFilter, setKleurFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].filter(Boolean).sort(), [matched]);
+  const artikelgroepen = useMemo(() => [...new Set(matched.map(m => extractArtikelgroep(m.artikel)))].filter(Boolean).sort(), [matched]);
   const lengtes = useMemo(() => [...new Set(matched.map(m => m.lengte).concat(voorraadRows.map(r => r.lengte)))].filter(Boolean).sort(), [matched, voorraadRows]);
   const kleuren = useMemo(() => [...new Set(matched.flatMap(m => m.kleurCodes))].filter(Boolean).sort(), [matched]);
 
@@ -239,7 +245,7 @@ export const MatchedTable = ({
       const q = search.toLowerCase();
       list = list.filter(m => m.artikel.toLowerCase().includes(q) || m.soort.toLowerCase().includes(q));
     }
-    if (soortFilter) list = list.filter(m => m.soort === soortFilter);
+    if (artikelgroepFilter) list = list.filter(m => extractArtikelgroep(m.artikel) === artikelgroepFilter);
     if (lengteFilter) list = list.filter(m => m.lengte === lengteFilter);
     if (kleurFilter) list = list.filter(m => m.kleurCodes.includes(kleurFilter));
     if (statusFilter) list = list.filter(m => m.status === statusFilter);
@@ -259,7 +265,7 @@ export const MatchedTable = ({
       behoefteItems: list.filter(m => m.behoefte > 0),
       voorraadItems: list.filter(m => m.behoefte === 0 && m.voorraad > 0),
     };
-  }, [matched, search, soortFilter, lengteFilter, kleurFilter, statusFilter, sortKey, sortDir]);
+  }, [matched, search, artikelgroepFilter, lengteFilter, kleurFilter, statusFilter, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -316,7 +322,7 @@ export const MatchedTable = ({
               {cfg.label}
             </span>
           </td>
-          <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.soort}</td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground font-mono">{extractArtikelgroep(m.artikel)}</td>
           <td className="px-2 py-2.5">
             <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
           </td>
@@ -472,9 +478,9 @@ export const MatchedTable = ({
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek..." className="w-full pl-7 pr-2 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
-        <select value={soortFilter || ""} onChange={e => setSoortFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
-          <option value="">Alle soorten</option>
-          {soorten.map(s => <option key={s} value={s}>{s}</option>)}
+        <select value={artikelgroepFilter || ""} onChange={e => setArtikelgroepFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle artikelgroepen</option>
+          {artikelgroepen.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={lengteFilter || ""} onChange={e => setLengteFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
           <option value="">Alle lengtes</option>
@@ -510,7 +516,7 @@ export const MatchedTable = ({
               <tr className="border-b border-border">
                 <th className="px-1.5 py-2 w-5"></th>
                 <SortHeader k="status" label="Status" />
-                <SortHeader k="soort" label="Soort" />
+                <SortHeader k="soort" label="Groep" />
                 <SortHeader k="artikel" label="Artikel" />
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Kleur</th>
@@ -544,7 +550,7 @@ export const MatchedTable = ({
             <table className={cn("w-full", largeView ? "text-[13px]" : "text-[11px]")}>
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Soort</th>
+                  <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Groep</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Artikel</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Lengte</th>
                   <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Voorraad</th>
@@ -553,7 +559,7 @@ export const MatchedTable = ({
               <tbody>
                 {voorraadItems.map(m => (
                   <tr key={m.key} className="border-b border-border/40 hover:bg-muted/10">
-                    <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.soort}</td>
+                    <td className="px-2 py-2 text-[10px] text-muted-foreground font-mono">{extractArtikelgroep(m.artikel)}</td>
                     <td className="px-2 py-2 font-medium text-foreground text-[11px]">{m.artikel}</td>
                     <td className="px-2 py-2 text-[10px] text-muted-foreground">{m.lengte || "—"}</td>
                     <td className="px-2 py-2 font-mono text-right text-foreground">{fmt(m.voorraad)}</td>
