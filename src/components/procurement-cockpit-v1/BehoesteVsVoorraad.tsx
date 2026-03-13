@@ -214,12 +214,14 @@ export const MatchedTable = ({
   const [search, setSearch] = useState("");
   const [soortFilter, setSoortFilter] = useState<string | null>(null);
   const [lengteFilter, setLengteFilter] = useState<string | null>(null);
+  const [kleurFilter, setKleurFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const soorten = useMemo(() => [...new Set(matched.map(m => m.soort))].filter(Boolean).sort(), [matched]);
   const lengtes = useMemo(() => [...new Set(matched.map(m => m.lengte).concat(voorraadRows.map(r => r.lengte)))].filter(Boolean).sort(), [matched, voorraadRows]);
+  const kleuren = useMemo(() => [...new Set(matched.flatMap(m => m.kleurCodes))].filter(Boolean).sort(), [matched]);
 
   // Keys already auto-matched
   const autoMatchedKeys = useMemo(() => {
@@ -239,6 +241,7 @@ export const MatchedTable = ({
     }
     if (soortFilter) list = list.filter(m => m.soort === soortFilter);
     if (lengteFilter) list = list.filter(m => m.lengte === lengteFilter);
+    if (kleurFilter) list = list.filter(m => m.kleurCodes.includes(kleurFilter));
     if (statusFilter) list = list.filter(m => m.status === statusFilter);
 
     const statusOrder: Record<string, number> = { niet_gedekt: 0, deels_gedekt: 1, gedekt: 2, overschot: 3 };
@@ -256,7 +259,7 @@ export const MatchedTable = ({
       behoefteItems: list.filter(m => m.behoefte > 0),
       voorraadItems: list.filter(m => m.behoefte === 0 && m.voorraad > 0),
     };
-  }, [matched, search, soortFilter, lengteFilter, statusFilter, sortKey, sortDir]);
+  }, [matched, search, soortFilter, lengteFilter, kleurFilter, statusFilter, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -476,6 +479,10 @@ export const MatchedTable = ({
         <select value={lengteFilter || ""} onChange={e => setLengteFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
           <option value="">Alle lengtes</option>
           {lengtes.map(l => <option key={l} value={l}>{l}</option>)}
+        </select>
+        <select value={kleurFilter || ""} onChange={e => setKleurFilter(e.target.value || null)} className="text-[11px] font-medium px-2 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+          <option value="">Alle kleuren</option>
+          {kleuren.map(k => <option key={k} value={k}>{kleurLabels[k] || k}</option>)}
         </select>
         <div className="flex gap-1">
           {(["niet_gedekt", "deels_gedekt", "gedekt", "overschot"] as const).map(s => {
