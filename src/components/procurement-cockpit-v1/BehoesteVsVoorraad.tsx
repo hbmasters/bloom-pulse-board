@@ -265,7 +265,7 @@ export const MatchedTable = ({
       behoefteItems: list.filter(m => m.behoefte > 0),
       voorraadItems: list.filter(m => m.behoefte === 0 && m.voorraad > 0),
     };
-  }, [matched, search, soortFilter, lengteFilter, kleurFilter, statusFilter, sortKey, sortDir]);
+  }, [matched, search, artikelgroepFilter, lengteFilter, kleurFilter, statusFilter, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
