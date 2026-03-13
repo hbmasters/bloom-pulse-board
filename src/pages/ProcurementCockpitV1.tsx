@@ -66,6 +66,8 @@ const ProcurementCockpitV1 = () => {
   const [showPriceComparison, setShowPriceComparison] = useState(true);
   const [showSupplierOffers, setShowSupplierOffers] = useState(true);
 
+  const matchState = useMatchState();
+
   const allColumns = [
     { key: "buyer", label: "Inkoper" },
     { key: "required_volume", label: "Benodigd" },
