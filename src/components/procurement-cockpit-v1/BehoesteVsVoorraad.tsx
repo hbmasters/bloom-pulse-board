@@ -24,6 +24,35 @@ import {
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3).replace(".", ",")}`;
 
+/** Parse a datum string like "13/03" or "2025-03-13" to a Date (current year assumed for dd/mm) */
+const parseDatumToDate = (raw: string): Date | null => {
+  if (!raw) return null;
+  const ddmm = raw.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if (ddmm) {
+    const day = parseInt(ddmm[1], 10);
+    const month = parseInt(ddmm[2], 10) - 1;
+    return new Date(new Date().getFullYear(), month, day);
+  }
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+/** Get the earliest datum + ISO week label from klanten */
+const getEarliestDatum = (klanten: { datum: string }[]): { datum: string; week: number | null } => {
+  const dates = klanten.map(k => ({ raw: k.datum, parsed: parseDatumToDate(k.datum) })).filter(d => d.parsed !== null);
+  if (dates.length === 0) return { datum: "", week: null };
+  dates.sort((a, b) => a.parsed!.getTime() - b.parsed!.getTime());
+  const earliest = dates[0];
+  return { datum: earliest.raw, week: getISOWeek(earliest.parsed!) };
+};
+
+/** Get average historical price from klanten */
+const getAvgPrice = (klanten: { prijs: number }[]): number | null => {
+  const prices = klanten.map(k => k.prijs).filter(p => p > 0);
+  if (prices.length === 0) return null;
+  return prices.reduce((s, p) => s + p, 0) / prices.length;
+};
+
 /** Extract artikelgroep = first 2 words of artikel name, e.g. "R GR Furiosa 35cm" → "R GR" */
 const extractArtikelgroep = (artikel: string): string => {
   const parts = artikel.trim().split(/\s+/);
