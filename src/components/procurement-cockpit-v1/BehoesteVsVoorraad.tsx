@@ -23,6 +23,12 @@ import {
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3).replace(".", ",")}`;
 
+/** Extract artikelgroep = first 2 words of artikel name, e.g. "R GR Furiosa 35cm" → "R GR" */
+const extractArtikelgroep = (artikel: string): string => {
+  const parts = artikel.trim().split(/\s+/);
+  return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0] || "";
+};
+
 const statusConfig = {
   gedekt: { label: "Gedekt", icon: CheckCircle2, color: "text-accent", bg: "bg-accent/10 border-accent/20" },
   deels_gedekt: { label: "Deels", icon: AlertTriangle, color: "text-yellow-500", bg: "bg-yellow-500/10 border-yellow-500/20" },
