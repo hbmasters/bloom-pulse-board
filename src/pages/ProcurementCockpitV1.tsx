@@ -181,6 +181,7 @@ const ProcurementCockpitV1 = () => {
             onUpload={matchState.handleUpload}
             onProcess={matchState.processMatch}
             onReset={matchState.reset}
+            linkedCount={matchState.manualLinks.length}
           />
           <div className="h-4 w-px bg-border" />
           {/* Shop status */}
