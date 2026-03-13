@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, DollarSign } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, PanelLeftClose, PanelLeft, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, DollarSign, Cpu } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -39,6 +39,7 @@ const navSections: NavSection[] = [
       { id: "methodiek", icon: Brain, label: "Methodiek" },
       { id: "agents", icon: Bot, label: "Agents" },
       { id: "history", icon: Clock, label: "Historie" },
+      { id: "ai-architecture", icon: Cpu, label: "AI Architecture" },
       { id: "settings", icon: Settings, label: "Instellingen" },
     ],
   },
