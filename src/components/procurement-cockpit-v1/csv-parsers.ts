@@ -75,8 +75,16 @@ function parseNumber(raw: string): number {
   return isNaN(n) ? 0 : n;
 }
 
-/* ── Simple CSV line parser (handles quoted fields) ── */
-function parseCSVLine(line: string): string[] {
+/* ── Auto-detect delimiter (comma or semicolon) ── */
+function detectDelimiter(text: string): string {
+  const firstLines = text.split("\n").slice(0, 5).join("\n");
+  const semicolons = (firstLines.match(/;/g) || []).length;
+  const commas = (firstLines.match(/,/g) || []).length;
+  return semicolons >= commas ? ";" : ",";
+}
+
+/* ── CSV line parser (handles quoted fields, configurable delimiter) ── */
+function parseCSVLine(line: string, delimiter = ","): string[] {
   const fields: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -89,7 +97,7 @@ function parseCSVLine(line: string): string[] {
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (ch === "," && !inQuotes) {
+    } else if (ch === delimiter && !inQuotes) {
       fields.push(current);
       current = "";
     } else {
@@ -100,78 +108,143 @@ function parseCSVLine(line: string): string[] {
   return fields;
 }
 
+/* ── Parse datum like "1v(13/03)" or "2v(20/03)" ── */
+function parseDatum(raw: string): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  // Extract date from patterns like "1v(13/03)" or just "13/03"
+  const match = trimmed.match(/\((\d{1,2}\/\d{1,2})\)/);
+  if (match) return match[1];
+  // Already a date-like string
+  if (/\d{1,2}[\/\-]\d{1,2}/.test(trimmed)) return trimmed;
+  return trimmed;
+}
+
+/* ── Detect format: legacy (many columns with markers) or simple (4 columns) ── */
+function isLegacyInkoop(lines: string[], delimiter: string): boolean {
+  for (const line of lines.slice(0, 10)) {
+    const cols = parseCSVLine(line, delimiter);
+    if (cols[0]?.trim() === "Inkooplijst" && cols.length >= 10) return true;
+  }
+  return false;
+}
+
+function isLegacyVoorraad(lines: string[], delimiter: string): boolean {
+  for (const line of lines.slice(0, 10)) {
+    const cols = parseCSVLine(line, delimiter);
+    if (cols[0]?.trim() === "Voorraadlijst Snijbloemen" && cols.length >= 15) return true;
+  }
+  return false;
+}
+
 /* ── Parse Inkooplijst CSV ──
-   Column mapping (0-indexed):
-   0: "Inkooplijst" (skip)
-   1: subtitle (skip)
-   2: Soort (flower family)
-   3: (empty)
-   4: Aantal (quantity, dots = thousands)
-   5: Artikel (article name)
-   6: Klant (customer)
-   7: Prijs (price, comma = decimal)
-   8: Kleur code (PA, WI, RZ, etc.)
-   9: Datum (delivery date)
-   10+: stock ref / footer (skip)
+   Supports two formats:
+   A) Simple: datum, aantal, product, prijs
+   B) Legacy: Inkooplijst, subtitle, Soort, ..., Aantal, Artikel, Klant, Prijs, KleurCode, Datum
 */
 export function parseInkooplijst(csvText: string): InkoopRow[] {
   const lines = csvText.split("\n").filter(l => l.trim().length > 0);
+  const delimiter = detectDelimiter(csvText);
   const rows: InkoopRow[] = [];
 
-  for (const line of lines) {
-    const cols = parseCSVLine(line);
-    if (cols.length < 10) continue;
-    if (cols[0]?.trim() !== "Inkooplijst") continue;
+  if (isLegacyInkoop(lines, delimiter)) {
+    // Legacy format
+    for (const line of lines) {
+      const cols = parseCSVLine(line, delimiter);
+      if (cols.length < 10) continue;
+      if (cols[0]?.trim() !== "Inkooplijst") continue;
 
-    const soort = cols[2]?.trim() || "";
-    const artikel = cols[5]?.trim() || "";
-    const klant = cols[6]?.trim() || "";
-    const kleurCode = cols[8]?.trim() || "";
-    const datum = cols[9]?.trim() || "";
+      const soort = cols[2]?.trim() || "";
+      const artikel = cols[5]?.trim() || "";
+      const klant = cols[6]?.trim() || "";
+      const kleurCode = cols[8]?.trim() || "";
+      const datum = cols[9]?.trim() || "";
 
-    if (!soort || !artikel) continue;
+      if (!soort || !artikel) continue;
 
-    const aantal = parseNumber(cols[4]);
-    const prijs = parseNumber(cols[7]);
+      const aantal = parseNumber(cols[4]);
+      const prijs = parseNumber(cols[7]);
 
-    rows.push({ soort, artikel, klant, prijs, kleurCode, datum, aantal });
+      rows.push({ soort, artikel, klant, prijs, kleurCode, datum, aantal });
+    }
+  } else {
+    // Simple format: datum, aantal, product, prijs
+    for (const line of lines) {
+      const cols = parseCSVLine(line, delimiter);
+      if (cols.length < 3) continue;
+
+      const datumRaw = cols[0]?.trim() || "";
+      // Skip header rows
+      if (/^(datum|date|header)/i.test(datumRaw)) continue;
+      // Must start with something that looks like a date marker
+      if (!datumRaw) continue;
+
+      const datum = parseDatum(datumRaw);
+      const aantal = parseNumber(cols[1]);
+      const artikel = cols[2]?.trim() || "";
+      const prijs = cols.length >= 4 ? parseNumber(cols[3]) : 0;
+
+      if (!artikel || aantal === 0) continue;
+
+      // Extract soort from artikel (first word)
+      const soort = artikel.split(/\s+/)[0] || "";
+
+      rows.push({ soort, artikel, klant: "", prijs, kleurCode: "", datum, aantal });
+    }
   }
   return rows;
 }
 
 /* ── Parse Voorraadlijst CSV ──
-   Column mapping (0-indexed):
-   0-9: repeated headers (skip)
-   10: Soort (flower family)
-   11: Lengte (stem length, may be empty)
-   12: Partij (batch number)
-   13: Aantal / AVE x APE (quantity, commas = thousands)
-   14: Artikel (article name)
-   15: Inkoopprijs (price, comma = decimal)
-   16: Opmerking (notes, optional)
-   17-18: footer (skip)
+   Supports two formats:
+   A) Simple: datum, aantal, product, prijs
+   B) Legacy: Voorraadlijst Snijbloemen, ..., Soort, Lengte, Partij, Aantal, Artikel, Prijs, Opmerking
 */
 export function parseVoorraadlijst(csvText: string): VoorraadRow[] {
   const lines = csvText.split("\n").filter(l => l.trim().length > 0);
+  const delimiter = detectDelimiter(csvText);
   const rows: VoorraadRow[] = [];
 
-  for (const line of lines) {
-    const cols = parseCSVLine(line);
-    if (cols.length < 15) continue;
-    if (cols[0]?.trim() !== "Voorraadlijst Snijbloemen") continue;
+  if (isLegacyVoorraad(lines, delimiter)) {
+    // Legacy format
+    for (const line of lines) {
+      const cols = parseCSVLine(line, delimiter);
+      if (cols.length < 15) continue;
+      if (cols[0]?.trim() !== "Voorraadlijst Snijbloemen") continue;
 
-    const soort = cols[10]?.trim() || "";
-    const lengte = cols[11]?.trim() || "";
-    const partij = cols[12]?.trim() || "";
-    const artikel = cols[14]?.trim() || "";
+      const soort = cols[10]?.trim() || "";
+      const lengte = cols[11]?.trim() || "";
+      const partij = cols[12]?.trim() || "";
+      const artikel = cols[14]?.trim() || "";
 
-    if (!soort || !artikel) continue;
+      if (!soort || !artikel) continue;
 
-    const aantal = parseNumber(cols[13]);
-    const inkoopprijs = parseNumber(cols[15]);
-    const opmerking = cols[16]?.trim() || "";
+      const aantal = parseNumber(cols[13]);
+      const inkoopprijs = parseNumber(cols[15]);
+      const opmerking = cols[16]?.trim() || "";
 
-    rows.push({ soort, lengte, partij, aantal, artikel, inkoopprijs, opmerking });
+      rows.push({ soort, lengte, partij, aantal, artikel, inkoopprijs, opmerking });
+    }
+  } else {
+    // Simple format: datum, aantal, product, prijs
+    for (const line of lines) {
+      const cols = parseCSVLine(line, delimiter);
+      if (cols.length < 3) continue;
+
+      const datumRaw = cols[0]?.trim() || "";
+      if (/^(datum|date|header)/i.test(datumRaw)) continue;
+      if (!datumRaw) continue;
+
+      const aantal = parseNumber(cols[1]);
+      const artikel = cols[2]?.trim() || "";
+      const inkoopprijs = cols.length >= 4 ? parseNumber(cols[3]) : 0;
+
+      if (!artikel || aantal === 0) continue;
+
+      const soort = artikel.split(/\s+/)[0] || "";
+
+      rows.push({ soort, lengte: "", partij: "", aantal, artikel, inkoopprijs, opmerking: "" });
+    }
   }
   return rows;
 }
