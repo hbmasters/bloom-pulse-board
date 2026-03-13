@@ -582,7 +582,7 @@ export const MatchedTable = ({
             </thead>
             <tbody>
               {behoefteItems.length === 0 ? (
-                <tr><td colSpan={11} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
+                <tr><td colSpan={13} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
               ) : behoefteItems.map(renderBehoefteRow)}
             </tbody>
           </table>
