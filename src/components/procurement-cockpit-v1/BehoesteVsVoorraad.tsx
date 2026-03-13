@@ -2,9 +2,10 @@ import { useState, useMemo, useCallback, Fragment } from "react";
 import {
   Upload, CheckCircle2, AlertTriangle, XCircle,
   Package, Search, ChevronDown, ChevronRight, ArrowUpDown,
-  RotateCcw, Link2, Unlink, Sparkles, ShoppingCart,
+  RotateCcw, Link2, Unlink, Sparkles, ShoppingCart, Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getISOWeek } from "date-fns";
 import {
   parseInkooplijst,
   parseVoorraadlijst,
@@ -22,6 +23,35 @@ import {
 
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3).replace(".", ",")}`;
+
+/** Parse a datum string like "13/03" or "2025-03-13" to a Date (current year assumed for dd/mm) */
+const parseDatumToDate = (raw: string): Date | null => {
+  if (!raw) return null;
+  const ddmm = raw.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if (ddmm) {
+    const day = parseInt(ddmm[1], 10);
+    const month = parseInt(ddmm[2], 10) - 1;
+    return new Date(new Date().getFullYear(), month, day);
+  }
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+/** Get the earliest datum + ISO week label from klanten */
+const getEarliestDatum = (klanten: { datum: string }[]): { datum: string; week: number | null } => {
+  const dates = klanten.map(k => ({ raw: k.datum, parsed: parseDatumToDate(k.datum) })).filter(d => d.parsed !== null);
+  if (dates.length === 0) return { datum: "", week: null };
+  dates.sort((a, b) => a.parsed!.getTime() - b.parsed!.getTime());
+  const earliest = dates[0];
+  return { datum: earliest.raw, week: getISOWeek(earliest.parsed!) };
+};
+
+/** Get average historical price from klanten */
+const getAvgPrice = (klanten: { prijs: number }[]): number | null => {
+  const prices = klanten.map(k => k.prijs).filter(p => p > 0);
+  if (prices.length === 0) return null;
+  return prices.reduce((s, p) => s + p, 0) / prices.length;
+};
 
 /** Extract artikelgroep = first 2 words of artikel name, e.g. "R GR Furiosa 35cm" → "R GR" */
 const extractArtikelgroep = (artikel: string): string => {
@@ -344,6 +374,25 @@ export const MatchedTable = ({
           <td className={cn("px-2 py-2.5 font-mono text-right font-bold", m.benodigd > 0 ? "text-destructive" : "text-accent")}>
             {m.benodigd > 0 ? fmt(m.benodigd) : <span className="flex items-center justify-end gap-0.5"><CheckCircle2 className="w-3 h-3" /> 0</span>}
           </td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground whitespace-nowrap">
+            {(() => {
+              const { datum, week } = getEarliestDatum(m.klanten);
+              if (!datum) return "—";
+              return (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                  <span>{datum}</span>
+                  {week !== null && <span className="font-mono text-[8px] px-1 py-0.5 rounded bg-muted border border-border">W{week}</span>}
+                </span>
+              );
+            })()}
+          </td>
+          <td className="px-2 py-2.5 font-mono text-right text-muted-foreground">
+            {(() => {
+              const avg = getAvgPrice(m.klanten);
+              return avg !== null ? fmtPrice(avg) : "—";
+            })()}
+          </td>
           <td className="px-2 py-2.5 text-[10px] text-muted-foreground max-w-[120px] truncate">
             {uniqueKlanten.join(", ") || "—"}
           </td>
@@ -354,7 +403,7 @@ export const MatchedTable = ({
 
         {isExpanded && (
           <tr className="border-b border-border/40 bg-muted/10">
-            <td colSpan={11} className="px-4 py-3">
+            <td colSpan={13} className="px-4 py-3">
               <div className="space-y-3">
                 {/* Dekking bar */}
                 <div className="flex items-center gap-3">
@@ -523,6 +572,8 @@ export const MatchedTable = ({
                 <SortHeader k="behoefte" label="Behoefte" align="text-right" />
                 <SortHeader k="voorraad" label="Voorraad" align="text-right" />
                 <SortHeader k="benodigd" label="Benodigd" align="text-right" />
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Datum / Week</th>
+                <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-right">Hist. Prijs</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-left">Klanten</th>
                 <th className="px-2 py-2 font-medium text-muted-foreground whitespace-nowrap text-center w-8">
                   <Link2 className="w-3 h-3 inline" />
@@ -531,7 +582,7 @@ export const MatchedTable = ({
             </thead>
             <tbody>
               {behoefteItems.length === 0 ? (
-                <tr><td colSpan={11} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
+                <tr><td colSpan={13} className="px-4 py-6 text-center text-[11px] text-muted-foreground italic">Geen behoefte-regels gevonden</td></tr>
               ) : behoefteItems.map(renderBehoefteRow)}
             </tbody>
           </table>
