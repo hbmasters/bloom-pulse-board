@@ -322,7 +322,7 @@ export const MatchedTable = ({
               {cfg.label}
             </span>
           </td>
-          <td className="px-2 py-2.5 text-[10px] text-muted-foreground">{m.soort}</td>
+          <td className="px-2 py-2.5 text-[10px] text-muted-foreground font-mono">{extractArtikelgroep(m.artikel)}</td>
           <td className="px-2 py-2.5">
             <span className="font-medium text-foreground text-[11px]">{m.artikel}</span>
           </td>
