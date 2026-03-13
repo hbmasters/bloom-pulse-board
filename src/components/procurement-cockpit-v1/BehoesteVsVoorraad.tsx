@@ -245,7 +245,7 @@ export const MatchedTable = ({
       const q = search.toLowerCase();
       list = list.filter(m => m.artikel.toLowerCase().includes(q) || m.soort.toLowerCase().includes(q));
     }
-    if (soortFilter) list = list.filter(m => m.soort === soortFilter);
+    if (artikelgroepFilter) list = list.filter(m => extractArtikelgroep(m.artikel) === artikelgroepFilter);
     if (lengteFilter) list = list.filter(m => m.lengte === lengteFilter);
     if (kleurFilter) list = list.filter(m => m.kleurCodes.includes(kleurFilter));
     if (statusFilter) list = list.filter(m => m.status === statusFilter);
