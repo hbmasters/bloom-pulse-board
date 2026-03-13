@@ -214,6 +214,7 @@ export const MatchedTable = ({
   const [search, setSearch] = useState("");
   const [soortFilter, setSoortFilter] = useState<string | null>(null);
   const [lengteFilter, setLengteFilter] = useState<string | null>(null);
+  const [kleurFilter, setKleurFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
