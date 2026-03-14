@@ -203,19 +203,6 @@ const ProcurementCockpitV1 = () => {
     };
   }, []);
 
-  const DatePicker = ({ value, onChange, label }: { value: Date | undefined; onChange: (d: Date | undefined) => void; label: string }) => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className={cn("h-8 text-[11px] font-medium gap-1.5 px-3 border-border bg-background", !value && "text-muted-foreground")}>
-          <CalendarIcon className="w-3.5 h-3.5" />
-          {value ? format(value, "d MMM yyyy", { locale: nl }) : label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className="p-3 pointer-events-auto" />
-      </PopoverContent>
-    </Popover>
-  );
 
   /* ── Helpers for extended row data ── */
   const getDesignAdvice = (productId: string) => designAdvisoryData.find(d => d.product_id === productId);
