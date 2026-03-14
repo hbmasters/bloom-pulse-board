@@ -6,7 +6,7 @@ import {
   TrendingDown, TrendingUp, ArrowUpDown, Search, ChevronDown,
   ChevronRight, Star, Shield, Clock, Zap, Eye, Users, X,
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
-  ShoppingBag, Ruler, CalendarIcon, Flower2,
+  ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
