@@ -29,12 +29,11 @@ import ProductionCockpit from "@/pages/ProductionCockpit";
 import CommercialCockpit from "@/pages/CommercialCockpit";
 
 import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
-import ProcurementDecisionList from "@/pages/ProcurementDecisionList";
 import AIArchitecture from "@/pages/AIArchitecture";
 import DevelopmentControl from "@/pages/DevelopmentControl";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "procurement-decision" | "ai-architecture" | "dev-control";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -59,7 +58,6 @@ const routeToView: Record<string, MCView> = {
   "/commercial": "commercial",
   
   "/labs/procurement-cockpit-v1": "procurement-cockpit-v1",
-  "/labs/procurement-decision-list": "procurement-decision",
   "/ai-architecture": "ai-architecture",
   "/dev-control": "dev-control",
 };
@@ -87,7 +85,6 @@ export const viewToRoute: Record<MCView, string> = {
   commercial: "/commercial",
   
   "procurement-cockpit-v1": "/labs/procurement-cockpit-v1",
-  "procurement-decision": "/labs/procurement-decision-list",
   "ai-architecture": "/ai-architecture",
   "dev-control": "/dev-control",
 };
@@ -169,7 +166,6 @@ const MissionControl = () => {
             {view === "commercial" && <CommercialCockpit />}
             
             {view === "procurement-cockpit-v1" && <ProcurementCockpitV1 />}
-            {view === "procurement-decision" && <ProcurementDecisionList />}
             {view === "ai-architecture" && <AIArchitecture />}
             {view === "dev-control" && <DevelopmentControl />}
           </div>
