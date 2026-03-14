@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import KPIPeriodFilter, { PeriodFilterState } from "@/components/mission-control/kpi/KPIPeriodFilter";
+import WeekYearFilter, { WeekYearFilterState } from "./WeekYearFilter";
 import {
   Select,
   SelectContent,
@@ -13,39 +13,42 @@ import {
   seasonalityLabels,
   riskLabels,
   availabilityLabels,
-  type TradeRegistryEntry,
 } from "./procurement-extended-data";
 
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
 const TradeRegistryPanel = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>(tradeRegistry[0]?.product || "");
-  const [weekOffset, setWeekOffset] = useState(0);
   const [visibleWeeks, setVisibleWeeks] = useState(12);
-  const [periodFilter, setPeriodFilter] = useState<PeriodFilterState>({
+  const [weekYearFilter, setWeekYearFilter] = useState<WeekYearFilterState>({
     year: new Date().getFullYear(),
-    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
-    comparison: null,
+    week: null,
   });
 
   const entry = useMemo(() => tradeRegistry.find(t => t.product === selectedProduct), [selectedProduct]);
+  
   const weeks = useMemo(() => {
-    const yearWeeks = entry?.weeks.filter(w => w.year === periodFilter.year) || [];
-    return yearWeeks.slice(weekOffset, weekOffset + visibleWeeks);
-  }, [entry, weekOffset, visibleWeeks, periodFilter.year]);
+    const yearWeeks = entry?.weeks.filter(w => w.year === weekYearFilter.year) || [];
+    if (weekYearFilter.week !== null) {
+      // Show from selected week onwards
+      const startIdx = yearWeeks.findIndex(w => w.week >= weekYearFilter.week!);
+      return yearWeeks.slice(startIdx >= 0 ? startIdx : 0, (startIdx >= 0 ? startIdx : 0) + visibleWeeks);
+    }
+    return yearWeeks.slice(0, visibleWeeks);
+  }, [entry, visibleWeeks, weekYearFilter]);
 
   return (
     <div className="space-y-4">
-      {/* Period filter */}
-      <KPIPeriodFilter value={periodFilter} onChange={(v) => { setPeriodFilter(v); setWeekOffset(0); }} />
+      {/* Week/Year filter */}
+      <WeekYearFilter value={weekYearFilter} onChange={setWeekYearFilter} />
 
-      {/* Product & Week selectors */}
+      {/* Product & visible weeks selectors */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Product:</span>
           <select
             value={selectedProduct}
-            onChange={e => { setSelectedProduct(e.target.value); setWeekOffset(0); }}
+            onChange={e => setSelectedProduct(e.target.value)}
             className="text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer"
           >
             {tradeRegistry.map(t => (
@@ -75,7 +78,7 @@ const TradeRegistryPanel = () => {
       {/* Week range display */}
       <div className="text-center">
         <span className="text-[10px] font-mono text-muted-foreground">
-          Week {weeks[0]?.week || "—"} – {weeks[weeks.length - 1]?.week || "—"} ({periodFilter.year})
+          Week {weeks[0]?.week || "—"} – {weeks[weeks.length - 1]?.week || "—"} ({weekYearFilter.year})
         </span>
       </div>
 
@@ -97,7 +100,7 @@ const TradeRegistryPanel = () => {
               const avail = availabilityLabels[w.expected_availability];
               const season = seasonalityLabels[w.seasonality];
               const risk = riskLabels[w.risk_level];
-              const isCurrentWeek = i === 0 && weekOffset === 0;
+              const isCurrentWeek = i === 0 && weekYearFilter.week === null;
               return (
                 <tr key={`${w.week}-${w.year}`} className={cn("border-b border-border/30 transition-colors", isCurrentWeek ? "bg-primary/5" : "hover:bg-muted/10")}>
                   <td className="px-2 py-2 font-mono font-semibold text-foreground whitespace-nowrap">
