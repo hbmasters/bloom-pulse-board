@@ -59,6 +59,7 @@ const routeToView: Record<string, MCView> = {
   "/commercial": "commercial",
   
   "/labs/procurement-cockpit-v1": "procurement-cockpit-v1",
+  "/labs/procurement-decision-list": "procurement-decision",
   "/ai-architecture": "ai-architecture",
   "/dev-control": "dev-control",
 };
