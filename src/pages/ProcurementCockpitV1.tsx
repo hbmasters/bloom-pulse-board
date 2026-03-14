@@ -518,6 +518,8 @@ const ProcurementCockpitV1 = () => {
                     const purchaseMix = getPurchaseMix(p.id);
                     const supplierQuality = getSupplierQuality(p.product);
                     const effectivePrice = getEffectivePrice(p.product);
+                    const supplierIntel = getSupplierIntel(p.id);
+                    const supplierMix = getSupplierMix(p.id);
 
                     return (
                       <Fragment key={p.id}>
