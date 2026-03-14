@@ -7,7 +7,7 @@ import {
   ChevronRight, Star, Shield, Clock, Zap, Eye, Users, X,
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
   ShoppingBag, Ruler, CalendarIcon, Flower2,
-  BarChart3, BookOpen, ShieldCheck, ArrowRight,
+  BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,13 @@ import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/comp
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
 import PriceCheckPanel from "@/components/procurement-cockpit-v1/PriceCheckPanel";
+import {
+  mockDecisionRows, computeKPIs, actionLabels, actionColors,
+  type ProcurementDecisionRow, type ProcurementAction,
+} from "@/components/procurement-decision/procurement-decision-data";
+import {
+  tradeRegistry, seasonalityLabels, riskLabels, availabilityLabels,
+} from "@/components/procurement-cockpit-v1/procurement-extended-data";
 
 /* ── helpers ── */
 const fmt = (n: number) => n.toLocaleString("nl-NL");

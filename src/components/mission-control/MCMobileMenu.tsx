@@ -57,8 +57,8 @@ const navSections: NavSection[] = [
   {
     label: "LABS",
     entries: [
-      { id: "purchasing-list-v1", icon: ShoppingCart, label: "Purchasing List V1.0" },
-      { id: "procurement-cockpit-v1", icon: ShoppingCart, label: "Purchasing List v0.5" },
+      { id: "procurement-cockpit-v1", icon: ShoppingCart, label: "Purchasing List V1.5" },
+      { id: "purchasing-list-v1", icon: ShoppingCart, label: "Purchasing List V1.0 (legacy)" },
       { id: "procurement-decision", icon: ShoppingCart, label: "Decision List (legacy)" },
     ],
   },
