@@ -418,36 +418,41 @@ const PurchasingListV1 = () => {
                 {filtered.map(row => {
                   const open = expandedId === row.id;
                   return (
-                    <TableRow key={row.id} className="border-border/30 cursor-pointer group" onClick={() => setExpandedId(open ? null : row.id)}>
-                      <TableCell className="w-8 pr-0">
-                        {open ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </TableCell>
-                      <TableCell className="font-medium text-xs">{row.product}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">{row.substitute_bundle}</TableCell>
-                      <TableCell className="text-right text-xs font-mono">{fmt(row.required_units)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono hidden md:table-cell">{fmt(row.current_stock)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono hidden md:table-cell">{fmt(row.free_stock)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono font-medium">{fmt(row.order_units)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono hidden lg:table-cell">{fmtPrice(row.market_price)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono hidden xl:table-cell text-muted-foreground">{fmtPrice(row.historical_price_last_month)}</TableCell>
-                      <TableCell className="text-right text-xs font-mono hidden xl:table-cell text-muted-foreground">{fmtPrice(row.historical_price_last_year)}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">{row.supplier}</TableCell>
-                      <TableCell className={cn("text-right text-xs font-mono hidden lg:table-cell", devColor(row.price_deviation_pct))}>
-                        {row.price_deviation_pct > 0 ? "+" : ""}{row.price_deviation_pct.toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-right hidden xl:table-cell"><ScoreBar value={row.supplier_quality_score} /></TableCell>
-                      <TableCell className="text-right hidden xl:table-cell"><ScoreBar value={row.inventory_pressure_score} /></TableCell>
-                      <TableCell><ActionBadge action={row.procurement_action} /></TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={row.id} className="border-border/30 cursor-pointer group" onClick={() => setExpandedId(open ? null : row.id)}>
+                        <TableCell className="w-8 pr-0">
+                          {open ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                        </TableCell>
+                        <TableCell className="font-medium text-xs">{row.product}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">{row.substitute_bundle}</TableCell>
+                        <TableCell className="text-right text-xs font-mono">{fmt(row.required_units)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono hidden md:table-cell">{fmt(row.current_stock)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono hidden md:table-cell">{fmt(row.free_stock)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono font-medium">{fmt(row.order_units)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono hidden lg:table-cell">{fmtPrice(row.market_price)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono hidden xl:table-cell text-muted-foreground">{fmtPrice(row.historical_price_last_month)}</TableCell>
+                        <TableCell className="text-right text-xs font-mono hidden xl:table-cell text-muted-foreground">{fmtPrice(row.historical_price_last_year)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">{row.supplier}</TableCell>
+                        <TableCell className={cn("text-right text-xs font-mono hidden lg:table-cell", devColor(row.price_deviation_pct))}>
+                          {row.price_deviation_pct > 0 ? "+" : ""}{row.price_deviation_pct.toFixed(1)}%
+                        </TableCell>
+                        <TableCell className="text-right hidden xl:table-cell"><ScoreBar value={row.supplier_quality_score} /></TableCell>
+                        <TableCell className="text-right hidden xl:table-cell"><ScoreBar value={row.inventory_pressure_score} /></TableCell>
+                        <TableCell><ActionBadge action={row.procurement_action} /></TableCell>
+                      </TableRow>
+                      {open && (
+                        <TableRow key={`${row.id}-detail`} className="border-border/30 hover:bg-transparent">
+                          <TableCell colSpan={15} className="p-0">
+                            <DetailPanel row={row} />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   );
                 })}
               </TableBody>
             </Table>
           </div>
-          {expandedId && (() => {
-            const row = filtered.find(r => r.id === expandedId);
-            return row ? <DetailPanel row={row} /> : null;
-          })()}
         </Card>
 
         {/* ── SECTION 3 & 4: Inventory Intelligence + Trade Registry ── */}
