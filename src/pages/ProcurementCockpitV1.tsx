@@ -543,6 +543,25 @@ const ProcurementCockpitV1 = () => {
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
                           {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
+                          {visibleColumns.has("substitute") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {subSuggestion && subSuggestion.status !== "none" && (
+                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
+                                  {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
+                                  {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.has("purchase_mix") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {purchaseMix && purchaseMix.has_mix && (
+                                <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20 whitespace-nowrap">
+                                  <Shuffle className="w-2.5 h-2.5 inline mr-0.5" />Mix
+                                </span>
+                              )}
+                            </td>
+                          )}
                           {visibleColumns.has("design_advice") && (
                             <td className={cn("px-3", rowPy)}>
                               {advisory && (
