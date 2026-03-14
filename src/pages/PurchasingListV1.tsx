@@ -336,7 +336,7 @@ const PurchasingListV1 = () => {
             <ShoppingCart className="h-5 w-5 text-primary" />
             <h1 className="text-xl font-bold text-foreground">Purchasing List</h1>
           </div>
-          <Badge variant="outline" className="text-[9px] font-mono border-primary/50 text-primary">V1.0</Badge>
+          
           <Badge variant="outline" className="text-[9px] font-mono border-amber-500/50 text-amber-400">LABS / BETA</Badge>
         </div>
 
