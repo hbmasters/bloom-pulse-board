@@ -205,7 +205,7 @@ const ProcurementCockpitV1 = () => {
           <ShoppingCart className="w-5 h-5 text-primary" />
           <h1 className="text-lg font-bold text-foreground tracking-tight">Procurement Cockpit</h1>
           <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">
-            LABS · V0.6
+            LABS · V1.5
           </span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
