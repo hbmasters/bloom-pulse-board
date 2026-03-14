@@ -14,6 +14,10 @@ import {
   riskLabels,
   availabilityLabels,
 } from "./procurement-extended-data";
+import {
+  getDesignStability,
+  designStabilityLabels,
+} from "./procurement-intelligence-data";
 
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
@@ -30,7 +34,6 @@ const TradeRegistryPanel = () => {
   const weeks = useMemo(() => {
     const yearWeeks = entry?.weeks.filter(w => w.year === weekYearFilter.year) || [];
     if (weekYearFilter.week !== null) {
-      // Show from selected week onwards
       const startIdx = yearWeeks.findIndex(w => w.week >= weekYearFilter.week!);
       return yearWeeks.slice(startIdx >= 0 ? startIdx : 0, (startIdx >= 0 ? startIdx : 0) + visibleWeeks);
     }
@@ -93,6 +96,7 @@ const TradeRegistryPanel = () => {
               <th className="px-2 py-2 text-left font-medium text-muted-foreground">Leveranciers</th>
               <th className="px-2 py-2 text-left font-medium text-muted-foreground">Seizoen</th>
               <th className="px-2 py-2 text-left font-medium text-muted-foreground">Risico</th>
+              <th className="px-2 py-2 text-left font-medium text-muted-foreground">Design</th>
             </tr>
           </thead>
           <tbody>
@@ -100,6 +104,8 @@ const TradeRegistryPanel = () => {
               const avail = availabilityLabels[w.expected_availability];
               const season = seasonalityLabels[w.seasonality];
               const risk = riskLabels[w.risk_level];
+              const stability = getDesignStability(w.expected_availability, w.risk_level);
+              const stabilityLabel = designStabilityLabels[stability];
               const isCurrentWeek = i === 0 && weekYearFilter.week === null;
               return (
                 <tr key={`${w.week}-${w.year}`} className={cn("border-b border-border/30 transition-colors", isCurrentWeek ? "bg-primary/5" : "hover:bg-muted/10")}>
@@ -123,6 +129,11 @@ const TradeRegistryPanel = () => {
                   <td className="px-2 py-2">
                     <span className={cn("font-medium", risk.color)}>{risk.label}</span>
                   </td>
+                  <td className="px-2 py-2">
+                    <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", stabilityLabel.color)}>
+                      {stabilityLabel.label}
+                    </span>
+                  </td>
                 </tr>
               );
             })}
@@ -132,12 +143,22 @@ const TradeRegistryPanel = () => {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-[9px] text-muted-foreground">
-        <span className="font-medium uppercase tracking-wide">Beschikbaarheid:</span>
-        {Object.entries(availabilityLabels).map(([k, v]) => (
-          <span key={k} className="flex items-center gap-1">
-            <span className={cn("w-2 h-2 rounded-full", v.bg)} /> {v.label}
-          </span>
-        ))}
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Beschikbaarheid:</span>
+          {Object.entries(availabilityLabels).map(([k, v]) => (
+            <span key={k} className="flex items-center gap-1">
+              <span className={cn("w-2 h-2 rounded-full", v.bg)} /> {v.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Design:</span>
+          {Object.entries(designStabilityLabels).map(([k, v]) => (
+            <span key={k} className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", v.color)}>
+              {v.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
