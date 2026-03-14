@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
-import KPIPeriodFilter, { PeriodFilterState } from "@/components/mission-control/kpi/KPIPeriodFilter";
+import DayFilter from "@/components/procurement-cockpit-v1/DayFilter";
 import {
   procurementRows,
   supplierOffers,
