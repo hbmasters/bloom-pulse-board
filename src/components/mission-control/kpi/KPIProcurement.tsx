@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Truck } from "lucide-react";
 import KPIMetricCard, { MetricData } from "./KPIMetricCard";
-import KPIFilters, { TimeFilter } from "./KPIFilters";
+import KPIPeriodFilter, { PeriodFilterState } from "./KPIPeriodFilter";
 
 type SubView = "direct" | "indirect";
 
@@ -22,8 +22,11 @@ const indirectMetrics: MetricData[] = [
 ];
 
 const KPIProcurement = ({ onBack }: { onBack: () => void }) => {
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>("week");
-  const [comparison, setComparison] = useState(false);
+  const [filter, setFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: "previous",
+  });
   const [subView, setSubView] = useState<SubView>("direct");
 
   return (
@@ -37,16 +40,17 @@ const KPIProcurement = ({ onBack }: { onBack: () => void }) => {
         <h2 className="text-xs font-black text-foreground uppercase tracking-wider">Procurement Dashboard</h2>
       </div>
 
-      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => setSubView("direct")} className={`text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg border transition-all ${subView === "direct" ? "bg-primary/15 text-primary border-primary/30" : "bg-card text-muted-foreground border-border hover:border-primary/20"}`}>
-            Directe Inkoop
-          </button>
-          <button onClick={() => setSubView("indirect")} className={`text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg border transition-all ${subView === "indirect" ? "bg-primary/15 text-primary border-primary/30" : "bg-card text-muted-foreground border-border hover:border-primary/20"}`}>
-            Indirecte Inkoop
-          </button>
-        </div>
-        <KPIFilters selected={timeFilter} onSelect={setTimeFilter} comparison={comparison} onComparisonToggle={() => setComparison(!comparison)} />
+      <div className="flex items-center gap-1.5 mb-3">
+        <button onClick={() => setSubView("direct")} className={`text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg border transition-all ${subView === "direct" ? "bg-primary/15 text-primary border-primary/30" : "bg-card text-muted-foreground border-border hover:border-primary/20"}`}>
+          Directe Inkoop
+        </button>
+        <button onClick={() => setSubView("indirect")} className={`text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg border transition-all ${subView === "indirect" ? "bg-primary/15 text-primary border-primary/30" : "bg-card text-muted-foreground border-border hover:border-primary/20"}`}>
+          Indirecte Inkoop
+        </button>
+      </div>
+
+      <div className="mb-3">
+        <KPIPeriodFilter value={filter} onChange={setFilter} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
