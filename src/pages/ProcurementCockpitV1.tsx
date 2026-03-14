@@ -172,11 +172,9 @@ const ProcurementCockpitV1 = () => {
     setFamilyFilter(null);
     setUrgencyFilter(null);
     setBuyerFilter(null);
-    setPeriodFilter({
-      year: new Date().getFullYear(),
-      period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
-      comparison: null,
-    });
+    setDateFrom(new Date());
+    const end = new Date(); end.setDate(end.getDate() + 6);
+    setDateTo(end);
   };
 
   const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter;
