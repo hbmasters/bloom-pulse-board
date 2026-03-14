@@ -22,9 +22,18 @@ const TradeRegistryPanel = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>(tradeRegistry[0]?.product || "");
   const [weekOffset, setWeekOffset] = useState(0);
   const [visibleWeeks, setVisibleWeeks] = useState(12);
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
 
   const entry = useMemo(() => tradeRegistry.find(t => t.product === selectedProduct), [selectedProduct]);
-  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset, visibleWeeks]);
+  const weeks = useMemo(() => {
+    const yearWeeks = entry?.weeks.filter(w => w.year === selectedYear) || [];
+    return yearWeeks.slice(weekOffset, weekOffset + visibleWeeks);
+  }, [entry, weekOffset, visibleWeeks, selectedYear]);
+
+  const availableYears = useMemo(() => {
+    if (!entry) return [2025];
+    return [...new Set(entry.weeks.map(w => w.year))].sort((a, b) => a - b);
+  }, [entry]);
 
   return (
     <div className="space-y-4">
