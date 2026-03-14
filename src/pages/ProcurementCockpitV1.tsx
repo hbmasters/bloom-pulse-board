@@ -130,12 +130,15 @@ const ProcurementCockpitV1 = () => {
   const allColumns = [
     { key: "buyer", label: "Inkoper" },
     { key: "required_volume", label: "Benodigd" },
+    { key: "inventory_pressure", label: "Voorraaddruk" },
     { key: "historical_price", label: "Hist. Prijs" },
     { key: "offer_price", label: "Offerteprijs" },
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
     { key: "preferred_supplier", label: "Lev. Voorkeur" },
+    { key: "substitute", label: "Substituut" },
+    { key: "purchase_mix", label: "Inkoopmix" },
     { key: "design_advice", label: "Design" },
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
