@@ -22,13 +22,22 @@ const TradeRegistryPanel = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>(tradeRegistry[0]?.product || "");
   const [weekOffset, setWeekOffset] = useState(0);
   const [visibleWeeks, setVisibleWeeks] = useState(12);
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
 
   const entry = useMemo(() => tradeRegistry.find(t => t.product === selectedProduct), [selectedProduct]);
-  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset, visibleWeeks]);
+  const weeks = useMemo(() => {
+    const yearWeeks = entry?.weeks.filter(w => w.year === selectedYear) || [];
+    return yearWeeks.slice(weekOffset, weekOffset + visibleWeeks);
+  }, [entry, weekOffset, visibleWeeks, selectedYear]);
+
+  const availableYears = useMemo(() => {
+    if (!entry) return [2025];
+    return [...new Set(entry.weeks.map(w => w.year))].sort((a, b) => a - b);
+  }, [entry]);
 
   return (
     <div className="space-y-4">
-      {/* Product & Week selectors */}
+      {/* Product, Year & Week selectors */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Product:</span>
@@ -41,6 +50,20 @@ const TradeRegistryPanel = () => {
               <option key={t.product} value={t.product}>{t.product} ({t.product_family})</option>
             ))}
           </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Jaar:</span>
+          <Select value={selectedYear.toString()} onValueChange={(v) => { setSelectedYear(Number(v)); setWeekOffset(0); }}>
+            <SelectTrigger className="w-[100px] h-8 text-[11px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex items-center gap-2">
