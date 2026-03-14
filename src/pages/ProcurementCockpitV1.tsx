@@ -845,12 +845,6 @@ const ProcurementCockpitV1 = () => {
         </IHSectionShell>
       )}
 
-      {/* ── TAB: Prijscheck & Advies ── */}
-      {activeTab === "prijscheck" && (
-        <IHSectionShell icon={ShieldCheck} title="Prijscheck & Design Advies" subtitle="Controleer margerisico voor offerte, design-geschiktheid en markup/markdown advies" badge={`${priceCheckData.filter(p => p.price_check_status !== "ok").length} aandacht`} badgeVariant={priceCheckData.some(p => p.price_check_status === "critical") ? "critical" : "warning"}>
-          <PriceCheckPanel />
-        </IHSectionShell>
-      )}
     </div>
   );
 };
