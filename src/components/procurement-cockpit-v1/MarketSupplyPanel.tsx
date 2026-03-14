@@ -10,6 +10,10 @@ import {
   effectivePriceData,
   type SupplierGrade,
 } from "./procurement-intelligence-data";
+import {
+  reliabilityLabels,
+  type ReliabilityClass,
+} from "./supplier-intelligence-data";
 
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
@@ -30,6 +34,15 @@ const MarketSupplyPanel = () => {
     if (entry.suppliers.some(s => s.grade === "A")) return "A";
     if (entry.suppliers.some(s => s.grade === "B")) return "B";
     return "C";
+  };
+
+  const getBestReliability = (product: string): ReliabilityClass | null => {
+    const entry = supplierQualityData.find(s => s.product === product);
+    if (!entry || entry.suppliers.length === 0) return null;
+    const bestScore = Math.max(...entry.suppliers.map(s => s.delivery_reliability));
+    if (bestScore >= 90) return "high";
+    if (bestScore >= 80) return "medium";
+    return "low";
   };
 
   const getEffective = (product: string) => effectivePriceData.find(e => e.product === product);
@@ -59,7 +72,7 @@ const MarketSupplyPanel = () => {
         <table className="w-full text-[11px]">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["Product", "Familie", "Aanbod", "Lev.", "Beste prijs", "Eff. prijs", "Δ Eff.", "Trend", "Druk", "Grade", "Update"].map(h => (
+              {["Product", "Familie", "Aanbod", "Lev.", "Beste prijs", "Eff. prijs", "Δ Eff.", "Trend", "Druk", "Grade", "Betrouwb.", "Update"].map(h => (
                 <th key={h} className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -68,6 +81,7 @@ const MarketSupplyPanel = () => {
             {marketSupplyData.map(m => {
               const pLabel = supplyPressureLabels[m.supply_pressure];
               const bestGrade = getBestGrade(m.product);
+              const bestReliability = getBestReliability(m.product);
               const eff = getEffective(m.product);
               const effDelta = eff ? ((eff.effective_price - eff.best_price) / eff.best_price * 100) : 0;
 
@@ -98,6 +112,13 @@ const MarketSupplyPanel = () => {
                       </span>
                     )}
                   </td>
+                  <td className="px-3 py-2.5">
+                    {bestReliability && (
+                      <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[bestReliability].color)}>
+                        {reliabilityLabels[bestReliability].label}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2.5 text-[9px] text-muted-foreground whitespace-nowrap">{m.last_updated}</td>
                 </tr>
               );
@@ -120,6 +141,12 @@ const MarketSupplyPanel = () => {
           <span>OK</span>
           <span className={cn("font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels.C.color)}>C</span>
           <span>Risico</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Betrouwb.</span>
+          <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.high.color)}>Hoog</span>
+          <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.medium.color)}>Medium</span>
+          <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.low.color)}>Laag</span>
         </div>
       </div>
     </div>
