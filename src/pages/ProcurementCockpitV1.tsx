@@ -6,6 +6,7 @@ import {
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
   ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
+  Layers, Repeat, Shuffle,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,16 @@ import {
   priceCheckStatusLabels,
   marketSupplyData,
 } from "@/components/procurement-cockpit-v1/procurement-extended-data";
+import {
+  inventoryPressureData,
+  inventoryPressureLabels,
+  substituteSuggestions,
+  substituteStatusLabels,
+  purchaseMixSuggestions,
+  supplierQualityData,
+  supplierGradeLabels,
+  effectivePriceData,
+} from "@/components/procurement-cockpit-v1/procurement-intelligence-data";
 import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
