@@ -21,10 +21,10 @@ const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 const TradeRegistryPanel = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>(tradeRegistry[0]?.product || "");
   const [weekOffset, setWeekOffset] = useState(0);
-  const visibleWeeks = 12;
+  const [visibleWeeks, setVisibleWeeks] = useState(12);
 
   const entry = useMemo(() => tradeRegistry.find(t => t.product === selectedProduct), [selectedProduct]);
-  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset]);
+  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset, visibleWeeks]);
 
   return (
     <div className="space-y-4">
