@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, DollarSign } from "lucide-react";
 import KPIMetricCard, { MetricData } from "./KPIMetricCard";
-import KPIFilters, { TimeFilter } from "./KPIFilters";
+import KPIPeriodFilter, { PeriodFilterState } from "./KPIPeriodFilter";
 
 const financeMetrics: MetricData[] = [
   { id: "f-rev", title: "Omzet", value: "€2.4M", status: "healthy", sparkline: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4], changeDir: "up", change: "+8.3%", target: "€2.2M" },
@@ -15,8 +15,11 @@ const financeMetrics: MetricData[] = [
 ];
 
 const KPIFinance = ({ onBack }: { onBack: () => void }) => {
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>("week");
-  const [comparison, setComparison] = useState(false);
+  const [filter, setFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: "previous",
+  });
 
   return (
     <div className="flex flex-col h-full p-3 md:p-4 overflow-hidden">
@@ -30,7 +33,7 @@ const KPIFinance = ({ onBack }: { onBack: () => void }) => {
       </div>
 
       <div className="mb-3">
-        <KPIFilters selected={timeFilter} onSelect={setTimeFilter} comparison={comparison} onComparisonToggle={() => setComparison(!comparison)} />
+        <KPIPeriodFilter value={filter} onChange={setFilter} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">

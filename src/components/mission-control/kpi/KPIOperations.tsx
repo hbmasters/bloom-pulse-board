@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Factory, Wrench, Package, ArrowLeft, Users, Clock, AlertTriangle, Gauge } from "lucide-react";
 import KPIMetricCard, { MetricData } from "./KPIMetricCard";
-import KPIFilters, { TimeFilter } from "./KPIFilters";
+import KPIPeriodFilter, { PeriodFilterState } from "./KPIPeriodFilter";
 import KPIAIMonitor from "./KPIAIMonitor";
 
 type SubDept = "hand" | "conveyor" | "packing";
@@ -46,8 +46,11 @@ const packingMetrics: MetricData[] = [
 ];
 
 const KPIOperations = ({ onBack }: { onBack: () => void }) => {
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>("week");
-  const [comparison, setComparison] = useState(false);
+  const [filter, setFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: "previous",
+  });
   const [subDept, setSubDept] = useState<SubDept>("hand");
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
 
@@ -87,13 +90,15 @@ const KPIOperations = ({ onBack }: { onBack: () => void }) => {
             </button>
           ))}
         </div>
-        <KPIFilters selected={timeFilter} onSelect={setTimeFilter} comparison={comparison} onComparisonToggle={() => setComparison(!comparison)} />
+      </div>
+
+      <div className="mb-3">
+        <KPIPeriodFilter value={filter} onChange={setFilter} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
         {subDept !== "packing" && (
           <>
-            {/* Line selector */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[9px] font-mono text-muted-foreground/50 mr-1">Lijnen:</span>
               {lines.map(line => {
@@ -120,7 +125,6 @@ const KPIOperations = ({ onBack }: { onBack: () => void }) => {
               {!selectedLine && <span className="text-[8px] font-mono text-muted-foreground/40 ml-2">← Selecteer een lijn voor detail</span>}
             </div>
 
-            {/* All lines overview or selected line detail */}
             {selectedLine ? (
               <div>
                 <h3 className="text-[11px] font-black text-foreground uppercase tracking-wider mb-2">
