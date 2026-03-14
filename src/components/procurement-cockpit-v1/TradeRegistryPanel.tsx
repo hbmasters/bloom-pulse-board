@@ -18,6 +18,10 @@ import {
   getDesignStability,
   designStabilityLabels,
 } from "./procurement-intelligence-data";
+import {
+  productSupplierStabilityData,
+  supplierStabilityLabels,
+} from "./supplier-intelligence-data";
 
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
