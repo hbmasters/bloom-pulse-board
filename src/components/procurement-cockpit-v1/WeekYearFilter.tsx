@@ -81,4 +81,3 @@ const WeekYearFilter = ({ value, onChange, maxWeeks = 52 }: WeekYearFilterProps)
 };
 
 export default WeekYearFilter;
-export type { WeekYearFilterState };
