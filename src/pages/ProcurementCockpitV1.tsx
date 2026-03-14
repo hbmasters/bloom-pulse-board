@@ -105,8 +105,11 @@ const ProcurementCockpitV1 = () => {
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [urgencyFilter, setUrgencyFilter] = useState<string | null>(null);
   const [buyerFilter, setBuyerFilter] = useState<string | null>(null);
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date());
-  const [dateTo, setDateTo] = useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 6); return d; });
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: null,
+  });
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
