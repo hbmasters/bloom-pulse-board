@@ -34,7 +34,7 @@ import {
 import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
-import PriceCheckPanel from "@/components/procurement-cockpit-v1/PriceCheckPanel";
+
 import {
   mockDecisionRows, computeKPIs, actionLabels, actionColors,
   type ProcurementDecisionRow, type ProcurementAction,
