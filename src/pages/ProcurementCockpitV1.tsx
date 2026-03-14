@@ -96,7 +96,6 @@ const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: "marktaanbod", label: "Marktaanbod", icon: <BarChart3 className="w-3.5 h-3.5" /> },
   { id: "handelsregister", label: "Handelsregister", icon: <BookOpen className="w-3.5 h-3.5" /> },
-  { id: "prijscheck", label: "Prijscheck & Advies", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
