@@ -35,7 +35,6 @@ const viewTitles: Record<MCView, string> = {
   
   "procurement-cockpit-v1": "Purchasing List V1.5",
   "procurement-decision": "Procurement Decision List",
-  "purchasing-list-v1": "Purchasing List V1.0 (legacy)",
   "ai-architecture": "AI Architecture",
   "dev-control": "Development Control Protocol",
 };
