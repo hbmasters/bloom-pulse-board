@@ -6,6 +6,7 @@ import {
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
   ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
+  Layers, Repeat, Shuffle,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,16 @@ import {
   priceCheckStatusLabels,
   marketSupplyData,
 } from "@/components/procurement-cockpit-v1/procurement-extended-data";
+import {
+  inventoryPressureData,
+  inventoryPressureLabels,
+  substituteSuggestions,
+  substituteStatusLabels,
+  purchaseMixSuggestions,
+  supplierQualityData,
+  supplierGradeLabels,
+  effectivePriceData,
+} from "@/components/procurement-cockpit-v1/procurement-intelligence-data";
 import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
@@ -119,12 +130,15 @@ const ProcurementCockpitV1 = () => {
   const allColumns = [
     { key: "buyer", label: "Inkoper" },
     { key: "required_volume", label: "Benodigd" },
+    { key: "inventory_pressure", label: "Voorraaddruk" },
     { key: "historical_price", label: "Hist. Prijs" },
     { key: "offer_price", label: "Offerteprijs" },
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
     { key: "preferred_supplier", label: "Lev. Voorkeur" },
+    { key: "substitute", label: "Substituut" },
+    { key: "purchase_mix", label: "Inkoopmix" },
     { key: "design_advice", label: "Design" },
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
@@ -201,6 +215,11 @@ const ProcurementCockpitV1 = () => {
   const getDesignAdvice = (productId: string) => designAdvisoryData.find(d => d.product_id === productId);
   const getPriceCheck = (productId: string) => priceCheckData.find(p => p.product_id === productId);
   const getMarketSupply = (productFamily: string, product: string) => marketSupplyData.find(m => m.product === product || m.product_family === productFamily);
+  const getInventoryPressure = (productId: string) => inventoryPressureData.find(ip => ip.product_id === productId);
+  const getSubstitute = (productId: string) => substituteSuggestions.find(s => s.product_id === productId);
+  const getPurchaseMix = (productId: string) => purchaseMixSuggestions.find(pm => pm.product_id === productId);
+  const getSupplierQuality = (product: string) => supplierQualityData.find(sq => sq.product === product);
+  const getEffectivePrice = (product: string) => effectivePriceData.find(ep => ep.product === product);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
@@ -439,12 +458,15 @@ const ProcurementCockpitV1 = () => {
                       ["product", "Product"],
                       ["buyer", "Inkoper"],
                       ["required_volume", "Benodigd"],
+                      ["inventory_pressure", "Druk"],
                       ["historical_price", "Hist. Prijs"],
                       ["offer_price", "Offerteprijs"],
                       ["advised_price", "Adviesprijs"],
                       ["market_price", "Marktprijs"],
                       ["variance_vs_calculated", "Δ Hist."],
                       ["preferred_supplier", "Lev. Voorkeur"],
+                      ["substitute", "Substituut"],
+                      ["purchase_mix", "Mix"],
                       ["design_advice", "Design"],
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
@@ -473,6 +495,11 @@ const ProcurementCockpitV1 = () => {
                     const advisory = getDesignAdvice(p.id);
                     const priceCheck = getPriceCheck(p.id);
                     const market = getMarketSupply(p.product_family, p.product);
+                    const invPressure = getInventoryPressure(p.id);
+                    const subSuggestion = getSubstitute(p.id);
+                    const purchaseMix = getPurchaseMix(p.id);
+                    const supplierQuality = getSupplierQuality(p.product);
+                    const effectivePrice = getEffectivePrice(p.product);
 
                     return (
                       <Fragment key={p.id}>
@@ -497,6 +524,15 @@ const ProcurementCockpitV1 = () => {
                           </td>
                           {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
+                          {visibleColumns.has("inventory_pressure") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {invPressure && (
+                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", inventoryPressureLabels[invPressure.status].color)}>
+                                  {inventoryPressureLabels[invPressure.status].label}
+                                </span>
+                              )}
+                            </td>
+                          )}
                           {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
                           {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
                           {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
@@ -507,6 +543,25 @@ const ProcurementCockpitV1 = () => {
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
                           {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
+                          {visibleColumns.has("substitute") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {subSuggestion && subSuggestion.status !== "none" && (
+                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
+                                  {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
+                                  {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.has("purchase_mix") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {purchaseMix && purchaseMix.has_mix && (
+                                <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20 whitespace-nowrap">
+                                  <Shuffle className="w-2.5 h-2.5 inline mr-0.5" />Mix
+                                </span>
+                              )}
+                            </td>
+                          )}
                           {visibleColumns.has("design_advice") && (
                             <td className={cn("px-3", rowPy)}>
                               {advisory && (
@@ -541,17 +596,139 @@ const ProcurementCockpitV1 = () => {
                           <tr className="border-b border-border/40 bg-muted/10">
                             <td colSpan={20} className="px-5 py-5">
                               <div className="space-y-5">
-                                {/* Context cards */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                  {[
-                                    { label: "Benodigd", value: fmt(p.required_volume - p.available_stock) },
-                                  ].map(c => (
-                                    <div key={c.label} className="rounded-lg border border-border bg-background p-3">
-                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>
-                                      <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{c.value}</div>
+                                {/* Context cards — Demand & Inventory Pressure */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  <div className="rounded-lg border border-border bg-background p-3">
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Benodigd</span>
+                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume - p.available_stock)}</div>
+                                    <div className="text-[9px] text-muted-foreground">Vraag: {fmt(p.required_volume)} · Voorraad: {fmt(p.available_stock)}</div>
+                                  </div>
+                                  {invPressure && (
+                                    <div className="rounded-lg border border-border bg-background p-3">
+                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Voorraaddruk</span>
+                                      <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", inventoryPressureLabels[invPressure.status].color)}>
+                                          {inventoryPressureLabels[invPressure.status].label}
+                                        </span>
+                                        <span className="text-[10px] font-mono text-muted-foreground">{invPressure.stock_days}d</span>
+                                      </div>
+                                      <div className="text-[9px] text-muted-foreground mt-1">{invPressure.explanation}</div>
                                     </div>
-                                  ))}
+                                  )}
+                                  {subSuggestion && subSuggestion.status !== "none" && (
+                                    <div className="rounded-lg border border-border bg-background p-3">
+                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Substituut advies</span>
+                                      <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", substituteStatusLabels[subSuggestion.status].color)}>
+                                          {substituteStatusLabels[subSuggestion.status].label}
+                                        </span>
+                                      </div>
+                                      <div className="text-[9px] text-muted-foreground mt-1">{subSuggestion.candidates.length} kandidaten beschikbaar</div>
+                                    </div>
+                                  )}
+                                  {purchaseMix && purchaseMix.has_mix && (
+                                    <div className="rounded-lg border border-border bg-background p-3">
+                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Inkoopmix</span>
+                                      <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
+                                          Mix beschikbaar
+                                        </span>
+                                      </div>
+                                      {purchaseMix.savings_vs_single > 0 && (
+                                        <div className="text-[9px] text-accent mt-1">Besparing: {purchaseMix.savings_vs_single.toFixed(1)}%</div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
+
+                                {/* Substitute Candidates */}
+                                {subSuggestion && subSuggestion.candidates.length > 0 && (
+                                  <div className="rounded-lg border border-border bg-background p-4 space-y-2">
+                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                                      <Repeat className="w-3.5 h-3.5 text-primary" />
+                                      Substituut kandidaten
+                                    </h4>
+                                    <div className="space-y-1.5">
+                                      {subSuggestion.candidates.map((c, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium text-foreground">{c.name}</span>
+                                            <div className="flex gap-1">
+                                              {c.family_match && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Familie ✓</span>}
+                                              {c.color_compatible && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Kleur ✓</span>}
+                                              {c.length_compatible && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Lengte ✓</span>}
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center gap-3">
+                                            <span className="font-mono text-muted-foreground">{fmtPrice(c.price)}</span>
+                                            <span className={cn("text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full",
+                                              c.confidence >= 80 ? "bg-accent/10 text-accent" : c.confidence >= 60 ? "bg-yellow-500/10 text-yellow-500" : "bg-muted text-muted-foreground"
+                                            )}>{c.confidence}%</span>
+                                            <span className={cn("text-[8px] font-medium",
+                                              c.availability === "high" ? "text-accent" : c.availability === "medium" ? "text-yellow-500" : "text-destructive"
+                                            )}>{c.availability === "high" ? "Hoog" : c.availability === "medium" ? "Medium" : "Laag"}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Purchase Mix Proposal */}
+                                {purchaseMix && purchaseMix.has_mix && (
+                                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                                      <Shuffle className="w-3.5 h-3.5 text-primary" />
+                                      Inkoopmix voorstel
+                                    </h4>
+                                    <div className="space-y-1">
+                                      {purchaseMix.lines.map((l, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/30">
+                                          <div className="flex items-center gap-2">
+                                            {l.type === "main" ? <Package className="w-3 h-3 text-foreground" /> : <Repeat className="w-3 h-3 text-primary" />}
+                                            <span className="font-medium text-foreground">{l.product}</span>
+                                            <span className={cn("text-[8px] px-1 py-0.5 rounded border",
+                                              l.type === "main" ? "bg-muted text-muted-foreground border-border" : "bg-primary/10 text-primary border-primary/20"
+                                            )}>{l.type === "main" ? "Hoofd" : "Substituut"}</span>
+                                          </div>
+                                          <div className="flex items-center gap-3">
+                                            <span className="font-mono text-foreground">{fmt(l.units)} st</span>
+                                            <span className="font-mono text-muted-foreground">{fmtPrice(l.price)}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2 border-t border-border/30 text-[10px]">
+                                      <span className="text-muted-foreground">Gewogen inkooprijs</span>
+                                      <span className="font-mono font-bold text-foreground">{fmtPrice(purchaseMix.total_cost)}</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Supplier Comparison with Quality */}
+                                {supplierQuality && supplierQuality.suppliers.length > 0 && (
+                                  <div className="rounded-lg border border-border bg-background p-4 space-y-2">
+                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                                      <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                                      Leverancier kwaliteitsoverzicht
+                                    </h4>
+                                    <div className="space-y-1.5">
+                                      {supplierQuality.suppliers.map((s, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
+                                          <div className="flex items-center gap-2">
+                                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.grade].color)}>{s.grade}</span>
+                                            <span className="font-medium text-foreground">{s.name}</span>
+                                          </div>
+                                          <div className="flex items-center gap-3 text-[9px] text-muted-foreground">
+                                            <span>Kwaliteit: <strong className="text-foreground">{s.quality_consistency}%</strong></span>
+                                            <span>Betrouwb.: <strong className="text-foreground">{s.delivery_reliability}%</strong></span>
+                                            <span>Afval: <strong className={cn(s.waste_risk > 5 ? "text-destructive" : "text-foreground")}>{s.waste_risk}%</strong></span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
 
                                 {/* Market & Design context block */}
                                 {showMarketContext && (advisory || priceCheck || market) && (
@@ -566,6 +743,12 @@ const ProcurementCockpitV1 = () => {
                                           <span className="text-[9px] font-medium text-muted-foreground uppercase">Marktprijs</span>
                                           <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmtPrice(market.best_price)}</div>
                                           <div className="text-[9px] text-muted-foreground">{fmtPrice(market.price_low)} – {fmtPrice(market.price_high)}</div>
+                                          {effectivePrice && (
+                                            <div className="text-[9px] text-muted-foreground mt-1">
+                                              Eff. prijs: <strong className="text-foreground">{fmtPrice(effectivePrice.effective_price)}</strong>
+                                              <span className="text-[8px] ml-1">(+{effectivePrice.waste_risk_pct}% afval)</span>
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                       {priceCheck && (
