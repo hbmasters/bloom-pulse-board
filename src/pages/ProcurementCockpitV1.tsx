@@ -11,9 +11,7 @@ import {
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import KPIPeriodFilter, { PeriodFilterState } from "@/components/mission-control/kpi/KPIPeriodFilter";
 import {
   procurementRows,
   supplierOffers,
