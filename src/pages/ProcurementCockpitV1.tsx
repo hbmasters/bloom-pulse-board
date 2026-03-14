@@ -231,6 +231,8 @@ const ProcurementCockpitV1 = () => {
   const getPurchaseMix = (productId: string) => purchaseMixSuggestions.find(pm => pm.product_id === productId);
   const getSupplierQuality = (product: string) => supplierQualityData.find(sq => sq.product === product);
   const getEffectivePrice = (product: string) => effectivePriceData.find(ep => ep.product === product);
+  const getSupplierIntel = (productId: string) => supplierIntelligenceData.find(si => si.product_id === productId);
+  const getSupplierMix = (productId: string) => supplierMixProposals.find(sm => sm.product_id === productId);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
