@@ -34,7 +34,7 @@ import {
 import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
-import PriceCheckPanel from "@/components/procurement-cockpit-v1/PriceCheckPanel";
+
 import {
   mockDecisionRows, computeKPIs, actionLabels, actionColors,
   type ProcurementDecisionRow, type ProcurementAction,
@@ -90,13 +90,12 @@ const shopIcon = (status: ShopStatus["status"]) => {
 
 type SortKey = keyof ProcurementRow;
 type SortDir = "asc" | "desc";
-type CockpitTab = "inkooplijst" | "marktaanbod" | "handelsregister" | "prijscheck";
+type CockpitTab = "inkooplijst" | "marktaanbod" | "handelsregister";
 
 const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: "marktaanbod", label: "Marktaanbod", icon: <BarChart3 className="w-3.5 h-3.5" /> },
   { id: "handelsregister", label: "Handelsregister", icon: <BookOpen className="w-3.5 h-3.5" /> },
-  { id: "prijscheck", label: "Prijscheck & Advies", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
@@ -846,12 +845,6 @@ const ProcurementCockpitV1 = () => {
         </IHSectionShell>
       )}
 
-      {/* ── TAB: Prijscheck & Advies ── */}
-      {activeTab === "prijscheck" && (
-        <IHSectionShell icon={ShieldCheck} title="Prijscheck & Design Advies" subtitle="Controleer margerisico voor offerte, design-geschiktheid en markup/markdown advies" badge={`${priceCheckData.filter(p => p.price_check_status !== "ok").length} aandacht`} badgeVariant={priceCheckData.some(p => p.price_check_status === "critical") ? "critical" : "warning"}>
-          <PriceCheckPanel />
-        </IHSectionShell>
-      )}
     </div>
   );
 };

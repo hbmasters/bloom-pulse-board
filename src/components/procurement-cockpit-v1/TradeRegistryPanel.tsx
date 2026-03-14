@@ -1,6 +1,13 @@
 import { useState, useMemo } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   tradeRegistry,
   seasonalityLabels,
@@ -14,46 +21,51 @@ const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 const TradeRegistryPanel = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>(tradeRegistry[0]?.product || "");
   const [weekOffset, setWeekOffset] = useState(0);
-  const visibleWeeks = 12;
+  const [visibleWeeks, setVisibleWeeks] = useState(12);
 
   const entry = useMemo(() => tradeRegistry.find(t => t.product === selectedProduct), [selectedProduct]);
-  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset]);
+  const weeks = useMemo(() => entry?.weeks.slice(weekOffset, weekOffset + visibleWeeks) || [], [entry, weekOffset, visibleWeeks]);
 
   return (
     <div className="space-y-4">
-      {/* Product selector */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Product:</span>
-        <select
-          value={selectedProduct}
-          onChange={e => { setSelectedProduct(e.target.value); setWeekOffset(0); }}
-          className="text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer"
-        >
-          {tradeRegistry.map(t => (
-            <option key={t.product} value={t.product}>{t.product} ({t.product_family})</option>
-          ))}
-        </select>
+      {/* Product & Week selectors */}
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Product:</span>
+          <select
+            value={selectedProduct}
+            onChange={e => { setSelectedProduct(e.target.value); setWeekOffset(0); }}
+            className="text-[11px] font-medium px-3 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer"
+          >
+            {tradeRegistry.map(t => (
+              <option key={t.product} value={t.product}>{t.product} ({t.product_family})</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Weken tonen:</span>
+          <Select value={visibleWeeks.toString()} onValueChange={(v) => setVisibleWeeks(Number(v))}>
+            <SelectTrigger className="w-[100px] h-8 text-[11px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="8">8 weken</SelectItem>
+              <SelectItem value="12">12 weken</SelectItem>
+              <SelectItem value="16">16 weken</SelectItem>
+              <SelectItem value="20">20 weken</SelectItem>
+              <SelectItem value="24">24 weken</SelectItem>
+              <SelectItem value="52">52 weken</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Week navigation */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setWeekOffset(Math.max(0, weekOffset - visibleWeeks))}
-          disabled={weekOffset === 0}
-          className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors px-2 py-1"
-        >
-          <ChevronLeft className="w-3.5 h-3.5" /> Vorige
-        </button>
+      {/* Week range display */}
+      <div className="text-center">
         <span className="text-[10px] font-mono text-muted-foreground">
           Week {weeks[0]?.week || "—"} – {weeks[weeks.length - 1]?.week || "—"} ({weeks[0]?.year || ""})
         </span>
-        <button
-          onClick={() => setWeekOffset(Math.min(52 - visibleWeeks, weekOffset + visibleWeeks))}
-          disabled={weekOffset >= 52 - visibleWeeks}
-          className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors px-2 py-1"
-        >
-          Volgende <ChevronRight className="w-3.5 h-3.5" />
-        </button>
       </div>
 
       {/* Week grid */}
