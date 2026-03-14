@@ -40,6 +40,7 @@ const App = () => (
            
            <Route path="/labs/procurement-cockpit-v1" element={<MissionControl />} />
            <Route path="/labs/procurement-decision-list" element={<MissionControl />} />
+           <Route path="/labs/purchasing-list-v1" element={<MissionControl />} />
            <Route path="/ai-architecture" element={<MissionControl />} />
            <Route path="/dev-control" element={<MissionControl />} />
           <Route path="*" element={<NotFound />} />
