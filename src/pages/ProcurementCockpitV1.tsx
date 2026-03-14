@@ -1,19 +1,15 @@
 import { useState, useMemo, Fragment } from "react";
-import { format } from "date-fns";
-import { nl } from "date-fns/locale";
 import {
   ShoppingCart, Package, AlertTriangle, CheckCircle2,
   TrendingDown, TrendingUp, ArrowUpDown, Search, ChevronDown,
   ChevronRight, Star, Shield, Clock, Zap, Eye, Users, X,
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
-  ShoppingBag, Ruler, CalendarIcon, Flower2,
+  ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import KPIPeriodFilter, { PeriodFilterState } from "@/components/mission-control/kpi/KPIPeriodFilter";
 import {
   procurementRows,
   supplierOffers,
@@ -107,8 +103,11 @@ const ProcurementCockpitV1 = () => {
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [urgencyFilter, setUrgencyFilter] = useState<string | null>(null);
   const [buyerFilter, setBuyerFilter] = useState<string | null>(null);
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date());
-  const [dateTo, setDateTo] = useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 6); return d; });
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilterState>({
+    year: new Date().getFullYear(),
+    period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+    comparison: null,
+  });
   const [shopPopup, setShopPopup] = useState(false);
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [compactView, setCompactView] = useState(false);
@@ -176,10 +175,11 @@ const ProcurementCockpitV1 = () => {
     setFamilyFilter(null);
     setUrgencyFilter(null);
     setBuyerFilter(null);
-    const now = new Date();
-    setDateFrom(now);
-    const end = new Date(); end.setDate(end.getDate() + 6);
-    setDateTo(end);
+    setPeriodFilter({
+      year: new Date().getFullYear(),
+      period: Math.ceil((new Date().getMonth() + 1) / (12 / 13)),
+      comparison: null,
+    });
   };
 
   const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter;
@@ -201,19 +201,6 @@ const ProcurementCockpitV1 = () => {
     };
   }, []);
 
-  const DatePicker = ({ value, onChange, label }: { value: Date | undefined; onChange: (d: Date | undefined) => void; label: string }) => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className={cn("h-8 text-[11px] font-medium gap-1.5 px-3 border-border bg-background", !value && "text-muted-foreground")}>
-          <CalendarIcon className="w-3.5 h-3.5" />
-          {value ? format(value, "d MMM yyyy", { locale: nl }) : label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className="p-3 pointer-events-auto" />
-      </PopoverContent>
-    </Popover>
-  );
 
   /* ── Helpers for extended row data ── */
   const getDesignAdvice = (productId: string) => designAdvisoryData.find(d => d.product_id === productId);
@@ -350,12 +337,7 @@ const ProcurementCockpitV1 = () => {
       {activeTab === "inkooplijst" && (
         <>
           {/* Period filter */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[11px] font-medium text-muted-foreground">Periode:</span>
-            <DatePicker value={dateFrom} onChange={setDateFrom} label="Van" />
-            <span className="text-[11px] text-muted-foreground">t/m</span>
-            <DatePicker value={dateTo} onChange={setDateTo} label="Tot" />
-          </div>
+          <KPIPeriodFilter value={periodFilter} onChange={setPeriodFilter} />
 
           {/* KPI Cards */}
           {showKPIs && (matchState.isProcessed
