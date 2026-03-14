@@ -553,6 +553,44 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </td>
                           )}
+                          {visibleColumns.has("supplier_intel") && (
+                            <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>
+                              {supplierIntel ? supplierIntel.supplier_name.split(" ").slice(0, 2).join(" ") : p.preferred_supplier.split(" ").slice(0, 2).join(" ")}
+                            </td>
+                          )}
+                          {visibleColumns.has("quality_class") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {supplierIntel && (
+                                <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[supplierIntel.supplier_class].color)}>
+                                  {supplierIntel.supplier_class}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.has("reliability") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {supplierIntel && (
+                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[supplierIntel.reliability_class].color)}>
+                                  {reliabilityLabels[supplierIntel.reliability_class].label}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.has("effective_price_col") && (
+                            <td className={cn("px-3", rowPy, "font-mono text-foreground")}>
+                              {supplierIntel ? fmtPrice(supplierIntel.effective_price) : "—"}
+                            </td>
+                          )}
+                          {visibleColumns.has("supplier_advice") && (
+                            <td className={cn("px-3", rowPy)}>
+                              {supplierIntel && (
+                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", supplierAdviceLabels[supplierIntel.advice].color)}>
+                                  {supplierIntel.advice === "preferred" && <UserCheck className="w-2.5 h-2.5 inline mr-0.5" />}
+                                  {supplierAdviceLabels[supplierIntel.advice].label}
+                                </span>
+                              )}
+                            </td>
+                          )}
                           {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
                           {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
                           {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
