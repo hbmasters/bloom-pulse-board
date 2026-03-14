@@ -212,6 +212,11 @@ const ProcurementCockpitV1 = () => {
   const getDesignAdvice = (productId: string) => designAdvisoryData.find(d => d.product_id === productId);
   const getPriceCheck = (productId: string) => priceCheckData.find(p => p.product_id === productId);
   const getMarketSupply = (productFamily: string, product: string) => marketSupplyData.find(m => m.product === product || m.product_family === productFamily);
+  const getInventoryPressure = (productId: string) => inventoryPressureData.find(ip => ip.product_id === productId);
+  const getSubstitute = (productId: string) => substituteSuggestions.find(s => s.product_id === productId);
+  const getPurchaseMix = (productId: string) => purchaseMixSuggestions.find(pm => pm.product_id === productId);
+  const getSupplierQuality = (product: string) => supplierQualityData.find(sq => sq.product === product);
+  const getEffectivePrice = (product: string) => effectivePriceData.find(ep => ep.product === product);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
