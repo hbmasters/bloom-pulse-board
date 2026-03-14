@@ -339,12 +339,7 @@ const ProcurementCockpitV1 = () => {
       {activeTab === "inkooplijst" && (
         <>
           {/* Period filter */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[11px] font-medium text-muted-foreground">Periode:</span>
-            <DatePicker value={dateFrom} onChange={setDateFrom} label="Van" />
-            <span className="text-[11px] text-muted-foreground">t/m</span>
-            <DatePicker value={dateTo} onChange={setDateTo} label="Tot" />
-          </div>
+          <KPIPeriodFilter value={periodFilter} onChange={setPeriodFilter} />
 
           {/* KPI Cards */}
           {showKPIs && (matchState.isProcessed
