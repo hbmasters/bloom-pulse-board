@@ -30,7 +30,6 @@ import CommercialCockpit from "@/pages/CommercialCockpit";
 
 import ProcurementCockpitV1 from "@/pages/ProcurementCockpitV1";
 import ProcurementDecisionList from "@/pages/ProcurementDecisionList";
-import PurchasingListV1 from "@/pages/PurchasingListV1";
 import AIArchitecture from "@/pages/AIArchitecture";
 import DevelopmentControl from "@/pages/DevelopmentControl";
 import { ChevronUp, ChevronDown } from "lucide-react";
