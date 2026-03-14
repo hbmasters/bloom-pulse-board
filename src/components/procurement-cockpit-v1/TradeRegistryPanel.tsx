@@ -18,6 +18,10 @@ import {
   getDesignStability,
   designStabilityLabels,
 } from "./procurement-intelligence-data";
+import {
+  productSupplierStabilityData,
+  supplierStabilityLabels,
+} from "./supplier-intelligence-data";
 
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
@@ -77,6 +81,23 @@ const TradeRegistryPanel = () => {
           </Select>
         </div>
       </div>
+
+      {/* Supplier stability badge for selected product */}
+      {(() => {
+        const stabilityEntry = productSupplierStabilityData.find(p => p.product === selectedProduct);
+        if (!stabilityEntry) return null;
+        const stabLabel = supplierStabilityLabels[stabilityEntry.stability];
+        return (
+          <div className="flex items-center gap-3 text-[10px]">
+            <span className={cn("font-medium px-2 py-0.5 rounded-full border", stabLabel.color)}>
+              {stabLabel.label}
+            </span>
+            <span className="text-muted-foreground">
+              {stabilityEntry.supplier_count} leverancier{stabilityEntry.supplier_count !== 1 ? "s" : ""} · Top leverancier {stabilityEntry.top_supplier_share}% volume
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Week range display */}
       <div className="text-center">
@@ -154,6 +175,14 @@ const TradeRegistryPanel = () => {
         <div className="flex items-center gap-2">
           <span className="font-medium uppercase tracking-wide">Design:</span>
           {Object.entries(designStabilityLabels).map(([k, v]) => (
+            <span key={k} className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", v.color)}>
+              {v.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Leverancier:</span>
+          {Object.entries(supplierStabilityLabels).map(([k, v]) => (
             <span key={k} className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", v.color)}>
               {v.label}
             </span>
