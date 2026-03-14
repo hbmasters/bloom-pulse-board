@@ -495,6 +495,11 @@ const ProcurementCockpitV1 = () => {
                     const advisory = getDesignAdvice(p.id);
                     const priceCheck = getPriceCheck(p.id);
                     const market = getMarketSupply(p.product_family, p.product);
+                    const invPressure = getInventoryPressure(p.id);
+                    const subSuggestion = getSubstitute(p.id);
+                    const purchaseMix = getPurchaseMix(p.id);
+                    const supplierQuality = getSupplierQuality(p.product);
+                    const effectivePrice = getEffectivePrice(p.product);
 
                     return (
                       <Fragment key={p.id}>
