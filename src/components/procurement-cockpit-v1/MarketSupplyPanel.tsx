@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { useState, useMemo } from "react";
+import { TrendingUp, TrendingDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   marketSupplyData,
@@ -19,6 +20,7 @@ const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
 const MarketSupplyPanel = () => {
+  const [search, setSearch] = useState("");
   const summary = {
     totalSupply: marketSupplyData.reduce((s, m) => s + m.available_supply, 0),
     critical: marketSupplyData.filter(m => m.supply_pressure === "critical").length,
