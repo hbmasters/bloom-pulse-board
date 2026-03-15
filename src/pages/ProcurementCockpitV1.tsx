@@ -471,7 +471,7 @@ const ProcurementCockpitV1 = () => {
                       ["advised_price", "Adviesprijs"],
                       ["market_price", "Marktprijs"],
                       ["variance_vs_calculated", "Δ Hist."],
-                      ["substitute", "Substituut"],
+                      
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                       <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => key !== "design_advice" && key !== "markup_advice" && key !== "market_price" && toggleSort(key as SortKey)}>
