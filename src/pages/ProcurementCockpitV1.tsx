@@ -537,7 +537,20 @@ const ProcurementCockpitV1 = () => {
                             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                           </td>
                           <td className={cn("px-2", rowPy)}>
-                            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", sLabel.color)}>{sLabel.label}</span>
+                            {(() => {
+                              const dekking = getDekkingStatus(p);
+                              const dc = dekkingConfig[dekking];
+                              const dekkingPct = p.required_volume > 0 ? Math.min(100, Math.round((p.available_stock / p.required_volume) * 100)) : 100;
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap", dc.color)}>{dc.label}</span>
+                                  <div className="w-10 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                                    <div className={cn("h-full rounded-full", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")} style={{ width: `${dekkingPct}%` }} />
+                                  </div>
+                                  <span className="text-[8px] font-mono text-muted-foreground">{dekkingPct}%</span>
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td className={cn("px-3", rowPy)}>
                             <div className="font-medium text-foreground text-[12px]">{p.product}</div>
