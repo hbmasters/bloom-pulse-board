@@ -365,31 +365,38 @@ const ProcurementCockpitV1 = () => {
           {/* Day filter */}
           <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
 
-          {/* KPI Cards */}
-          {showKPIs && (matchState.isProcessed
-            ? <MatchedKPIs matched={matchState.matched} />
-            : <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {[
-                { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
-                { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
-                { label: "Open inkoopbehoefte", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
-                { label: "Offerteprijs vs Inkoopprijs", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, sub: `Offerte ${fmtPrice(totals.avgOfferPrice)} · Inkoop ${fmtPrice(totals.avgHistoricalPrice)}`, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
-                { label: "Actie nodig", value: `${totals.actionNeeded}`, icon: Zap },
-              ].map(k => (
-                <div key={k.label} className={cn(
-                  "rounded-xl border border-border bg-card p-3.5 flex flex-col gap-1",
-                  k.highlight && "ring-1 ring-destructive/20"
-                )}>
-                  <div className="flex items-center gap-1.5">
-                    <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+          {/* KPI Cards — Dekking + Procurement */}
+          {showKPIs && (() => {
+            const gedektCount = procurementRows.filter(p => getDekkingStatus(p) === "gedekt").length;
+            const deelsCount = procurementRows.filter(p => getDekkingStatus(p) === "deels_gedekt").length;
+            const nietCount = procurementRows.filter(p => getDekkingStatus(p) === "niet_gedekt").length;
+            const overschotCount = procurementRows.filter(p => getDekkingStatus(p) === "overschot").length;
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { label: "Totaal behoefte", value: fmt(totals.required + totals.freeStock), icon: Package },
+                  { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
+                  { label: "Open inkoop", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
+                  { label: "Δ Offerte/Inkoop", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
+                  { label: "Gedekt", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
+                  { label: "Deels gedekt", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
+                  { label: "Niet gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
+                  { label: "Overschot", value: `${overschotCount}`, icon: Package },
+                ].map(k => (
+                  <div key={k.label} className={cn(
+                    "rounded-xl border border-border bg-card p-3 flex flex-col gap-1",
+                    k.highlight && "ring-1 ring-destructive/20"
+                  )}>
+                    <div className="flex items-center gap-1.5">
+                      <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+                    </div>
+                    <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : k.variant === "warning" ? "text-yellow-500" : "text-foreground")}>{k.value}</span>
                   </div>
-                  <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : "text-foreground")}>{k.value}</span>
-                  {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Supply Radar Signals */}
           {(() => {
