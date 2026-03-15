@@ -197,38 +197,31 @@ const Sentinel = () => (
       {/* S1 — KPI Header */}
       <KPIHeader />
 
-      {/* S2 — Service Scanner */}
-      <IHSectionShell title="Service Scanner" icon={<Wifi className="w-4 h-4" />}>
+      <IHSectionShell title="Service Scanner" icon={Wifi}>
         <ServicePanel />
       </IHSectionShell>
 
-      {/* S3 — Communication Guard */}
-      <IHSectionShell title="Communication Guard" icon={<Radio className="w-4 h-4" />}>
+      <IHSectionShell title="Communication Guard" icon={Radio}>
         <CommGuardPanel />
       </IHSectionShell>
 
-      {/* S4 — Backup */}
-      <IHSectionShell title="Backup Status" icon={<Database className="w-4 h-4" />}>
+      <IHSectionShell title="Backup Status" icon={Database}>
         <BackupPanel />
       </IHSectionShell>
 
-      {/* S5 — Updates */}
-      <IHSectionShell title="Update & Patch Status" icon={<RefreshCw className="w-4 h-4" />}>
+      <IHSectionShell title="Update & Patch Status" icon={RefreshCw}>
         <UpdatePanel />
       </IHSectionShell>
 
-      {/* S6 — Firewall / Security */}
-      <IHSectionShell title="Firewall & Security" icon={<Lock className="w-4 h-4" />}>
+      <IHSectionShell title="Firewall & Security" icon={Lock}>
         <SecurityPanel />
       </IHSectionShell>
 
-      {/* S7 — Node Health */}
-      <IHSectionShell title="Node Health" icon={<Server className="w-4 h-4" />}>
+      <IHSectionShell title="Node Health" icon={Server}>
         <NodePanel />
       </IHSectionShell>
 
-      {/* S8 — Alerts & Incidents */}
-      <IHSectionShell title="Alerts & Incidents" icon={<AlertTriangle className="w-4 h-4" />}>
+      <IHSectionShell title="Alerts & Incidents" icon={AlertTriangle}>
         <AlertsPanel />
       </IHSectionShell>
     </div>
