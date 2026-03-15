@@ -566,15 +566,6 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </td>
                           )}
-                          {visibleColumns.has("reliability") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {supplierIntel && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[supplierIntel.reliability_class].color)}>
-                                  {reliabilityLabels[supplierIntel.reliability_class].label}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("effective_price_col") && (
                             <td className={cn("px-3", rowPy, "font-mono text-foreground")}>
                               {supplierIntel ? fmtPrice(supplierIntel.effective_price) : "—"}
