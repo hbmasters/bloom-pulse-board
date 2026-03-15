@@ -36,7 +36,11 @@ import {
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
-const MarketSupplyPanel = () => {
+const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
+  familyFilter?: string | null;
+  onFamilyFilterChange?: (v: string | null) => void;
+  families?: string[];
+}) => {
   const [search, setSearch] = useState("");
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [visibleWeeks, setVisibleWeeks] = useState(12);
@@ -84,9 +88,11 @@ const MarketSupplyPanel = () => {
     return yearWeeks.slice(0, visibleWeeks);
   };
 
-  const filteredData = marketSupplyData.filter(m =>
-    !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredData = marketSupplyData.filter(m => {
+    if (search && !m.product.toLowerCase().includes(search.toLowerCase()) && !m.product_family.toLowerCase().includes(search.toLowerCase())) return false;
+    if (familyFilter && m.product_family !== familyFilter) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -108,10 +114,18 @@ const MarketSupplyPanel = () => {
         ))}
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek product of familie..." className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+      {/* Search + filters */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek product of familie..." className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+        </div>
+        {families && families.length > 0 && onFamilyFilterChange && (
+          <select value={familyFilter || ""} onChange={e => onFamilyFilterChange(e.target.value || null)} className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground cursor-pointer">
+            <option value="">Alle families</option>
+            {families.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+        )}
       </div>
 
       {/* Market supply table */}

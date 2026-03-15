@@ -389,42 +389,8 @@ const ProcurementCockpitV1 = () => {
             );
           })()}
 
-          {/* Supply Radar Signals */}
-          {(() => {
-            const radarSignals = computeRadarSignals(mockDecisionRows);
-            const decisionKpis = computeKPIs(mockDecisionRows);
-            return radarSignals.length > 0 ? (
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {radarSignals.map((s, i) => (
-                    <div key={i} className={cn("flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-semibold", signalSeverityColors[s.severity])}>
-                      {s.severity === "critical" ? <ShieldAlert className="h-3 w-3" /> : s.severity === "warning" ? <AlertTriangle className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                      {s.label}
-                      <span className="font-normal opacity-80 hidden sm:inline">— {s.detail}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><BarChart3 className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Gem. druk</span></div>
-                    <span className={cn("text-base font-bold font-mono", decisionKpis.avgPressure > 60 ? "text-destructive" : "text-foreground")}>{decisionKpis.avgPressure}/100</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><TrendingDown className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Markdown</span></div>
-                    <span className="text-base font-bold font-mono text-destructive">{decisionKpis.markdownCandidates}</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Markup</span></div>
-                    <span className="text-base font-bold font-mono text-accent">{decisionKpis.markupOpportunities}</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Gem. Δ prijs</span></div>
-                    <span className={cn("text-base font-bold font-mono", Math.abs(decisionKpis.avgDeviation) > 10 ? "text-destructive" : "text-foreground")}>{decisionKpis.avgDeviation > 0 ? "+" : ""}{decisionKpis.avgDeviation}%</span>
-                  </div>
-                </div>
-              </div>
-            ) : null;
-          })()}
+
+
 
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative flex-1 min-w-[160px] max-w-xs">
@@ -1007,108 +973,19 @@ const ProcurementCockpitV1 = () => {
             </div>
            </IHSectionShell>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5 text-muted-foreground" />
-                Inventory Intelligence
-              </h3>
-              {(() => {
-                const highPressure = mockDecisionRows.filter(r => r.inventory_pressure_score > 60).sort((a, b) => b.inventory_pressure_score - a.inventory_pressure_score);
-                const highTurnover = mockDecisionRows.filter(r => r.turnover_risk === "high");
-                const markdownRows = mockDecisionRows.filter(r => r.markdown_advice);
-                const useStockRows = mockDecisionRows.filter(r => r.procurement_action === "use_stock");
-                return (
-                  <>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="rounded-lg border border-border bg-background p-2.5">
-                        <p className="text-[9px] font-mono uppercase text-muted-foreground">Hoge druk</p>
-                        <p className="text-base font-bold text-foreground">{highPressure.length}</p>
-                      </div>
-                      <div className="rounded-lg border border-border bg-background p-2.5">
-                        <p className="text-[9px] font-mono uppercase text-muted-foreground">Omlooprisico</p>
-                        <p className="text-base font-bold text-destructive">{highTurnover.length}</p>
-                      </div>
-                      <div className="rounded-lg border border-border bg-background p-2.5">
-                        <p className="text-[9px] font-mono uppercase text-muted-foreground">Markdown advies</p>
-                        <p className="text-base font-bold text-amber-400">{markdownRows.length}</p>
-                      </div>
-                      <div className="rounded-lg border border-border bg-background p-2.5">
-                        <p className="text-[9px] font-mono uppercase text-muted-foreground">Voorraad eerst</p>
-                        <p className="text-base font-bold text-sky-400">{useStockRows.length}</p>
-                      </div>
-                    </div>
-                    {highPressure.length > 0 && (
-                      <div className="space-y-1.5">
-                        {highPressure.slice(0, 4).map(r => (
-                          <div key={r.id} className="flex items-center justify-between text-xs bg-muted/20 rounded-lg p-2 border border-border/30">
-                            <span className="font-medium text-foreground truncate flex-1">{r.product}</span>
-                            <span className="text-muted-foreground font-mono mr-3">{r.stock_days}d</span>
-                            <span className={cn("text-[10px] font-medium", r.turnover_risk === "high" ? "text-destructive" : r.turnover_risk === "medium" ? "text-amber-400" : "text-accent")}>
-                              {r.turnover_risk} risk
-                            </span>
-                            <span className="font-mono ml-3 text-muted-foreground">{r.inventory_pressure_score}/100</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
 
-            {/* ── Trade Registry preview (compact 8 weken) ── */}
-            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                Trade Registry — 8 weken vooruit
-              </h3>
-              {(() => {
-                const entry = tradeRegistry[0];
-                if (!entry) return <p className="text-xs text-muted-foreground">Geen data</p>;
-                const weeks = entry.weeks.slice(0, 8);
-                return (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-[10px]">
-                      <thead>
-                        <tr className="border-b border-border bg-muted/30">
-                          <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Week</th>
-                          <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Beschikbaar</th>
-                          <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Prijsrange</th>
-                          <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Seizoen</th>
-                          <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Risico</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {weeks.map((w, i) => {
-                          const avail = availabilityLabels[w.expected_availability];
-                          const season = seasonalityLabels[w.seasonality];
-                          const risk = riskLabels[w.risk_level];
-                          return (
-                            <tr key={`${w.week}-${w.year}`} className={cn("border-b border-border/30", i === 0 ? "bg-primary/5" : "hover:bg-muted/10")}>
-                              <td className="px-2 py-1.5 font-mono font-semibold text-foreground">W{w.week}{i === 0 && <span className="ml-1 text-[8px] text-primary">NU</span>}</td>
-                              <td className="px-2 py-1.5"><span className={cn("font-medium", avail.color)}>{avail.label}</span></td>
-                              <td className="px-2 py-1.5 font-mono text-muted-foreground">€{w.expected_price_low.toFixed(3)} – €{w.expected_price_high.toFixed(3)}</td>
-                              <td className="px-2 py-1.5"><span className={cn("font-medium", season.color)}>{season.label}</span></td>
-                              <td className="px-2 py-1.5"><span className={cn("font-medium", risk.color)}>{risk.label}</span></td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+
         </>
       )}
 
       {/* ── TAB: Marktaanbod ── */}
       {activeTab === "marktaanbod" && (
-        <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
-          <MarketSupplyPanel />
-        </IHSectionShell>
+        <>
+          <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
+          <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
+            <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
+          </IHSectionShell>
+        </>
       )}
 
     </div>
