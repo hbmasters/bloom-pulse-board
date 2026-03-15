@@ -664,7 +664,48 @@ const ProcurementCockpitV1 = () => {
                                 </div>
 
 
-                                {/* Leverancier Intelligence — unified panel */}
+                                {/* Leveranciersaanbod */}
+                                {showSupplierOffers && <div>
+                                  <h4 className="text-xs font-semibold text-foreground mb-2.5 flex items-center gap-1.5">
+                                    <Eye className="w-3.5 h-3.5 text-primary" />
+                                    Leveranciersaanbod ({offers.length})
+                                  </h4>
+                                  {offers.length === 0 ? (
+                                    <p className="text-[11px] text-muted-foreground italic">Geen leveranciersdata beschikbaar.</p>
+                                  ) : (
+                                    <div className="overflow-x-auto rounded-lg border border-border">
+                                      <table className="w-full text-[11px]">
+                                        <thead>
+                                          <tr className="border-b border-border">
+                                            {["Leverancier", "Prijs", "Aantal", "Levering", "Kwaliteit", "Betrouwb.", "Prijsstab.", "Δ Hist.", "Δ Offerte", ""].map(h => (
+                                              <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground whitespace-nowrap">{h}</th>
+                                            ))}
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {offers.map(o => (
+                                            <tr key={o.supplier_name} className="border-b border-border/30 hover:bg-muted/10 transition-colors">
+                                              <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">{o.supplier_name}</td>
+                                              <td className="px-3 py-2.5 font-mono text-foreground">{fmtPrice(o.offer_price)}</td>
+                                              <td className="px-3 py-2.5 font-mono text-muted-foreground">{fmt(o.offer_quantity)}</td>
+                                              <td className="px-3 py-2.5 text-muted-foreground">{o.delivery_timing}</td>
+                                              <td className="px-3 py-2.5 font-mono text-muted-foreground">{o.supplier_quality_score}%</td>
+                                              <td className="px-3 py-2.5 font-mono text-muted-foreground">{o.supplier_reliability_score}%</td>
+                                              <td className="px-3 py-2.5 font-mono text-muted-foreground">{o.price_stability_index}%</td>
+                                              <td className={cn("px-3 py-2.5 font-mono", pctColor(o.variance_vs_historical))}>{o.variance_vs_historical > 0 ? "+" : ""}{o.variance_vs_historical.toFixed(1)}%</td>
+                                              <td className={cn("px-3 py-2.5 font-mono", pctColor(o.variance_vs_offer))}>{o.variance_vs_offer > 0 ? "+" : ""}{o.variance_vs_offer.toFixed(1)}%</td>
+                                              <td className="px-3 py-2.5">
+                                                <button className="text-[10px] font-medium text-primary hover:text-primary/80 border border-primary/30 hover:border-primary/50 rounded-lg px-2.5 py-1 transition-colors">Bekijk</button>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </div>}
+
+
                                 {supplierIntel && (
                                   <div className="rounded-lg border border-border bg-background p-4 space-y-4">
                                     <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
