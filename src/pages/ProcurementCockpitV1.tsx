@@ -900,67 +900,59 @@ const ProcurementCockpitV1 = () => {
                                   </div>
                                 </div>}
 
-                                {/* Substituut bloemsoorten */}
-                                {subSuggestion && subSuggestion.candidates.length > 0 && (
-                                  <div className="rounded-lg border border-border bg-background p-4 space-y-2">
+                                {/* Substituut opties (kandidaten + mix samengevoegd) */}
+                                {((subSuggestion && subSuggestion.candidates.length > 0) || (purchaseMix && purchaseMix.has_mix)) && (
+                                  <div className="rounded-lg border border-border bg-background p-4 space-y-3">
                                     <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
                                       <Repeat className="w-3.5 h-3.5 text-primary" />
-                                      Substituut bloemsoorten
+                                      Substituut opties
+                                      {subSuggestion && <span className="text-[9px] font-normal text-muted-foreground ml-1">({subSuggestion.candidates.length} kandidaten)</span>}
                                     </h4>
-                                    <div className="space-y-1.5">
-                                      {subSuggestion.candidates.map((c, i) => (
-                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
-                                          <div className="flex items-center gap-2">
-                                            <span className="font-medium text-foreground">{c.name}</span>
-                                            <div className="flex gap-1">
-                                              {c.family_match && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Familie ✓</span>}
-                                              {c.color_compatible && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Kleur ✓</span>}
-                                              {c.length_compatible && <span className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Lengte ✓</span>}
+
+                                    {subSuggestion && subSuggestion.candidates.length > 0 && (
+                                      <div className="space-y-1">
+                                        {subSuggestion.candidates.map((c, i) => (
+                                          <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/10 border border-border/30">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium text-foreground">{c.name}</span>
+                                              <div className="flex gap-0.5">
+                                                {c.family_match && <span className="text-[7px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Fam</span>}
+                                                {c.color_compatible && <span className="text-[7px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Klr</span>}
+                                                {c.length_compatible && <span className="text-[7px] px-1 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">Len</span>}
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-mono text-muted-foreground">{fmtPrice(c.price)}</span>
+                                              <span className={cn("text-[8px] font-mono font-bold", c.confidence >= 80 ? "text-accent" : c.confidence >= 60 ? "text-yellow-500" : "text-muted-foreground")}>{c.confidence}%</span>
                                             </div>
                                           </div>
-                                          <div className="flex items-center gap-3">
-                                            <span className="font-mono text-muted-foreground">{fmtPrice(c.price)}</span>
-                                            <span className={cn("text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full",
-                                              c.confidence >= 80 ? "bg-accent/10 text-accent" : c.confidence >= 60 ? "bg-yellow-500/10 text-yellow-500" : "bg-muted text-muted-foreground"
-                                            )}>{c.confidence}%</span>
-                                            <span className={cn("text-[8px] font-medium",
-                                              c.availability === "high" ? "text-accent" : c.availability === "medium" ? "text-yellow-500" : "text-destructive"
-                                            )}>{c.availability === "high" ? "Hoog" : c.availability === "medium" ? "Medium" : "Laag"}</span>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+                                        ))}
+                                      </div>
+                                    )}
 
-                                {/* Substitutemix voorstel */}
-                                {purchaseMix && purchaseMix.has_mix && (
-                                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
-                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
-                                      <Shuffle className="w-3.5 h-3.5 text-primary" />
-                                      Substitutemix voorstel
-                                    </h4>
-                                    <div className="space-y-1">
-                                      {purchaseMix.lines.map((l, i) => (
-                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/30">
-                                          <div className="flex items-center gap-2">
-                                            {l.type === "main" ? <Package className="w-3 h-3 text-foreground" /> : <Repeat className="w-3 h-3 text-primary" />}
-                                            <span className="font-medium text-foreground">{l.product}</span>
-                                            <span className={cn("text-[8px] px-1 py-0.5 rounded border",
-                                              l.type === "main" ? "bg-muted text-muted-foreground border-border" : "bg-primary/10 text-primary border-primary/20"
-                                            )}>{l.type === "main" ? "Hoofd" : "Substituut"}</span>
-                                          </div>
-                                          <div className="flex items-center gap-3">
-                                            <span className="font-mono text-foreground">{fmt(l.units)} st</span>
-                                            <span className="font-mono text-muted-foreground">{fmtPrice(l.price)}</span>
-                                          </div>
+                                    {purchaseMix && purchaseMix.has_mix && (
+                                      <>
+                                        <div className="border-t border-border/30 pt-3 space-y-1">
+                                          <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide">Aanbevolen mix</span>
+                                          {purchaseMix.lines.map((l, i) => (
+                                            <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/10 border border-border/30">
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-medium text-foreground">{l.product}</span>
+                                                <span className={cn("text-[8px] px-1 py-0.5 rounded border", l.type === "main" ? "bg-muted text-muted-foreground border-border" : "bg-primary/10 text-primary border-primary/20")}>{l.type === "main" ? "Hoofd" : "Sub"}</span>
+                                              </div>
+                                              <div className="flex items-center gap-3">
+                                                <span className="font-mono text-foreground">{fmt(l.units)} st</span>
+                                                <span className="font-mono text-muted-foreground">{fmtPrice(l.price)}</span>
+                                              </div>
+                                            </div>
+                                          ))}
                                         </div>
-                                      ))}
-                                    </div>
-                                    <div className="flex items-center justify-between pt-2 border-t border-border/30 text-[10px]">
-                                      <span className="text-muted-foreground">Gewogen inkooprijs</span>
-                                      <span className="font-mono font-bold text-foreground">{fmtPrice(purchaseMix.total_cost)}</span>
-                                    </div>
+                                        <div className="flex items-center justify-between text-[10px] pt-1">
+                                          <span className="text-muted-foreground">Gewogen inkooprijs</span>
+                                          <span className="font-mono font-bold text-foreground">{fmtPrice(purchaseMix.total_cost)}</span>
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                 )}
 
