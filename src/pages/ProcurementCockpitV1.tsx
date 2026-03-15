@@ -689,6 +689,7 @@ const ProcurementCockpitV1 = () => {
                                               <td className={cn("px-3 py-2.5 font-mono", pctColor(o.variance_vs_offer))}>{o.variance_vs_offer > 0 ? "+" : ""}{o.variance_vs_offer.toFixed(1)}%</td>
                                               <td className="px-3 py-2.5">
                                                 <button className="text-[10px] font-medium text-primary hover:text-primary/80 border border-primary/30 hover:border-primary/50 rounded-lg px-2.5 py-1 transition-colors">Bekijk</button>
+                                                <button disabled className="text-[10px] font-medium text-muted-foreground/40 border border-border rounded-lg px-2.5 py-1 cursor-not-allowed bg-muted/20">Koop</button>
                                               </td>
                                             </tr>
                                           ))}
