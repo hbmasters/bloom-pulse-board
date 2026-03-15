@@ -579,7 +579,7 @@ const ProcurementCockpitV1 = () => {
                             </td>
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
-                          {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
+                          
                           {visibleColumns.has("substitute") && (
                             <td className={cn("px-3", rowPy)}>
                               {subSuggestion && subSuggestion.status !== "none" && (
