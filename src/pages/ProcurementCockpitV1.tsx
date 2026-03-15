@@ -538,10 +538,11 @@ const ProcurementCockpitV1 = () => {
                             })()}
                           </td>
                           <td className={cn("px-3", rowPy)}>
-                            <div className="font-medium text-foreground text-[12px]">{p.product}</div>
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
-                              <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-foreground text-[12px]">{p.product}</span>
+                              <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">{p.stem_length}</span>
                             </div>
+                            <div className="text-[10px] text-muted-foreground mt-0.5">{p.product_family}</div>
                           </td>
                           
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
