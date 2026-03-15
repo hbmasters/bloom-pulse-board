@@ -1051,8 +1051,8 @@ const ProcurementCockpitV1 = () => {
                 </tbody>
               </table>
             </div>
+           </IHSectionShell>
 
-          {/* ── Inventory Intelligence ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="rounded-xl border border-border bg-card p-4 space-y-3">
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
