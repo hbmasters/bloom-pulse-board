@@ -138,9 +138,9 @@ const ProcurementCockpitV1 = () => {
     return "niet_gedekt";
   };
   const dekkingConfig: Record<DekkingStatus, { label: string; color: string }> = {
-    gedekt: { label: "Gedekt", color: "text-accent bg-accent/10 border-accent/20" },
+    gedekt: { label: "Volledig", color: "text-accent bg-accent/10 border-accent/20" },
     deels_gedekt: { label: "Deels", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
-    niet_gedekt: { label: "Niet gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
+    niet_gedekt: { label: "Gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
     overschot: { label: "Overschot", color: "text-muted-foreground bg-muted/50 border-border" },
   };
 
