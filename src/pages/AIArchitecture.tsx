@@ -282,6 +282,56 @@ const AIArchitecture = () => {
           ))}
         </div>
       </section>
+      </div>
+
+      {/* Right sidebar */}
+      <div className="hidden xl:block w-72 shrink-0 border-l border-border p-4 space-y-5 overflow-y-auto">
+        {/* Progress */}
+        <div className="space-y-2">
+          <h3 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider">Systeem Voortgang</h3>
+          <div className="text-2xl font-bold text-foreground">{progressPct}%</div>
+          <div className="w-full h-2 rounded-full bg-muted/50 overflow-hidden">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressPct}%` }} />
+          </div>
+          <p className="text-[10px] font-mono text-muted-foreground">{liveCount} live · {partialCount} partial · {plannedCount} planned</p>
+        </div>
+
+        <div className="h-px bg-border" />
+
+        {/* Per-layer breakdown */}
+        {[
+          { label: "Core Truth", items: coreTruthLayers, icon: Database },
+          { label: "Decision Engines", items: decisionEngines, icon: Brain },
+          { label: "Execution", items: executionLayer, icon: Server },
+        ].map(group => (
+          <div key={group.label} className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <group.icon className="w-3 h-3 text-primary/60" />
+              <h4 className="text-[10px] font-mono font-semibold text-foreground/70 uppercase tracking-wider">{group.label}</h4>
+            </div>
+            <div className="space-y-1">
+              {group.items.map(item => (
+                <div key={item.title} className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-muted-foreground truncate">{item.title}</span>
+                  <StatusBadge status={item.status} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="h-px bg-border" />
+
+        {/* Quick stats */}
+        <div className="space-y-2">
+          <h3 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider">Infra</h3>
+          <div className="space-y-1.5 text-[10px] font-mono">
+            <div className="flex justify-between"><span className="text-muted-foreground">Nodes</span><span className="text-foreground">1 actief · 2 gepland</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Engines</span><span className="text-foreground">{decisionEngines.length} totaal</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Databronnen</span><span className="text-foreground">{coreTruthLayers.length} lagen</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
