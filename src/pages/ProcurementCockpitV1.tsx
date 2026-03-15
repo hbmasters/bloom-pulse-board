@@ -44,7 +44,7 @@ import {
   reliabilityLabels,
   supplierMixProposals,
 } from "@/components/procurement-cockpit-v1/supplier-intelligence-data";
-import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
+// Upload functionality removed — dekking computed from static data
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
 
@@ -131,7 +131,19 @@ const ProcurementCockpitV1 = () => {
   const [showSupplierOffers, setShowSupplierOffers] = useState(true);
   const [showMarketContext, setShowMarketContext] = useState(true);
 
-  const matchState = useMatchState();
+  // Compute dekking status per row
+  type DekkingStatus = "gedekt" | "deels_gedekt" | "niet_gedekt" | "overschot";
+  const getDekkingStatus = (p: ProcurementRow): DekkingStatus => {
+    if (p.available_stock >= p.required_volume && p.open_buy_need === 0) return p.free_stock > p.required_volume ? "overschot" : "gedekt";
+    if (p.free_stock > 0 && p.open_buy_need > 0) return "deels_gedekt";
+    return "niet_gedekt";
+  };
+  const dekkingConfig: Record<DekkingStatus, { label: string; color: string }> = {
+    gedekt: { label: "Gedekt", color: "text-accent bg-accent/10 border-accent/20" },
+    deels_gedekt: { label: "Deels", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
+    niet_gedekt: { label: "Niet gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
+    overschot: { label: "Overschot", color: "text-muted-foreground bg-muted/50 border-border" },
+  };
 
   const allColumns = [
     { key: "buyer", label: "Inkoper" },
@@ -246,19 +258,6 @@ const ProcurementCockpitV1 = () => {
           </span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {activeTab === "inkooplijst" && (
-            <UploadControls
-              inkoopFile={matchState.inkoopFile}
-              voorraadFile={matchState.voorraadFile}
-              inkoopCount={matchState.inkoopCount}
-              voorraadCount={matchState.voorraadCount}
-              isProcessed={matchState.isProcessed}
-              onUpload={matchState.handleUpload}
-              onProcess={matchState.processMatch}
-              onReset={matchState.reset}
-              linkedCount={matchState.manualLinks.length}
-            />
-          )}
           <div className="h-4 w-px bg-border" />
           {/* Shop status */}
           <div className="relative">
@@ -366,31 +365,38 @@ const ProcurementCockpitV1 = () => {
           {/* Day filter */}
           <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
 
-          {/* KPI Cards */}
-          {showKPIs && (matchState.isProcessed
-            ? <MatchedKPIs matched={matchState.matched} />
-            : <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {[
-                { label: "Benodigd volume", value: fmt(totals.required), icon: Package },
-                { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
-                { label: "Open inkoopbehoefte", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
-                { label: "Offerteprijs vs Inkoopprijs", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, sub: `Offerte ${fmtPrice(totals.avgOfferPrice)} · Inkoop ${fmtPrice(totals.avgHistoricalPrice)}`, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
-                { label: "Actie nodig", value: `${totals.actionNeeded}`, icon: Zap },
-              ].map(k => (
-                <div key={k.label} className={cn(
-                  "rounded-xl border border-border bg-card p-3.5 flex flex-col gap-1",
-                  k.highlight && "ring-1 ring-destructive/20"
-                )}>
-                  <div className="flex items-center gap-1.5">
-                    <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+          {/* KPI Cards — Dekking + Procurement */}
+          {showKPIs && (() => {
+            const gedektCount = procurementRows.filter(p => getDekkingStatus(p) === "gedekt").length;
+            const deelsCount = procurementRows.filter(p => getDekkingStatus(p) === "deels_gedekt").length;
+            const nietCount = procurementRows.filter(p => getDekkingStatus(p) === "niet_gedekt").length;
+            const overschotCount = procurementRows.filter(p => getDekkingStatus(p) === "overschot").length;
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { label: "Totaal behoefte", value: fmt(totals.required + totals.freeStock), icon: Package },
+                  { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
+                  { label: "Open inkoop", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
+                  { label: "Δ Offerte/Inkoop", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
+                  { label: "Gedekt", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
+                  { label: "Deels gedekt", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
+                  { label: "Niet gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
+                  { label: "Overschot", value: `${overschotCount}`, icon: Package },
+                ].map(k => (
+                  <div key={k.label} className={cn(
+                    "rounded-xl border border-border bg-card p-3 flex flex-col gap-1",
+                    k.highlight && "ring-1 ring-destructive/20"
+                  )}>
+                    <div className="flex items-center gap-1.5">
+                      <k.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{k.label}</span>
+                    </div>
+                    <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : k.variant === "warning" ? "text-yellow-500" : "text-foreground")}>{k.value}</span>
                   </div>
-                  <span className={cn("text-lg font-bold font-mono", k.variant === "critical" ? "text-destructive" : k.variant === "success" ? "text-accent" : "text-foreground")}>{k.value}</span>
-                  {"sub" in k && k.sub && <span className="text-[9px] text-muted-foreground font-mono">{k.sub}</span>}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Supply Radar Signals */}
           {(() => {
@@ -457,16 +463,13 @@ const ProcurementCockpitV1 = () => {
           </div>
 
           {/* Procurement List */}
-          <IHSectionShell icon={ShoppingCart} title={matchState.isProcessed ? "Afstreepoverzicht" : "Inkooplijst"} subtitle={matchState.isProcessed ? "Behoefte vs voorraad per artikel" : "Klik op een rij voor detail · Inclusief markt- en designcontext"} badge={matchState.isProcessed ? `${matchState.matched.length}` : `${filtered.length}`}>
-            {matchState.isProcessed ? (
-              <MatchedTable matched={matchState.matched} largeView={largeView} voorraadRows={matchState.voorraadRows} manualLinks={matchState.manualLinks} onLink={matchState.addLink} onUnlink={matchState.removeLink} />
-            ) : (
+          <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Behoefte vs voorraad · Klik op een rij voor detail" badge={`${filtered.length}`}>
             <div className="overflow-x-auto -mx-5">
               <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-2 py-2.5 w-6"></th>
-                    <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Status</th>
+                    <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Dekking</th>
                     {([
                       ["product", "Product"],
                       ["buyer", "Inkoper"],
@@ -508,7 +511,7 @@ const ProcurementCockpitV1 = () => {
                   {filtered.map(p => {
                     const isExpanded = expandedId === p.id;
                     const offers = supplierOffers[p.id] || [];
-                    const sLabel = statusLabels[p.status];
+                    
                     const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
                     const advisory = getDesignAdvice(p.id);
                     const priceCheck = getPriceCheck(p.id);
@@ -534,7 +537,20 @@ const ProcurementCockpitV1 = () => {
                             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                           </td>
                           <td className={cn("px-2", rowPy)}>
-                            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", sLabel.color)}>{sLabel.label}</span>
+                            {(() => {
+                              const dekking = getDekkingStatus(p);
+                              const dc = dekkingConfig[dekking];
+                              const dekkingPct = p.required_volume > 0 ? Math.min(100, Math.round((p.available_stock / p.required_volume) * 100)) : 100;
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap", dc.color)}>{dc.label}</span>
+                                  <div className="w-10 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                                    <div className={cn("h-full rounded-full", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")} style={{ width: `${dekkingPct}%` }} />
+                                  </div>
+                                  <span className="text-[8px] font-mono text-muted-foreground">{dekkingPct}%</span>
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td className={cn("px-3", rowPy)}>
                             <div className="font-medium text-foreground text-[12px]">{p.product}</div>
@@ -654,12 +670,37 @@ const ProcurementCockpitV1 = () => {
                           <tr className="border-b border-border/40 bg-muted/10">
                             <td colSpan={20} className="px-5 py-5">
                               <div className="space-y-5">
+                                {/* Dekking bar */}
+                                {(() => {
+                                  const dekkingPct = p.required_volume > 0 ? Math.min(100, Math.round((p.available_stock / p.required_volume) * 100)) : 100;
+                                  const dekking = getDekkingStatus(p);
+                                  const dc = dekkingConfig[dekking];
+                                  return (
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-[10px] font-medium text-muted-foreground w-14">Dekking</span>
+                                      <div className="flex-1 max-w-xs bg-muted rounded-full h-2 overflow-hidden">
+                                        <div className={cn("h-full rounded-full transition-all", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")} style={{ width: `${dekkingPct}%` }} />
+                                      </div>
+                                      <span className={cn("text-[11px] font-mono font-bold", dekkingPct >= 100 ? "text-accent" : dekkingPct >= 50 ? "text-yellow-500" : "text-destructive")}>{dekkingPct}%</span>
+                                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", dc.color)}>{dc.label}</span>
+                                    </div>
+                                  );
+                                })()}
+
                                 {/* Context cards — Demand & Inventory Pressure */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                   <div className="rounded-lg border border-border bg-background p-3">
-                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Benodigd</span>
-                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume - p.available_stock)}</div>
-                                    <div className="text-[9px] text-muted-foreground">Vraag: {fmt(p.required_volume)} · Voorraad: {fmt(p.available_stock)}</div>
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Behoefte</span>
+                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume)}</div>
+                                  </div>
+                                  <div className="rounded-lg border border-border bg-background p-3">
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Voorraad</span>
+                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.available_stock)}</div>
+                                    <div className="text-[9px] text-muted-foreground">Vrij: {fmt(p.free_stock)} · Gereserv: {fmt(p.reserved_stock)}</div>
+                                  </div>
+                                  <div className={cn("rounded-lg border bg-background p-3", p.open_buy_need > 0 ? "border-destructive/30" : "border-border")}>
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Nog nodig</span>
+                                    <div className={cn("text-sm font-bold font-mono mt-0.5", p.open_buy_need > 0 ? "text-destructive" : "text-accent")}>{fmt(p.open_buy_need)}</div>
                                   </div>
                                   {invPressure && (
                                     <div className="rounded-lg border border-border bg-background p-3">
@@ -1048,10 +1089,8 @@ const ProcurementCockpitV1 = () => {
                 </tbody>
               </table>
             </div>
-            )}
            </IHSectionShell>
 
-          {/* ── Inventory Intelligence ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="rounded-xl border border-border bg-card p-4 space-y-3">
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
