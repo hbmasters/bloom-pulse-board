@@ -366,7 +366,7 @@ const ProcurementCockpitV1 = () => {
             const nietCount = procurementRows.filter(p => getDekkingStatus(p) === "niet_gedekt").length;
             const overschotCount = procurementRows.filter(p => getDekkingStatus(p) === "overschot").length;
             return (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
                   { label: "Totaal behoefte", value: fmt(totals.required + totals.freeStock), icon: Package },
                   { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
