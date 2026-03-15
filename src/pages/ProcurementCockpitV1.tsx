@@ -511,7 +511,7 @@ const ProcurementCockpitV1 = () => {
                   {filtered.map(p => {
                     const isExpanded = expandedId === p.id;
                     const offers = supplierOffers[p.id] || [];
-                    const sLabel = statusLabels[p.status];
+                    
                     const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
                     const advisory = getDesignAdvice(p.id);
                     const priceCheck = getPriceCheck(p.id);
