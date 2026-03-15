@@ -36,7 +36,11 @@ import {
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
-const MarketSupplyPanel = () => {
+const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
+  familyFilter?: string | null;
+  onFamilyFilterChange?: (v: string | null) => void;
+  families?: string[];
+}) => {
   const [search, setSearch] = useState("");
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [visibleWeeks, setVisibleWeeks] = useState(12);
