@@ -923,12 +923,12 @@ const ProcurementCockpitV1 = () => {
                                   </div>
                                 )}
 
-                                {/* Inkoopmix voorstel */}
+                                {/* Substitutemix voorstel */}
                                 {purchaseMix && purchaseMix.has_mix && (
                                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
                                     <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
                                       <Shuffle className="w-3.5 h-3.5 text-primary" />
-                                      Inkoopmix voorstel
+                                      Substitutemix voorstel
                                     </h4>
                                     <div className="space-y-1">
                                       {purchaseMix.lines.map((l, i) => (
