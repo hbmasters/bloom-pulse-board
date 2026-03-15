@@ -153,7 +153,7 @@ const ProcurementCockpitV1 = () => {
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
-    { key: "substitute", label: "Substituut" },
+    
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
@@ -471,7 +471,7 @@ const ProcurementCockpitV1 = () => {
                       ["advised_price", "Adviesprijs"],
                       ["market_price", "Marktprijs"],
                       ["variance_vs_calculated", "Δ Hist."],
-                      ["substitute", "Substituut"],
+                      
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                       <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => key !== "design_advice" && key !== "markup_advice" && key !== "market_price" && toggleSort(key as SortKey)}>
@@ -568,16 +568,6 @@ const ProcurementCockpitV1 = () => {
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
                           
-                          {visibleColumns.has("substitute") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {subSuggestion && subSuggestion.status !== "none" && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
-                                  {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
-                                  {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("markup_advice") && (
                             <td className={cn("px-3", rowPy)}>
                               {advisory && advisory.markup_advice !== "none" && (
