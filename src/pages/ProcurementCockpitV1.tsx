@@ -466,7 +466,6 @@ const ProcurementCockpitV1 = () => {
                     {([
                       ["product", "Product"],
                       ["required_volume", "Benodigd"],
-                      ["supplier_intel", "Leverancier"],
                       ["quality_class", "Kwal."],
                       ["effective_price_col", "Eff. Prijs"],
                       ["supplier_advice", "Advies"],
@@ -475,9 +474,7 @@ const ProcurementCockpitV1 = () => {
                       ["advised_price", "Adviesprijs"],
                       ["market_price", "Marktprijs"],
                       ["variance_vs_calculated", "Δ Hist."],
-                      ["preferred_supplier", "Lev. Voorkeur"],
                       ["substitute", "Substituut"],
-                      ["design_advice", "Design"],
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                       <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => key !== "design_advice" && key !== "markup_advice" && key !== "market_price" && toggleSort(key as SortKey)}>
