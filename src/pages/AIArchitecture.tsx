@@ -159,9 +159,23 @@ const FlowArrow = () => (
   </div>
 );
 
+const allItems = [
+  ...coreTruthLayers.map(i => ({ ...i, layer: "Truth" })),
+  ...decisionEngines.map(i => ({ ...i, layer: "Engine" })),
+  ...executionLayer.map(i => ({ ...i, layer: "Execution" })),
+];
+
 const AIArchitecture = () => {
+  const liveCount = allItems.filter(i => i.status === "live").length;
+  const partialCount = allItems.filter(i => i.status === "partial").length;
+  const plannedCount = allItems.filter(i => i.status === "planned").length;
+  const totalCount = allItems.length;
+  const progressPct = Math.round(((liveCount + partialCount * 0.5) / totalCount) * 100);
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-2">
+    <div className="flex-1 overflow-y-auto flex">
+      {/* Main content */}
+      <div className="flex-1 p-4 md:p-6 lg:p-8 max-w-5xl space-y-2">
       {/* Page header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
