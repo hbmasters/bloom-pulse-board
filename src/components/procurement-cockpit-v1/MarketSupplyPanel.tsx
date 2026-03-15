@@ -88,9 +88,11 @@ const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
     return yearWeeks.slice(0, visibleWeeks);
   };
 
-  const filteredData = marketSupplyData.filter(m =>
-    !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredData = marketSupplyData.filter(m => {
+    if (search && !m.product.toLowerCase().includes(search.toLowerCase()) && !m.product_family.toLowerCase().includes(search.toLowerCase())) return false;
+    if (familyFilter && m.product_family !== familyFilter) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-4">
