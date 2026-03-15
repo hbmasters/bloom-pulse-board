@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { useState, useMemo } from "react";
+import { TrendingUp, TrendingDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   marketSupplyData,
@@ -19,6 +20,7 @@ const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
 const MarketSupplyPanel = () => {
+  const [search, setSearch] = useState("");
   const summary = {
     totalSupply: marketSupplyData.reduce((s, m) => s + m.available_supply, 0),
     critical: marketSupplyData.filter(m => m.supply_pressure === "critical").length,
@@ -67,6 +69,12 @@ const MarketSupplyPanel = () => {
         ))}
       </div>
 
+      {/* Search */}
+      <div className="relative max-w-xs">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoek product of familie..." className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+      </div>
+
       {/* Market supply table */}
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-[11px]">
@@ -78,7 +86,9 @@ const MarketSupplyPanel = () => {
             </tr>
           </thead>
           <tbody>
-            {marketSupplyData.map(m => {
+            {marketSupplyData
+              .filter(m => !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase()))
+              .map(m => {
               const pLabel = supplyPressureLabels[m.supply_pressure];
               const bestGrade = getBestGrade(m.product);
               const bestReliability = getBestReliability(m.product);
