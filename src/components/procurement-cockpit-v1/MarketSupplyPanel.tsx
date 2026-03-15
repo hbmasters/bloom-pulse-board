@@ -1,6 +1,7 @@
 import { useState, useMemo, Fragment } from "react";
-import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronRight, Link2, Package, Ruler } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { procurementRows } from "./procurement-cockpit-v1-data";
 import {
   marketSupplyData,
   supplyPressureLabels,
