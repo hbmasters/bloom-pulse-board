@@ -1132,16 +1132,11 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
-      {/* ── TAB: Marktaanbod (inclusief Handelsregister) ── */}
+      {/* ── TAB: Marktaanbod ── */}
       {activeTab === "marktaanbod" && (
-        <div className="space-y-5">
-          <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen en aanbodsdruk per product" badge={`${marketSupplyData.length} producten`}>
-            <MarketSupplyPanel />
-          </IHSectionShell>
-          <IHSectionShell icon={BookOpen} title="Handelsregister" subtitle="52-weken overzicht van beschikbaarheid, prijzen en seizoenspatronen" badge="52 weken">
-            <TradeRegistryPanel />
-          </IHSectionShell>
-        </div>
+        <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
+          <MarketSupplyPanel />
+        </IHSectionShell>
       )}
 
     </div>

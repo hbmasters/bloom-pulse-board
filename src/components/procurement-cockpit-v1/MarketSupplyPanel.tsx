@@ -1,26 +1,49 @@
-import { useState, useMemo } from "react";
-import { TrendingUp, TrendingDown, Search } from "lucide-react";
+import { useState, useMemo, Fragment } from "react";
+import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   marketSupplyData,
   supplyPressureLabels,
+  tradeRegistry,
+  seasonalityLabels,
+  riskLabels,
+  availabilityLabels,
 } from "./procurement-extended-data";
 import {
   supplierQualityData,
   supplierGradeLabels,
   effectivePriceData,
+  getDesignStability,
+  designStabilityLabels,
   type SupplierGrade,
 } from "./procurement-intelligence-data";
 import {
   reliabilityLabels,
+  productSupplierStabilityData,
+  supplierStabilityLabels,
   type ReliabilityClass,
 } from "./supplier-intelligence-data";
+import WeekYearFilter, { WeekYearFilterState } from "./WeekYearFilter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 
 const MarketSupplyPanel = () => {
   const [search, setSearch] = useState("");
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
+  const [visibleWeeks, setVisibleWeeks] = useState(12);
+  const [weekYearFilter, setWeekYearFilter] = useState<WeekYearFilterState>({
+    year: new Date().getFullYear(),
+    week: null,
+  });
+
   const summary = {
     totalSupply: marketSupplyData.reduce((s, m) => s + m.available_supply, 0),
     critical: marketSupplyData.filter(m => m.supply_pressure === "critical").length,
@@ -48,6 +71,21 @@ const MarketSupplyPanel = () => {
   };
 
   const getEffective = (product: string) => effectivePriceData.find(e => e.product === product);
+
+  const getTradeWeeks = (product: string) => {
+    const entry = tradeRegistry.find(t => t.product === product);
+    if (!entry) return [];
+    const yearWeeks = entry.weeks.filter(w => w.year === weekYearFilter.year);
+    if (weekYearFilter.week !== null) {
+      const startIdx = yearWeeks.findIndex(w => w.week >= weekYearFilter.week!);
+      return yearWeeks.slice(startIdx >= 0 ? startIdx : 0, (startIdx >= 0 ? startIdx : 0) + visibleWeeks);
+    }
+    return yearWeeks.slice(0, visibleWeeks);
+  };
+
+  const filteredData = marketSupplyData.filter(m =>
+    !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
@@ -80,57 +118,172 @@ const MarketSupplyPanel = () => {
         <table className="w-full text-[11px]">
           <thead>
             <tr className="border-b border-border bg-muted/30">
+              <th className="px-2 py-2.5 w-6"></th>
               {["Product", "Familie", "Aanbod", "Lev.", "Beste prijs", "Eff. prijs", "Δ Eff.", "Trend", "Druk", "Grade", "Betrouwb.", "Update"].map(h => (
                 <th key={h} className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {marketSupplyData
-              .filter(m => !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase()))
-              .map(m => {
+            {filteredData.map(m => {
               const pLabel = supplyPressureLabels[m.supply_pressure];
               const bestGrade = getBestGrade(m.product);
               const bestReliability = getBestReliability(m.product);
               const eff = getEffective(m.product);
               const effDelta = eff ? ((eff.effective_price - eff.best_price) / eff.best_price * 100) : 0;
+              const isExpanded = expandedProduct === m.product;
+              const weeks = isExpanded ? getTradeWeeks(m.product) : [];
+              const stabilityEntry = productSupplierStabilityData.find(p => p.product === m.product);
 
               return (
-                <tr key={m.product} className="border-b border-border/30 hover:bg-muted/10 transition-colors">
-                  <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">{m.product}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground">{m.product_family}</td>
-                  <td className="px-3 py-2.5 font-mono text-foreground">{fmt(m.available_supply)}</td>
-                  <td className="px-3 py-2.5 font-mono text-muted-foreground">{m.supplier_count}</td>
-                  <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{fmtPrice(m.best_price)}</td>
-                  <td className="px-3 py-2.5 font-mono text-foreground">
-                    {eff ? fmtPrice(eff.effective_price) : "—"}
-                  </td>
-                  <td className={cn("px-3 py-2.5 font-mono text-[10px]", effDelta > 5 ? "text-destructive" : "text-muted-foreground")}>
-                    {eff ? `+${effDelta.toFixed(1)}%` : "—"}
-                  </td>
-                  <td className={cn("px-3 py-2.5 font-mono flex items-center gap-1", m.price_trend > 3 ? "text-destructive" : m.price_trend < -1 ? "text-accent" : "text-muted-foreground")}>
-                    {m.price_trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    {m.price_trend > 0 ? "+" : ""}{m.price_trend.toFixed(1)}%
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", pLabel.color)}>{pLabel.label}</span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {bestGrade && (
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", supplierGradeLabels[bestGrade].color)}>
-                        {bestGrade}
+                <Fragment key={m.product}>
+                  <tr
+                    className={cn("border-b border-border/30 transition-colors cursor-pointer", isExpanded ? "bg-primary/5" : "hover:bg-muted/10")}
+                    onClick={() => setExpandedProduct(isExpanded ? null : m.product)}
+                  >
+                    <td className="px-2 py-2.5 text-muted-foreground">
+                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                    </td>
+                    <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">{m.product}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground">{m.product_family}</td>
+                    <td className="px-3 py-2.5 font-mono text-foreground">{fmt(m.available_supply)}</td>
+                    <td className="px-3 py-2.5 font-mono text-muted-foreground">{m.supplier_count}</td>
+                    <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{fmtPrice(m.best_price)}</td>
+                    <td className="px-3 py-2.5 font-mono text-foreground">
+                      {eff ? fmtPrice(eff.effective_price) : "—"}
+                    </td>
+                    <td className={cn("px-3 py-2.5 font-mono text-[10px]", effDelta > 5 ? "text-destructive" : "text-muted-foreground")}>
+                      {eff ? `+${effDelta.toFixed(1)}%` : "—"}
+                    </td>
+                    <td className={cn("px-3 py-2.5 font-mono", m.price_trend > 3 ? "text-destructive" : m.price_trend < -1 ? "text-accent" : "text-muted-foreground")}>
+                      <span className="flex items-center gap-1">
+                        {m.price_trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        {m.price_trend > 0 ? "+" : ""}{m.price_trend.toFixed(1)}%
                       </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {bestReliability && (
-                      <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[bestReliability].color)}>
-                        {reliabilityLabels[bestReliability].label}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-[9px] text-muted-foreground whitespace-nowrap">{m.last_updated}</td>
-                </tr>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", pLabel.color)}>{pLabel.label}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {bestGrade && (
+                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", supplierGradeLabels[bestGrade].color)}>
+                          {bestGrade}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {bestReliability && (
+                        <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[bestReliability].color)}>
+                          {reliabilityLabels[bestReliability].label}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-[9px] text-muted-foreground whitespace-nowrap">{m.last_updated}</td>
+                  </tr>
+
+                  {/* Expanded: Trade Registry weeks */}
+                  {isExpanded && (
+                    <tr>
+                      <td colSpan={13} className="p-0">
+                        <div className="bg-muted/20 border-t border-border px-4 py-3 space-y-3">
+                          {/* Supplier stability + week controls */}
+                          <div className="flex items-center justify-between flex-wrap gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                                52-weken overzicht
+                              </span>
+                              {stabilityEntry && (() => {
+                                const stabLabel = supplierStabilityLabels[stabilityEntry.stability];
+                                return (
+                                  <span className="flex items-center gap-2 text-[10px]">
+                                    <span className={cn("font-medium px-2 py-0.5 rounded-full border", stabLabel.color)}>
+                                      {stabLabel.label}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      {stabilityEntry.supplier_count} lev. · Top {stabilityEntry.top_supplier_share}%
+                                    </span>
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <WeekYearFilter value={weekYearFilter} onChange={setWeekYearFilter} />
+                              <Select value={visibleWeeks.toString()} onValueChange={(v) => setVisibleWeeks(Number(v))}>
+                                <SelectTrigger className="w-[90px] h-7 text-[10px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {[8, 12, 16, 20, 24, 52].map(n => (
+                                    <SelectItem key={n} value={n.toString()}>{n} wkn</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          {/* Week range */}
+                          <div className="text-center">
+                            <span className="text-[9px] font-mono text-muted-foreground">
+                              Week {weeks[0]?.week || "—"} – {weeks[weeks.length - 1]?.week || "—"} ({weekYearFilter.year})
+                            </span>
+                          </div>
+
+                          {/* Weeks table */}
+                          <div className="overflow-x-auto rounded-lg border border-border">
+                            <table className="w-full text-[10px]">
+                              <thead>
+                                <tr className="border-b border-border bg-muted/30">
+                                  {["Week", "Beschikbaarheid", "Prijs range", "Leveranciers", "Seizoen", "Risico", "Design"].map(h => (
+                                    <th key={h} className="px-2 py-1.5 text-left font-medium text-muted-foreground">{h}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {weeks.map((w, i) => {
+                                  const avail = availabilityLabels[w.expected_availability];
+                                  const season = seasonalityLabels[w.seasonality];
+                                  const risk = riskLabels[w.risk_level];
+                                  const stability = getDesignStability(w.expected_availability, w.risk_level);
+                                  const stabilityLabel = designStabilityLabels[stability];
+                                  const isCurrentWeek = i === 0 && weekYearFilter.week === null;
+                                  return (
+                                    <tr key={`${w.week}-${w.year}`} className={cn("border-b border-border/30 transition-colors", isCurrentWeek ? "bg-primary/5" : "hover:bg-muted/10")}>
+                                      <td className="px-2 py-1.5 font-mono font-semibold text-foreground whitespace-nowrap">
+                                        W{w.week}
+                                        {isCurrentWeek && <span className="ml-1.5 text-[8px] text-primary font-medium">NU</span>}
+                                      </td>
+                                      <td className="px-2 py-1.5">
+                                        <div className="flex items-center gap-1.5">
+                                          <div className={cn("w-2 h-2 rounded-full", avail.bg)} />
+                                          <span className={cn("font-medium", avail.color)}>{avail.label}</span>
+                                        </div>
+                                      </td>
+                                      <td className="px-2 py-1.5 font-mono text-muted-foreground">
+                                        {fmtPrice(w.expected_price_low)} – {fmtPrice(w.expected_price_high)}
+                                      </td>
+                                      <td className="px-2 py-1.5 font-mono text-muted-foreground">{w.supplier_count}</td>
+                                      <td className="px-2 py-1.5">
+                                        <span className={cn("font-medium", season.color)}>{season.label}</span>
+                                      </td>
+                                      <td className="px-2 py-1.5">
+                                        <span className={cn("font-medium", risk.color)}>{risk.label}</span>
+                                      </td>
+                                      <td className="px-2 py-1.5">
+                                        <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", stabilityLabel.color)}>
+                                          {stabilityLabel.label}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               );
             })}
           </tbody>
@@ -140,23 +293,38 @@ const MarketSupplyPanel = () => {
       {/* Legend */}
       <div className="flex flex-wrap gap-6 text-[9px] text-muted-foreground">
         <div className="flex items-center gap-2">
-          <span className="font-medium uppercase tracking-wide">Eff. prijs</span>
-          <span>= Beste prijs + afvalrisico</span>
+          <span className="font-medium uppercase tracking-wide">Druk:</span>
+          {Object.entries(supplyPressureLabels).map(([k, v]) => (
+            <span key={k} className={cn("font-medium px-1.5 py-0.5 rounded-full border", v.color)}>{v.label}</span>
+          ))}
         </div>
         <div className="flex items-center gap-2">
           <span className="font-medium uppercase tracking-wide">Grade</span>
           <span className={cn("font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels.A.color)}>A</span>
-          <span>Top</span>
           <span className={cn("font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels.B.color)}>B</span>
-          <span>OK</span>
           <span className={cn("font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels.C.color)}>C</span>
-          <span>Risico</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="font-medium uppercase tracking-wide">Betrouwb.</span>
           <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.high.color)}>Hoog</span>
           <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.medium.color)}>Medium</span>
           <span className={cn("font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels.low.color)}>Laag</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Beschikb.:</span>
+          {Object.entries(availabilityLabels).map(([k, v]) => (
+            <span key={k} className="flex items-center gap-1">
+              <span className={cn("w-2 h-2 rounded-full", v.bg)} /> {v.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium uppercase tracking-wide">Design:</span>
+          {Object.entries(designStabilityLabels).map(([k, v]) => (
+            <span key={k} className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", v.color)}>
+              {v.label}
+            </span>
+          ))}
         </div>
       </div>
     </div>
