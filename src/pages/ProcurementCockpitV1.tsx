@@ -103,12 +103,11 @@ const shopIcon = (status: ShopStatus["status"]) => {
 
 type SortKey = keyof ProcurementRow;
 type SortDir = "asc" | "desc";
-type CockpitTab = "inkooplijst" | "marktaanbod" | "handelsregister";
+type CockpitTab = "inkooplijst" | "marktaanbod";
 
 const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: "marktaanbod", label: "Marktaanbod", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-  { id: "handelsregister", label: "Handelsregister", icon: <BookOpen className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
@@ -1133,18 +1132,16 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
-      {/* ── TAB: Marktaanbod ── */}
+      {/* ── TAB: Marktaanbod (inclusief Handelsregister) ── */}
       {activeTab === "marktaanbod" && (
-        <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen en aanbodsdruk per product" badge={`${marketSupplyData.length} producten`}>
-          <MarketSupplyPanel />
-        </IHSectionShell>
-      )}
-
-      {/* ── TAB: Handelsregister ── */}
-      {activeTab === "handelsregister" && (
-        <IHSectionShell icon={BookOpen} title="Handelsregister" subtitle="52-weken overzicht van beschikbaarheid, prijzen en seizoenspatronen" badge="52 weken">
-          <TradeRegistryPanel />
-        </IHSectionShell>
+        <div className="space-y-5">
+          <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen en aanbodsdruk per product" badge={`${marketSupplyData.length} producten`}>
+            <MarketSupplyPanel />
+          </IHSectionShell>
+          <IHSectionShell icon={BookOpen} title="Handelsregister" subtitle="52-weken overzicht van beschikbaarheid, prijzen en seizoenspatronen" badge="52 weken">
+            <TradeRegistryPanel />
+          </IHSectionShell>
+        </div>
       )}
 
     </div>
