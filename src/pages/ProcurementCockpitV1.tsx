@@ -148,7 +148,6 @@ const ProcurementCockpitV1 = () => {
     { key: "required_volume", label: "Benodigd" },
     { key: "quality_class", label: "Kwaliteit" },
     { key: "effective_price_col", label: "Eff. Prijs" },
-    { key: "supplier_advice", label: "Advies" },
     { key: "historical_price", label: "Hist. Prijs" },
     { key: "offer_price", label: "Offerteprijs" },
     { key: "advised_price", label: "Adviesprijs" },
