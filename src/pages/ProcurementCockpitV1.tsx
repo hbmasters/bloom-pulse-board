@@ -331,23 +331,28 @@ const ProcurementCockpitV1 = () => {
         </div>
       </div>
 
-      {/* ── Tab navigation ── */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1">
-        {tabItems.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-1.5 text-[11px] font-semibold px-4 py-2 rounded-lg border transition-all whitespace-nowrap",
-              activeTab === tab.id
-                ? "bg-primary/10 text-primary border-primary/30"
-                : "bg-card text-muted-foreground border-border hover:border-primary/20 hover:text-foreground"
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+      {/* ── Tab navigation + Date filter on one line ── */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-1">
+          {tabItems.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1.5 text-[11px] font-semibold px-4 py-2 rounded-lg border transition-all whitespace-nowrap",
+                activeTab === tab.id
+                  ? "bg-primary/10 text-primary border-primary/30"
+                  : "bg-card text-muted-foreground border-border hover:border-primary/20 hover:text-foreground"
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto">
+          <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
+        </div>
       </div>
 
       {/* ── TAB: Inkooplijst ── */}
