@@ -466,7 +466,6 @@ const ProcurementCockpitV1 = () => {
                       ["required_volume", "Benodigd"],
                       ["quality_class", "Kwal."],
                       ["effective_price_col", "Eff. Prijs"],
-                      ["supplier_advice", "Advies"],
                       ["historical_price", "Hist. Prijs"],
                       ["offer_price", "Offerteprijs"],
                       ["advised_price", "Adviesprijs"],
