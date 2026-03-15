@@ -148,7 +148,6 @@ const ProcurementCockpitV1 = () => {
     { key: "required_volume", label: "Benodigd" },
     { key: "quality_class", label: "Kwaliteit" },
     { key: "effective_price_col", label: "Eff. Prijs" },
-    { key: "supplier_advice", label: "Advies" },
     { key: "historical_price", label: "Hist. Prijs" },
     { key: "offer_price", label: "Offerteprijs" },
     { key: "advised_price", label: "Adviesprijs" },
@@ -467,7 +466,6 @@ const ProcurementCockpitV1 = () => {
                       ["required_volume", "Benodigd"],
                       ["quality_class", "Kwal."],
                       ["effective_price_col", "Eff. Prijs"],
-                      ["supplier_advice", "Advies"],
                       ["historical_price", "Hist. Prijs"],
                       ["offer_price", "Offerteprijs"],
                       ["advised_price", "Adviesprijs"],
@@ -558,16 +556,6 @@ const ProcurementCockpitV1 = () => {
                           {visibleColumns.has("effective_price_col") && (
                             <td className={cn("px-3", rowPy, "font-mono text-foreground")}>
                               {supplierIntel ? fmtPrice(supplierIntel.effective_price) : "—"}
-                            </td>
-                          )}
-                          {visibleColumns.has("supplier_advice") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {supplierIntel && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", supplierAdviceLabels[supplierIntel.advice].color)}>
-                                  {supplierIntel.advice === "preferred" && <UserCheck className="w-2.5 h-2.5 inline mr-0.5" />}
-                                  {supplierAdviceLabels[supplierIntel.advice].label}
-                                </span>
-                              )}
                             </td>
                           )}
                           {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}

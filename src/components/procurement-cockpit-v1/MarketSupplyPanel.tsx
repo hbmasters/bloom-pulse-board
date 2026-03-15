@@ -1,6 +1,7 @@
 import { useState, useMemo, Fragment } from "react";
-import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Search, ChevronDown, ChevronRight, Link2, Package, Ruler } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { procurementRows } from "./procurement-cockpit-v1-data";
 import {
   marketSupplyData,
   supplyPressureLabels,
@@ -279,6 +280,62 @@ const MarketSupplyPanel = () => {
                               </tbody>
                             </table>
                           </div>
+
+                          {/* Koppelingen — linked procurement needs */}
+                          {(() => {
+                            const linkedRows = procurementRows.filter(
+                              p => p.product === m.product || p.product_family === m.product_family
+                            );
+                            if (linkedRows.length === 0) return null;
+                            const totalNeed = linkedRows.reduce((s, r) => s + r.required_volume, 0);
+                            const totalOpen = linkedRows.reduce((s, r) => s + r.open_buy_need, 0);
+                            return (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                    <Link2 className="w-3 h-3" /> Koppelingen inkooplijst
+                                  </span>
+                                  <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
+                                    {linkedRows.length} product{linkedRows.length !== 1 ? "en" : ""}
+                                  </span>
+                                  <span className="text-[9px] text-muted-foreground">
+                                    Totaal behoefte: <strong className="text-foreground">{fmt(totalNeed)}</strong> · Open inkoop: <strong className={cn(totalOpen > 0 ? "text-destructive" : "text-accent")}>{fmt(totalOpen)}</strong>
+                                  </span>
+                                </div>
+                                <div className="space-y-1">
+                                  {linkedRows.map(r => {
+                                    const dekkingPct = r.required_volume > 0 ? Math.min(100, Math.round((r.available_stock / r.required_volume) * 100)) : 100;
+                                    return (
+                                      <div key={r.id} className="flex items-center justify-between text-[10px] py-1.5 px-3 rounded-lg bg-background border border-border/30">
+                                        <div className="flex items-center gap-2">
+                                          <Package className="w-3 h-3 text-muted-foreground" />
+                                          <span className="font-medium text-foreground">{r.product}</span>
+                                          <span className="text-[9px] font-mono font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">{r.stem_length}</span>
+                                          <span className="text-[9px] text-muted-foreground">{r.buyer}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] text-muted-foreground">Behoefte:</span>
+                                            <span className="font-mono text-foreground">{fmt(r.required_volume)}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] text-muted-foreground">Open:</span>
+                                            <span className={cn("font-mono font-semibold", r.open_buy_need > 0 ? "text-destructive" : "text-accent")}>{fmt(r.open_buy_need)}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <div className="w-12 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                                              <div className={cn("h-full rounded-full", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")} style={{ width: `${dekkingPct}%` }} />
+                                            </div>
+                                            <span className="text-[8px] font-mono text-muted-foreground">{dekkingPct}%</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </td>
                     </tr>
