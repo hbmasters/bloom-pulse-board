@@ -670,12 +670,37 @@ const ProcurementCockpitV1 = () => {
                           <tr className="border-b border-border/40 bg-muted/10">
                             <td colSpan={20} className="px-5 py-5">
                               <div className="space-y-5">
+                                {/* Dekking bar */}
+                                {(() => {
+                                  const dekkingPct = p.required_volume > 0 ? Math.min(100, Math.round((p.available_stock / p.required_volume) * 100)) : 100;
+                                  const dekking = getDekkingStatus(p);
+                                  const dc = dekkingConfig[dekking];
+                                  return (
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-[10px] font-medium text-muted-foreground w-14">Dekking</span>
+                                      <div className="flex-1 max-w-xs bg-muted rounded-full h-2 overflow-hidden">
+                                        <div className={cn("h-full rounded-full transition-all", dekkingPct >= 100 ? "bg-accent" : dekkingPct >= 50 ? "bg-yellow-500" : "bg-destructive")} style={{ width: `${dekkingPct}%` }} />
+                                      </div>
+                                      <span className={cn("text-[11px] font-mono font-bold", dekkingPct >= 100 ? "text-accent" : dekkingPct >= 50 ? "text-yellow-500" : "text-destructive")}>{dekkingPct}%</span>
+                                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", dc.color)}>{dc.label}</span>
+                                    </div>
+                                  );
+                                })()}
+
                                 {/* Context cards — Demand & Inventory Pressure */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                   <div className="rounded-lg border border-border bg-background p-3">
-                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Benodigd</span>
-                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume - p.available_stock)}</div>
-                                    <div className="text-[9px] text-muted-foreground">Vraag: {fmt(p.required_volume)} · Voorraad: {fmt(p.available_stock)}</div>
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Behoefte</span>
+                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume)}</div>
+                                  </div>
+                                  <div className="rounded-lg border border-border bg-background p-3">
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Voorraad</span>
+                                    <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.available_stock)}</div>
+                                    <div className="text-[9px] text-muted-foreground">Vrij: {fmt(p.free_stock)} · Gereserv: {fmt(p.reserved_stock)}</div>
+                                  </div>
+                                  <div className={cn("rounded-lg border bg-background p-3", p.open_buy_need > 0 ? "border-destructive/30" : "border-border")}>
+                                    <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Nog nodig</span>
+                                    <div className={cn("text-sm font-bold font-mono mt-0.5", p.open_buy_need > 0 ? "text-destructive" : "text-accent")}>{fmt(p.open_buy_need)}</div>
                                   </div>
                                   {invPressure && (
                                     <div className="rounded-lg border border-border bg-background p-3">
