@@ -781,11 +781,11 @@ const ProcurementCockpitV1 = () => {
                                       <div className="text-[10px] text-foreground mt-1 leading-relaxed">{supplierIntel.effective_price_explanation}</div>
                                     </div>
 
-                                    {/* Kwaliteitsoverzicht alle leveranciers */}
-                                    {supplierQuality && supplierQuality.suppliers.length > 0 && (
+                                    {/* Alternatieve leveranciers (kwaliteit + alternatieven samengevoegd) */}
+                                    {(supplierQuality?.suppliers?.length > 0 || supplierIntel.alternative_suppliers.length > 0) && (
                                       <div className="space-y-1.5">
-                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Kwaliteitsoverzicht alle leveranciers</span>
-                                        {supplierQuality.suppliers.map((s, i) => (
+                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Alternatieve leveranciers</span>
+                                        {supplierQuality && supplierQuality.suppliers.map((s, i) => (
                                           <div key={`qual-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
                                             <div className="flex items-center gap-2">
                                               <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.grade].color)}>{s.grade}</span>
@@ -798,15 +798,8 @@ const ProcurementCockpitV1 = () => {
                                             </div>
                                           </div>
                                         ))}
-                                      </div>
-                                    )}
-
-                                    {/* Alternatieve leveranciers */}
-                                    {supplierIntel.alternative_suppliers.length > 0 && (
-                                      <div className="space-y-1.5">
-                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Alternatieve leveranciers</span>
                                         {supplierIntel.alternative_suppliers.map((alt, i) => (
-                                          <div key={i} className="flex items-center justify-between text-[10px] py-2 px-3 rounded-lg bg-muted/20 border border-border/30">
+                                          <div key={`alt-${i}`} className="flex items-center justify-between text-[10px] py-2 px-3 rounded-lg bg-muted/20 border border-border/30">
                                             <div className="flex items-center gap-2">
                                               <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[alt.class].color)}>{alt.class}</span>
                                               <span className="font-medium text-foreground">{alt.name}</span>
