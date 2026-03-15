@@ -49,6 +49,7 @@ const navSections: NavSection[] = [
       { id: "methodiek", icon: Brain, label: "Methodiek" },
       { id: "agents", icon: Bot, label: "Agents" },
       { id: "history", icon: Clock, label: "Historie" },
+      { id: "sentinel", icon: ShieldCheck, label: "Sentinel" },
       { id: "ai-architecture", icon: Cpu, label: "AI Architecture" },
       { id: "dev-control", icon: Shield, label: "Dev Control Protocol" },
       { id: "settings", icon: Settings, label: "Instellingen" },
