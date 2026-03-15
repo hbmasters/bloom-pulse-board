@@ -138,8 +138,9 @@ const ControlCenter = () => {
       <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-4">
         {/* Page header */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Monitor className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center relative">
+            <Shield className="w-5 h-5 text-primary" />
+            <Activity className="w-2.5 h-2.5 text-primary absolute -bottom-0.5 -right-0.5" />
           </div>
           <div>
             <h1 className="text-lg font-black tracking-wide text-foreground uppercase">HBMaster Control Center</h1>
