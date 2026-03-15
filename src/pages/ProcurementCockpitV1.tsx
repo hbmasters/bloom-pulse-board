@@ -372,9 +372,9 @@ const ProcurementCockpitV1 = () => {
                   { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
                   { label: "Open inkoop", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
                   { label: "Δ Offerte/Inkoop", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
-                  { label: "Gedekt", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
-                  { label: "Deels gedekt", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
-                  { label: "Niet gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
+                  { label: "Volledig", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
+                  { label: "Deels", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
+                  { label: "Gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
                   { label: "Overschot", value: `${overschotCount}`, icon: Package },
                 ].map(k => (
                   <div key={k.label} className={cn(
