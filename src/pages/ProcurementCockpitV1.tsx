@@ -699,7 +699,8 @@ const ProcurementCockpitV1 = () => {
                                                 <button disabled className="text-[10px] font-medium text-muted-foreground/40 border border-border rounded-lg px-2.5 py-1 cursor-not-allowed bg-muted/20">Koop</button>
                                               </td>
                                             </tr>
-                                          ))}
+                                            );
+                                          })}
                                         </tbody>
                                       </table>
                                     </div>
