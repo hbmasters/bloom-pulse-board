@@ -153,7 +153,7 @@ const ProcurementCockpitV1 = () => {
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
-    { key: "substitute", label: "Substituut" },
+    
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
