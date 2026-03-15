@@ -389,42 +389,8 @@ const ProcurementCockpitV1 = () => {
             );
           })()}
 
-          {/* Supply Radar Signals */}
-          {(() => {
-            const radarSignals = computeRadarSignals(mockDecisionRows);
-            const decisionKpis = computeKPIs(mockDecisionRows);
-            return radarSignals.length > 0 ? (
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {radarSignals.map((s, i) => (
-                    <div key={i} className={cn("flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-semibold", signalSeverityColors[s.severity])}>
-                      {s.severity === "critical" ? <ShieldAlert className="h-3 w-3" /> : s.severity === "warning" ? <AlertTriangle className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                      {s.label}
-                      <span className="font-normal opacity-80 hidden sm:inline">— {s.detail}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><BarChart3 className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Gem. druk</span></div>
-                    <span className={cn("text-base font-bold font-mono", decisionKpis.avgPressure > 60 ? "text-destructive" : "text-foreground")}>{decisionKpis.avgPressure}/100</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><TrendingDown className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Markdown</span></div>
-                    <span className="text-base font-bold font-mono text-destructive">{decisionKpis.markdownCandidates}</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Markup</span></div>
-                    <span className="text-base font-bold font-mono text-accent">{decisionKpis.markupOpportunities}</span>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card p-2.5 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-muted-foreground" /><span className="text-[9px] font-medium text-muted-foreground uppercase">Gem. Δ prijs</span></div>
-                    <span className={cn("text-base font-bold font-mono", Math.abs(decisionKpis.avgDeviation) > 10 ? "text-destructive" : "text-foreground")}>{decisionKpis.avgDeviation > 0 ? "+" : ""}{decisionKpis.avgDeviation}%</span>
-                  </div>
-                </div>
-              </div>
-            ) : null;
-          })()}
+
+
 
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative flex-1 min-w-[160px] max-w-xs">
