@@ -138,9 +138,9 @@ const ProcurementCockpitV1 = () => {
     return "niet_gedekt";
   };
   const dekkingConfig: Record<DekkingStatus, { label: string; color: string }> = {
-    gedekt: { label: "Gedekt", color: "text-accent bg-accent/10 border-accent/20" },
+    gedekt: { label: "Volledig", color: "text-accent bg-accent/10 border-accent/20" },
     deels_gedekt: { label: "Deels", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
-    niet_gedekt: { label: "Niet gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
+    niet_gedekt: { label: "Gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
     overschot: { label: "Overschot", color: "text-muted-foreground bg-muted/50 border-border" },
   };
 
@@ -366,15 +366,15 @@ const ProcurementCockpitV1 = () => {
             const nietCount = procurementRows.filter(p => getDekkingStatus(p) === "niet_gedekt").length;
             const overschotCount = procurementRows.filter(p => getDekkingStatus(p) === "overschot").length;
             return (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
                   { label: "Totaal behoefte", value: fmt(totals.required + totals.freeStock), icon: Package },
                   { label: "Vrije voorraad", value: fmt(totals.freeStock), icon: CheckCircle2 },
                   { label: "Open inkoop", value: fmt(totals.openBuy), icon: AlertTriangle, highlight: true },
                   { label: "Δ Offerte/Inkoop", value: `${totals.offerVsHistorical > 0 ? "+" : ""}${totals.offerVsHistorical.toFixed(1)}%`, icon: totals.offerVsHistorical > 0 ? TrendingUp : TrendingDown, variant: totals.offerVsHistorical <= 0 ? "success" as const : "critical" as const },
-                  { label: "Gedekt", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
-                  { label: "Deels gedekt", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
-                  { label: "Niet gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
+                  { label: "Volledig", value: `${gedektCount}`, icon: CheckCircle2, variant: "success" as const },
+                  { label: "Deels", value: `${deelsCount}`, icon: AlertTriangle, variant: "warning" as const },
+                  { label: "Gedekt", value: `${nietCount}`, icon: AlertTriangle, variant: "critical" as const },
                   { label: "Overschot", value: `${overschotCount}`, icon: Package },
                 ].map(k => (
                   <div key={k.label} className={cn(
