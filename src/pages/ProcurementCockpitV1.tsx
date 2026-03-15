@@ -131,7 +131,19 @@ const ProcurementCockpitV1 = () => {
   const [showSupplierOffers, setShowSupplierOffers] = useState(true);
   const [showMarketContext, setShowMarketContext] = useState(true);
 
-  const matchState = useMatchState();
+  // Compute dekking status per row
+  type DekkingStatus = "gedekt" | "deels_gedekt" | "niet_gedekt" | "overschot";
+  const getDekkingStatus = (p: ProcurementRow): DekkingStatus => {
+    if (p.available_stock >= p.required_volume && p.open_buy_need === 0) return p.free_stock > p.required_volume ? "overschot" : "gedekt";
+    if (p.free_stock > 0 && p.open_buy_need > 0) return "deels_gedekt";
+    return "niet_gedekt";
+  };
+  const dekkingConfig: Record<DekkingStatus, { label: string; color: string }> = {
+    gedekt: { label: "Gedekt", color: "text-accent bg-accent/10 border-accent/20" },
+    deels_gedekt: { label: "Deels", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
+    niet_gedekt: { label: "Niet gedekt", color: "text-destructive bg-destructive/10 border-destructive/20" },
+    overschot: { label: "Overschot", color: "text-muted-foreground bg-muted/50 border-border" },
+  };
 
   const allColumns = [
     { key: "buyer", label: "Inkoper" },
