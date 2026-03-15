@@ -980,9 +980,12 @@ const ProcurementCockpitV1 = () => {
 
       {/* ── TAB: Marktaanbod ── */}
       {activeTab === "marktaanbod" && (
-        <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
-          <MarketSupplyPanel />
-        </IHSectionShell>
+        <>
+          <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
+          <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
+            <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
+          </IHSectionShell>
+        </>
       )}
 
     </div>
