@@ -552,15 +552,6 @@ const ProcurementCockpitV1 = () => {
                           </td>
                           
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
-                          {visibleColumns.has("inventory_pressure") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {invPressure && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", inventoryPressureLabels[invPressure.status].color)}>
-                                  {inventoryPressureLabels[invPressure.status].label}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("supplier_intel") && (
                             <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>
                               {supplierIntel ? supplierIntel.supplier_name.split(" ").slice(0, 2).join(" ") : p.preferred_supplier.split(" ").slice(0, 2).join(" ")}
