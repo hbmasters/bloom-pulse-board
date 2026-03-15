@@ -468,12 +468,9 @@ const ProcurementCockpitV1 = () => {
                     <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Dekking</th>
                     {([
                       ["product", "Product"],
-                      ["buyer", "Inkoper"],
                       ["required_volume", "Benodigd"],
-                      ["inventory_pressure", "Druk"],
                       ["supplier_intel", "Leverancier"],
                       ["quality_class", "Kwal."],
-                      ["reliability", "Betr."],
                       ["effective_price_col", "Eff. Prijs"],
                       ["supplier_advice", "Advies"],
                       ["historical_price", "Hist. Prijs"],
@@ -483,7 +480,6 @@ const ProcurementCockpitV1 = () => {
                       ["variance_vs_calculated", "Δ Hist."],
                       ["preferred_supplier", "Lev. Voorkeur"],
                       ["substitute", "Substituut"],
-                      ["purchase_mix", "Mix"],
                       ["design_advice", "Design"],
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
