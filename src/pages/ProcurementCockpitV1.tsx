@@ -146,12 +146,9 @@ const ProcurementCockpitV1 = () => {
   };
 
   const allColumns = [
-    { key: "buyer", label: "Inkoper" },
     { key: "required_volume", label: "Benodigd" },
-    { key: "inventory_pressure", label: "Voorraaddruk" },
     { key: "supplier_intel", label: "Leverancier" },
     { key: "quality_class", label: "Kwaliteit" },
-    { key: "reliability", label: "Betrouwb." },
     { key: "effective_price_col", label: "Eff. Prijs" },
     { key: "supplier_advice", label: "Advies" },
     { key: "historical_price", label: "Hist. Prijs" },
@@ -161,7 +158,6 @@ const ProcurementCockpitV1 = () => {
     { key: "variance_vs_calculated", label: "Δ Hist." },
     { key: "preferred_supplier", label: "Lev. Voorkeur" },
     { key: "substitute", label: "Substituut" },
-    { key: "purchase_mix", label: "Inkoopmix" },
     { key: "design_advice", label: "Design" },
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
@@ -472,12 +468,9 @@ const ProcurementCockpitV1 = () => {
                     <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Dekking</th>
                     {([
                       ["product", "Product"],
-                      ["buyer", "Inkoper"],
                       ["required_volume", "Benodigd"],
-                      ["inventory_pressure", "Druk"],
                       ["supplier_intel", "Leverancier"],
                       ["quality_class", "Kwal."],
-                      ["reliability", "Betr."],
                       ["effective_price_col", "Eff. Prijs"],
                       ["supplier_advice", "Advies"],
                       ["historical_price", "Hist. Prijs"],
@@ -487,7 +480,6 @@ const ProcurementCockpitV1 = () => {
                       ["variance_vs_calculated", "Δ Hist."],
                       ["preferred_supplier", "Lev. Voorkeur"],
                       ["substitute", "Substituut"],
-                      ["purchase_mix", "Mix"],
                       ["design_advice", "Design"],
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
@@ -558,17 +550,8 @@ const ProcurementCockpitV1 = () => {
                               <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
                             </div>
                           </td>
-                          {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
+                          
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
-                          {visibleColumns.has("inventory_pressure") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {invPressure && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", inventoryPressureLabels[invPressure.status].color)}>
-                                  {inventoryPressureLabels[invPressure.status].label}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("supplier_intel") && (
                             <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>
                               {supplierIntel ? supplierIntel.supplier_name.split(" ").slice(0, 2).join(" ") : p.preferred_supplier.split(" ").slice(0, 2).join(" ")}
@@ -579,15 +562,6 @@ const ProcurementCockpitV1 = () => {
                               {supplierIntel && (
                                 <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[supplierIntel.supplier_class].color)}>
                                   {supplierIntel.supplier_class}
-                                </span>
-                              )}
-                            </td>
-                          )}
-                          {visibleColumns.has("reliability") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {supplierIntel && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", reliabilityLabels[supplierIntel.reliability_class].color)}>
-                                  {reliabilityLabels[supplierIntel.reliability_class].label}
                                 </span>
                               )}
                             </td>
@@ -623,15 +597,6 @@ const ProcurementCockpitV1 = () => {
                                 <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
                                   {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
                                   {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
-                                </span>
-                              )}
-                            </td>
-                          )}
-                          {visibleColumns.has("purchase_mix") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {purchaseMix && purchaseMix.has_mix && (
-                                <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20 whitespace-nowrap">
-                                  <Shuffle className="w-2.5 h-2.5 inline mr-0.5" />Mix
                                 </span>
                               )}
                             </td>
@@ -688,7 +653,7 @@ const ProcurementCockpitV1 = () => {
                                 })()}
 
                                 {/* Context cards — Demand & Inventory Pressure */}
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                                   <div className="rounded-lg border border-border bg-background p-3">
                                     <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Behoefte</span>
                                     <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmt(p.required_volume)}</div>
