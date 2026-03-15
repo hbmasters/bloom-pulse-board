@@ -86,7 +86,9 @@ const MarketSupplyPanel = () => {
             </tr>
           </thead>
           <tbody>
-            {marketSupplyData.map(m => {
+            {marketSupplyData
+              .filter(m => !search || m.product.toLowerCase().includes(search.toLowerCase()) || m.product_family.toLowerCase().includes(search.toLowerCase()))
+              .map(m => {
               const pLabel = supplyPressureLabels[m.supply_pressure];
               const bestGrade = getBestGrade(m.product);
               const bestReliability = getBestReliability(m.product);
