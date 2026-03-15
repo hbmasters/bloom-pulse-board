@@ -568,16 +568,6 @@ const ProcurementCockpitV1 = () => {
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
                           
-                          {visibleColumns.has("substitute") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {subSuggestion && subSuggestion.status !== "none" && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
-                                  {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
-                                  {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("markup_advice") && (
                             <td className={cn("px-3", rowPy)}>
                               {advisory && advisory.markup_advice !== "none" && (
