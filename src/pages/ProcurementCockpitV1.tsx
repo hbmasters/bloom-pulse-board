@@ -676,9 +676,16 @@ const ProcurementCockpitV1 = () => {
                                           </tr>
                                         </thead>
                                         <tbody>
-                                          {offers.map(o => (
-                                            <tr key={o.supplier_name} className="border-b border-border/30 hover:bg-muted/10 transition-colors">
-                                              <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">{o.supplier_name}</td>
+                                          {offers.map(o => {
+                                            const isPreferred = o.supplier_name === p.preferred_supplier;
+                                            return (
+                                            <tr key={o.supplier_name} className={cn("border-b border-border/30 transition-colors", isPreferred ? "bg-accent/5 ring-1 ring-inset ring-accent/20" : "hover:bg-muted/10")}>
+                                              <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">
+                                                <span className="flex items-center gap-1.5">
+                                                  {o.supplier_name}
+                                                  {isPreferred && <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">Voorkeur</span>}
+                                                </span>
+                                              </td>
                                               <td className="px-3 py-2.5 font-mono text-foreground">{fmtPrice(o.offer_price)}</td>
                                               <td className="px-3 py-2.5 font-mono text-muted-foreground">{fmt(o.offer_quantity)}</td>
                                               <td className="px-3 py-2.5 text-muted-foreground">{o.delivery_timing}</td>
@@ -692,7 +699,8 @@ const ProcurementCockpitV1 = () => {
                                                 <button disabled className="text-[10px] font-medium text-muted-foreground/40 border border-border rounded-lg px-2.5 py-1 cursor-not-allowed bg-muted/20">Koop</button>
                                               </td>
                                             </tr>
-                                          ))}
+                                            );
+                                          })}
                                         </tbody>
                                       </table>
                                     </div>
