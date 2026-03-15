@@ -39,6 +39,7 @@ const navSections: NavSection[] = [
       { id: "methodiek", icon: Brain, label: "Methodiek" },
       { id: "agents", icon: Bot, label: "Agents" },
       { id: "history", icon: Clock, label: "Historie" },
+      { id: "sentinel", icon: ShieldCheck, label: "Sentinel" },
       { id: "ai-architecture", icon: Cpu, label: "AI Architecture" },
       { id: "dev-control", icon: Shield, label: "Dev Control Protocol" },
       { id: "settings", icon: Settings, label: "Instellingen" },
@@ -49,7 +50,6 @@ const navSections: NavSection[] = [
     entries: [
       { id: "procurement-cockpit-v1", icon: ShoppingCart, label: "Purchasing List V1.5" },
       { id: "strategic-insight", icon: Compass, label: "Strategic & Market Insight" },
-      { id: "sentinel", icon: ShieldCheck, label: "Sentinel" },
     ],
   },
 ];
