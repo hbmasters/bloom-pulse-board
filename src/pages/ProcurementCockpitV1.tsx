@@ -258,19 +258,6 @@ const ProcurementCockpitV1 = () => {
           </span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {activeTab === "inkooplijst" && (
-            <UploadControls
-              inkoopFile={matchState.inkoopFile}
-              voorraadFile={matchState.voorraadFile}
-              inkoopCount={matchState.inkoopCount}
-              voorraadCount={matchState.voorraadCount}
-              isProcessed={matchState.isProcessed}
-              onUpload={matchState.handleUpload}
-              onProcess={matchState.processMatch}
-              onReset={matchState.reset}
-              linkedCount={matchState.manualLinks.length}
-            />
-          )}
           <div className="h-4 w-px bg-border" />
           {/* Shop status */}
           <div className="relative">
