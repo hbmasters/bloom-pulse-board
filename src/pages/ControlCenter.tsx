@@ -175,7 +175,7 @@ const ControlCenter = () => {
 
         {/* Tab content */}
         <div className="min-h-[60vh]">
-          {activeTab === "sentinel" && <Sentinel />}
+          {activeTab === "sentinel" && <Sentinel embedded />}
 
           {activeTab === "scheduler" && (
             <div className="rounded-lg border border-border bg-card/40 overflow-hidden" style={{ minHeight: "500px" }}>
