@@ -147,7 +147,6 @@ const ProcurementCockpitV1 = () => {
 
   const allColumns = [
     { key: "required_volume", label: "Benodigd" },
-    { key: "supplier_intel", label: "Leverancier" },
     { key: "quality_class", label: "Kwaliteit" },
     { key: "effective_price_col", label: "Eff. Prijs" },
     { key: "supplier_advice", label: "Advies" },
@@ -156,9 +155,7 @@ const ProcurementCockpitV1 = () => {
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
-    { key: "preferred_supplier", label: "Lev. Voorkeur" },
     { key: "substitute", label: "Substituut" },
-    { key: "design_advice", label: "Design" },
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
@@ -469,7 +466,6 @@ const ProcurementCockpitV1 = () => {
                     {([
                       ["product", "Product"],
                       ["required_volume", "Benodigd"],
-                      ["supplier_intel", "Leverancier"],
                       ["quality_class", "Kwal."],
                       ["effective_price_col", "Eff. Prijs"],
                       ["supplier_advice", "Advies"],
@@ -478,9 +474,7 @@ const ProcurementCockpitV1 = () => {
                       ["advised_price", "Adviesprijs"],
                       ["market_price", "Marktprijs"],
                       ["variance_vs_calculated", "Δ Hist."],
-                      ["preferred_supplier", "Lev. Voorkeur"],
                       ["substitute", "Substituut"],
-                      ["design_advice", "Design"],
                       ["markup_advice", "Markup/Down"],
                     ] as [string, string][]).filter(([key]) => key === "product" || visibleColumns.has(key)).map(([key, label]) => (
                       <th key={key} className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => key !== "design_advice" && key !== "markup_advice" && key !== "market_price" && toggleSort(key as SortKey)}>
@@ -552,11 +546,6 @@ const ProcurementCockpitV1 = () => {
                           </td>
                           
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
-                          {visibleColumns.has("supplier_intel") && (
-                            <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>
-                              {supplierIntel ? supplierIntel.supplier_name.split(" ").slice(0, 2).join(" ") : p.preferred_supplier.split(" ").slice(0, 2).join(" ")}
-                            </td>
-                          )}
                           {visibleColumns.has("quality_class") && (
                             <td className={cn("px-3", rowPy)}>
                               {supplierIntel && (
@@ -590,22 +579,13 @@ const ProcurementCockpitV1 = () => {
                             </td>
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
-                          {visibleColumns.has("preferred_supplier") && <td className={cn("px-3", rowPy, "text-muted-foreground whitespace-nowrap text-[10px]")}>{p.preferred_supplier}</td>}
+                          
                           {visibleColumns.has("substitute") && (
                             <td className={cn("px-3", rowPy)}>
                               {subSuggestion && subSuggestion.status !== "none" && (
                                 <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", substituteStatusLabels[subSuggestion.status].color)}>
                                   {subSuggestion.status === "recommended" ? <Repeat className="w-2.5 h-2.5 inline mr-0.5" /> : null}
                                   {subSuggestion.status === "recommended" ? "Aanbev." : "Beschikb."}
-                                </span>
-                              )}
-                            </td>
-                          )}
-                          {visibleColumns.has("design_advice") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {advisory && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", designAdviceLabels[advisory.design_advice].color)}>
-                                  {designAdviceLabels[advisory.design_advice].icon}
                                 </span>
                               )}
                             </td>
