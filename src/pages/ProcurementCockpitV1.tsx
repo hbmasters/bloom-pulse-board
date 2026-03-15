@@ -463,16 +463,13 @@ const ProcurementCockpitV1 = () => {
           </div>
 
           {/* Procurement List */}
-          <IHSectionShell icon={ShoppingCart} title={matchState.isProcessed ? "Afstreepoverzicht" : "Inkooplijst"} subtitle={matchState.isProcessed ? "Behoefte vs voorraad per artikel" : "Klik op een rij voor detail · Inclusief markt- en designcontext"} badge={matchState.isProcessed ? `${matchState.matched.length}` : `${filtered.length}`}>
-            {matchState.isProcessed ? (
-              <MatchedTable matched={matchState.matched} largeView={largeView} voorraadRows={matchState.voorraadRows} manualLinks={matchState.manualLinks} onLink={matchState.addLink} onUnlink={matchState.removeLink} />
-            ) : (
+          <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Behoefte vs voorraad · Klik op een rij voor detail" badge={`${filtered.length}`}>
             <div className="overflow-x-auto -mx-5">
               <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-2 py-2.5 w-6"></th>
-                    <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Status</th>
+                    <th className="px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Dekking</th>
                     {([
                       ["product", "Product"],
                       ["buyer", "Inkoper"],
