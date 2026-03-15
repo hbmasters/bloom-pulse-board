@@ -179,20 +179,22 @@ const AlertsPanel = () => (
 );
 
 /* ── Main Page ── */
-const Sentinel = () => (
-  <div className="h-full overflow-y-auto">
-    <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-          <Shield className="w-5 h-5 text-primary" />
+const Sentinel = ({ embedded = false }: { embedded?: boolean }) => (
+  <div className={embedded ? "" : "h-full overflow-y-auto"}>
+    <div className={embedded ? "space-y-6" : "max-w-[1400px] mx-auto p-4 md:p-6 space-y-6"}>
+      {/* Page header — only when standalone */}
+      {!embedded && (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black tracking-wide text-foreground uppercase">HBMaster Sentinel</h1>
+            <p className="text-[11px] text-muted-foreground font-mono">Platform security, health & communication control</p>
+          </div>
+          <span className="ml-auto text-[9px] font-mono uppercase tracking-widest text-muted-foreground px-2 py-1 rounded border border-border bg-muted/30">Labs / Beta</span>
         </div>
-        <div>
-          <h1 className="text-lg font-black tracking-wide text-foreground uppercase">HBMaster Sentinel</h1>
-          <p className="text-[11px] text-muted-foreground font-mono">Platform security, health & communication control</p>
-        </div>
-        <span className="ml-auto text-[9px] font-mono uppercase tracking-widest text-muted-foreground px-2 py-1 rounded border border-border bg-muted/30">Labs / Beta</span>
-      </div>
+      )}
 
       {/* S1 — KPI Header */}
       <KPIHeader />
