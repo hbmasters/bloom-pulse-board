@@ -676,8 +676,10 @@ const ProcurementCockpitV1 = () => {
                                           </tr>
                                         </thead>
                                         <tbody>
-                                          {offers.map(o => (
-                                            <tr key={o.supplier_name} className="border-b border-border/30 hover:bg-muted/10 transition-colors">
+                                          {offers.map(o => {
+                                            const isPreferred = o.supplier_name === p.preferred_supplier;
+                                            return (
+                                            <tr key={o.supplier_name} className={cn("border-b border-border/30 transition-colors", isPreferred ? "bg-accent/5 ring-1 ring-inset ring-accent/20" : "hover:bg-muted/10")}>
                                               <td className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap">{o.supplier_name}</td>
                                               <td className="px-3 py-2.5 font-mono text-foreground">{fmtPrice(o.offer_price)}</td>
                                               <td className="px-3 py-2.5 font-mono text-muted-foreground">{fmt(o.offer_quantity)}</td>
