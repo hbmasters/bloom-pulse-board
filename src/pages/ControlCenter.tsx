@@ -138,8 +138,9 @@ const ControlCenter = () => {
       <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-4">
         {/* Page header */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Monitor className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center relative">
+            <Shield className="w-5 h-5 text-primary" />
+            <Activity className="w-2.5 h-2.5 text-primary absolute -bottom-0.5 -right-0.5" />
           </div>
           <div>
             <h1 className="text-lg font-black tracking-wide text-foreground uppercase">HBMaster Control Center</h1>
@@ -224,6 +225,23 @@ const ControlCenter = () => {
               <WeeklyReviewPanel />
             </IHSectionShell>
           )}
+
+          {/* Future Extensions — prepared structure */}
+          <div className="mt-6 rounded-lg border border-dashed border-border/50 p-4">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground/40">Geplande Extensies</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+              {[
+                "Morning AI Briefing",
+                "System Alerts Feed",
+                "Node Cluster Monitoring",
+                "Agent Activity Monitoring",
+              ].map(ext => (
+                <div key={ext} className="rounded-lg border border-border/30 bg-muted/5 p-2.5 text-center">
+                  <span className="text-[10px] font-mono text-muted-foreground/40">{ext}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
