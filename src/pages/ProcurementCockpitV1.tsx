@@ -815,64 +815,8 @@ const ProcurementCockpitV1 = () => {
                                   </div>
                                 )}
 
-                                {/* Market & Design context block */}
-                                {showMarketContext && (advisory || priceCheck || market) && (
-                                  <div className="rounded-lg border border-border bg-background p-4 space-y-3">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                      {market && (
-                                        <div className="rounded-lg border border-border bg-background p-2.5">
-                                          <span className="text-[9px] font-medium text-muted-foreground uppercase">Marktprijs</span>
-                                          <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmtPrice(market.best_price)}</div>
-                                          <div className="text-[9px] text-muted-foreground">{fmtPrice(market.price_low)} – {fmtPrice(market.price_high)}</div>
-                                          {effectivePrice && (
-                                            <div className="text-[9px] text-muted-foreground mt-1">
-                                              Eff. prijs: <strong className="text-foreground">{fmtPrice(effectivePrice.effective_price)}</strong>
-                                              <span className="text-[8px] ml-1">(+{effectivePrice.waste_risk_pct}% afval)</span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                      {priceCheck && (
-                                        <div className="rounded-lg border border-border bg-background p-2.5">
-                                          <span className="text-[9px] font-medium text-muted-foreground uppercase">Prijscheck</span>
-                                          <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", priceCheckStatusLabels[priceCheck.price_check_status].color)}>
-                                              {priceCheckStatusLabels[priceCheck.price_check_status].label}
-                                            </span>
-                                          </div>
-                                          <div className="text-[9px] text-muted-foreground mt-1">{priceCheck.advice_text}</div>
-                                        </div>
-                                      )}
-                                      {advisory && (
-                                        <div className="rounded-lg border border-border bg-background p-2.5">
-                                          <span className="text-[9px] font-medium text-muted-foreground uppercase">Design advies</span>
-                                          <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", designAdviceLabels[advisory.design_advice].color)}>
-                                              {designAdviceLabels[advisory.design_advice].icon} {designAdviceLabels[advisory.design_advice].label}
-                                            </span>
-                                          </div>
-                                          <div className="text-[9px] text-muted-foreground mt-1">{advisory.advice_detail}</div>
-                                          {advisory.substitute && (
-                                            <div className="flex items-center gap-1 text-[9px] text-primary mt-1">
-                                              <ArrowRight className="w-2.5 h-2.5" /> Substituut: {advisory.substitute}
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                      {advisory && advisory.markup_advice !== "none" && (
-                                        <div className="rounded-lg border border-border bg-background p-2.5">
-                                          <span className="text-[9px] font-medium text-muted-foreground uppercase">Markup/Markdown</span>
-                                          <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", markupAdviceLabels[advisory.markup_advice].color)}>
-                                              {markupAdviceLabels[advisory.markup_advice].label}
-                                            </span>
-                                          </div>
-                                          <div className="text-[9px] text-muted-foreground mt-1">{advisory.markup_detail}</div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
+
+
 
                                 {/* Price comparison */}
                                 {showPriceComparison && <div>
