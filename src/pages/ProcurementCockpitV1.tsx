@@ -787,8 +787,7 @@ const ProcurementCockpitV1 = () => {
                                         </div>
                                       </>
                                     )}
-                                  </div>
-                                )}
+                                </div>}
 
                               </div>
                             </td>
