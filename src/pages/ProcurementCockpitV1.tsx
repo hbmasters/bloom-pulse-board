@@ -737,13 +737,11 @@ const ProcurementCockpitV1 = () => {
                                 </div>}
 
                                 {/* Substituut opties (kandidaten + mix samengevoegd) */}
-                                {((subSuggestion && subSuggestion.candidates.length > 0) || (purchaseMix && purchaseMix.has_mix)) && (
-                                  <div className="rounded-lg border border-border bg-background p-4 space-y-3">
-                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
-                                      <Repeat className="w-3.5 h-3.5 text-primary" />
-                                      Substituut opties
-                                      {subSuggestion && <span className="text-[9px] font-normal text-muted-foreground ml-1">({subSuggestion.candidates.length} kandidaten)</span>}
-                                    </h4>
+                                {((subSuggestion && subSuggestion.candidates.length > 0) || (purchaseMix && purchaseMix.has_mix)) && <div>
+                                  <h4 className="text-xs font-semibold text-foreground mb-2.5 flex items-center gap-1.5">
+                                    <Repeat className="w-3.5 h-3.5 text-primary" />
+                                    Substituut opties ({subSuggestion ? subSuggestion.candidates.length : 0})
+                                  </h4>
 
                                     {subSuggestion && subSuggestion.candidates.length > 0 && (
                                       <div className="space-y-1">
