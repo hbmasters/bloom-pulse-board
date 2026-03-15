@@ -33,7 +33,7 @@ const viewTitles: Record<MCView, string> = {
   "production-cockpit": "Production Cockpit",
   commercial: "Commercial Cockpit",
   
-  "procurement-cockpit-v1": "Purchasing List V1.5",
+  "procurement-cockpit-v1": "Procurement Cockpit V0.5",
   sentinel: "HBMaster Sentinel",
   "strategic-insight": "Strategic & Market Insight",
   "ai-architecture": "AI Architecture",
