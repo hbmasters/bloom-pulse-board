@@ -594,42 +594,23 @@ const ProcurementCockpitV1 = () => {
                                     <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Nog nodig</span>
                                     <div className={cn("text-sm font-bold font-mono mt-0.5", p.open_buy_need > 0 ? "text-destructive" : "text-accent")}>{fmt(p.open_buy_need)}</div>
                                   </div>
-                                  {invPressure && (
-                                    <div className="rounded-lg border border-border bg-background p-3">
-                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Voorraaddruk</span>
-                                      <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", inventoryPressureLabels[invPressure.status].color)}>
-                                          {inventoryPressureLabels[invPressure.status].label}
-                                        </span>
-                                        <span className="text-[10px] font-mono text-muted-foreground">{invPressure.stock_days}d</span>
+                                  {/* Price comparison cards inline */}
+                                  {showPriceComparison && [
+                                    { label: "Hist. prijs", value: p.historical_price, baseline: true },
+                                    { label: "Offerteprijs", value: p.offer_price },
+                                    { label: "Adviesprijs", value: p.advised_price },
+                                    ...(market ? [{ label: "Marktprijs", value: market.best_price }] : []),
+                                  ].map(pc => {
+                                    const diff = p.historical_price > 0 ? ((pc.value - p.historical_price) / p.historical_price * 100) : 0;
+                                    return (
+                                      <div key={pc.label} className={cn("rounded-lg border border-border bg-background p-3", pc.baseline && "ring-1 ring-primary/20")}>
+                                        <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">{pc.label}</span>
+                                        <div className="text-sm font-bold font-mono mt-0.5 text-foreground">{fmtPrice(pc.value)}</div>
+                                        {!pc.baseline && <div className={cn("text-[9px] font-mono", pctColor(diff))}>{diff > 0 ? "+" : ""}{diff.toFixed(1)}%</div>}
+                                        {pc.baseline && <div className="text-[9px] font-mono text-muted-foreground">referentie</div>}
                                       </div>
-                                      <div className="text-[9px] text-muted-foreground mt-1">{invPressure.explanation}</div>
-                                    </div>
-                                  )}
-                                  {subSuggestion && subSuggestion.status !== "none" && (
-                                    <div className="rounded-lg border border-border bg-background p-3">
-                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Substituut advies</span>
-                                      <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", substituteStatusLabels[subSuggestion.status].color)}>
-                                          {substituteStatusLabels[subSuggestion.status].label}
-                                        </span>
-                                      </div>
-                                      <div className="text-[9px] text-muted-foreground mt-1">{subSuggestion.candidates.length} kandidaten beschikbaar</div>
-                                    </div>
-                                  )}
-                                  {purchaseMix && purchaseMix.has_mix && (
-                                    <div className="rounded-lg border border-border bg-background p-3">
-                                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wide">Inkoopmix</span>
-                                      <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
-                                          Mix beschikbaar
-                                        </span>
-                                      </div>
-                                      {purchaseMix.savings_vs_single > 0 && (
-                                        <div className="text-[9px] text-accent mt-1">Besparing: {purchaseMix.savings_vs_single.toFixed(1)}%</div>
-                                      )}
-                                    </div>
-                                  )}
+                                    );
+                                  })}
                                 </div>
 
 
