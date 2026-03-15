@@ -147,7 +147,6 @@ const ProcurementCockpitV1 = () => {
 
   const allColumns = [
     { key: "required_volume", label: "Benodigd" },
-    { key: "supplier_intel", label: "Leverancier" },
     { key: "quality_class", label: "Kwaliteit" },
     { key: "effective_price_col", label: "Eff. Prijs" },
     { key: "supplier_advice", label: "Advies" },
@@ -156,9 +155,7 @@ const ProcurementCockpitV1 = () => {
     { key: "advised_price", label: "Adviesprijs" },
     { key: "market_price", label: "Marktprijs" },
     { key: "variance_vs_calculated", label: "Δ Hist." },
-    { key: "preferred_supplier", label: "Lev. Voorkeur" },
     { key: "substitute", label: "Substituut" },
-    { key: "design_advice", label: "Design" },
     { key: "markup_advice", label: "Markup/Down" },
   ] as const;
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(allColumns.map(c => c.key)));
