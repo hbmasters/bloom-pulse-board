@@ -225,6 +225,23 @@ const ControlCenter = () => {
               <WeeklyReviewPanel />
             </IHSectionShell>
           )}
+
+          {/* Future Extensions — prepared structure */}
+          <div className="mt-6 rounded-lg border border-dashed border-border/50 p-4">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground/40">Geplande Extensies</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+              {[
+                "Morning AI Briefing",
+                "System Alerts Feed",
+                "Node Cluster Monitoring",
+                "Agent Activity Monitoring",
+              ].map(ext => (
+                <div key={ext} className="rounded-lg border border-border/30 bg-muted/5 p-2.5 text-center">
+                  <span className="text-[10px] font-mono text-muted-foreground/40">{ext}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
