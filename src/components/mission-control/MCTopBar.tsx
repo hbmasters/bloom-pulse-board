@@ -39,6 +39,7 @@ const viewTitles: Record<MCView, string> = {
   "ai-architecture": "AI Architecture",
   "dev-control": "Development Control Protocol",
   "control-center": "HBMaster Control Center",
+  "build-radar": "Build Radar",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {

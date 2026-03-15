@@ -34,9 +34,10 @@ import DevelopmentControl from "@/pages/DevelopmentControl";
 import StrategicInsight from "@/pages/StrategicInsight";
 import Sentinel from "@/pages/Sentinel";
 import ControlCenter from "@/pages/ControlCenter";
+import BuildRadar from "@/pages/BuildRadar";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -64,6 +65,7 @@ const routeToView: Record<string, MCView> = {
   "/labs/strategic-market-insight": "strategic-insight",
   "/labs/sentinel": "sentinel",
   "/labs/control-center": "control-center",
+  "/labs/build-radar": "build-radar",
   "/ai-architecture": "ai-architecture",
   "/dev-control": "dev-control",
 };
@@ -94,6 +96,7 @@ export const viewToRoute: Record<MCView, string> = {
   "strategic-insight": "/labs/strategic-market-insight",
   sentinel: "/labs/sentinel",
   "control-center": "/labs/control-center",
+  "build-radar": "/labs/build-radar",
   "ai-architecture": "/ai-architecture",
   "dev-control": "/dev-control",
 };
@@ -178,6 +181,7 @@ const MissionControl = () => {
             {view === "strategic-insight" && <StrategicInsight />}
             {view === "sentinel" && <Sentinel />}
             {view === "control-center" && <ControlCenter />}
+            {view === "build-radar" && <BuildRadar />}
             {view === "ai-architecture" && <AIArchitecture />}
             {view === "dev-control" && <DevelopmentControl />}
           </div>
