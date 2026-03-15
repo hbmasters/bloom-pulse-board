@@ -358,8 +358,6 @@ const ProcurementCockpitV1 = () => {
       {/* ── TAB: Inkooplijst ── */}
       {activeTab === "inkooplijst" && (
         <>
-          {/* Day filter */}
-          <DayFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
 
           {/* KPI Cards — Dekking + Procurement */}
           {showKPIs && (() => {
