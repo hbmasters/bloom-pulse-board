@@ -33,7 +33,7 @@ const DayFilter = ({ dateFrom, dateTo, onDateFromChange, onDateToChange }: DayFi
   );
 
   return (
-    <div className="flex items-center gap-2.5 flex-wrap">
+    <div className="flex items-center gap-2.5 flex-wrap justify-end ml-auto">
       <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground/50" />
       <DateBtn value={dateFrom} onChange={onDateFromChange} label="Van" />
       <span className="text-[11px] text-muted-foreground/50">t/m</span>
