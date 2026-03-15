@@ -590,15 +590,6 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </td>
                           )}
-                          {visibleColumns.has("design_advice") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {advisory && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", designAdviceLabels[advisory.design_advice].color)}>
-                                  {designAdviceLabels[advisory.design_advice].icon}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("markup_advice") && (
                             <td className={cn("px-3", rowPy)}>
                               {advisory && advisory.markup_advice !== "none" && (
