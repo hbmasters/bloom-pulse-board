@@ -1,5 +1,5 @@
 import { Shield, Radio, Database, RefreshCw, Server, AlertTriangle, Lock, Wifi } from "lucide-react";
-import { IHSectionShell } from "@/components/intelligence-hub/IHSectionShell";
+import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import {
   sentinelKPIs, services, commChannels, backupInfo, updates, securityRules, nodes, alerts,
   statusStyles, type SentinelStatus,
