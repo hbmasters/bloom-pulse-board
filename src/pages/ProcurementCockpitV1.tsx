@@ -558,16 +558,6 @@ const ProcurementCockpitV1 = () => {
                               {supplierIntel ? fmtPrice(supplierIntel.effective_price) : "—"}
                             </td>
                           )}
-                          {visibleColumns.has("supplier_advice") && (
-                            <td className={cn("px-3", rowPy)}>
-                              {supplierIntel && (
-                                <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border whitespace-nowrap", supplierAdviceLabels[supplierIntel.advice].color)}>
-                                  {supplierIntel.advice === "preferred" && <UserCheck className="w-2.5 h-2.5 inline mr-0.5" />}
-                                  {supplierAdviceLabels[supplierIntel.advice].label}
-                                </span>
-                              )}
-                            </td>
-                          )}
                           {visibleColumns.has("historical_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.historical_price)}</td>}
                           {visibleColumns.has("offer_price") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmtPrice(p.offer_price)}</td>}
                           {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
