@@ -723,29 +723,6 @@ const ProcurementCockpitV1 = () => {
                                       </div>
                                     )}
 
-                                    {purchaseMix && purchaseMix.has_mix && (
-                                      <>
-                                        <div className="border-t border-border/30 pt-3 space-y-1">
-                                          <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide">Aanbevolen mix</span>
-                                          {purchaseMix.lines.map((l, i) => (
-                                            <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/10 border border-border/30">
-                                              <div className="flex items-center gap-2">
-                                                <span className="font-medium text-foreground">{l.product}</span>
-                                                <span className={cn("text-[8px] px-1 py-0.5 rounded border", l.type === "main" ? "bg-muted text-muted-foreground border-border" : "bg-primary/10 text-primary border-primary/20")}>{l.type === "main" ? "Hoofd" : "Sub"}</span>
-                                              </div>
-                                              <div className="flex items-center gap-3">
-                                                <span className="font-mono text-foreground">{fmt(l.units)} st</span>
-                                                <span className="font-mono text-muted-foreground">{fmtPrice(l.price)}</span>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                        <div className="flex items-center justify-between text-[10px] pt-1">
-                                          <span className="text-muted-foreground">Gewogen inkooprijs</span>
-                                          <span className="font-mono font-bold text-foreground">{fmtPrice(purchaseMix.total_cost)}</span>
-                                        </div>
-                                      </>
-                                    )}
                                 </div>}
 
                               </div>
