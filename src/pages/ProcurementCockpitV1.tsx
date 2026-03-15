@@ -749,13 +749,14 @@ const ProcurementCockpitV1 = () => {
                                   </div>
                                 )}
 
-                                {/* Supplier Intelligence Panel */}
+                                {/* Leverancier Intelligence — unified panel */}
                                 {supplierIntel && (
-                                  <div className="rounded-lg border border-border bg-background p-4 space-y-3">
+                                  <div className="rounded-lg border border-border bg-background p-4 space-y-4">
                                     <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
                                       <UserCheck className="w-3.5 h-3.5 text-primary" />
                                       Leverancier Intelligence
                                     </h4>
+
                                     {/* Supplier summary cards */}
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                       <div className="rounded-lg border border-border bg-muted/10 p-2.5">
@@ -785,12 +786,34 @@ const ProcurementCockpitV1 = () => {
                                         <div className="text-[9px] text-foreground mt-1 leading-relaxed">{supplierIntel.preferred_supplier_reason}</div>
                                       </div>
                                     </div>
+
                                     {/* Effective price explanation */}
                                     <div className="rounded-lg border border-border/50 bg-muted/5 p-3">
                                       <span className="text-[9px] font-medium text-muted-foreground uppercase">Effectieve prijs toelichting</span>
                                       <div className="text-[10px] text-foreground mt-1 leading-relaxed">{supplierIntel.effective_price_explanation}</div>
                                     </div>
-                                    {/* Alternative suppliers */}
+
+                                    {/* Kwaliteitsoverzicht alle leveranciers */}
+                                    {supplierQuality && supplierQuality.suppliers.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Kwaliteitsoverzicht alle leveranciers</span>
+                                        {supplierQuality.suppliers.map((s, i) => (
+                                          <div key={`qual-${i}`} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
+                                            <div className="flex items-center gap-2">
+                                              <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.grade].color)}>{s.grade}</span>
+                                              <span className="font-medium text-foreground">{s.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[9px] text-muted-foreground">
+                                              <span>Kwaliteit: <strong className="text-foreground">{s.quality_consistency}%</strong></span>
+                                              <span>Betrouwb.: <strong className="text-foreground">{s.delivery_reliability}%</strong></span>
+                                              <span>Afval: <strong className={cn(s.waste_risk > 5 ? "text-destructive" : "text-foreground")}>{s.waste_risk}%</strong></span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {/* Alternatieve leveranciers */}
                                     {supplierIntel.alternative_suppliers.length > 0 && (
                                       <div className="space-y-1.5">
                                         <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Alternatieve leveranciers</span>
@@ -813,64 +836,39 @@ const ProcurementCockpitV1 = () => {
                                         ))}
                                       </div>
                                     )}
-                                  </div>
-                                )}
 
-                                {/* Supplier Mix Proposal */}
-                                {supplierMix && supplierMix.has_mix && (
-                                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
-                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
-                                      <Shuffle className="w-3.5 h-3.5 text-primary" />
-                                      Leveranciersmix voorstel
-                                      <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
-                                        {supplierMix.suppliers.length} leveranciers
-                                      </span>
-                                    </h4>
-                                    <div className="space-y-1">
-                                      {supplierMix.suppliers.map((s, i) => (
-                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/30">
-                                          <div className="flex items-center gap-2">
-                                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.class].color)}>{s.class}</span>
-                                            <span className="font-medium text-foreground">{s.name}</span>
-                                          </div>
-                                          <div className="flex items-center gap-3">
-                                            <span className="font-mono text-foreground">{fmt(s.volume)} st</span>
-                                            <span className="font-mono text-muted-foreground">Nom: {fmtPrice(s.price)}</span>
-                                            <span className="font-mono text-muted-foreground">Eff: {fmtPrice(s.effective_price)}</span>
-                                          </div>
+                                    {/* Aanbevolen leveranciersmix */}
+                                    {supplierMix && supplierMix.has_mix && (
+                                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+                                        <span className="text-[10px] font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                                          <Shuffle className="w-3 h-3 text-primary" />
+                                          Aanbevolen leveranciersmix
+                                          <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
+                                            {supplierMix.suppliers.length} leveranciers
+                                          </span>
+                                        </span>
+                                        <div className="space-y-1">
+                                          {supplierMix.suppliers.map((s, i) => (
+                                            <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-background border border-border/30">
+                                              <div className="flex items-center gap-2">
+                                                <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.class].color)}>{s.class}</span>
+                                                <span className="font-medium text-foreground">{s.name}</span>
+                                              </div>
+                                              <div className="flex items-center gap-3">
+                                                <span className="font-mono text-foreground">{fmt(s.volume)} st</span>
+                                                <span className="font-mono text-muted-foreground">Nom: {fmtPrice(s.price)}</span>
+                                                <span className="font-mono text-muted-foreground">Eff: {fmtPrice(s.effective_price)}</span>
+                                              </div>
+                                            </div>
+                                          ))}
                                         </div>
-                                      ))}
-                                    </div>
-                                    <div className="flex items-center justify-between pt-2 border-t border-border/30 text-[10px]">
-                                      <span className="text-muted-foreground">Gewogen inkooprijs (nominaal / effectief)</span>
-                                      <span className="font-mono font-bold text-foreground">{fmtPrice(supplierMix.weighted_price)} / {fmtPrice(supplierMix.weighted_effective_price)}</span>
-                                    </div>
-                                    <div className="text-[9px] text-muted-foreground pt-1">{supplierMix.rationale}</div>
-                                  </div>
-                                )}
-
-                                {/* Supplier Comparison with Quality (existing) */}
-                                {supplierQuality && supplierQuality.suppliers.length > 0 && (
-                                  <div className="rounded-lg border border-border bg-background p-4 space-y-2">
-                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
-                                      <Shield className="w-3.5 h-3.5 text-muted-foreground" />
-                                      Leverancier kwaliteitsoverzicht
-                                    </h4>
-                                    <div className="space-y-1.5">
-                                      {supplierQuality.suppliers.map((s, i) => (
-                                        <div key={i} className="flex items-center justify-between text-[10px] py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30">
-                                          <div className="flex items-center gap-2">
-                                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border", supplierGradeLabels[s.grade].color)}>{s.grade}</span>
-                                            <span className="font-medium text-foreground">{s.name}</span>
-                                          </div>
-                                          <div className="flex items-center gap-3 text-[9px] text-muted-foreground">
-                                            <span>Kwaliteit: <strong className="text-foreground">{s.quality_consistency}%</strong></span>
-                                            <span>Betrouwb.: <strong className="text-foreground">{s.delivery_reliability}%</strong></span>
-                                            <span>Afval: <strong className={cn(s.waste_risk > 5 ? "text-destructive" : "text-foreground")}>{s.waste_risk}%</strong></span>
-                                          </div>
+                                        <div className="flex items-center justify-between pt-2 border-t border-border/30 text-[10px]">
+                                          <span className="text-muted-foreground">Gewogen inkooprijs (nominaal / effectief)</span>
+                                          <span className="font-mono font-bold text-foreground">{fmtPrice(supplierMix.weighted_price)} / {fmtPrice(supplierMix.weighted_effective_price)}</span>
                                         </div>
-                                      ))}
-                                    </div>
+                                        <div className="text-[9px] text-muted-foreground">{supplierMix.rationale}</div>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
 
