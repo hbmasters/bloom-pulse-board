@@ -550,7 +550,7 @@ const ProcurementCockpitV1 = () => {
                               <Ruler className="w-2.5 h-2.5" />{p.stem_length} · {p.product_family}
                             </div>
                           </td>
-                          {visibleColumns.has("buyer") && <td className={cn("px-3", rowPy, "text-[10px] text-muted-foreground whitespace-nowrap")}>{p.buyer}</td>}
+                          
                           {visibleColumns.has("required_volume") && <td className={cn("px-3", rowPy, "font-mono text-foreground")}>{fmt(p.required_volume - p.available_stock)}</td>}
                           {visibleColumns.has("inventory_pressure") && (
                             <td className={cn("px-3", rowPy)}>
