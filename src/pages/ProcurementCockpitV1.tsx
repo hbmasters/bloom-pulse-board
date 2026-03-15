@@ -44,7 +44,7 @@ import {
   reliabilityLabels,
   supplierMixProposals,
 } from "@/components/procurement-cockpit-v1/supplier-intelligence-data";
-import { UploadControls, MatchedKPIs, MatchedTable, useMatchState } from "@/components/procurement-cockpit-v1/BehoesteVsVoorraad";
+// Upload functionality removed — dekking computed from static data
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
 
