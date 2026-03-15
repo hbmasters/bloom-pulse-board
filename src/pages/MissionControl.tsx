@@ -181,6 +181,7 @@ const MissionControl = () => {
             {view === "strategic-insight" && <StrategicInsight />}
             {view === "sentinel" && <Sentinel />}
             {view === "control-center" && <ControlCenter />}
+            {view === "build-radar" && <BuildRadar />}
             {view === "ai-architecture" && <AIArchitecture />}
             {view === "dev-control" && <DevelopmentControl />}
           </div>
