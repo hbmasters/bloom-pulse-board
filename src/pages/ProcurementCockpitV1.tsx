@@ -816,11 +816,7 @@ const ProcurementCockpitV1 = () => {
 
                                 {/* Market & Design context block */}
                                 {showMarketContext && (advisory || priceCheck || market) && (
-                                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
-                                    <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
-                                      <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                                      Markt & Design Context
-                                    </h4>
+                                  <div className="rounded-lg border border-border bg-background p-4 space-y-3">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                       {market && (
                                         <div className="rounded-lg border border-border bg-background p-2.5">
