@@ -48,10 +48,12 @@ export interface ProductionOrder {
   allocationProgress: number;
   status: AllocationStatus;
   marginRisk: MarginRisk;
-  targetMarginPct: number; // Gewenste marge
-  currentMarginPct: number; // Huidige marge
+  targetMarginPct: number;
+  currentMarginPct: number;
   targetMarginEur: number;
   currentMarginEur: number;
+  sellingPrice: number;   // Verkoopprijs per stuk
+  costPrice: number;      // Kostprijs per stuk
   aiIndicators: AIIndicator[];
   articles: ArticleLine[];
 }
