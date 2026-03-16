@@ -3,6 +3,7 @@
 export type AllocationStatus = "action" | "blocked" | "ready" | "completed";
 export type MarginRisk = "ok" | "warning" | "critical";
 export type AIIndicator = "ai-prepared" | "substitute-available" | "margin-risk" | "allocation-warning";
+export type ProductCategory = "hand" | "band" | "arrangement";
 
 export type TrackTraceStatus = "binnengemeld" | "onderweg" | "verwacht" | "onbekend";
 
