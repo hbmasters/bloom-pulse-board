@@ -114,7 +114,7 @@ const Verdelen = () => {
       </div>
 
       <Tabs defaultValue="te-verdelen" className="flex-1 min-h-0 flex flex-col">
-        <div className="px-4 md:px-6 pt-2 flex-shrink-0">
+        <div className="px-4 md:px-6 pt-2 flex-shrink-0 flex flex-wrap items-center gap-2">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="te-verdelen" className="text-xs gap-1.5">
               <Package className="w-3.5 h-3.5" /> Te Verdelen
