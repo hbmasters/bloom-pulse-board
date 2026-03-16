@@ -81,6 +81,7 @@ export const weeklyReview: WeeklyReviewItem[] = [
 
 export const reviewCategoryConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
   efficiency:     { label: "Efficiëntie",      bg: "bg-accent/10",       text: "text-accent",         border: "border-accent/20" },
+  "ai-cost":      { label: "AI Kosten",        bg: "bg-cyan-500/10",     text: "text-cyan-500",       border: "border-cyan-500/20" },
   issue:          { label: "Openstaand Issue",  bg: "bg-destructive/10",  text: "text-destructive",    border: "border-destructive/20" },
   proposal:       { label: "Voorstel",          bg: "bg-blue-500/10",     text: "text-blue-500",       border: "border-blue-500/20" },
   todo:           { label: "TODO",              bg: "bg-yellow-500/10",   text: "text-yellow-500",     border: "border-yellow-500/20" },
