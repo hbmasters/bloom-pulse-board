@@ -591,7 +591,7 @@ const Verdelen = () => {
                 <div className="lg:flex-1 flex flex-col min-h-0 min-w-0">
                   <ScrollArea className="flex-1">
                     <div className="p-4 space-y-3">
-                      {/* Panel title */}
+                      {/* Panel title + active user */}
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
                           Concept Productie Order
@@ -604,62 +604,72 @@ const Verdelen = () => {
                         )}
                       </div>
 
-                      {/* Order header with photo + central info */}
-                      <div className="flex gap-4">
-                        {/* Enlargeable photo */}
-                        <div
-                          className="w-24 h-24 rounded-lg border border-border overflow-hidden shrink-0 bg-secondary/30 cursor-pointer relative group"
-                          onClick={() => setPhotoEnlarged(true)}
-                        >
-                          <img
-                            src={bouquetImageMap[selectedOrder.bouquetImage]}
-                            alt={selectedOrder.bouquet}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Maximize2 className="w-5 h-5 text-white" />
+                      {/* Order header — compact row */}
+                      <div className="flex gap-3 items-start">
+                        {/* Photo + AI generate icon */}
+                        <div className="shrink-0 flex flex-col items-center gap-1">
+                          <div
+                            className="w-20 h-20 rounded-lg border border-border overflow-hidden bg-secondary/30 cursor-pointer relative group"
+                            onClick={() => setPhotoEnlarged(true)}
+                          >
+                            <img
+                              src={bouquetImageMap[selectedOrder.bouquetImage]}
+                              alt={selectedOrder.bouquet}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Maximize2 className="w-4 h-4 text-white" />
+                            </div>
                           </div>
+                          <button
+                            className="flex items-center gap-0.5 text-[8px] font-mono text-primary hover:text-primary/80 transition-colors"
+                            title="Genereer AI foto op basis van huidige verdeling"
+                          >
+                            <ImagePlus className="w-3 h-3" />
+                            <span>AI foto</span>
+                          </button>
                         </div>
 
+                        {/* Info block */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-bold text-foreground">{selectedOrder.bouquet}</h3>
-                            <Badge variant="outline" className={cn("text-[9px] font-mono uppercase", statusColors[selectedOrder.status])}>
+                          {/* Row 1: Name + badges */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h3 className="text-sm font-bold text-foreground leading-tight">{selectedOrder.bouquet}</h3>
+                            <Badge variant="outline" className={cn("text-[8px] font-mono uppercase", statusColors[selectedOrder.status])}>
                               {selectedOrder.status}
                             </Badge>
-                            <Badge variant="outline" className={cn("text-[9px] font-mono", categoryLabels[selectedOrder.category].className)}>
+                            <Badge variant="outline" className={cn("text-[8px] font-mono", categoryLabels[selectedOrder.category].className)}>
                               {categoryLabels[selectedOrder.category].label}
                             </Badge>
                             {isDepartureToday(selectedOrder) && selectedOrder.allocationProgress < 100 && (
-                              <Badge variant="outline" className="text-[8px] font-mono bg-destructive/20 text-destructive border-destructive/30 gap-0.5">
+                              <Badge variant="outline" className="text-[7px] font-mono bg-destructive/20 text-destructive border-destructive/30 gap-0.5">
                                 <AlertTriangle className="w-2.5 h-2.5" /> Actie Vereist
                               </Badge>
                             )}
                           </div>
 
-                          {/* Central: quantity */}
-                          <div className="mt-1 flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-foreground">{selectedOrder.quantity}</span>
-                            <span className="text-xs font-mono text-muted-foreground">stuks</span>
-                          </div>
-
-                          <p className="text-xs text-muted-foreground">{selectedOrder.customer}</p>
-
-                          {/* Central: departure date + time */}
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="flex items-center gap-1 bg-secondary/40 rounded px-2 py-0.5">
+                          {/* Row 2: Customer + quantity + departure */}
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-xs text-muted-foreground">{selectedOrder.customer}</span>
+                            <span className="text-xs font-mono text-muted-foreground">•</span>
+                            <span className="text-lg font-black text-foreground leading-none">{selectedOrder.quantity}</span>
+                            <span className="text-[10px] font-mono text-muted-foreground">stuks</span>
+                            <span className="text-xs font-mono text-muted-foreground">•</span>
+                            <div className="flex items-center gap-1 bg-secondary/40 rounded px-1.5 py-0.5">
                               <Truck className="w-3 h-3 text-primary" />
-                              <span className="text-xs font-mono font-bold text-foreground">{selectedOrder.departureDate}</span>
-                              <span className="text-xs font-mono font-bold text-primary">{selectedOrder.departureTime}</span>
+                              <span className="text-[10px] font-mono font-bold text-foreground">{selectedOrder.departureDate}</span>
+                              <span className="text-[10px] font-mono font-bold text-primary">{selectedOrder.departureTime}</span>
                             </div>
                           </div>
 
-                          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
+                          {/* Row 3: Order details */}
+                          <p className="text-[10px] font-mono text-muted-foreground mt-1">
                             {selectedOrder.orderNumber} • {selectedOrder.internNummer && `Intern: ${selectedOrder.internNummer} • `}{selectedOrder.productionLine}
                           </p>
 
+                          {/* AI indicators */}
                           {selectedOrder.aiIndicators.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1.5">
+                            <div className="flex flex-wrap gap-1 mt-1">
                               {selectedOrder.aiIndicators.map(ind => (
                                 <Badge key={ind} variant="outline" className={cn("text-[8px]", aiIndicatorLabels[ind].className)}>
                                   {aiIndicatorLabels[ind].label}
@@ -669,12 +679,6 @@ const Verdelen = () => {
                           )}
                         </div>
                       </div>
-
-                      {/* AI Generate photo button */}
-                      <Button variant="outline" size="sm" className="w-full text-[10px] font-mono gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-                        <ImagePlus className="w-3.5 h-3.5" />
-                        Genereer AI foto op basis van huidige verdeling
-                      </Button>
 
                       {/* Margin panel */}
                       <div className="rounded-lg border border-border bg-card/60 p-3">
