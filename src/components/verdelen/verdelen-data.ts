@@ -65,7 +65,9 @@ export interface ProductionOrder {
   bouquetImage: string;
   productionLine: string;
   quantity: number;
+  category: ProductCategory;
   departureDate: string;
+  departureTime: string;
   allocationProgress: number;
   status: AllocationStatus;
   marginRisk: MarginRisk;
@@ -80,6 +82,7 @@ export interface ProductionOrder {
   articles: ArticleLine[];
   materials?: MaterialLine[];
   bewerkingen?: Bewerkingen;
+  activeUser?: string;
 }
 
 export interface AIAction {
