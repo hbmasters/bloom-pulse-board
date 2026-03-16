@@ -203,6 +203,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 41,
     targetMarginEur: 2.90,
     currentMarginEur: 3.15,
+    sellingPrice: 7.68,
+    costPrice: 4.53,
     aiIndicators: [],
     articles: [
       { id: "a11", articleName: "Roos Avalanche 70cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b16", quantity: 5 }], substituteAvailable: false },
