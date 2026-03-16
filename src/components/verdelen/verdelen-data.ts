@@ -58,6 +58,7 @@ export interface Bewerkingen {
 export interface ProductionOrder {
   id: string;
   orderNumber: string;
+  internNummer?: string;
   customer: string;
   bouquet: string;
   bouquetImage: string;
@@ -71,10 +72,13 @@ export interface ProductionOrder {
   currentMarginPct: number;
   targetMarginEur: number;
   currentMarginEur: number;
-  sellingPrice: number;   // Verkoopprijs per stuk
-  costPrice: number;      // Kostprijs per stuk
+  sellingPrice: number;
+  costPrice: number;
+  laborCost?: number;
   aiIndicators: AIIndicator[];
   articles: ArticleLine[];
+  materials?: MaterialLine[];
+  bewerkingen?: Bewerkingen;
 }
 
 export interface AIAction {
