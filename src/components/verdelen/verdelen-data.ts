@@ -266,11 +266,9 @@ export const aiIndicatorLabels: Record<AIIndicator, { label: string; className: 
   "allocation-warning": { label: "Allocatie ⚠", className: "bg-destructive/20 text-destructive border-destructive/30" },
 };
 
-// Map bouquet images
-export const bouquetImages: Record<string, string> = {
-  "product-charme-xl.jpg": "/src/assets/product-charme-xl.jpg",
-  "product-field-m.jpg": "/src/assets/product-field-m.jpg",
-  "product-trend.jpg": "/src/assets/product-trend.jpg",
-  "product-de-luxe.jpg": "/src/assets/product-de-luxe.jpg",
-  "product-lovely.jpg": "/src/assets/product-lovely.jpg",
+export const trackTraceColors: Record<TrackTraceStatus, { label: string; className: string }> = {
+  binnengemeld: { label: "Binnengemeld", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  onderweg: { label: "Onderweg", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  verwacht: { label: "Verwacht", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  onbekend: { label: "Onbekend", className: "bg-muted text-muted-foreground border-border" },
 };

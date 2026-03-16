@@ -11,11 +11,12 @@ import {
 import {
   Package, Bot, CheckCircle2, ArrowRight, Sparkles, ChevronRight, ChevronLeft,
   ClipboardList, TrendingUp, ShieldAlert, Zap, FileText, Printer, ArrowRightLeft,
+  Truck, MapPin, Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   productionOrders, stockBatches, aiActions, picklists, allocationLogs,
-  statusColors, marginColors, aiIndicatorLabels,
+  statusColors, marginColors, aiIndicatorLabels, trackTraceColors,
   type ProductionOrder, type AIAction, type StockBatch,
 } from "@/components/verdelen/verdelen-data";
 
@@ -132,13 +133,170 @@ const Verdelen = () => {
 
             {selectedOrder && (
               <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-                {/* ─── LEFT PANEL: Order detail + articles ─── */}
-                <div className="lg:w-[42%] flex flex-col min-h-0 border-r border-border">
+
+                {/* ═══ LEFT PANEL: Beschikbare Voorraad ═══ */}
+                <div className="lg:w-[48%] flex flex-col min-h-0 border-r border-border">
+                  <div className="px-4 py-2 border-b border-border flex-shrink-0 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                        Beschikbare Voorraad
+                      </span>
+                      {selectedArticleId && (
+                        <span className="text-[10px] font-mono text-primary ml-2">
+                          — gefilterd
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant="outline" className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        <MapPin className="w-2.5 h-2.5 mr-0.5" /> Binnengemeld
+                      </Badge>
+                      <Badge variant="outline" className="text-[9px] font-mono bg-blue-500/10 text-blue-400 border-blue-500/30">
+                        <Truck className="w-2.5 h-2.5 mr-0.5" /> Onderweg
+                      </Badge>
+                    </div>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="text-[10px] font-mono uppercase tracking-wider">
+                          <TableHead className="w-6"></TableHead>
+                          <TableHead>Artikel</TableHead>
+                          <TableHead className="text-right">AVE</TableHead>
+                          <TableHead className="text-right hidden md:table-cell">APE</TableHead>
+                          <TableHead className="text-right">€ Prijs</TableHead>
+                          <TableHead className="hidden lg:table-cell">Leverancier</TableHead>
+                          <TableHead className="hidden xl:table-cell">Leeft.</TableHead>
+                          <TableHead className="hidden xl:table-cell">Kwal</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {relevantBatches.map(batch => {
+                          const isSelected = selectedBatchId === batch.id;
+                          const lowStock = batch.ave < 100;
+                          const tt = trackTraceColors[batch.trackTrace];
+                          return (
+                            <TableRow
+                              key={batch.id}
+                              className={cn(
+                                "cursor-pointer transition-colors text-xs",
+                                isSelected ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-secondary/30",
+                                batch.ave === 0 && "opacity-40"
+                              )}
+                              onClick={() => setSelectedBatchId(isSelected ? null : batch.id)}
+                            >
+                              <TableCell className="p-2">
+                                <div className={cn("w-2 h-2 rounded-full", batch.ave === 0 ? "bg-destructive" : lowStock ? "bg-amber-400" : "bg-emerald-400")} />
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium text-foreground block truncate max-w-[160px]">{batch.articleName}</span>
+                                <span className="text-[9px] font-mono text-muted-foreground">{batch.articleCode} • {batch.origin}</span>
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                <span className={batch.ave === 0 ? "text-destructive" : lowStock ? "text-amber-400" : "text-foreground"}>{batch.ave.toLocaleString()}</span>
+                              </TableCell>
+                              <TableCell className="text-right font-mono hidden md:table-cell text-muted-foreground">{batch.ape.toLocaleString()}</TableCell>
+                              <TableCell className="text-right font-mono font-medium">€{batch.valuationPrice.toFixed(2)}</TableCell>
+                              <TableCell className="hidden lg:table-cell text-muted-foreground text-[11px] max-w-[110px] truncate">{batch.supplier}</TableCell>
+                              <TableCell className="hidden xl:table-cell">
+                                <Badge variant="outline" className={cn(
+                                  "text-[9px] font-mono",
+                                  batch.ageDays >= 3 ? "text-amber-400 border-amber-500/30" : "text-muted-foreground border-border"
+                                )}>
+                                  {batch.ageDays}d
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="hidden xl:table-cell">
+                                <Badge variant="outline" className={cn(
+                                  "text-[9px] font-mono",
+                                  batch.quality === "A" ? "text-emerald-400 border-emerald-500/30" : "text-amber-400 border-amber-500/30"
+                                )}>
+                                  {batch.quality}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className={cn("text-[8px] font-mono", tt.className)}>
+                                  {batch.trackTrace === "binnengemeld" && <MapPin className="w-2.5 h-2.5 mr-0.5" />}
+                                  {batch.trackTrace === "onderweg" && <Truck className="w-2.5 h-2.5 mr-0.5" />}
+                                  {batch.trackTrace === "verwacht" && <Clock className="w-2.5 h-2.5 mr-0.5" />}
+                                  {tt.label}
+                                </Badge>
+                                {batch.expectedArrival && batch.trackTrace !== "binnengemeld" && (
+                                  <span className="text-[8px] font-mono text-muted-foreground block mt-0.5">
+                                    ETA: {batch.expectedArrival.slice(5)}
+                                  </span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </div>
+
+                {/* ═══ CENTER: Allocation arrows + AI auto ═══ */}
+                <div className="hidden lg:flex flex-col items-center justify-center w-16 shrink-0 gap-3 py-8">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-10 h-10 rounded-full border-primary/40 text-primary hover:bg-primary/10"
+                    disabled={!selectedBatchId || !selectedArticleId}
+                    title="Verdeel naar order →"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                  <div className="flex flex-col items-center gap-1">
+                    <ArrowRightLeft className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-[8px] font-mono text-muted-foreground text-center leading-tight">
+                      Verdeel
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-10 h-10 rounded-full border-destructive/40 text-destructive hover:bg-destructive/10"
+                    disabled={!selectedArticleId}
+                    title="← Verwijder van order"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+
+                  {/* AI Auto Verdeel */}
+                  <div className="mt-4 border-t border-border pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[10px] gap-1.5 border-primary/40 text-primary hover:bg-primary/10 px-2.5 py-4 flex-col h-auto"
+                      title="AI verdeelt automatisch de beste batches"
+                    >
+                      <Bot className="w-4 h-4" />
+                      <span className="leading-tight text-center">Auto<br/>Verdeel</span>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Mobile allocate bar */}
+                <div className="lg:hidden flex items-center justify-center gap-2 py-2 border-y border-border bg-secondary/20 shrink-0">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 text-primary border-primary/30" disabled={!selectedBatchId || !selectedArticleId}>
+                    Verdeel <ChevronRight className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs gap-1 border-primary/30 text-primary" title="AI Auto Verdeel">
+                    <Bot className="w-3.5 h-3.5" /> Auto
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs gap-1 text-destructive border-destructive/30" disabled={!selectedArticleId}>
+                    <ChevronLeft className="w-3.5 h-3.5" /> Verwijder
+                  </Button>
+                </div>
+
+                {/* ═══ RIGHT PANEL: Product / Order detail ═══ */}
+                <div className="lg:flex-1 flex flex-col min-h-0 min-w-0">
                   <ScrollArea className="flex-1">
                     <div className="p-4 space-y-3">
-                      {/* Order header with photo */}
-                      <div className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg border border-border overflow-hidden shrink-0 bg-secondary/30">
+                      {/* Order header with large photo */}
+                      <div className="flex gap-4">
+                        <div className="w-24 h-24 rounded-lg border border-border overflow-hidden shrink-0 bg-secondary/30">
                           <img
                             src={bouquetImageMap[selectedOrder.bouquetImage]}
                             alt={selectedOrder.bouquet}
@@ -147,15 +305,28 @@ const Verdelen = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-foreground">{selectedOrder.bouquet}</h3>
+                            <h3 className="text-base font-bold text-foreground">{selectedOrder.bouquet}</h3>
                             <Badge variant="outline" className={cn("text-[9px] font-mono uppercase", statusColors[selectedOrder.status])}>
                               {selectedOrder.status}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground">{selectedOrder.customer}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{selectedOrder.customer}</p>
                           <p className="text-[10px] font-mono text-muted-foreground">
-                            {selectedOrder.orderNumber} • {selectedOrder.productionLine} • {selectedOrder.quantity} st • {selectedOrder.departureDate}
+                            {selectedOrder.orderNumber} • {selectedOrder.productionLine} • {selectedOrder.quantity} st
                           </p>
+                          <p className="text-[10px] font-mono text-muted-foreground">
+                            Vertrek: {selectedOrder.departureDate}
+                          </p>
+                          {/* AI indicators */}
+                          {selectedOrder.aiIndicators.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {selectedOrder.aiIndicators.map(ind => (
+                                <Badge key={ind} variant="outline" className={cn("text-[8px]", aiIndicatorLabels[ind].className)}>
+                                  {aiIndicatorLabels[ind].label}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -187,12 +358,12 @@ const Verdelen = () => {
                       {/* Allocation progress */}
                       <div className="flex items-center gap-2">
                         <Progress value={selectedOrder.allocationProgress} className="h-2 flex-1" />
-                        <span className="text-xs font-mono text-muted-foreground">{selectedOrder.allocationProgress}%</span>
+                        <span className="text-xs font-mono text-muted-foreground">{selectedOrder.allocationProgress}% verdeeld</span>
                       </div>
 
                       {/* Article lines */}
                       <div className="rounded-lg border border-border bg-card/60 p-3">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground block mb-2">Artikelregels</span>
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground block mb-2">Artikelregels (recept)</span>
                         <div className="space-y-1">
                           {selectedOrder.articles.map(art => {
                             const pct = art.needed > 0 ? (art.allocated / art.needed) * 100 : 0;
@@ -292,123 +463,6 @@ const Verdelen = () => {
                         </div>
                       )}
                     </div>
-                  </ScrollArea>
-                </div>
-
-                {/* ─── CENTER: Allocation arrows ─── */}
-                <div className="hidden lg:flex flex-col items-center justify-center w-14 shrink-0 gap-3 py-8">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-10 h-10 rounded-full border-primary/40 text-primary hover:bg-primary/10"
-                    disabled={!selectedBatchId || !selectedArticleId}
-                    title="Verdeel naar order"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  <div className="flex flex-col items-center gap-1">
-                    <ArrowRightLeft className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-[8px] font-mono text-muted-foreground text-center leading-tight">
-                      Verdeel
-                    </span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-10 h-10 rounded-full border-destructive/40 text-destructive hover:bg-destructive/10"
-                    disabled={!selectedArticleId}
-                    title="Verwijder van order"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                {/* Mobile allocate bar */}
-                <div className="lg:hidden flex items-center justify-center gap-2 py-2 border-y border-border bg-secondary/20 shrink-0">
-                  <Button variant="outline" size="sm" className="text-xs gap-1 text-primary border-primary/30" disabled={!selectedBatchId || !selectedArticleId}>
-                    <ChevronLeft className="w-3.5 h-3.5" /> Verdeel
-                  </Button>
-                  <ArrowRightLeft className="w-3.5 h-3.5 text-muted-foreground" />
-                  <Button variant="outline" size="sm" className="text-xs gap-1 text-destructive border-destructive/30" disabled={!selectedArticleId}>
-                    Verwijder <ChevronRight className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                {/* ─── RIGHT PANEL: Stock batches ─── */}
-                <div className="lg:flex-1 flex flex-col min-h-0 min-w-0">
-                  <div className="px-4 py-2 border-b border-border flex-shrink-0">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                      Beschikbare Voorraad
-                    </span>
-                    {selectedArticleId && (
-                      <span className="text-[10px] font-mono text-primary ml-2">
-                        — gefilterd op geselecteerd artikel
-                      </span>
-                    )}
-                  </div>
-                  <ScrollArea className="flex-1">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="text-[10px] font-mono uppercase tracking-wider">
-                          <TableHead className="w-8"></TableHead>
-                          <TableHead>Artikel</TableHead>
-                          <TableHead className="hidden sm:table-cell">Code</TableHead>
-                          <TableHead className="text-right">AVE</TableHead>
-                          <TableHead className="text-right hidden md:table-cell">APE</TableHead>
-                          <TableHead className="text-right">Prijs</TableHead>
-                          <TableHead className="hidden lg:table-cell">Leverancier</TableHead>
-                          <TableHead className="hidden xl:table-cell">Leeftijd</TableHead>
-                          <TableHead className="hidden xl:table-cell">Kwal</TableHead>
-                          <TableHead className="hidden xl:table-cell">Herkomst</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {relevantBatches.map(batch => {
-                          const isSelected = selectedBatchId === batch.id;
-                          const lowStock = batch.ave < 100;
-                          return (
-                            <TableRow
-                              key={batch.id}
-                              className={cn(
-                                "cursor-pointer transition-colors text-xs",
-                                isSelected ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-secondary/30",
-                                batch.ave === 0 && "opacity-40"
-                              )}
-                              onClick={() => setSelectedBatchId(isSelected ? null : batch.id)}
-                            >
-                              <TableCell className="p-2">
-                                <div className={cn("w-2 h-2 rounded-full", batch.ave === 0 ? "bg-destructive" : lowStock ? "bg-amber-400" : "bg-emerald-400")} />
-                              </TableCell>
-                              <TableCell className="font-medium max-w-[140px] truncate">{batch.articleName}</TableCell>
-                              <TableCell className="hidden sm:table-cell font-mono text-[10px] text-muted-foreground">{batch.articleCode}</TableCell>
-                              <TableCell className="text-right font-mono">
-                                <span className={batch.ave === 0 ? "text-destructive" : lowStock ? "text-amber-400" : ""}>{batch.ave.toLocaleString()}</span>
-                              </TableCell>
-                              <TableCell className="text-right font-mono hidden md:table-cell text-muted-foreground">{batch.ape.toLocaleString()}</TableCell>
-                              <TableCell className="text-right font-mono font-medium">€{batch.valuationPrice.toFixed(2)}</TableCell>
-                              <TableCell className="hidden lg:table-cell text-muted-foreground text-[11px] max-w-[120px] truncate">{batch.supplier}</TableCell>
-                              <TableCell className="hidden xl:table-cell">
-                                <Badge variant="outline" className={cn(
-                                  "text-[9px] font-mono",
-                                  batch.ageDays >= 3 ? "text-amber-400 border-amber-500/30" : "text-muted-foreground border-border"
-                                )}>
-                                  {batch.ageDays}d
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="hidden xl:table-cell">
-                                <Badge variant="outline" className={cn(
-                                  "text-[9px] font-mono",
-                                  batch.quality === "A" ? "text-emerald-400 border-emerald-500/30" : "text-amber-400 border-amber-500/30"
-                                )}>
-                                  {batch.quality}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="hidden xl:table-cell text-[10px] font-mono text-muted-foreground">{batch.origin}</TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
                   </ScrollArea>
                 </div>
               </div>
