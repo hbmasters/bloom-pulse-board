@@ -17,7 +17,11 @@ import {
   Package, Bot, CheckCircle2, ArrowRight, Sparkles, ChevronRight, ChevronLeft,
   ClipboardList, TrendingUp, ShieldAlert, Zap, FileText, Printer, ArrowRightLeft,
   Truck, MapPin, Clock, CalendarIcon, Search, ChevronDown, ChevronUp,
+  Filter, X, Layers,
 } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   productionOrders, stockBatches, aiActions, picklists, allocationLogs,
