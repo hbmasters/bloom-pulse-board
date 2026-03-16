@@ -3,6 +3,7 @@
 export type AllocationStatus = "action" | "blocked" | "ready" | "completed";
 export type MarginRisk = "ok" | "warning" | "critical";
 export type AIIndicator = "ai-prepared" | "substitute-available" | "margin-risk" | "allocation-warning";
+export type ProductCategory = "hand" | "band" | "arrangement";
 
 export type TrackTraceStatus = "binnengemeld" | "onderweg" | "verwacht" | "onbekend";
 
@@ -64,7 +65,9 @@ export interface ProductionOrder {
   bouquetImage: string;
   productionLine: string;
   quantity: number;
+  category: ProductCategory;
   departureDate: string;
+  departureTime: string;
   allocationProgress: number;
   status: AllocationStatus;
   marginRisk: MarginRisk;
@@ -79,6 +82,7 @@ export interface ProductionOrder {
   articles: ArticleLine[];
   materials?: MaterialLine[];
   bewerkingen?: Bewerkingen;
+  activeUser?: string;
 }
 
 export interface AIAction {
@@ -143,7 +147,9 @@ export const productionOrders: ProductionOrder[] = [
     bouquetImage: "product-charme-xl.jpg",
     productionLine: "Lijn 1",
     quantity: 480,
+    category: "band",
     departureDate: "2026-03-17",
+    departureTime: "06:00",
     allocationProgress: 85,
     status: "action",
     marginRisk: "ok",
@@ -177,7 +183,10 @@ export const productionOrders: ProductionOrder[] = [
     bouquetImage: "product-field-m.jpg",
     productionLine: "Lijn 2",
     quantity: 960,
+    category: "band",
     departureDate: "2026-03-17",
+    departureTime: "14:00",
+    activeUser: "Dustin van Baal",
     allocationProgress: 45,
     status: "action",
     marginRisk: "warning",
@@ -210,7 +219,9 @@ export const productionOrders: ProductionOrder[] = [
     bouquetImage: "product-trend.jpg",
     productionLine: "Lijn 1",
     quantity: 320,
+    category: "hand",
     departureDate: "2026-03-18",
+    departureTime: "08:00",
     allocationProgress: 0,
     status: "blocked",
     marginRisk: "critical",
@@ -241,7 +252,9 @@ export const productionOrders: ProductionOrder[] = [
     bouquetImage: "product-de-luxe.jpg",
     productionLine: "Lijn 3",
     quantity: 240,
+    category: "arrangement",
     departureDate: "2026-03-16",
+    departureTime: "16:00",
     allocationProgress: 100,
     status: "completed",
     marginRisk: "ok",
@@ -274,7 +287,9 @@ export const productionOrders: ProductionOrder[] = [
     bouquetImage: "product-lovely.jpg",
     productionLine: "Lijn 2",
     quantity: 160,
+    category: "hand",
     departureDate: "2026-03-17",
+    departureTime: "10:00",
     allocationProgress: 100,
     status: "ready",
     marginRisk: "ok",
@@ -343,4 +358,10 @@ export const trackTraceColors: Record<TrackTraceStatus, { label: string; classNa
   onderweg: { label: "Onderweg", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
   verwacht: { label: "Verwacht", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
   onbekend: { label: "Onbekend", className: "bg-muted text-muted-foreground border-border" },
+};
+
+export const categoryLabels: Record<ProductCategory, { label: string; className: string }> = {
+  hand: { label: "Hand", className: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
+  band: { label: "Band", className: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
+  arrangement: { label: "Arrangement", className: "bg-rose-500/20 text-rose-400 border-rose-500/30" },
 };
