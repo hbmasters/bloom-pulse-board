@@ -17,7 +17,11 @@ import {
   Package, Bot, CheckCircle2, ArrowRight, Sparkles, ChevronRight, ChevronLeft,
   ClipboardList, TrendingUp, ShieldAlert, Zap, FileText, Printer, ArrowRightLeft,
   Truck, MapPin, Clock, CalendarIcon, Search, ChevronDown, ChevronUp,
+  Filter, X, Layers,
 } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   productionOrders, stockBatches, aiActions, picklists, allocationLogs,
@@ -49,6 +53,13 @@ const Verdelen = () => {
   const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date("2026-03-17"));
   const [orderSearch, setOrderSearch] = useState("");
   const [orderNavOpen, setOrderNavOpen] = useState(true);
+  // Stock filters
+  const [stockSearch, setStockSearch] = useState("");
+  const [stockSupplier, setStockSupplier] = useState<string>("all");
+  const [stockQuality, setStockQuality] = useState<string>("all");
+  const [stockTrackTrace, setStockTrackTrace] = useState<string>("all");
+  const [stockOrigin, setStockOrigin] = useState<string>("all");
+  const [stockArticleFilter, setStockArticleFilter] = useState<string | null>(null);
 
   // Filter orders by departure date
   const dateFilteredOrders = useMemo(() => {
@@ -72,16 +83,72 @@ const Verdelen = () => {
   const selectedOrder = productionOrders.find(o => o.id === selectedOrderId) ?? null;
   const verdeeldOrders = dateFilteredOrders.filter(o => o.status === "completed" || o.status === "ready");
 
-  // Filter batches relevant to selected order's articles
+  // Filter batches relevant to selected order's articles + user filters
   const relevantBatches = useMemo(() => {
-    if (!selectedOrder) return stockBatches;
-    const articleNames = selectedOrder.articles.map(a => a.articleName);
-    const substitutes = selectedOrder.articles
-      .filter(a => a.substituteName)
-      .map(a => a.substituteName!);
-    const allNames = [...articleNames, ...substitutes];
-    return stockBatches.filter(b => allNames.includes(b.articleName));
-  }, [selectedOrder]);
+    let batches = stockBatches;
+
+    // Filter by selected order articles
+    if (selectedOrder) {
+      const articleNames = selectedOrder.articles.map(a => a.articleName);
+      const substitutes = selectedOrder.articles
+        .filter(a => a.substituteName)
+        .map(a => a.substituteName!);
+      const allNames = [...articleNames, ...substitutes];
+      batches = batches.filter(b => allNames.includes(b.articleName));
+    }
+
+    // Filter by specific article from stuklijst
+    if (stockArticleFilter) {
+      batches = batches.filter(b => b.articleName === stockArticleFilter);
+    }
+
+    // Search filter
+    if (stockSearch.trim()) {
+      const q = stockSearch.toLowerCase();
+      batches = batches.filter(b =>
+        b.articleName.toLowerCase().includes(q) ||
+        b.articleCode.toLowerCase().includes(q) ||
+        b.supplier.toLowerCase().includes(q)
+      );
+    }
+
+    // Supplier filter
+    if (stockSupplier !== "all") {
+      batches = batches.filter(b => b.supplier === stockSupplier);
+    }
+
+    // Quality filter
+    if (stockQuality !== "all") {
+      batches = batches.filter(b => b.quality === stockQuality);
+    }
+
+    // Track & trace filter
+    if (stockTrackTrace !== "all") {
+      batches = batches.filter(b => b.trackTrace === stockTrackTrace);
+    }
+
+    // Origin filter
+    if (stockOrigin !== "all") {
+      batches = batches.filter(b => b.origin === stockOrigin);
+    }
+
+    return batches;
+  }, [selectedOrder, stockArticleFilter, stockSearch, stockSupplier, stockQuality, stockTrackTrace, stockOrigin]);
+
+  // Unique values for filter dropdowns
+  const uniqueSuppliers = useMemo(() => [...new Set(stockBatches.map(b => b.supplier))], []);
+  const uniqueOrigins = useMemo(() => [...new Set(stockBatches.map(b => b.origin))], []);
+
+  const hasActiveStockFilters = stockSearch || stockSupplier !== "all" || stockQuality !== "all" || stockTrackTrace !== "all" || stockOrigin !== "all" || stockArticleFilter;
+
+  const clearStockFilters = () => {
+    setStockSearch("");
+    setStockSupplier("all");
+    setStockQuality("all");
+    setStockTrackTrace("all");
+    setStockOrigin("all");
+    setStockArticleFilter(null);
+  };
 
   const toggleAction = (id: string) => {
     setActions(prev => prev.map(a => a.id === id ? { ...a, done: !a.done } : a));
@@ -223,24 +290,115 @@ const Verdelen = () => {
 
                 {/* ═══ LEFT PANEL: Beschikbare Voorraad ═══ */}
                 <div className="lg:w-[48%] flex flex-col min-h-0 border-r border-border">
-                  <div className="px-4 py-2 border-b border-border flex-shrink-0 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                        Beschikbare Voorraad
-                      </span>
-                      {selectedArticleId && (
-                        <span className="text-[10px] font-mono text-primary ml-2">
-                          — gefilterd
+                  {/* Header */}
+                  <div className="px-3 py-2 border-b border-border flex-shrink-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                          Beschikbare Voorraad
                         </span>
+                        <Badge variant="outline" className="text-[9px] font-mono">{relevantBatches.length} partijen</Badge>
+                      </div>
+                      {hasActiveStockFilters && (
+                        <button onClick={clearStockFilters} className="flex items-center gap-1 text-[9px] font-mono text-primary hover:text-primary/80 transition-colors">
+                          <X className="w-3 h-3" /> Wis filters
+                        </button>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        <MapPin className="w-2.5 h-2.5 mr-0.5" /> Binnengemeld
-                      </Badge>
-                      <Badge variant="outline" className="text-[9px] font-mono bg-blue-500/10 text-blue-400 border-blue-500/30">
-                        <Truck className="w-2.5 h-2.5 mr-0.5" /> Onderweg
-                      </Badge>
+
+                    {/* Article chips from stuklijst */}
+                    {selectedOrder && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        <button
+                          onClick={() => setStockArticleFilter(null)}
+                          className={cn(
+                            "text-[9px] font-mono px-2 py-0.5 rounded-full border transition-colors",
+                            !stockArticleFilter
+                              ? "bg-primary/20 text-primary border-primary/30"
+                              : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                          )}
+                        >
+                          Alle artikelen
+                        </button>
+                        {selectedOrder.articles.map(art => {
+                          const pct = art.needed > 0 ? (art.allocated / art.needed) * 100 : 0;
+                          const isActive = stockArticleFilter === art.articleName;
+                          return (
+                            <button
+                              key={art.id}
+                              onClick={() => setStockArticleFilter(isActive ? null : art.articleName)}
+                              className={cn(
+                                "text-[9px] font-mono px-2 py-0.5 rounded-full border transition-colors flex items-center gap-1",
+                                isActive
+                                  ? "bg-primary/20 text-primary border-primary/30"
+                                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                              )}
+                            >
+                              <div className={cn("w-1.5 h-1.5 rounded-full", pct >= 100 ? "bg-emerald-400" : pct > 0 ? "bg-amber-400" : "bg-destructive")} />
+                              {art.articleName}
+                              <span className="opacity-60">{art.allocated}/{art.needed}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Filter row */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="relative flex-1 min-w-[100px]">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                        <Input
+                          placeholder="Zoek in voorraad..."
+                          value={stockSearch}
+                          onChange={e => setStockSearch(e.target.value)}
+                          className="h-7 pl-6 text-[10px] font-mono bg-secondary/30 border-border"
+                        />
+                      </div>
+                      <Select value={stockQuality} onValueChange={setStockQuality}>
+                        <SelectTrigger className="h-7 w-[70px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Kwal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle</SelectItem>
+                          <SelectItem value="A">A</SelectItem>
+                          <SelectItem value="B">B</SelectItem>
+                          <SelectItem value="C">C</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockTrackTrace} onValueChange={setStockTrackTrace}>
+                        <SelectTrigger className="h-7 w-[110px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle statussen</SelectItem>
+                          <SelectItem value="binnengemeld">Binnengemeld</SelectItem>
+                          <SelectItem value="onderweg">Onderweg</SelectItem>
+                          <SelectItem value="verwacht">Verwacht</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockSupplier} onValueChange={setStockSupplier}>
+                        <SelectTrigger className="h-7 w-[120px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Leverancier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle leveranciers</SelectItem>
+                          {uniqueSuppliers.map(s => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockOrigin} onValueChange={setStockOrigin}>
+                        <SelectTrigger className="h-7 w-[80px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Herkomst" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle</SelectItem>
+                          {uniqueOrigins.map(o => (
+                            <SelectItem key={o} value={o}>{o}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <ScrollArea className="flex-1">
