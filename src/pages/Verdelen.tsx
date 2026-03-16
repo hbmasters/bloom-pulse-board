@@ -290,24 +290,115 @@ const Verdelen = () => {
 
                 {/* ═══ LEFT PANEL: Beschikbare Voorraad ═══ */}
                 <div className="lg:w-[48%] flex flex-col min-h-0 border-r border-border">
-                  <div className="px-4 py-2 border-b border-border flex-shrink-0 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                        Beschikbare Voorraad
-                      </span>
-                      {selectedArticleId && (
-                        <span className="text-[10px] font-mono text-primary ml-2">
-                          — gefilterd
+                  {/* Header */}
+                  <div className="px-3 py-2 border-b border-border flex-shrink-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                          Beschikbare Voorraad
                         </span>
+                        <Badge variant="outline" className="text-[9px] font-mono">{relevantBatches.length} partijen</Badge>
+                      </div>
+                      {hasActiveStockFilters && (
+                        <button onClick={clearStockFilters} className="flex items-center gap-1 text-[9px] font-mono text-primary hover:text-primary/80 transition-colors">
+                          <X className="w-3 h-3" /> Wis filters
+                        </button>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        <MapPin className="w-2.5 h-2.5 mr-0.5" /> Binnengemeld
-                      </Badge>
-                      <Badge variant="outline" className="text-[9px] font-mono bg-blue-500/10 text-blue-400 border-blue-500/30">
-                        <Truck className="w-2.5 h-2.5 mr-0.5" /> Onderweg
-                      </Badge>
+
+                    {/* Article chips from stuklijst */}
+                    {selectedOrder && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        <button
+                          onClick={() => setStockArticleFilter(null)}
+                          className={cn(
+                            "text-[9px] font-mono px-2 py-0.5 rounded-full border transition-colors",
+                            !stockArticleFilter
+                              ? "bg-primary/20 text-primary border-primary/30"
+                              : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                          )}
+                        >
+                          Alle artikelen
+                        </button>
+                        {selectedOrder.articles.map(art => {
+                          const pct = art.needed > 0 ? (art.allocated / art.needed) * 100 : 0;
+                          const isActive = stockArticleFilter === art.articleName;
+                          return (
+                            <button
+                              key={art.id}
+                              onClick={() => setStockArticleFilter(isActive ? null : art.articleName)}
+                              className={cn(
+                                "text-[9px] font-mono px-2 py-0.5 rounded-full border transition-colors flex items-center gap-1",
+                                isActive
+                                  ? "bg-primary/20 text-primary border-primary/30"
+                                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                              )}
+                            >
+                              <div className={cn("w-1.5 h-1.5 rounded-full", pct >= 100 ? "bg-emerald-400" : pct > 0 ? "bg-amber-400" : "bg-destructive")} />
+                              {art.articleName}
+                              <span className="opacity-60">{art.allocated}/{art.needed}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Filter row */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="relative flex-1 min-w-[100px]">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                        <Input
+                          placeholder="Zoek in voorraad..."
+                          value={stockSearch}
+                          onChange={e => setStockSearch(e.target.value)}
+                          className="h-7 pl-6 text-[10px] font-mono bg-secondary/30 border-border"
+                        />
+                      </div>
+                      <Select value={stockQuality} onValueChange={setStockQuality}>
+                        <SelectTrigger className="h-7 w-[70px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Kwal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle</SelectItem>
+                          <SelectItem value="A">A</SelectItem>
+                          <SelectItem value="B">B</SelectItem>
+                          <SelectItem value="C">C</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockTrackTrace} onValueChange={setStockTrackTrace}>
+                        <SelectTrigger className="h-7 w-[110px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle statussen</SelectItem>
+                          <SelectItem value="binnengemeld">Binnengemeld</SelectItem>
+                          <SelectItem value="onderweg">Onderweg</SelectItem>
+                          <SelectItem value="verwacht">Verwacht</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockSupplier} onValueChange={setStockSupplier}>
+                        <SelectTrigger className="h-7 w-[120px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Leverancier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle leveranciers</SelectItem>
+                          {uniqueSuppliers.map(s => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={stockOrigin} onValueChange={setStockOrigin}>
+                        <SelectTrigger className="h-7 w-[80px] text-[10px] font-mono bg-secondary/30">
+                          <SelectValue placeholder="Herkomst" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle</SelectItem>
+                          {uniqueOrigins.map(o => (
+                            <SelectItem key={o} value={o}>{o}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <ScrollArea className="flex-1">
