@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Shield, Timer, Activity, Link2, FileText, Monitor } from "lucide-react";
+import { Shield, Timer, Activity, Link2, FileText, Radar, Sun } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import {
   integrations, integrationStatusStyles, type IntegrationStatus,
+  controlStatusStyles, type ControlStatus,
   weeklyReview, reviewCategoryConfig, priorityStyles,
 } from "@/components/control-center/control-center-data";
 
 /* ── Tab system ── */
-type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review";
+type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review" | "future";
 
 const tabs: { id: CCTab; label: string; icon: typeof Shield }[] = [
   { id: "sentinel", label: "Sentinel", icon: Shield },
@@ -19,6 +20,7 @@ const tabs: { id: CCTab; label: string; icon: typeof Shield }[] = [
   { id: "telemetry", label: "Telemetry", icon: Activity },
   { id: "integrations", label: "Integraties", icon: Link2 },
   { id: "review", label: "Weekly Review", icon: FileText },
+  { id: "future", label: "Briefing & Build", icon: Sun },
 ];
 
 /* ── Integration Status Badge ── */
@@ -32,6 +34,22 @@ const IntegrationBadge = ({ status }: { status: IntegrationStatus }) => {
   );
 };
 
+/* ── Channel Policy Badge ── */
+const ChannelPolicyBadge = ({ policy }: { policy?: string }) => {
+  if (!policy) return null;
+  const styles: Record<string, { bg: string; text: string; border: string }> = {
+    "internal-only": { bg: "bg-blue-500/10", text: "text-blue-500", border: "border-blue-500/20" },
+    "external":      { bg: "bg-orange-500/10", text: "text-orange-500", border: "border-orange-500/20" },
+    "monitored":     { bg: "bg-violet-500/10", text: "text-violet-500", border: "border-violet-500/20" },
+  };
+  const s = styles[policy] || styles["monitored"];
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider border ${s.bg} ${s.text} ${s.border}`}>
+      {policy}
+    </span>
+  );
+};
+
 /* ── Section 4: Integration Monitoring ── */
 const IntegrationPanel = () => {
   const categoryLabels: Record<string, string> = { messaging: "Messaging", crm: "CRM", data: "Data", api: "API" };
@@ -40,14 +58,11 @@ const IntegrationPanel = () => {
 
   return (
     <div className="space-y-4">
-      {/* Summary */}
       <div className="flex items-center gap-4 text-[10px] font-mono">
         <span className="text-accent">{onlineCount} online</span>
         {issueCount > 0 && <span className="text-orange-500">{issueCount} issues</span>}
         <span className="text-muted-foreground">{integrations.length} totaal</span>
       </div>
-
-      {/* Integration cards */}
       <div className="space-y-2">
         {integrations.map(item => (
           <div key={item.name} className={`rounded-lg border p-3 ${integrationStatusStyles[item.status].bg} ${integrationStatusStyles[item.status].border}`}>
@@ -57,13 +72,20 @@ const IntegrationPanel = () => {
                 {categoryLabels[item.category]}
               </span>
               <IntegrationBadge status={item.status} />
+              <ChannelPolicyBadge policy={item.channelPolicy} />
               <span className="text-[9px] font-mono text-muted-foreground ml-auto">Uptime {item.uptime}</span>
             </div>
             <p className="text-[11px] text-muted-foreground">{item.detail}</p>
-            {item.lastError && (
-              <div className="mt-1.5 flex items-start gap-2 px-2 py-1.5 rounded bg-muted/20 border border-border/40">
-                <span className="text-[9px] font-mono text-muted-foreground/50 shrink-0">{item.lastErrorTime}</span>
-                <span className="text-[10px] font-mono text-orange-400">{item.lastError}</span>
+            {(item.lastError || item.timeoutPattern || item.reconnectCount) && (
+              <div className="mt-1.5 flex items-start gap-2 px-2 py-1.5 rounded bg-muted/20 border border-border/40 flex-wrap">
+                {item.lastErrorTime && <span className="text-[9px] font-mono text-muted-foreground/50 shrink-0">{item.lastErrorTime}</span>}
+                {item.lastError && <span className="text-[10px] font-mono text-orange-400">{item.lastError}</span>}
+                {item.timeoutPattern && (
+                  <span className="text-[9px] font-mono text-yellow-500/70 ml-auto">Timeouts: {item.timeoutPattern}</span>
+                )}
+                {item.reconnectCount && item.reconnectCount > 0 && (
+                  <span className="text-[9px] font-mono text-orange-400/70">Reconnects: {item.reconnectCount}</span>
+                )}
               </div>
             )}
           </div>
@@ -81,21 +103,18 @@ const WeeklyReviewPanel = () => {
     return acc;
   }, {} as Record<string, typeof weeklyReview>);
 
-  const categoryOrder = ["issue", "proposal", "efficiency", "todo", "recommendation"];
+  const categoryOrder = ["issue", "proposal", "ai-cost", "efficiency", "todo", "recommendation"];
 
   return (
     <div className="space-y-5">
-      {/* Memo header */}
       <div className="rounded-lg border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">Management Memo</span>
           <span className="text-[9px] font-mono text-muted-foreground">Week 11 · 2026</span>
         </div>
         <h3 className="text-sm font-bold text-foreground">Wekelijkse Operationele Review</h3>
-        <p className="text-[11px] text-muted-foreground mt-1">Overzicht van efficiëntie, openstaande issues, voorstellen en aanbevelingen voor de komende week.</p>
+        <p className="text-[11px] text-muted-foreground mt-1">Overzicht van efficiëntie, AI-kosten, openstaande issues, voorstellen en aanbevelingen voor de komende week.</p>
       </div>
-
-      {/* Grouped items */}
       {categoryOrder.map(cat => {
         const items = grouped[cat];
         if (!items) return null;
@@ -129,6 +148,51 @@ const WeeklyReviewPanel = () => {
   );
 };
 
+/* ── Section 6: Future Readiness ── */
+const FutureReadinessPanel = () => {
+  const futureModules = [
+    { name: "Morning Intelligence Briefing", status: "Planned", description: "Dagelijkse AI-gestuurde samenvatting van overnight systeemsignalen, afwijkingen en prioriteiten.", readiness: 20 },
+    { name: "Build Radar Integration", status: "Active", description: "Live build-pipeline status, fase-voortgang en node-monitoring. Beschikbaar via Labs → Build Radar.", readiness: 75 },
+    { name: "System Alerts Feed", status: "Planned", description: "Gecentraliseerde alerting met severity-filters en escalatie-routing.", readiness: 10 },
+    { name: "Node Cluster Monitoring", status: "Planned", description: "Mac Studio + Mac mini cluster health, load balancing en failover status.", readiness: 15 },
+    { name: "Agent Activity Monitoring", status: "Planned", description: "Real-time overzicht van actieve AI-agents, taken, token-gebruik en response-kwaliteit.", readiness: 10 },
+    { name: "Signal Bus", status: "Architecture", description: "Event-driven signaal-infrastructuur voor cross-module communicatie.", readiness: 5 },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">Roadmap — Control Center Extensions</span>
+        <p className="text-[11px] text-muted-foreground mt-1">Modules die worden voorbereid voor integratie in het Control Center.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {futureModules.map(mod => (
+          <div key={mod.name} className="rounded-lg border border-border/50 bg-card/30 p-3 space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-foreground">{mod.name}</span>
+              <span className={cn(
+                "text-[8px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border",
+                mod.status === "Active"
+                  ? "bg-accent/10 text-accent border-accent/20"
+                  : mod.status === "Architecture"
+                  ? "bg-violet-500/10 text-violet-500 border-violet-500/20"
+                  : "bg-muted/30 text-muted-foreground border-border"
+              )}>{mod.status}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">{mod.description}</p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1 rounded-full bg-muted/30 overflow-hidden">
+                <div className="h-full rounded-full bg-primary/50" style={{ width: `${mod.readiness}%` }} />
+              </div>
+              <span className="text-[9px] font-mono text-muted-foreground/60">{mod.readiness}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ── Main Page ── */
 const ControlCenter = () => {
   const [activeTab, setActiveTab] = useState<CCTab>("sentinel");
@@ -147,7 +211,7 @@ const ControlCenter = () => {
             <p className="text-[11px] text-muted-foreground font-mono">System health · Scheduler · Telemetry · Integrations · Governance</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">V1.0</span>
+            <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">V1.1</span>
             <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">BETA</span>
           </div>
         </div>
@@ -226,22 +290,11 @@ const ControlCenter = () => {
             </IHSectionShell>
           )}
 
-          {/* Future Extensions — prepared structure */}
-          <div className="mt-6 rounded-lg border border-dashed border-border/50 p-4">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground/40">Geplande Extensies</span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-              {[
-                "Morning AI Briefing",
-                "System Alerts Feed",
-                "Node Cluster Monitoring",
-                "Agent Activity Monitoring",
-              ].map(ext => (
-                <div key={ext} className="rounded-lg border border-border/30 bg-muted/5 p-2.5 text-center">
-                  <span className="text-[10px] font-mono text-muted-foreground/40">{ext}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {activeTab === "future" && (
+            <IHSectionShell title="Briefing & Build Readiness" icon={Sun}>
+              <FutureReadinessPanel />
+            </IHSectionShell>
+          )}
         </div>
       </div>
     </div>
