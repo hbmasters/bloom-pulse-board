@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,21 +11,25 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Package, Bot, CheckCircle2, ArrowRight, Sparkles, ChevronRight, ChevronLeft,
   ClipboardList, TrendingUp, ShieldAlert, Zap, FileText, Printer, ArrowRightLeft,
   Truck, MapPin, Clock, CalendarIcon, Search, ChevronDown, ChevronUp,
-  Filter, X, Layers,
+  Filter, X, Layers, AlertTriangle, Save, User, Maximize2, ImagePlus,
 } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   productionOrders, stockBatches, aiActions, picklists, allocationLogs,
-  statusColors, marginColors, aiIndicatorLabels, trackTraceColors,
+  statusColors, marginColors, aiIndicatorLabels, trackTraceColors, categoryLabels,
   type ProductionOrder, type AIAction, type StockBatch,
 } from "@/components/verdelen/verdelen-data";
 
@@ -44,6 +48,21 @@ const bouquetImageMap: Record<string, string> = {
   "product-lovely.jpg": imgLovely,
 };
 
+const isDepartureToday = (order: ProductionOrder) => {
+  const today = format(new Date(), "yyyy-MM-dd");
+  return order.departureDate === today;
+};
+
+const isWithin2HoursOfDeparture = (order: ProductionOrder) => {
+  if (!isDepartureToday(order)) return false;
+  const now = new Date();
+  const [h, m] = order.departureTime.split(":").map(Number);
+  const departure = new Date();
+  departure.setHours(h, m, 0, 0);
+  const diffMs = departure.getTime() - now.getTime();
+  return diffMs > 0 && diffMs <= 2 * 60 * 60 * 1000;
+};
+
 const Verdelen = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(productionOrders[0]?.id ?? null);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
@@ -53,6 +72,10 @@ const Verdelen = () => {
   const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date("2026-03-17"));
   const [orderSearch, setOrderSearch] = useState("");
   const [orderNavOpen, setOrderNavOpen] = useState(true);
+  const [photoEnlarged, setPhotoEnlarged] = useState(false);
+  const [showSpoedDialog, setShowSpoedDialog] = useState(false);
+  const [pendingConfirmOrderId, setPendingConfirmOrderId] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   // Stock filters
   const [stockSearch, setStockSearch] = useState("");
   const [stockSupplier, setStockSupplier] = useState<string>("all");
@@ -60,6 +83,22 @@ const Verdelen = () => {
   const [stockTrackTrace, setStockTrackTrace] = useState<string>("all");
   const [stockOrigin, setStockOrigin] = useState<string>("all");
   const [stockArticleFilter, setStockArticleFilter] = useState<string | null>(null);
+
+  // Auto-save effect
+  const triggerAutoSave = useCallback(() => {
+    setLastSaved(new Date());
+    // In production this would persist to backend
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(triggerAutoSave, 30000);
+    return () => clearInterval(timer);
+  }, [triggerAutoSave]);
+
+  // Auto-save on meaningful actions
+  useEffect(() => {
+    triggerAutoSave();
+  }, [actions, confirmedOrders, triggerAutoSave]);
 
   // Filter orders by departure date
   const dateFilteredOrders = useMemo(() => {
@@ -86,8 +125,6 @@ const Verdelen = () => {
   // Filter batches relevant to selected order's articles + user filters
   const relevantBatches = useMemo(() => {
     let batches = stockBatches;
-
-    // Filter by selected order articles
     if (selectedOrder) {
       const articleNames = selectedOrder.articles.map(a => a.articleName);
       const substitutes = selectedOrder.articles
@@ -96,13 +133,9 @@ const Verdelen = () => {
       const allNames = [...articleNames, ...substitutes];
       batches = batches.filter(b => allNames.includes(b.articleName));
     }
-
-    // Filter by specific article from stuklijst
     if (stockArticleFilter) {
       batches = batches.filter(b => b.articleName === stockArticleFilter);
     }
-
-    // Search filter
     if (stockSearch.trim()) {
       const q = stockSearch.toLowerCase();
       batches = batches.filter(b =>
@@ -111,31 +144,13 @@ const Verdelen = () => {
         b.supplier.toLowerCase().includes(q)
       );
     }
-
-    // Supplier filter
-    if (stockSupplier !== "all") {
-      batches = batches.filter(b => b.supplier === stockSupplier);
-    }
-
-    // Quality filter
-    if (stockQuality !== "all") {
-      batches = batches.filter(b => b.quality === stockQuality);
-    }
-
-    // Track & trace filter
-    if (stockTrackTrace !== "all") {
-      batches = batches.filter(b => b.trackTrace === stockTrackTrace);
-    }
-
-    // Origin filter
-    if (stockOrigin !== "all") {
-      batches = batches.filter(b => b.origin === stockOrigin);
-    }
-
+    if (stockSupplier !== "all") batches = batches.filter(b => b.supplier === stockSupplier);
+    if (stockQuality !== "all") batches = batches.filter(b => b.quality === stockQuality);
+    if (stockTrackTrace !== "all") batches = batches.filter(b => b.trackTrace === stockTrackTrace);
+    if (stockOrigin !== "all") batches = batches.filter(b => b.origin === stockOrigin);
     return batches;
   }, [selectedOrder, stockArticleFilter, stockSearch, stockSupplier, stockQuality, stockTrackTrace, stockOrigin]);
 
-  // Unique values for filter dropdowns
   const uniqueSuppliers = useMemo(() => [...new Set(stockBatches.map(b => b.supplier))], []);
   const uniqueOrigins = useMemo(() => [...new Set(stockBatches.map(b => b.origin))], []);
 
@@ -154,8 +169,25 @@ const Verdelen = () => {
     setActions(prev => prev.map(a => a.id === id ? { ...a, done: !a.done } : a));
   };
 
-  const confirmOrder = (orderId: string) => {
+  const handleConfirmClick = (orderId: string) => {
+    const order = productionOrders.find(o => o.id === orderId);
+    if (order && isDepartureToday(order) && isWithin2HoursOfDeparture(order)) {
+      setPendingConfirmOrderId(orderId);
+      setShowSpoedDialog(true);
+    } else {
+      confirmOrder(orderId, false);
+    }
+  };
+
+  const confirmOrder = (orderId: string, spoed: boolean) => {
     setConfirmedOrders(prev => new Set(prev).add(orderId));
+    if (spoed) {
+      toast.success("Spoed productie order aangemaakt en bevestigd");
+    } else {
+      toast.success("Productie order bevestigd");
+    }
+    setShowSpoedDialog(false);
+    setPendingConfirmOrderId(null);
   };
 
   const orderActions = selectedOrder
@@ -174,6 +206,13 @@ const Verdelen = () => {
           <p className="text-[10px] font-mono text-muted-foreground">Allocatie Cockpit — Voorraad → Productieorders</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {/* Auto-save indicator */}
+          {lastSaved && (
+            <span className="flex items-center gap-1 text-[9px] font-mono text-muted-foreground">
+              <Save className="w-3 h-3 text-emerald-400" />
+              Opgeslagen {format(lastSaved, "HH:mm:ss")}
+            </span>
+          )}
           <Badge variant="outline" className="text-[10px] font-mono bg-primary/10 text-primary border-primary/30">
             <Bot className="w-3 h-3 mr-1" /> AI Assist Actief
           </Badge>
@@ -197,7 +236,6 @@ const Verdelen = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Compact date + search filter bar */}
           <div className="flex items-center gap-2 ml-auto">
             <Popover>
               <PopoverTrigger asChild>
@@ -252,6 +290,8 @@ const Verdelen = () => {
                   <div className="py-0.5">
                     {filteredTeVerdelen.map(order => {
                       const isActive = selectedOrderId === order.id;
+                      const needsAction = isDepartureToday(order) && order.allocationProgress < 100;
+                      const cat = categoryLabels[order.category];
                       return (
                         <button
                           key={order.id}
@@ -270,8 +310,23 @@ const Verdelen = () => {
                             <div className="flex items-center gap-1">
                               <span className="text-[10px] font-mono font-medium text-foreground">{order.orderNumber.replace("PO-2026-", "")}</span>
                               <span className="text-[9px] font-mono text-muted-foreground">{order.allocationProgress}%</span>
+                              {needsAction && (
+                                <Badge variant="outline" className="text-[7px] px-1 py-0 h-3 bg-destructive/20 text-destructive border-destructive/30">
+                                  ACTIE
+                                </Badge>
+                              )}
                             </div>
-                            <span className="text-[9px] text-muted-foreground truncate block">{order.bouquet}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] text-muted-foreground truncate">{order.bouquet}</span>
+                              <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3", cat.className)}>
+                                {cat.label}
+                              </Badge>
+                            </div>
+                            {order.activeUser && (
+                              <span className="text-[8px] text-primary flex items-center gap-0.5 mt-0.5">
+                                <User className="w-2.5 h-2.5" /> {order.activeUser}
+                              </span>
+                            )}
                           </div>
                         </button>
                       );
@@ -290,7 +345,6 @@ const Verdelen = () => {
 
                 {/* ═══ LEFT PANEL: Beschikbare Voorraad ═══ */}
                 <div className="lg:w-[48%] flex flex-col min-h-0 border-r border-border">
-                  {/* Header */}
                   <div className="px-3 py-2 border-b border-border flex-shrink-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -507,8 +561,6 @@ const Verdelen = () => {
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
-
-                  {/* AI Auto Verdeel */}
                   <div className="mt-4 border-t border-border pt-4">
                     <Button
                       variant="outline"
@@ -517,7 +569,7 @@ const Verdelen = () => {
                       title="AI verdeelt automatisch de beste batches"
                     >
                       <Bot className="w-4 h-4" />
-                      <span className="leading-tight text-center">Auto<br/>Verdeel</span>
+                      <span className="leading-tight text-center">Auto<br />Verdeel</span>
                     </Button>
                   </div>
                 </div>
@@ -535,33 +587,77 @@ const Verdelen = () => {
                   </Button>
                 </div>
 
-                {/* ═══ RIGHT PANEL: Product / Order detail ═══ */}
+                {/* ═══ RIGHT PANEL: Concept Productie Order ═══ */}
                 <div className="lg:flex-1 flex flex-col min-h-0 min-w-0">
                   <ScrollArea className="flex-1">
                     <div className="p-4 space-y-3">
-                      {/* Order header with large photo */}
+                      {/* Panel title */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
+                          Concept Productie Order
+                        </span>
+                        {selectedOrder.activeUser && (
+                          <Badge variant="outline" className="text-[9px] font-mono bg-primary/10 text-primary border-primary/30 gap-1">
+                            <User className="w-3 h-3" />
+                            {selectedOrder.activeUser} is bezig met verdelen
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Order header with photo + central info */}
                       <div className="flex gap-4">
-                        <div className="w-24 h-24 rounded-lg border border-border overflow-hidden shrink-0 bg-secondary/30">
+                        {/* Enlargeable photo */}
+                        <div
+                          className="w-24 h-24 rounded-lg border border-border overflow-hidden shrink-0 bg-secondary/30 cursor-pointer relative group"
+                          onClick={() => setPhotoEnlarged(true)}
+                        >
                           <img
                             src={bouquetImageMap[selectedOrder.bouquetImage]}
                             alt={selectedOrder.bouquet}
                             className="w-full h-full object-cover"
                           />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Maximize2 className="w-5 h-5 text-white" />
+                          </div>
                         </div>
+
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-base font-bold text-foreground">{selectedOrder.bouquet}</h3>
                             <Badge variant="outline" className={cn("text-[9px] font-mono uppercase", statusColors[selectedOrder.status])}>
                               {selectedOrder.status}
                             </Badge>
+                            <Badge variant="outline" className={cn("text-[9px] font-mono", categoryLabels[selectedOrder.category].className)}>
+                              {categoryLabels[selectedOrder.category].label}
+                            </Badge>
+                            {isDepartureToday(selectedOrder) && selectedOrder.allocationProgress < 100 && (
+                              <Badge variant="outline" className="text-[8px] font-mono bg-destructive/20 text-destructive border-destructive/30 gap-0.5">
+                                <AlertTriangle className="w-2.5 h-2.5" /> Actie Vereist
+                              </Badge>
+                            )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{selectedOrder.customer}</p>
-                          <p className="text-[10px] font-mono text-muted-foreground">
-                            {selectedOrder.orderNumber} • {selectedOrder.internNummer && `Intern: ${selectedOrder.internNummer} • `}{selectedOrder.productionLine} • {selectedOrder.quantity} st
+
+                          {/* Central: quantity */}
+                          <div className="mt-1 flex items-baseline gap-2">
+                            <span className="text-2xl font-black text-foreground">{selectedOrder.quantity}</span>
+                            <span className="text-xs font-mono text-muted-foreground">stuks</span>
+                          </div>
+
+                          <p className="text-xs text-muted-foreground">{selectedOrder.customer}</p>
+
+                          {/* Central: departure date + time */}
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1 bg-secondary/40 rounded px-2 py-0.5">
+                              <Truck className="w-3 h-3 text-primary" />
+                              <span className="text-xs font-mono font-bold text-foreground">{selectedOrder.departureDate}</span>
+                              <span className="text-xs font-mono font-bold text-primary">{selectedOrder.departureTime}</span>
+                            </div>
+                          </div>
+
+                          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
+                            {selectedOrder.orderNumber} • {selectedOrder.internNummer && `Intern: ${selectedOrder.internNummer} • `}{selectedOrder.productionLine}
                           </p>
-                          <p className="text-[10px] font-mono text-muted-foreground">
-                            Vertrek: {selectedOrder.departureDate}
-                          </p>
+
                           {selectedOrder.aiIndicators.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1.5">
                               {selectedOrder.aiIndicators.map(ind => (
@@ -573,6 +669,12 @@ const Verdelen = () => {
                           )}
                         </div>
                       </div>
+
+                      {/* AI Generate photo button */}
+                      <Button variant="outline" size="sm" className="w-full text-[10px] font-mono gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                        <ImagePlus className="w-3.5 h-3.5" />
+                        Genereer AI foto op basis van huidige verdeling
+                      </Button>
 
                       {/* Margin panel */}
                       <div className="rounded-lg border border-border bg-card/60 p-3">
@@ -712,7 +814,7 @@ const Verdelen = () => {
                           </div>
                         )}
 
-                        {/* Kostprijs totaal + Verkoopprijs + Marge summary */}
+                        {/* Kostprijs totaal */}
                         <div className="border-t border-border bg-secondary/10 px-3 py-2 space-y-0.5">
                           <div className="flex justify-between text-[11px] font-medium">
                             <span className="text-muted-foreground">Kostprijs totaal (incl arbeid)</span>
@@ -810,7 +912,7 @@ const Verdelen = () => {
                         size="lg"
                         className="w-full text-sm font-bold gap-2 h-12"
                         disabled={confirmedOrders.has(selectedOrder.id) || selectedOrder.allocationProgress < 100}
-                        onClick={() => confirmOrder(selectedOrder.id)}
+                        onClick={() => handleConfirmClick(selectedOrder.id)}
                       >
                         {confirmedOrders.has(selectedOrder.id) ? (
                           <><CheckCircle2 className="w-4 h-4" /> Productie Order Bevestigd</>
@@ -842,6 +944,7 @@ const Verdelen = () => {
                     <TableHead>Order</TableHead>
                     <TableHead>Klant</TableHead>
                     <TableHead>Boeket</TableHead>
+                    <TableHead>Cat</TableHead>
                     <TableHead>Lijn</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
                     <TableHead>Gewenste Marge</TableHead>
@@ -860,6 +963,11 @@ const Verdelen = () => {
                       <TableCell className="font-mono text-[11px]">{order.orderNumber}</TableCell>
                       <TableCell>{order.customer}</TableCell>
                       <TableCell className="font-medium">{order.bouquet}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn("text-[8px] font-mono", categoryLabels[order.category].className)}>
+                          {categoryLabels[order.category].label}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">{order.productionLine}</TableCell>
                       <TableCell className="text-right font-mono">{order.quantity}</TableCell>
                       <TableCell>
@@ -935,7 +1043,6 @@ const Verdelen = () => {
                   </div>
                 ))}
               </div>
-
               <p className="text-[10px] font-mono text-muted-foreground mt-4 px-1">
                 Pagina 1: Technische productiedata • Pagina 2: Ontwerp instructies • Prijzen worden nooit getoond
               </p>
@@ -943,6 +1050,46 @@ const Verdelen = () => {
           </ScrollArea>
         </TabsContent>
       </Tabs>
+
+      {/* ═══ Enlarged Photo Dialog ═══ */}
+      <Dialog open={photoEnlarged} onOpenChange={setPhotoEnlarged}>
+        <DialogContent className="sm:max-w-lg p-2">
+          {selectedOrder && (
+            <img
+              src={bouquetImageMap[selectedOrder.bouquetImage]}
+              alt={selectedOrder.bouquet}
+              className="w-full h-auto rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Spoed Order Dialog ═══ */}
+      <Dialog open={showSpoedDialog} onOpenChange={setShowSpoedDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              Spoed Productie Order?
+            </DialogTitle>
+            <DialogDescription>
+              Deze order vertrekt vandaag en is binnen 2 uur gepland. Wil je er een spoed order van maken? Dit krijgt prioriteit op de productievloer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => {
+              if (pendingConfirmOrderId) confirmOrder(pendingConfirmOrderId, false);
+            }}>
+              Nee, normaal bevestigen
+            </Button>
+            <Button className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-white" onClick={() => {
+              if (pendingConfirmOrderId) confirmOrder(pendingConfirmOrderId, true);
+            }}>
+              <Zap className="w-4 h-4" /> Ja, maak spoed order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
