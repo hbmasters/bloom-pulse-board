@@ -423,15 +423,23 @@ const Verdelen = () => {
                           <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Marge</span>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-4 gap-3">
+                          <div>
+                            <span className="text-[9px] font-mono text-muted-foreground block">Verkoopprijs</span>
+                            <span className="text-sm font-bold text-foreground">€{selectedOrder.sellingPrice.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-mono text-muted-foreground block">Kostprijs</span>
+                            <span className="text-sm font-bold text-foreground">€{selectedOrder.costPrice.toFixed(2)}</span>
+                          </div>
                           <div>
                             <span className="text-[9px] font-mono text-muted-foreground block">Gewenste Marge</span>
-                            <span className="text-base font-bold text-foreground">{selectedOrder.targetMarginPct}% <span className="text-xs text-muted-foreground font-normal">/ €{selectedOrder.targetMarginEur.toFixed(2)}</span></span>
+                            <span className="text-sm font-bold text-foreground">{selectedOrder.targetMarginPct}% <span className="text-[10px] text-muted-foreground font-normal">/ €{selectedOrder.targetMarginEur.toFixed(2)}</span></span>
                           </div>
                           <div>
                             <span className="text-[9px] font-mono text-muted-foreground block">Huidige Marge</span>
-                            <span className={cn("text-base font-bold", marginColors[selectedOrder.marginRisk])}>
-                              {selectedOrder.currentMarginPct}% <span className="text-xs font-normal opacity-70">/ €{selectedOrder.currentMarginEur.toFixed(2)}</span>
+                            <span className={cn("text-sm font-bold", marginColors[selectedOrder.marginRisk])}>
+                              {selectedOrder.currentMarginPct}% <span className="text-[10px] font-normal opacity-70">/ €{selectedOrder.currentMarginEur.toFixed(2)}</span>
                             </span>
                           </div>
                         </div>

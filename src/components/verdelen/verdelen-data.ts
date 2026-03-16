@@ -48,10 +48,12 @@ export interface ProductionOrder {
   allocationProgress: number;
   status: AllocationStatus;
   marginRisk: MarginRisk;
-  targetMarginPct: number; // Gewenste marge
-  currentMarginPct: number; // Huidige marge
+  targetMarginPct: number;
+  currentMarginPct: number;
   targetMarginEur: number;
   currentMarginEur: number;
+  sellingPrice: number;   // Verkoopprijs per stuk
+  costPrice: number;      // Kostprijs per stuk
   aiIndicators: AIIndicator[];
   articles: ArticleLine[];
 }
@@ -125,6 +127,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 34,
     targetMarginEur: 2.10,
     currentMarginEur: 1.92,
+    sellingPrice: 5.65,
+    costPrice: 3.73,
     aiIndicators: ["ai-prepared"],
     articles: [
       { id: "a1", articleName: "Roos Red Naomi 60cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b1", quantity: 5 }], substituteAvailable: false },
@@ -149,6 +153,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 22,
     targetMarginEur: 1.20,
     currentMarginEur: 0.88,
+    sellingPrice: 4.00,
+    costPrice: 3.12,
     aiIndicators: ["margin-risk", "substitute-available"],
     articles: [
       { id: "a5", articleName: "Chrysant Bacardi", needed: 4, allocated: 2, allocatedBatches: [{ batchId: "b7", quantity: 2 }], substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02 },
@@ -173,6 +179,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 12,
     targetMarginEur: 1.05,
     currentMarginEur: 0.38,
+    sellingPrice: 3.75,
+    costPrice: 3.37,
     aiIndicators: ["margin-risk", "allocation-warning"],
     articles: [
       { id: "a9", articleName: "Tulp mix", needed: 7, allocated: 0, allocatedBatches: [], substituteAvailable: false },
@@ -195,6 +203,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 41,
     targetMarginEur: 2.90,
     currentMarginEur: 3.15,
+    sellingPrice: 7.68,
+    costPrice: 4.53,
     aiIndicators: [],
     articles: [
       { id: "a11", articleName: "Roos Avalanche 70cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b16", quantity: 5 }], substituteAvailable: false },
@@ -218,6 +228,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 38,
     targetMarginEur: 2.30,
     currentMarginEur: 2.44,
+    sellingPrice: 6.42,
+    costPrice: 3.98,
     aiIndicators: ["ai-prepared"],
     articles: [
       { id: "a14", articleName: "Roos Pink Floyd 50cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b19", quantity: 5 }], substituteAvailable: false },
