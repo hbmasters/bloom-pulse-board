@@ -4,13 +4,27 @@ export type AllocationStatus = "action" | "blocked" | "ready" | "completed";
 export type MarginRisk = "ok" | "warning" | "critical";
 export type AIIndicator = "ai-prepared" | "substitute-available" | "margin-risk" | "allocation-warning";
 
+export interface StockBatch {
+  id: string;
+  articleName: string;
+  articleCode: string;
+  ave: number; // Available units
+  ape: number; // Already allocated units
+  totalStock: number;
+  valuationPrice: number; // Waarderingsprijs
+  supplier: string;
+  ageDays: number;
+  quality: "A" | "B" | "C";
+  origin: string;
+  deliveryDate: string;
+}
+
 export interface ArticleLine {
   id: string;
   articleName: string;
   needed: number;
   allocated: number;
-  batchId?: string;
-  batchName?: string;
+  allocatedBatches: { batchId: string; quantity: number }[];
   substituteAvailable: boolean;
   substituteConfidence?: number;
   substituteName?: string;
@@ -22,14 +36,17 @@ export interface ProductionOrder {
   orderNumber: string;
   customer: string;
   bouquet: string;
+  bouquetImage: string;
   productionLine: string;
   quantity: number;
   departureDate: string;
   allocationProgress: number;
   status: AllocationStatus;
   marginRisk: MarginRisk;
-  expectedMarginPct: number;
-  expectedMarginEur: number;
+  targetMarginPct: number; // Gewenste marge
+  currentMarginPct: number; // Huidige marge
+  targetMarginEur: number;
+  currentMarginEur: number;
   aiIndicators: AIIndicator[];
   articles: ArticleLine[];
 }
@@ -60,28 +77,55 @@ export interface AllocationLog {
   overrideReason?: string;
 }
 
-// --- Mock data ---
+// --- Stock batches ---
+export const stockBatches: StockBatch[] = [
+  { id: "b1", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 1200, ape: 480, totalStock: 1680, valuationPrice: 0.42, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
+  { id: "b2", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 800, ape: 200, totalStock: 1000, valuationPrice: 0.38, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13" },
+  { id: "b3", articleName: "Eucalyptus Parvifolia", articleCode: "EUP", ave: 3600, ape: 900, totalStock: 4500, valuationPrice: 0.12, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "IL", deliveryDate: "2026-03-14" },
+  { id: "b4", articleName: "Gerbera Pasta", articleCode: "GPA", ave: 320, ape: 160, totalStock: 480, valuationPrice: 0.29, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
+  { id: "b5", articleName: "Gerbera Kimsey", articleCode: "GKI", ave: 600, ape: 0, totalStock: 600, valuationPrice: 0.25, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b6", articleName: "Lisianthus wit", articleCode: "LW", ave: 1500, ape: 400, totalStock: 1900, valuationPrice: 0.35, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b7", articleName: "Chrysant Bacardi", articleCode: "CB", ave: 200, ape: 100, totalStock: 300, valuationPrice: 0.18, supplier: "HBM Flowers Kenya", ageDays: 2, quality: "A", origin: "Kenya", deliveryDate: "2026-03-14" },
+  { id: "b8", articleName: "Chrysant Baltica", articleCode: "CBL", ave: 900, ape: 0, totalStock: 900, valuationPrice: 0.16, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b9", articleName: "Alstroemeria mix", articleCode: "AM", ave: 2400, ape: 600, totalStock: 3000, valuationPrice: 0.15, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b10", articleName: "Solidago", articleCode: "SOL", ave: 150, ape: 50, totalStock: 200, valuationPrice: 0.08, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13" },
+  { id: "b11", articleName: "Hypericum", articleCode: "HYP", ave: 400, ape: 0, totalStock: 400, valuationPrice: 0.14, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
+  { id: "b12", articleName: "Pittosporum", articleCode: "PIT", ave: 80, ape: 60, totalStock: 140, valuationPrice: 0.10, supplier: "Decorum Plants", ageDays: 4, quality: "B", origin: "IL", deliveryDate: "2026-03-12" },
+  { id: "b13", articleName: "Tulp mix", articleCode: "TM", ave: 0, ape: 0, totalStock: 0, valuationPrice: 0.22, supplier: "-", ageDays: 0, quality: "A", origin: "-", deliveryDate: "-" },
+  { id: "b14", articleName: "Freesia wit", articleCode: "FW", ave: 180, ape: 0, totalStock: 180, valuationPrice: 0.19, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
+  { id: "b15", articleName: "Freesia crème", articleCode: "FC", ave: 500, ape: 0, totalStock: 500, valuationPrice: 0.17, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b16", articleName: "Roos Avalanche 70cm", articleCode: "RA70", ave: 600, ape: 240, totalStock: 840, valuationPrice: 0.55, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
+  { id: "b17", articleName: "Hydrangea wit", articleCode: "HW", ave: 120, ape: 40, totalStock: 160, valuationPrice: 1.85, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b18", articleName: "Lisianthus roze", articleCode: "LR", ave: 800, ape: 300, totalStock: 1100, valuationPrice: 0.33, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
+  { id: "b19", articleName: "Roos Pink Floyd 50cm", articleCode: "RPF50", ave: 450, ape: 160, totalStock: 610, valuationPrice: 0.36, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
+  { id: "b20", articleName: "Gypsophila", articleCode: "GYP", ave: 2000, ape: 400, totalStock: 2400, valuationPrice: 0.06, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
+  { id: "b21", articleName: "Asparagus", articleCode: "ASP", ave: 1800, ape: 320, totalStock: 2120, valuationPrice: 0.04, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
+];
 
+// --- Production orders ---
 export const productionOrders: ProductionOrder[] = [
   {
     id: "po-1",
     orderNumber: "PO-2026-0341",
     customer: "Jumbo Bloemen",
     bouquet: "Charme XL",
+    bouquetImage: "product-charme-xl.jpg",
     productionLine: "Lijn 1",
     quantity: 480,
     departureDate: "2026-03-17",
     allocationProgress: 85,
     status: "action",
     marginRisk: "ok",
-    expectedMarginPct: 34,
-    expectedMarginEur: 1.92,
+    targetMarginPct: 35,
+    currentMarginPct: 34,
+    targetMarginEur: 2.10,
+    currentMarginEur: 1.92,
     aiIndicators: ["ai-prepared"],
     articles: [
-      { id: "a1", articleName: "Roos Red Naomi 60cm", needed: 5, allocated: 5, substituteAvailable: false },
-      { id: "a2", articleName: "Eucalyptus Parvifolia", needed: 3, allocated: 3, substituteAvailable: false },
-      { id: "a3", articleName: "Gerbera Pasta", needed: 3, allocated: 2, substituteAvailable: true, substituteConfidence: 92, substituteName: "Gerbera Kimsey", marginImpact: -0.04 },
-      { id: "a4", articleName: "Lisianthus wit", needed: 2, allocated: 2, substituteAvailable: false },
+      { id: "a1", articleName: "Roos Red Naomi 60cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b1", quantity: 5 }], substituteAvailable: false },
+      { id: "a2", articleName: "Eucalyptus Parvifolia", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b3", quantity: 3 }], substituteAvailable: false },
+      { id: "a3", articleName: "Gerbera Pasta", needed: 3, allocated: 2, allocatedBatches: [{ batchId: "b4", quantity: 2 }], substituteAvailable: true, substituteConfidence: 92, substituteName: "Gerbera Kimsey", marginImpact: -0.04 },
+      { id: "a4", articleName: "Lisianthus wit", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b6", quantity: 2 }], substituteAvailable: false },
     ],
   },
   {
@@ -89,20 +133,23 @@ export const productionOrders: ProductionOrder[] = [
     orderNumber: "PO-2026-0342",
     customer: "Albert Heijn",
     bouquet: "Field M",
+    bouquetImage: "product-field-m.jpg",
     productionLine: "Lijn 2",
     quantity: 960,
     departureDate: "2026-03-17",
     allocationProgress: 45,
     status: "action",
     marginRisk: "warning",
-    expectedMarginPct: 22,
-    expectedMarginEur: 0.88,
+    targetMarginPct: 30,
+    currentMarginPct: 22,
+    targetMarginEur: 1.20,
+    currentMarginEur: 0.88,
     aiIndicators: ["margin-risk", "substitute-available"],
     articles: [
-      { id: "a5", articleName: "Chrysant Bacardi", needed: 4, allocated: 2, substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02 },
-      { id: "a6", articleName: "Alstroemeria mix", needed: 3, allocated: 3, substituteAvailable: false },
-      { id: "a7", articleName: "Solidago", needed: 2, allocated: 0, substituteAvailable: true, substituteConfidence: 78, substituteName: "Hypericum", marginImpact: -0.12 },
-      { id: "a8", articleName: "Pittosporum", needed: 2, allocated: 0, substituteAvailable: false },
+      { id: "a5", articleName: "Chrysant Bacardi", needed: 4, allocated: 2, allocatedBatches: [{ batchId: "b7", quantity: 2 }], substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02 },
+      { id: "a6", articleName: "Alstroemeria mix", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b9", quantity: 3 }], substituteAvailable: false },
+      { id: "a7", articleName: "Solidago", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 78, substituteName: "Hypericum", marginImpact: -0.12 },
+      { id: "a8", articleName: "Pittosporum", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: false },
     ],
   },
   {
@@ -110,18 +157,21 @@ export const productionOrders: ProductionOrder[] = [
     orderNumber: "PO-2026-0343",
     customer: "Aldi Blumen",
     bouquet: "Trend",
+    bouquetImage: "product-trend.jpg",
     productionLine: "Lijn 1",
     quantity: 320,
     departureDate: "2026-03-18",
     allocationProgress: 0,
     status: "blocked",
     marginRisk: "critical",
-    expectedMarginPct: 12,
-    expectedMarginEur: 0.38,
+    targetMarginPct: 28,
+    currentMarginPct: 12,
+    targetMarginEur: 1.05,
+    currentMarginEur: 0.38,
     aiIndicators: ["margin-risk", "allocation-warning"],
     articles: [
-      { id: "a9", articleName: "Tulp mix", needed: 7, allocated: 0, substituteAvailable: false },
-      { id: "a10", articleName: "Freesia wit", needed: 3, allocated: 0, substituteAvailable: true, substituteConfidence: 65, substituteName: "Freesia crème", marginImpact: -0.02 },
+      { id: "a9", articleName: "Tulp mix", needed: 7, allocated: 0, allocatedBatches: [], substituteAvailable: false },
+      { id: "a10", articleName: "Freesia wit", needed: 3, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 65, substituteName: "Freesia crème", marginImpact: -0.02 },
     ],
   },
   {
@@ -129,19 +179,22 @@ export const productionOrders: ProductionOrder[] = [
     orderNumber: "PO-2026-0340",
     customer: "Lidl NL",
     bouquet: "De Luxe",
+    bouquetImage: "product-de-luxe.jpg",
     productionLine: "Lijn 3",
     quantity: 240,
     departureDate: "2026-03-16",
     allocationProgress: 100,
     status: "completed",
     marginRisk: "ok",
-    expectedMarginPct: 41,
-    expectedMarginEur: 3.15,
+    targetMarginPct: 38,
+    currentMarginPct: 41,
+    targetMarginEur: 2.90,
+    currentMarginEur: 3.15,
     aiIndicators: [],
     articles: [
-      { id: "a11", articleName: "Roos Avalanche 70cm", needed: 5, allocated: 5, substituteAvailable: false },
-      { id: "a12", articleName: "Hydrangea wit", needed: 1, allocated: 1, substituteAvailable: false },
-      { id: "a13", articleName: "Lisianthus roze", needed: 3, allocated: 3, substituteAvailable: false },
+      { id: "a11", articleName: "Roos Avalanche 70cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b16", quantity: 5 }], substituteAvailable: false },
+      { id: "a12", articleName: "Hydrangea wit", needed: 1, allocated: 1, allocatedBatches: [{ batchId: "b17", quantity: 1 }], substituteAvailable: false },
+      { id: "a13", articleName: "Lisianthus roze", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b18", quantity: 3 }], substituteAvailable: false },
     ],
   },
   {
@@ -149,19 +202,22 @@ export const productionOrders: ProductionOrder[] = [
     orderNumber: "PO-2026-0344",
     customer: "Deen Supermarkt",
     bouquet: "Lovely",
+    bouquetImage: "product-lovely.jpg",
     productionLine: "Lijn 2",
     quantity: 160,
     departureDate: "2026-03-17",
     allocationProgress: 100,
     status: "ready",
     marginRisk: "ok",
-    expectedMarginPct: 38,
-    expectedMarginEur: 2.44,
+    targetMarginPct: 36,
+    currentMarginPct: 38,
+    targetMarginEur: 2.30,
+    currentMarginEur: 2.44,
     aiIndicators: ["ai-prepared"],
     articles: [
-      { id: "a14", articleName: "Roos Pink Floyd 50cm", needed: 5, allocated: 5, substituteAvailable: false },
-      { id: "a15", articleName: "Gypsophila", needed: 2, allocated: 2, substituteAvailable: false },
-      { id: "a16", articleName: "Asparagus", needed: 2, allocated: 2, substituteAvailable: false },
+      { id: "a14", articleName: "Roos Pink Floyd 50cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b19", quantity: 5 }], substituteAvailable: false },
+      { id: "a15", articleName: "Gypsophila", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b20", quantity: 2 }], substituteAvailable: false },
+      { id: "a16", articleName: "Asparagus", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b21", quantity: 2 }], substituteAvailable: false },
     ],
   },
 ];
@@ -203,4 +259,13 @@ export const aiIndicatorLabels: Record<AIIndicator, { label: string; className: 
   "substitute-available": { label: "Substitutie", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
   "margin-risk": { label: "Marge Risico", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
   "allocation-warning": { label: "Allocatie ⚠", className: "bg-destructive/20 text-destructive border-destructive/30" },
+};
+
+// Map bouquet images
+export const bouquetImages: Record<string, string> = {
+  "product-charme-xl.jpg": "/src/assets/product-charme-xl.jpg",
+  "product-field-m.jpg": "/src/assets/product-field-m.jpg",
+  "product-trend.jpg": "/src/assets/product-trend.jpg",
+  "product-de-luxe.jpg": "/src/assets/product-de-luxe.jpg",
+  "product-lovely.jpg": "/src/assets/product-lovely.jpg",
 };
