@@ -35,14 +35,14 @@ export interface IntegrationItem {
 }
 
 export const integrations: IntegrationItem[] = [
-  { name: "WhatsApp Gateway", category: "messaging", status: "online", uptime: "99.9%", detail: "Connected via Business API — 2,340 messages today" },
-  { name: "Telegram Bot", category: "messaging", status: "online", uptime: "99.8%", detail: "Bot active — 12 notifications sent today" },
-  { name: "HBM CRM", category: "crm", status: "degraded", uptime: "98.7%", lastError: "Sync latency spike — 8.2s response", lastErrorTime: "14:13", detail: "Order sync active — 41 orders processed last run" },
-  { name: "Axerrio Data Warehouse", category: "data", status: "online", uptime: "99.95%", detail: "Bi-directional sync active — 847 records last batch" },
-  { name: "HBM Florist API", category: "api", status: "online", uptime: "99.99%", detail: "Recipe and composition data flowing" },
-  { name: "HBM Logistics Bridge", category: "api", status: "online", uptime: "99.9%", detail: "12 routes updated last cycle" },
-  { name: "Kenya Data Sync", category: "data", status: "offline", uptime: "91.0%", lastError: "Paused by user — seasonal schedule", lastErrorTime: "08:00", detail: "Farm production data from HBM Kenya" },
-  { name: "Email Notification Service", category: "messaging", status: "reconnecting", uptime: "97.2%", lastError: "SMTP timeout — retrying", lastErrorTime: "14:28", detail: "Transactional emails for reports and alerts" },
+  { name: "WhatsApp Gateway", category: "messaging", status: "online", uptime: "99.9%", detail: "Connected via Business API — 2,340 messages today", channelPolicy: "monitored", timeoutPattern: "None" },
+  { name: "Telegram Bot", category: "messaging", status: "online", uptime: "99.8%", detail: "Bot active — 12 notifications sent today", channelPolicy: "internal-only" },
+  { name: "HBM CRM", category: "crm", status: "degraded", uptime: "98.7%", lastError: "Sync latency spike — 8.2s response", lastErrorTime: "14:13", detail: "Order sync active — 41 orders processed last run", channelPolicy: "internal-only", timeoutPattern: "3× in 24h" },
+  { name: "Axerrio Data Warehouse", category: "data", status: "online", uptime: "99.95%", detail: "Bi-directional sync active — 847 records last batch", channelPolicy: "internal-only" },
+  { name: "HBM Florist API", category: "api", status: "online", uptime: "99.99%", detail: "Recipe and composition data flowing", channelPolicy: "internal-only" },
+  { name: "HBM Logistics Bridge", category: "api", status: "online", uptime: "99.9%", detail: "12 routes updated last cycle", channelPolicy: "internal-only" },
+  { name: "Kenya Data Sync", category: "data", status: "offline", uptime: "91.0%", lastError: "Paused by user — seasonal schedule", lastErrorTime: "08:00", detail: "Farm production data from HBM Kenya", channelPolicy: "external" },
+  { name: "Email Notification Service", category: "messaging", status: "reconnecting", uptime: "97.2%", lastError: "SMTP timeout — retrying", lastErrorTime: "14:28", detail: "Transactional emails for reports and alerts", channelPolicy: "monitored", reconnectCount: 3, timeoutPattern: "5× in 6h" },
 ];
 
 export interface WeeklyReviewItem {
