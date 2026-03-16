@@ -1,6 +1,18 @@
 // HBMaster Control Center — Integration & Weekly Review mock data
 
 export type IntegrationStatus = "online" | "degraded" | "offline" | "reconnecting";
+export type ControlStatus = "healthy" | "watch" | "warning" | "critical" | "stable" | "noisy" | "internal-only" | "review-needed";
+
+export const controlStatusStyles: Record<ControlStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
+  healthy:        { label: "Healthy",        bg: "bg-accent/10",        text: "text-accent",              border: "border-accent/20",        dot: "bg-accent" },
+  stable:         { label: "Stable",         bg: "bg-accent/8",         text: "text-accent/80",           border: "border-accent/15",        dot: "bg-accent/70" },
+  watch:          { label: "Watch",          bg: "bg-yellow-500/10",    text: "text-yellow-500",          border: "border-yellow-500/20",    dot: "bg-yellow-500" },
+  noisy:          { label: "Noisy",          bg: "bg-orange-400/10",    text: "text-orange-400",          border: "border-orange-400/20",    dot: "bg-orange-400 animate-pulse" },
+  warning:        { label: "Warning",        bg: "bg-orange-500/10",    text: "text-orange-500",          border: "border-orange-500/20",    dot: "bg-orange-500" },
+  critical:       { label: "Critical",       bg: "bg-destructive/10",   text: "text-destructive",         border: "border-destructive/20",   dot: "bg-destructive" },
+  "internal-only":{ label: "Internal Only",  bg: "bg-blue-500/10",      text: "text-blue-500",            border: "border-blue-500/20",      dot: "bg-blue-500" },
+  "review-needed":{ label: "Review Needed",  bg: "bg-violet-500/10",    text: "text-violet-500",          border: "border-violet-500/20",    dot: "bg-violet-500" },
+};
 
 export const integrationStatusStyles: Record<IntegrationStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
   online:       { label: "Online",        bg: "bg-accent/10",        text: "text-accent",         border: "border-accent/20",        dot: "bg-accent" },
