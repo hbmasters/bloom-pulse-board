@@ -29,6 +29,9 @@ export interface IntegrationItem {
   lastError?: string;
   lastErrorTime?: string;
   detail: string;
+  channelPolicy?: "internal-only" | "external" | "monitored";
+  timeoutPattern?: string;
+  reconnectCount?: number;
 }
 
 export const integrations: IntegrationItem[] = [
