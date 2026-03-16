@@ -127,6 +127,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 34,
     targetMarginEur: 2.10,
     currentMarginEur: 1.92,
+    sellingPrice: 5.65,
+    costPrice: 3.73,
     aiIndicators: ["ai-prepared"],
     articles: [
       { id: "a1", articleName: "Roos Red Naomi 60cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b1", quantity: 5 }], substituteAvailable: false },
