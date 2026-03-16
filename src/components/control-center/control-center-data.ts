@@ -46,7 +46,7 @@ export const integrations: IntegrationItem[] = [
 ];
 
 export interface WeeklyReviewItem {
-  category: "efficiency" | "issue" | "proposal" | "todo" | "recommendation";
+  category: "efficiency" | "issue" | "proposal" | "todo" | "recommendation" | "ai-cost";
   title: string;
   detail: string;
   priority: "high" | "medium" | "low";
@@ -58,6 +58,10 @@ export const weeklyReview: WeeklyReviewItem[] = [
   { category: "efficiency", title: "Productie-efficiëntie stabiel op 94%", detail: "Lijn 1 en Lijn 3 boven target. Lijn 2 licht onder gemiddelde door receptwisseling.", priority: "medium" },
   { category: "efficiency", title: "Inkoop coverage 87% → 92%", detail: "Verbeterde dekkingsgraad door eerder bestellen bij voorkeursleveranciers.", priority: "low" },
   
+  // AI Cost
+  { category: "ai-cost", title: "AI token gebruik deze week: €127", detail: "Gemiddeld €18/dag. Chat agents 62%, Forecast models 24%, Code assist 14%. Binnen budget (€200/week).", priority: "low" },
+  { category: "ai-cost", title: "Gemini Pro verbruik stijgt", detail: "Pro-model gebruik +30% t.o.v. vorige week. Overweeg Flash voor eenvoudige taken.", priority: "medium", owner: "Development" },
+
   // Issues
   { category: "issue", title: "Koelcel sensor K3-B intermittent", detail: "Sensor geeft sporadisch geen data. Hardware check ingepland voor vrijdag.", priority: "high", owner: "Technische Dienst" },
   { category: "issue", title: "CRM sync latency boven threshold", detail: "Response times tot 8.2s. Axerrio team geïnformeerd. Monitoring opgevoerd.", priority: "medium", owner: "Data Team" },
