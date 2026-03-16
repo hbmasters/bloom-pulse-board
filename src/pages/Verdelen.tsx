@@ -399,12 +399,11 @@ const Verdelen = () => {
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">{selectedOrder.customer}</p>
                           <p className="text-[10px] font-mono text-muted-foreground">
-                            {selectedOrder.orderNumber} • {selectedOrder.productionLine} • {selectedOrder.quantity} st
+                            {selectedOrder.orderNumber} • {selectedOrder.internNummer && `Intern: ${selectedOrder.internNummer} • `}{selectedOrder.productionLine} • {selectedOrder.quantity} st
                           </p>
                           <p className="text-[10px] font-mono text-muted-foreground">
                             Vertrek: {selectedOrder.departureDate}
                           </p>
-                          {/* AI indicators */}
                           {selectedOrder.aiIndicators.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1.5">
                               {selectedOrder.aiIndicators.map(ind => (
@@ -456,40 +455,150 @@ const Verdelen = () => {
                         <span className="text-xs font-mono text-muted-foreground">{selectedOrder.allocationProgress}% verdeeld</span>
                       </div>
 
-                      {/* Article lines */}
-                      <div className="rounded-lg border border-border bg-card/60 p-3">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground block mb-2">Artikelregels (recept)</span>
-                        <div className="space-y-1">
-                          {selectedOrder.articles.map(art => {
-                            const pct = art.needed > 0 ? (art.allocated / art.needed) * 100 : 0;
-                            const isSelected = selectedArticleId === art.id;
-                            return (
-                              <button
-                                key={art.id}
-                                onClick={() => setSelectedArticleId(isSelected ? null : art.id)}
-                                className={cn(
-                                  "w-full flex items-center gap-2 py-2 px-2 rounded-md text-left transition-colors",
-                                  isSelected ? "bg-primary/10 border border-primary/30" : "hover:bg-secondary/30 border border-transparent"
-                                )}
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium text-foreground truncate">{art.articleName}</span>
-                                    {art.substituteAvailable && (
-                                      <Sparkles className="w-3 h-3 text-blue-400 shrink-0" />
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    <Progress value={pct} className="h-1 w-16" />
-                                    <span className="text-[10px] font-mono text-muted-foreground">{art.allocated}/{art.needed}</span>
-                                  </div>
-                                </div>
-                                <ChevronRight className={cn("w-3 h-3 text-muted-foreground transition-transform", isSelected && "rotate-90")} />
-                              </button>
-                            );
-                          })}
+                      {/* ═══ STUKLIJST (BOM) ═══ */}
+                      <div className="rounded-lg border border-border bg-card/60 overflow-hidden">
+                        <div className="px-3 py-2 border-b border-border flex items-center gap-2">
+                          <ClipboardList className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Stuklijst</span>
+                          <span className="text-[9px] font-mono text-muted-foreground ml-auto">
+                            Totaal: {selectedOrder.articles.reduce((s, a) => s + a.needed, 0)} stelen × {selectedOrder.articles.length} soorten
+                          </span>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="text-[9px] font-mono uppercase tracking-wider">
+                              <TableHead className="w-5 px-2"></TableHead>
+                              <TableHead className="px-2">Artikel</TableHead>
+                              <TableHead className="px-2">Aantal</TableHead>
+                              <TableHead className="px-2">Kleur</TableHead>
+                              <TableHead className="px-2 text-right">Per bkt</TableHead>
+                              <TableHead className="px-2 text-right">Inkoop</TableHead>
+                              <TableHead className="px-2 text-right">Status</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedOrder.articles.map(art => {
+                              const pct = art.needed > 0 ? (art.allocated / art.needed) * 100 : 0;
+                              const isSelected = selectedArticleId === art.id;
+                              return (
+                                <TableRow
+                                  key={art.id}
+                                  onClick={() => setSelectedArticleId(isSelected ? null : art.id)}
+                                  className={cn(
+                                    "cursor-pointer text-[11px] transition-colors",
+                                    isSelected ? "bg-primary/10 border-l-2 border-l-primary" : "hover:bg-secondary/30"
+                                  )}
+                                >
+                                  <TableCell className="p-2">
+                                    <div className={cn("w-2 h-2 rounded-full", pct >= 100 ? "bg-emerald-400" : pct > 0 ? "bg-amber-400" : "bg-destructive")} />
+                                  </TableCell>
+                                  <TableCell className="p-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-medium text-foreground">{art.articleName}</span>
+                                      {art.substituteAvailable && <Sparkles className="w-3 h-3 text-blue-400 shrink-0" />}
+                                    </div>
+                                    <span className="text-[9px] font-mono text-muted-foreground">{art.articleCode}</span>
+                                  </TableCell>
+                                  <TableCell className="p-2 font-mono text-muted-foreground">
+                                    {art.quantityFormula || `${art.needed}`}
+                                  </TableCell>
+                                  <TableCell className="p-2 font-mono text-muted-foreground">{art.color || "—"}</TableCell>
+                                  <TableCell className="p-2 text-right font-mono">{art.perBouquet ?? art.needed}</TableCell>
+                                  <TableCell className="p-2 text-right font-mono font-medium">
+                                    {art.purchasePrice != null ? `€${art.purchasePrice.toFixed(3)}` : "—"}
+                                  </TableCell>
+                                  <TableCell className="p-2 text-right">
+                                    <div className="flex items-center gap-1.5 justify-end">
+                                      <Progress value={pct} className="h-1 w-10" />
+                                      <span className="text-[9px] font-mono text-muted-foreground">{art.allocated}/{art.needed}</span>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+
+                        {/* Totaal stelen row */}
+                        <div className="px-3 py-1.5 border-t border-border flex justify-between text-[10px] font-mono text-muted-foreground">
+                          <span>Totaal aantal stelen</span>
+                          <span className="font-bold text-foreground">
+                            {selectedOrder.articles.reduce((s, a) => s + a.needed, 0)} st — €
+                            {selectedOrder.articles.reduce((s, a) => s + (a.purchasePrice ?? 0) * (a.needed), 0).toFixed(3)}
+                          </span>
+                        </div>
+
+                        {/* Materialen */}
+                        {selectedOrder.materials && selectedOrder.materials.length > 0 && (
+                          <div className="border-t border-border">
+                            <div className="px-3 py-1.5 text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground bg-secondary/20">
+                              Materialen
+                            </div>
+                            {selectedOrder.materials.map(mat => (
+                              <div key={mat.id} className="px-3 py-1 flex justify-between text-[11px] border-t border-border/50">
+                                <span className="text-muted-foreground">
+                                  <span className="font-mono text-foreground/60 mr-2">{mat.quantity}</span>
+                                  {mat.name}
+                                </span>
+                                <span className="font-mono font-medium text-foreground">€{mat.price.toFixed(3)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Arbeid */}
+                        {selectedOrder.laborCost != null && (
+                          <div className="px-3 py-1.5 border-t border-border flex justify-between text-[11px]">
+                            <span className="text-muted-foreground font-medium">Arbeid</span>
+                            <span className="font-mono font-bold text-foreground">€{selectedOrder.laborCost.toFixed(3)}</span>
+                          </div>
+                        )}
+
+                        {/* Kostprijs totaal + Verkoopprijs + Marge summary */}
+                        <div className="border-t border-border bg-secondary/10 px-3 py-2 space-y-0.5">
+                          <div className="flex justify-between text-[11px] font-medium">
+                            <span className="text-muted-foreground">Kostprijs totaal (incl arbeid)</span>
+                            <span className="font-mono font-bold text-foreground">€{selectedOrder.costPrice.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-[11px] font-medium">
+                            <span className="text-muted-foreground">Verkoopprijs</span>
+                            <span className="font-mono font-bold text-foreground">€{selectedOrder.sellingPrice.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-[11px] font-medium">
+                            <span className="text-muted-foreground">Marge</span>
+                            <span className={cn("font-mono font-bold", marginColors[selectedOrder.marginRisk])}>
+                              {selectedOrder.currentMarginPct}%
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Bewerkingen */}
+                      {selectedOrder.bewerkingen && (
+                        <div className="rounded-lg border border-border bg-card/60 p-3">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground block mb-2">Bewerkingen</span>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
+                            {selectedOrder.bewerkingen.lengte && (
+                              <>
+                                <span className="text-muted-foreground">Lengte:</span>
+                                <span className="font-mono text-foreground">{selectedOrder.bewerkingen.lengte}</span>
+                              </>
+                            )}
+                            {selectedOrder.bewerkingen.aantalPerVerpakking && (
+                              <>
+                                <span className="text-muted-foreground">Aantal per verpakking:</span>
+                                <span className="font-mono text-foreground">{selectedOrder.bewerkingen.aantalPerVerpakking}</span>
+                              </>
+                            )}
+                            {selectedOrder.bewerkingen.belading && (
+                              <>
+                                <span className="text-muted-foreground">Belading:</span>
+                                <span className="font-mono text-foreground">{selectedOrder.bewerkingen.belading}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Substitute advice for selected article */}
                       {selectedArticleId && (() => {
@@ -533,32 +642,31 @@ const Verdelen = () => {
                           </div>
                         </div>
                       )}
-
-                      {/* Confirm */}
-                      {selectedOrder.status !== "completed" && (
-                        <div className="rounded-lg border border-border bg-card/60 p-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <span className="text-xs font-medium text-foreground">Bevestig Allocatie</span>
-                              <p className="text-[10px] text-muted-foreground">Menselijke bevestiging vereist</p>
-                            </div>
-                            <Button
-                              size="sm"
-                              disabled={confirmedOrders.has(selectedOrder.id) || selectedOrder.allocationProgress < 100}
-                              onClick={() => confirmOrder(selectedOrder.id)}
-                              className="text-xs gap-1.5"
-                            >
-                              {confirmedOrders.has(selectedOrder.id) ? (
-                                <><CheckCircle2 className="w-3.5 h-3.5" /> Bevestigd</>
-                              ) : (
-                                <><ArrowRight className="w-3.5 h-3.5" /> Bevestigen</>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </ScrollArea>
+
+                  {/* ═══ BEVESTIG PRODUCTIE ORDER — fixed bottom ═══ */}
+                  {selectedOrder.status !== "completed" && (
+                    <div className="border-t border-border bg-card/80 backdrop-blur-sm px-4 py-3 shrink-0">
+                      <Button
+                        size="lg"
+                        className="w-full text-sm font-bold gap-2 h-12"
+                        disabled={confirmedOrders.has(selectedOrder.id) || selectedOrder.allocationProgress < 100}
+                        onClick={() => confirmOrder(selectedOrder.id)}
+                      >
+                        {confirmedOrders.has(selectedOrder.id) ? (
+                          <><CheckCircle2 className="w-4 h-4" /> Productie Order Bevestigd</>
+                        ) : (
+                          <><ArrowRight className="w-4 h-4" /> Bevestig Productie Order</>
+                        )}
+                      </Button>
+                      {selectedOrder.allocationProgress < 100 && (
+                        <p className="text-[10px] font-mono text-muted-foreground text-center mt-1.5">
+                          Volledige allocatie vereist ({selectedOrder.allocationProgress}% verdeeld)
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
