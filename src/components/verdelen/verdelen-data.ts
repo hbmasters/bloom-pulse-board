@@ -4,6 +4,8 @@ export type AllocationStatus = "action" | "blocked" | "ready" | "completed";
 export type MarginRisk = "ok" | "warning" | "critical";
 export type AIIndicator = "ai-prepared" | "substitute-available" | "margin-risk" | "allocation-warning";
 
+export type TrackTraceStatus = "binnengemeld" | "onderweg" | "verwacht" | "onbekend";
+
 export interface StockBatch {
   id: string;
   articleName: string;
@@ -17,6 +19,9 @@ export interface StockBatch {
   quality: "A" | "B" | "C";
   origin: string;
   deliveryDate: string;
+  trackTrace: TrackTraceStatus;
+  expectedArrival?: string; // only if onderweg/verwacht
+  binnengemeldAt?: string; // timestamp when checked in
 }
 
 export interface ArticleLine {
