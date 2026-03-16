@@ -4,6 +4,8 @@ export type AllocationStatus = "action" | "blocked" | "ready" | "completed";
 export type MarginRisk = "ok" | "warning" | "critical";
 export type AIIndicator = "ai-prepared" | "substitute-available" | "margin-risk" | "allocation-warning";
 
+export type TrackTraceStatus = "binnengemeld" | "onderweg" | "verwacht" | "onbekend";
+
 export interface StockBatch {
   id: string;
   articleName: string;
@@ -17,6 +19,9 @@ export interface StockBatch {
   quality: "A" | "B" | "C";
   origin: string;
   deliveryDate: string;
+  trackTrace: TrackTraceStatus;
+  expectedArrival?: string; // only if onderweg/verwacht
+  binnengemeldAt?: string; // timestamp when checked in
 }
 
 export interface ArticleLine {
@@ -79,27 +84,27 @@ export interface AllocationLog {
 
 // --- Stock batches ---
 export const stockBatches: StockBatch[] = [
-  { id: "b1", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 1200, ape: 480, totalStock: 1680, valuationPrice: 0.42, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
-  { id: "b2", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 800, ape: 200, totalStock: 1000, valuationPrice: 0.38, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13" },
-  { id: "b3", articleName: "Eucalyptus Parvifolia", articleCode: "EUP", ave: 3600, ape: 900, totalStock: 4500, valuationPrice: 0.12, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "IL", deliveryDate: "2026-03-14" },
-  { id: "b4", articleName: "Gerbera Pasta", articleCode: "GPA", ave: 320, ape: 160, totalStock: 480, valuationPrice: 0.29, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
-  { id: "b5", articleName: "Gerbera Kimsey", articleCode: "GKI", ave: 600, ape: 0, totalStock: 600, valuationPrice: 0.25, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b6", articleName: "Lisianthus wit", articleCode: "LW", ave: 1500, ape: 400, totalStock: 1900, valuationPrice: 0.35, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b7", articleName: "Chrysant Bacardi", articleCode: "CB", ave: 200, ape: 100, totalStock: 300, valuationPrice: 0.18, supplier: "HBM Flowers Kenya", ageDays: 2, quality: "A", origin: "Kenya", deliveryDate: "2026-03-14" },
-  { id: "b8", articleName: "Chrysant Baltica", articleCode: "CBL", ave: 900, ape: 0, totalStock: 900, valuationPrice: 0.16, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b9", articleName: "Alstroemeria mix", articleCode: "AM", ave: 2400, ape: 600, totalStock: 3000, valuationPrice: 0.15, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b10", articleName: "Solidago", articleCode: "SOL", ave: 150, ape: 50, totalStock: 200, valuationPrice: 0.08, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13" },
-  { id: "b11", articleName: "Hypericum", articleCode: "HYP", ave: 400, ape: 0, totalStock: 400, valuationPrice: 0.14, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
-  { id: "b12", articleName: "Pittosporum", articleCode: "PIT", ave: 80, ape: 60, totalStock: 140, valuationPrice: 0.10, supplier: "Decorum Plants", ageDays: 4, quality: "B", origin: "IL", deliveryDate: "2026-03-12" },
-  { id: "b13", articleName: "Tulp mix", articleCode: "TM", ave: 0, ape: 0, totalStock: 0, valuationPrice: 0.22, supplier: "-", ageDays: 0, quality: "A", origin: "-", deliveryDate: "-" },
-  { id: "b14", articleName: "Freesia wit", articleCode: "FW", ave: 180, ape: 0, totalStock: 180, valuationPrice: 0.19, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
-  { id: "b15", articleName: "Freesia crème", articleCode: "FC", ave: 500, ape: 0, totalStock: 500, valuationPrice: 0.17, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b16", articleName: "Roos Avalanche 70cm", articleCode: "RA70", ave: 600, ape: 240, totalStock: 840, valuationPrice: 0.55, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
-  { id: "b17", articleName: "Hydrangea wit", articleCode: "HW", ave: 120, ape: 40, totalStock: 160, valuationPrice: 1.85, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b18", articleName: "Lisianthus roze", articleCode: "LR", ave: 800, ape: 300, totalStock: 1100, valuationPrice: 0.33, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15" },
-  { id: "b19", articleName: "Roos Pink Floyd 50cm", articleCode: "RPF50", ave: 450, ape: 160, totalStock: 610, valuationPrice: 0.36, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15" },
-  { id: "b20", articleName: "Gypsophila", articleCode: "GYP", ave: 2000, ape: 400, totalStock: 2400, valuationPrice: 0.06, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
-  { id: "b21", articleName: "Asparagus", articleCode: "ASP", ave: 1800, ape: 320, totalStock: 2120, valuationPrice: 0.04, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14" },
+  { id: "b1", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 1200, ape: 480, totalStock: 1680, valuationPrice: 0.42, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 05:30" },
+  { id: "b2", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", ave: 800, ape: 200, totalStock: 1000, valuationPrice: 0.38, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-13 06:15" },
+  { id: "b3", articleName: "Eucalyptus Parvifolia", articleCode: "EUP", ave: 3600, ape: 900, totalStock: 4500, valuationPrice: 0.12, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "IL", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 07:00" },
+  { id: "b4", articleName: "Gerbera Pasta", articleCode: "GPA", ave: 320, ape: 160, totalStock: 480, valuationPrice: 0.29, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 06:45" },
+  { id: "b5", articleName: "Gerbera Kimsey", articleCode: "GKI", ave: 600, ape: 0, totalStock: 600, valuationPrice: 0.25, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 06:00" },
+  { id: "b6", articleName: "Lisianthus wit", articleCode: "LW", ave: 1500, ape: 400, totalStock: 1900, valuationPrice: 0.35, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 05:45" },
+  { id: "b7", articleName: "Chrysant Bacardi", articleCode: "CB", ave: 200, ape: 100, totalStock: 300, valuationPrice: 0.18, supplier: "HBM Flowers Kenya", ageDays: 2, quality: "A", origin: "Kenya", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 05:30" },
+  { id: "b8", articleName: "Chrysant Baltica", articleCode: "CBL", ave: 900, ape: 0, totalStock: 900, valuationPrice: 0.16, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 06:30" },
+  { id: "b9", articleName: "Alstroemeria mix", articleCode: "AM", ave: 2400, ape: 600, totalStock: 3000, valuationPrice: 0.15, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 06:00" },
+  { id: "b10", articleName: "Solidago", articleCode: "SOL", ave: 150, ape: 50, totalStock: 200, valuationPrice: 0.08, supplier: "Flora Holland Aalsmeer", ageDays: 3, quality: "B", origin: "NL", deliveryDate: "2026-03-13", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-13 07:00" },
+  { id: "b11", articleName: "Hypericum", articleCode: "HYP", ave: 400, ape: 0, totalStock: 400, valuationPrice: 0.14, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15", trackTrace: "onderweg", expectedArrival: "2026-03-16 04:00" },
+  { id: "b12", articleName: "Pittosporum", articleCode: "PIT", ave: 80, ape: 60, totalStock: 140, valuationPrice: 0.10, supplier: "Decorum Plants", ageDays: 4, quality: "B", origin: "IL", deliveryDate: "2026-03-12", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-12 06:30" },
+  { id: "b13", articleName: "Tulp mix", articleCode: "TM", ave: 0, ape: 0, totalStock: 0, valuationPrice: 0.22, supplier: "Van Dijk Tulpen", ageDays: 0, quality: "A", origin: "NL", deliveryDate: "2026-03-17", trackTrace: "verwacht", expectedArrival: "2026-03-17 05:00" },
+  { id: "b14", articleName: "Freesia wit", articleCode: "FW", ave: 180, ape: 0, totalStock: 180, valuationPrice: 0.19, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 06:00" },
+  { id: "b15", articleName: "Freesia crème", articleCode: "FC", ave: 500, ape: 0, totalStock: 500, valuationPrice: 0.17, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 06:15" },
+  { id: "b16", articleName: "Roos Avalanche 70cm", articleCode: "RA70", ave: 600, ape: 240, totalStock: 840, valuationPrice: 0.55, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 05:30" },
+  { id: "b17", articleName: "Hydrangea wit", articleCode: "HW", ave: 120, ape: 40, totalStock: 160, valuationPrice: 1.85, supplier: "Decorum Plants", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 07:00" },
+  { id: "b18", articleName: "Lisianthus roze", articleCode: "LR", ave: 800, ape: 300, totalStock: 1100, valuationPrice: 0.33, supplier: "Flora Holland Aalsmeer", ageDays: 1, quality: "A", origin: "NL", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 06:00" },
+  { id: "b19", articleName: "Roos Pink Floyd 50cm", articleCode: "RPF50", ave: 450, ape: 160, totalStock: 610, valuationPrice: 0.36, supplier: "HBM Flowers Kenya", ageDays: 1, quality: "A", origin: "Kenya", deliveryDate: "2026-03-15", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-15 05:45" },
+  { id: "b20", articleName: "Gypsophila", articleCode: "GYP", ave: 2000, ape: 400, totalStock: 2400, valuationPrice: 0.06, supplier: "Flora Holland Aalsmeer", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 06:30" },
+  { id: "b21", articleName: "Asparagus", articleCode: "ASP", ave: 1800, ape: 320, totalStock: 2120, valuationPrice: 0.04, supplier: "Decorum Plants", ageDays: 2, quality: "A", origin: "NL", deliveryDate: "2026-03-14", trackTrace: "binnengemeld", binnengemeldAt: "2026-03-14 07:15" },
 ];
 
 // --- Production orders ---
@@ -261,11 +266,9 @@ export const aiIndicatorLabels: Record<AIIndicator, { label: string; className: 
   "allocation-warning": { label: "Allocatie ⚠", className: "bg-destructive/20 text-destructive border-destructive/30" },
 };
 
-// Map bouquet images
-export const bouquetImages: Record<string, string> = {
-  "product-charme-xl.jpg": "/src/assets/product-charme-xl.jpg",
-  "product-field-m.jpg": "/src/assets/product-field-m.jpg",
-  "product-trend.jpg": "/src/assets/product-trend.jpg",
-  "product-de-luxe.jpg": "/src/assets/product-de-luxe.jpg",
-  "product-lovely.jpg": "/src/assets/product-lovely.jpg",
+export const trackTraceColors: Record<TrackTraceStatus, { label: string; className: string }> = {
+  binnengemeld: { label: "Binnengemeld", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  onderweg: { label: "Onderweg", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  verwacht: { label: "Verwacht", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  onbekend: { label: "Onbekend", className: "bg-muted text-muted-foreground border-border" },
 };
