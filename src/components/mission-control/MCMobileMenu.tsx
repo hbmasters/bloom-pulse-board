@@ -60,6 +60,7 @@ const navSections: NavSection[] = [
     entries: [
       { id: "control-center", icon: Monitor, label: "Control Center" },
       { id: "build-radar", icon: Radar, label: "Build Radar" },
+      { id: "verdelen", icon: Package, label: "Verdelen" },
       { id: "procurement-cockpit-v1", icon: ShoppingCart, label: "Procurement Cockpit V0.5" },
       { id: "strategic-insight", icon: Compass, label: "Strategic & Market Insight" },
     ],
