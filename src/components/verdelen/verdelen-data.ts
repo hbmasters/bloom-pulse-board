@@ -153,6 +153,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 22,
     targetMarginEur: 1.20,
     currentMarginEur: 0.88,
+    sellingPrice: 4.00,
+    costPrice: 3.12,
     aiIndicators: ["margin-risk", "substitute-available"],
     articles: [
       { id: "a5", articleName: "Chrysant Bacardi", needed: 4, allocated: 2, allocatedBatches: [{ batchId: "b7", quantity: 2 }], substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02 },
