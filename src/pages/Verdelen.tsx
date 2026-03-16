@@ -46,10 +46,31 @@ const Verdelen = () => {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [actions, setActions] = useState<AIAction[]>(aiActions);
   const [confirmedOrders, setConfirmedOrders] = useState<Set<string>>(new Set());
+  const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date("2026-03-17"));
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderNavOpen, setOrderNavOpen] = useState(true);
+
+  // Filter orders by departure date
+  const dateFilteredOrders = useMemo(() => {
+    if (!departureDate) return productionOrders;
+    const dateStr = format(departureDate, "yyyy-MM-dd");
+    return productionOrders.filter(o => o.departureDate === dateStr);
+  }, [departureDate]);
+
+  // Further filter by search
+  const filteredTeVerdelen = useMemo(() => {
+    const base = dateFilteredOrders.filter(o => o.status !== "completed");
+    if (!orderSearch.trim()) return base;
+    const q = orderSearch.toLowerCase();
+    return base.filter(o =>
+      o.orderNumber.toLowerCase().includes(q) ||
+      o.customer.toLowerCase().includes(q) ||
+      o.bouquet.toLowerCase().includes(q)
+    );
+  }, [dateFilteredOrders, orderSearch]);
 
   const selectedOrder = productionOrders.find(o => o.id === selectedOrderId) ?? null;
-  const teVerdelenOrders = productionOrders.filter(o => o.status !== "completed");
-  const verdeeldOrders = productionOrders.filter(o => o.status === "completed" || o.status === "ready");
+  const verdeeldOrders = dateFilteredOrders.filter(o => o.status === "completed" || o.status === "ready");
 
   // Filter batches relevant to selected order's articles
   const relevantBatches = useMemo(() => {
