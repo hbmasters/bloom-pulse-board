@@ -83,16 +83,72 @@ const Verdelen = () => {
   const selectedOrder = productionOrders.find(o => o.id === selectedOrderId) ?? null;
   const verdeeldOrders = dateFilteredOrders.filter(o => o.status === "completed" || o.status === "ready");
 
-  // Filter batches relevant to selected order's articles
+  // Filter batches relevant to selected order's articles + user filters
   const relevantBatches = useMemo(() => {
-    if (!selectedOrder) return stockBatches;
-    const articleNames = selectedOrder.articles.map(a => a.articleName);
-    const substitutes = selectedOrder.articles
-      .filter(a => a.substituteName)
-      .map(a => a.substituteName!);
-    const allNames = [...articleNames, ...substitutes];
-    return stockBatches.filter(b => allNames.includes(b.articleName));
-  }, [selectedOrder]);
+    let batches = stockBatches;
+
+    // Filter by selected order articles
+    if (selectedOrder) {
+      const articleNames = selectedOrder.articles.map(a => a.articleName);
+      const substitutes = selectedOrder.articles
+        .filter(a => a.substituteName)
+        .map(a => a.substituteName!);
+      const allNames = [...articleNames, ...substitutes];
+      batches = batches.filter(b => allNames.includes(b.articleName));
+    }
+
+    // Filter by specific article from stuklijst
+    if (stockArticleFilter) {
+      batches = batches.filter(b => b.articleName === stockArticleFilter);
+    }
+
+    // Search filter
+    if (stockSearch.trim()) {
+      const q = stockSearch.toLowerCase();
+      batches = batches.filter(b =>
+        b.articleName.toLowerCase().includes(q) ||
+        b.articleCode.toLowerCase().includes(q) ||
+        b.supplier.toLowerCase().includes(q)
+      );
+    }
+
+    // Supplier filter
+    if (stockSupplier !== "all") {
+      batches = batches.filter(b => b.supplier === stockSupplier);
+    }
+
+    // Quality filter
+    if (stockQuality !== "all") {
+      batches = batches.filter(b => b.quality === stockQuality);
+    }
+
+    // Track & trace filter
+    if (stockTrackTrace !== "all") {
+      batches = batches.filter(b => b.trackTrace === stockTrackTrace);
+    }
+
+    // Origin filter
+    if (stockOrigin !== "all") {
+      batches = batches.filter(b => b.origin === stockOrigin);
+    }
+
+    return batches;
+  }, [selectedOrder, stockArticleFilter, stockSearch, stockSupplier, stockQuality, stockTrackTrace, stockOrigin]);
+
+  // Unique values for filter dropdowns
+  const uniqueSuppliers = useMemo(() => [...new Set(stockBatches.map(b => b.supplier))], []);
+  const uniqueOrigins = useMemo(() => [...new Set(stockBatches.map(b => b.origin))], []);
+
+  const hasActiveStockFilters = stockSearch || stockSupplier !== "all" || stockQuality !== "all" || stockTrackTrace !== "all" || stockOrigin !== "all" || stockArticleFilter;
+
+  const clearStockFilters = () => {
+    setStockSearch("");
+    setStockSupplier("all");
+    setStockQuality("all");
+    setStockTrackTrace("all");
+    setStockOrigin("all");
+    setStockArticleFilter(null);
+  };
 
   const toggleAction = (id: string) => {
     setActions(prev => prev.map(a => a.id === id ? { ...a, done: !a.done } : a));
