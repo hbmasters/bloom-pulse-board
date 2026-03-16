@@ -53,6 +53,13 @@ const Verdelen = () => {
   const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date("2026-03-17"));
   const [orderSearch, setOrderSearch] = useState("");
   const [orderNavOpen, setOrderNavOpen] = useState(true);
+  // Stock filters
+  const [stockSearch, setStockSearch] = useState("");
+  const [stockSupplier, setStockSupplier] = useState<string>("all");
+  const [stockQuality, setStockQuality] = useState<string>("all");
+  const [stockTrackTrace, setStockTrackTrace] = useState<string>("all");
+  const [stockOrigin, setStockOrigin] = useState<string>("all");
+  const [stockArticleFilter, setStockArticleFilter] = useState<string | null>(null);
 
   // Filter orders by departure date
   const dateFilteredOrders = useMemo(() => {
