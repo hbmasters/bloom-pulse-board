@@ -179,6 +179,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 12,
     targetMarginEur: 1.05,
     currentMarginEur: 0.38,
+    sellingPrice: 3.75,
+    costPrice: 3.37,
     aiIndicators: ["margin-risk", "allocation-warning"],
     articles: [
       { id: "a9", articleName: "Tulp mix", needed: 7, allocated: 0, allocatedBatches: [], substituteAvailable: false },
