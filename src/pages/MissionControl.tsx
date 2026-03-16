@@ -35,6 +35,7 @@ import StrategicInsight from "@/pages/StrategicInsight";
 import Sentinel from "@/pages/Sentinel";
 import ControlCenter from "@/pages/ControlCenter";
 import BuildRadar from "@/pages/BuildRadar";
+import Verdelen from "@/pages/Verdelen";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen";
