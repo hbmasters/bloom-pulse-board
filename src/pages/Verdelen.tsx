@@ -1,17 +1,22 @@
 import { useState, useMemo } from "react";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Package, Bot, CheckCircle2, ArrowRight, Sparkles, ChevronRight, ChevronLeft,
   ClipboardList, TrendingUp, ShieldAlert, Zap, FileText, Printer, ArrowRightLeft,
-  Truck, MapPin, Clock,
+  Truck, MapPin, Clock, CalendarIcon, Search, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,10 +46,31 @@ const Verdelen = () => {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [actions, setActions] = useState<AIAction[]>(aiActions);
   const [confirmedOrders, setConfirmedOrders] = useState<Set<string>>(new Set());
+  const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date("2026-03-17"));
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderNavOpen, setOrderNavOpen] = useState(true);
+
+  // Filter orders by departure date
+  const dateFilteredOrders = useMemo(() => {
+    if (!departureDate) return productionOrders;
+    const dateStr = format(departureDate, "yyyy-MM-dd");
+    return productionOrders.filter(o => o.departureDate === dateStr);
+  }, [departureDate]);
+
+  // Further filter by search
+  const filteredTeVerdelen = useMemo(() => {
+    const base = dateFilteredOrders.filter(o => o.status !== "completed");
+    if (!orderSearch.trim()) return base;
+    const q = orderSearch.toLowerCase();
+    return base.filter(o =>
+      o.orderNumber.toLowerCase().includes(q) ||
+      o.customer.toLowerCase().includes(q) ||
+      o.bouquet.toLowerCase().includes(q)
+    );
+  }, [dateFilteredOrders, orderSearch]);
 
   const selectedOrder = productionOrders.find(o => o.id === selectedOrderId) ?? null;
-  const teVerdelenOrders = productionOrders.filter(o => o.status !== "completed");
-  const verdeeldOrders = productionOrders.filter(o => o.status === "completed" || o.status === "ready");
+  const verdeeldOrders = dateFilteredOrders.filter(o => o.status === "completed" || o.status === "ready");
 
   // Filter batches relevant to selected order's articles
   const relevantBatches = useMemo(() => {
@@ -88,11 +114,11 @@ const Verdelen = () => {
       </div>
 
       <Tabs defaultValue="te-verdelen" className="flex-1 min-h-0 flex flex-col">
-        <div className="px-4 md:px-6 pt-2 flex-shrink-0">
+        <div className="px-4 md:px-6 pt-2 flex-shrink-0 flex flex-wrap items-center gap-2">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="te-verdelen" className="text-xs gap-1.5">
               <Package className="w-3.5 h-3.5" /> Te Verdelen
-              <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1.5">{teVerdelenOrders.length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1.5">{filteredTeVerdelen.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="verdeeld" className="text-xs gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" /> Verdeeld
@@ -103,36 +129,97 @@ const Verdelen = () => {
               <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1.5">{picklists.length}</Badge>
             </TabsTrigger>
           </TabsList>
+
+          {/* Compact date + search filter bar */}
+          <div className="flex items-center gap-2 ml-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="text-[10px] font-mono gap-1.5 h-7 px-2">
+                  <CalendarIcon className="w-3 h-3" />
+                  {departureDate ? format(departureDate, "dd MMM", { locale: nl }) : "Alle data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={departureDate}
+                  onSelect={setDepartureDate}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+                <div className="px-3 pb-2">
+                  <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setDepartureDate(undefined)}>
+                    Alle data tonen
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+              <Input
+                placeholder="Zoek order..."
+                value={orderSearch}
+                onChange={e => setOrderSearch(e.target.value)}
+                className="h-7 w-36 pl-6 text-[10px] font-mono bg-secondary/30 border-border"
+              />
+            </div>
+          </div>
         </div>
 
         {/* ─── Te Verdelen ─── */}
         <TabsContent value="te-verdelen" className="flex-1 min-h-0 m-0">
-          <div className="flex flex-col h-full">
-            {/* Order selector row */}
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0">
-              {teVerdelenOrders.map(order => (
-                <button
-                  key={order.id}
-                  onClick={() => { setSelectedOrderId(order.id); setSelectedArticleId(null); setSelectedBatchId(null); }}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-md border text-xs font-medium transition-colors shrink-0",
-                    selectedOrderId === order.id
-                      ? "bg-primary/10 border-primary/40 text-primary"
-                      : "border-border text-muted-foreground hover:bg-secondary/50"
-                  )}
-                >
-                  {order.status === "action" && <Zap className="w-3 h-3 text-amber-400" />}
-                  {order.status === "blocked" && <ShieldAlert className="w-3 h-3 text-destructive" />}
-                  {order.status === "ready" && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
-                  <span className="font-mono">{order.orderNumber.replace("PO-2026-", "")}</span>
-                  <span className="hidden sm:inline text-muted-foreground">— {order.bouquet}</span>
-                  <span className="font-mono text-[10px] text-muted-foreground">{order.allocationProgress}%</span>
-                </button>
-              ))}
+          <div className="flex h-full">
+            {/* ─── Order navigator sidebar ─── */}
+            <div className={cn(
+              "flex flex-col border-r border-border bg-card/30 transition-all duration-200 shrink-0",
+              orderNavOpen ? "w-56" : "w-10"
+            )}>
+              <button
+                onClick={() => setOrderNavOpen(!orderNavOpen)}
+                className="flex items-center justify-between px-2 py-1.5 border-b border-border text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground hover:bg-secondary/30"
+              >
+                {orderNavOpen && <span>Orders ({filteredTeVerdelen.length})</span>}
+                {orderNavOpen ? <ChevronLeft className="w-3 h-3" /> : <Package className="w-3.5 h-3.5 mx-auto" />}
+              </button>
+              {orderNavOpen && (
+                <ScrollArea className="flex-1">
+                  <div className="py-0.5">
+                    {filteredTeVerdelen.map(order => {
+                      const isActive = selectedOrderId === order.id;
+                      return (
+                        <button
+                          key={order.id}
+                          onClick={() => { setSelectedOrderId(order.id); setSelectedArticleId(null); setSelectedBatchId(null); }}
+                          className={cn(
+                            "w-full flex items-center gap-1.5 px-2 py-1.5 text-left transition-colors",
+                            isActive ? "bg-primary/10 border-l-2 border-l-primary" : "hover:bg-secondary/30 border-l-2 border-l-transparent"
+                          )}
+                        >
+                          <div className="shrink-0">
+                            {order.status === "action" && <Zap className="w-3 h-3 text-amber-400" />}
+                            {order.status === "blocked" && <ShieldAlert className="w-3 h-3 text-destructive" />}
+                            {order.status === "ready" && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] font-mono font-medium text-foreground">{order.orderNumber.replace("PO-2026-", "")}</span>
+                              <span className="text-[9px] font-mono text-muted-foreground">{order.allocationProgress}%</span>
+                            </div>
+                            <span className="text-[9px] text-muted-foreground truncate block">{order.bouquet}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                    {filteredTeVerdelen.length === 0 && (
+                      <p className="text-[10px] text-muted-foreground text-center py-4 px-2">Geen orders gevonden</p>
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
             </div>
 
+            {/* Main content area */}
             {selectedOrder && (
-              <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
+              <div className="flex-1 min-h-0 flex flex-col lg:flex-row min-w-0">
 
                 {/* ═══ LEFT PANEL: Beschikbare Voorraad ═══ */}
                 <div className="lg:w-[48%] flex flex-col min-h-0 border-r border-border">
