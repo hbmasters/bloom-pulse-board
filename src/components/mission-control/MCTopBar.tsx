@@ -40,6 +40,7 @@ const viewTitles: Record<MCView, string> = {
   "dev-control": "Development Control Protocol",
   "control-center": "HBMaster Control Center",
   "build-radar": "Build Radar",
+  verdelen: "Verdelen — Allocatie Cockpit",
 };
 
 const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate }: MCTopBarProps) => {
