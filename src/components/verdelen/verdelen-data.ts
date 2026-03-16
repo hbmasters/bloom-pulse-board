@@ -359,3 +359,9 @@ export const trackTraceColors: Record<TrackTraceStatus, { label: string; classNa
   verwacht: { label: "Verwacht", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
   onbekend: { label: "Onbekend", className: "bg-muted text-muted-foreground border-border" },
 };
+
+export const categoryLabels: Record<ProductCategory, { label: string; className: string }> = {
+  hand: { label: "Hand", className: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
+  band: { label: "Band", className: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
+  arrangement: { label: "Arrangement", className: "bg-rose-500/20 text-rose-400 border-rose-500/30" },
+};
