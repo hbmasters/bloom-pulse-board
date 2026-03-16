@@ -37,7 +37,7 @@ import ControlCenter from "@/pages/ControlCenter";
 import BuildRadar from "@/pages/BuildRadar";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
