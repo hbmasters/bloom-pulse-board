@@ -27,6 +27,7 @@ export interface StockBatch {
 export interface ArticleLine {
   id: string;
   articleName: string;
+  articleCode?: string;
   needed: number;
   allocated: number;
   allocatedBatches: { batchId: string; quantity: number }[];
@@ -34,11 +35,30 @@ export interface ArticleLine {
   substituteConfidence?: number;
   substituteName?: string;
   marginImpact?: number;
+  quantityFormula?: string; // e.g. "2x130=260"
+  color?: string;
+  perBouquet?: number; // stems per bouquet/emmer
+  purchasePrice?: number; // inkoop per stuk
+}
+
+export interface MaterialLine {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Bewerkingen {
+  lengte?: string;
+  aantalPerVerpakking?: string;
+  transportdrager?: string;
+  belading?: string;
 }
 
 export interface ProductionOrder {
   id: string;
   orderNumber: string;
+  internNummer?: string;
   customer: string;
   bouquet: string;
   bouquetImage: string;
@@ -52,10 +72,13 @@ export interface ProductionOrder {
   currentMarginPct: number;
   targetMarginEur: number;
   currentMarginEur: number;
-  sellingPrice: number;   // Verkoopprijs per stuk
-  costPrice: number;      // Kostprijs per stuk
+  sellingPrice: number;
+  costPrice: number;
+  laborCost?: number;
   aiIndicators: AIIndicator[];
   articles: ArticleLine[];
+  materials?: MaterialLine[];
+  bewerkingen?: Bewerkingen;
 }
 
 export interface AIAction {
@@ -114,6 +137,7 @@ export const productionOrders: ProductionOrder[] = [
   {
     id: "po-1",
     orderNumber: "PO-2026-0341",
+    internNummer: "1697559",
     customer: "Jumbo Bloemen",
     bouquet: "Charme XL",
     bouquetImage: "product-charme-xl.jpg",
@@ -129,17 +153,25 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginEur: 1.92,
     sellingPrice: 5.65,
     costPrice: 3.73,
+    laborCost: 0.96,
     aiIndicators: ["ai-prepared"],
     articles: [
-      { id: "a1", articleName: "Roos Red Naomi 60cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b1", quantity: 5 }], substituteAvailable: false },
-      { id: "a2", articleName: "Eucalyptus Parvifolia", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b3", quantity: 3 }], substituteAvailable: false },
-      { id: "a3", articleName: "Gerbera Pasta", needed: 3, allocated: 2, allocatedBatches: [{ batchId: "b4", quantity: 2 }], substituteAvailable: true, substituteConfidence: 92, substituteName: "Gerbera Kimsey", marginImpact: -0.04 },
-      { id: "a4", articleName: "Lisianthus wit", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b6", quantity: 2 }], substituteAvailable: false },
+      { id: "a1", articleName: "Roos Red Naomi 60cm", articleCode: "RN60", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b1", quantity: 5 }], substituteAvailable: false, quantityFormula: "2x130=260", color: "GRI", perBouquet: 1, purchasePrice: 0.42 },
+      { id: "a2", articleName: "Eucalyptus Parvifolia", articleCode: "EUP", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b3", quantity: 3 }], substituteAvailable: false, quantityFormula: "2x100+60=260", color: "GR", perBouquet: 1, purchasePrice: 0.12 },
+      { id: "a3", articleName: "Gerbera Pasta", articleCode: "GPA", needed: 3, allocated: 2, allocatedBatches: [{ batchId: "b4", quantity: 2 }], substituteAvailable: true, substituteConfidence: 92, substituteName: "Gerbera Kimsey", marginImpact: -0.04, quantityFormula: "5x50+10=260", color: "RZ", perBouquet: 1, purchasePrice: 0.29 },
+      { id: "a4", articleName: "Lisianthus wit", articleCode: "LW", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b6", quantity: 2 }], substituteAvailable: false, quantityFormula: "3x80+20=260", color: "CR", perBouquet: 1, purchasePrice: 0.35 },
     ],
+    materials: [
+      { id: "m1", name: "t-bag / chrysal/sticker", quantity: 260, price: 0.10 },
+      { id: "m2", name: "emmer 10L x2", quantity: 260, price: 0.16 },
+      { id: "m3", name: "Smart prefold 44*50 nat", quantity: 260, price: 0.226 },
+    ],
+    bewerkingen: { lengte: "50 cm", aantalPerVerpakking: "x2", transportdrager: "", belading: "0 x 0" },
   },
   {
     id: "po-2",
     orderNumber: "PO-2026-0342",
+    internNummer: "1697560",
     customer: "Albert Heijn",
     bouquet: "Field M",
     bouquetImage: "product-field-m.jpg",
@@ -155,17 +187,24 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginEur: 0.88,
     sellingPrice: 4.00,
     costPrice: 3.12,
+    laborCost: 0.85,
     aiIndicators: ["margin-risk", "substitute-available"],
     articles: [
-      { id: "a5", articleName: "Chrysant Bacardi", needed: 4, allocated: 2, allocatedBatches: [{ batchId: "b7", quantity: 2 }], substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02 },
-      { id: "a6", articleName: "Alstroemeria mix", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b9", quantity: 3 }], substituteAvailable: false },
-      { id: "a7", articleName: "Solidago", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 78, substituteName: "Hypericum", marginImpact: -0.12 },
-      { id: "a8", articleName: "Pittosporum", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: false },
+      { id: "a5", articleName: "Chrysant Bacardi", articleCode: "CB", needed: 4, allocated: 2, allocatedBatches: [{ batchId: "b7", quantity: 2 }], substituteAvailable: true, substituteConfidence: 87, substituteName: "Chrysant Baltica", marginImpact: 0.02, quantityFormula: "4x240=960", color: "RZ", perBouquet: 1, purchasePrice: 0.18 },
+      { id: "a6", articleName: "Alstroemeria mix", articleCode: "AM", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b9", quantity: 3 }], substituteAvailable: false, quantityFormula: "3x320=960", color: "MIX", perBouquet: 1, purchasePrice: 0.15 },
+      { id: "a7", articleName: "Solidago", articleCode: "SOL", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 78, substituteName: "Hypericum", marginImpact: -0.12, quantityFormula: "2x480=960", color: "GR", perBouquet: 1, purchasePrice: 0.08 },
+      { id: "a8", articleName: "Pittosporum", articleCode: "PIT", needed: 2, allocated: 0, allocatedBatches: [], substituteAvailable: false, quantityFormula: "2x480=960", color: "GR", perBouquet: 1, purchasePrice: 0.10 },
     ],
+    materials: [
+      { id: "m4", name: "t-bag / chrysal/sticker", quantity: 960, price: 0.10 },
+      { id: "m5", name: "emmer 10L x2", quantity: 960, price: 0.16 },
+    ],
+    bewerkingen: { lengte: "45 cm", aantalPerVerpakking: "x2", belading: "0 x 0" },
   },
   {
     id: "po-3",
     orderNumber: "PO-2026-0343",
+    internNummer: "1697561",
     customer: "Aldi Blumen",
     bouquet: "Trend",
     bouquetImage: "product-trend.jpg",
@@ -181,15 +220,22 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginEur: 0.38,
     sellingPrice: 3.75,
     costPrice: 3.37,
+    laborCost: 0.72,
     aiIndicators: ["margin-risk", "allocation-warning"],
     articles: [
-      { id: "a9", articleName: "Tulp mix", needed: 7, allocated: 0, allocatedBatches: [], substituteAvailable: false },
-      { id: "a10", articleName: "Freesia wit", needed: 3, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 65, substituteName: "Freesia crème", marginImpact: -0.02 },
+      { id: "a9", articleName: "Tulp mix", articleCode: "TM", needed: 7, allocated: 0, allocatedBatches: [], substituteAvailable: false, quantityFormula: "7x46=322", color: "MIX", perBouquet: 1, purchasePrice: 0.22 },
+      { id: "a10", articleName: "Freesia wit", articleCode: "FW", needed: 3, allocated: 0, allocatedBatches: [], substituteAvailable: true, substituteConfidence: 65, substituteName: "Freesia crème", marginImpact: -0.02, quantityFormula: "3x107=321", color: "CR", perBouquet: 1, purchasePrice: 0.19 },
     ],
+    materials: [
+      { id: "m6", name: "t-bag / chrysal/sticker", quantity: 320, price: 0.10 },
+      { id: "m7", name: "Smart prefold 44*50 nat", quantity: 320, price: 0.226 },
+    ],
+    bewerkingen: { lengte: "40 cm", aantalPerVerpakking: "x1", belading: "0 x 0" },
   },
   {
     id: "po-4",
     orderNumber: "PO-2026-0340",
+    internNummer: "1697558",
     customer: "Lidl NL",
     bouquet: "De Luxe",
     bouquetImage: "product-de-luxe.jpg",
@@ -205,16 +251,24 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginEur: 3.15,
     sellingPrice: 7.68,
     costPrice: 4.53,
+    laborCost: 1.10,
     aiIndicators: [],
     articles: [
-      { id: "a11", articleName: "Roos Avalanche 70cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b16", quantity: 5 }], substituteAvailable: false },
-      { id: "a12", articleName: "Hydrangea wit", needed: 1, allocated: 1, allocatedBatches: [{ batchId: "b17", quantity: 1 }], substituteAvailable: false },
-      { id: "a13", articleName: "Lisianthus roze", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b18", quantity: 3 }], substituteAvailable: false },
+      { id: "a11", articleName: "Roos Avalanche 70cm", articleCode: "RA70", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b16", quantity: 5 }], substituteAvailable: false, quantityFormula: "5x48=240", color: "CR", perBouquet: 1, purchasePrice: 0.55 },
+      { id: "a12", articleName: "Hydrangea wit", articleCode: "HW", needed: 1, allocated: 1, allocatedBatches: [{ batchId: "b17", quantity: 1 }], substituteAvailable: false, quantityFormula: "1x240=240", color: "CR", perBouquet: 1, purchasePrice: 1.85 },
+      { id: "a13", articleName: "Lisianthus roze", articleCode: "LR", needed: 3, allocated: 3, allocatedBatches: [{ batchId: "b18", quantity: 3 }], substituteAvailable: false, quantityFormula: "3x80=240", color: "RZ", perBouquet: 1, purchasePrice: 0.33 },
     ],
+    materials: [
+      { id: "m8", name: "t-bag / chrysal/sticker", quantity: 240, price: 0.10 },
+      { id: "m9", name: "emmer 10L x2", quantity: 240, price: 0.16 },
+      { id: "m10", name: "Smart prefold 44*50 nat", quantity: 240, price: 0.226 },
+    ],
+    bewerkingen: { lengte: "60 cm", aantalPerVerpakking: "x2", belading: "0 x 0" },
   },
   {
     id: "po-5",
     orderNumber: "PO-2026-0344",
+    internNummer: "1697562",
     customer: "Deen Supermarkt",
     bouquet: "Lovely",
     bouquetImage: "product-lovely.jpg",
@@ -230,12 +284,18 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginEur: 2.44,
     sellingPrice: 6.42,
     costPrice: 3.98,
+    laborCost: 0.90,
     aiIndicators: ["ai-prepared"],
     articles: [
-      { id: "a14", articleName: "Roos Pink Floyd 50cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b19", quantity: 5 }], substituteAvailable: false },
-      { id: "a15", articleName: "Gypsophila", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b20", quantity: 2 }], substituteAvailable: false },
-      { id: "a16", articleName: "Asparagus", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b21", quantity: 2 }], substituteAvailable: false },
+      { id: "a14", articleName: "Roos Pink Floyd 50cm", articleCode: "RPF50", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b19", quantity: 5 }], substituteAvailable: false, quantityFormula: "5x32=160", color: "RZ", perBouquet: 1, purchasePrice: 0.36 },
+      { id: "a15", articleName: "Gypsophila", articleCode: "GYP", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b20", quantity: 2 }], substituteAvailable: false, quantityFormula: "2x80=160", color: "CR", perBouquet: 1, purchasePrice: 0.06 },
+      { id: "a16", articleName: "Asparagus", articleCode: "ASP", needed: 2, allocated: 2, allocatedBatches: [{ batchId: "b21", quantity: 2 }], substituteAvailable: false, quantityFormula: "2x80=160", color: "GR", perBouquet: 1, purchasePrice: 0.04 },
     ],
+    materials: [
+      { id: "m11", name: "t-bag / chrysal/sticker", quantity: 160, price: 0.10 },
+      { id: "m12", name: "emmer 10L x2", quantity: 160, price: 0.16 },
+    ],
+    bewerkingen: { lengte: "50 cm", aantalPerVerpakking: "x2", belading: "0 x 0" },
   },
 ];
 
