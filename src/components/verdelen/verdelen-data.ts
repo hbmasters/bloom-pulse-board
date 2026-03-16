@@ -27,6 +27,7 @@ export interface StockBatch {
 export interface ArticleLine {
   id: string;
   articleName: string;
+  articleCode?: string;
   needed: number;
   allocated: number;
   allocatedBatches: { batchId: string; quantity: number }[];
@@ -34,6 +35,24 @@ export interface ArticleLine {
   substituteConfidence?: number;
   substituteName?: string;
   marginImpact?: number;
+  quantityFormula?: string; // e.g. "2x130=260"
+  color?: string;
+  perBouquet?: number; // stems per bouquet/emmer
+  purchasePrice?: number; // inkoop per stuk
+}
+
+export interface MaterialLine {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Bewerkingen {
+  lengte?: string;
+  aantalPerVerpakking?: string;
+  transportdrager?: string;
+  belading?: string;
 }
 
 export interface ProductionOrder {
