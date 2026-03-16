@@ -228,6 +228,8 @@ export const productionOrders: ProductionOrder[] = [
     currentMarginPct: 38,
     targetMarginEur: 2.30,
     currentMarginEur: 2.44,
+    sellingPrice: 6.42,
+    costPrice: 3.98,
     aiIndicators: ["ai-prepared"],
     articles: [
       { id: "a14", articleName: "Roos Pink Floyd 50cm", needed: 5, allocated: 5, allocatedBatches: [{ batchId: "b19", quantity: 5 }], substituteAvailable: false },
