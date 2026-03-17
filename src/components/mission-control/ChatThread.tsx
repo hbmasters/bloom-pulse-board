@@ -108,21 +108,53 @@ const WorkflowPanel = ({ workflow }: { workflow: AIWorkflowData }) => {
 };
 
 /* ── Lovable-style thinking bubble ── */
-const thinkingSteps = [
+const standardSteps = [
   "Context analyseren…",
   "Data ophalen…",
   "Antwoord formuleren…",
 ];
 
-const ThinkingBubble = () => {
+const analysisSteps = [
+  "Context analyseren…",
+  "Data ophalen…",
+  "Analyse uitvoeren…",
+  "Resultaten verwerken…",
+  "Rapport samenstellen…",
+];
+
+const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend"];
+
+function isAnalysisQuery(text: string): boolean {
+  const lower = text.toLowerCase();
+  return ANALYSIS_KEYWORDS.some(k => lower.includes(k));
+}
+
+const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
+  const steps = isAnalysis ? analysisSteps : standardSteps;
   const [activeStep, setActiveStep] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep(prev => (prev < thinkingSteps.length - 1 ? prev + 1 : prev));
-    }, 1800);
-    return () => clearInterval(interval);
-  }, []);
+    const stepInterval = setInterval(() => {
+      setActiveStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
+    }, isAnalysis ? 2200 : 1800);
+    return () => clearInterval(stepInterval);
+  }, [steps.length, isAnalysis]);
+
+  // Smooth progress bar for analysis
+  useEffect(() => {
+    if (!isAnalysis) return;
+    const timer = setInterval(() => {
+      setProgress(prev => {
+        const target = ((activeStep + 1) / steps.length) * 100;
+        const diff = target - prev;
+        return prev + diff * 0.08;
+      });
+    }, 50);
+    return () => clearInterval(timer);
+  }, [activeStep, steps.length, isAnalysis]);
+
+  const barWidth = isAnalysis ? progress : ((activeStep + 1) / steps.length) * 100;
 
   return (
     <div className="flex justify-start">
@@ -133,12 +165,19 @@ const ThinkingBubble = () => {
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <div className="absolute inset-0 w-4 h-4 rounded-full bg-primary/20 animate-ping" />
           </div>
-          <span className="text-xs font-semibold text-foreground">HBMaster is bezig</span>
+          <span className="text-xs font-semibold text-foreground">
+            {isAnalysis ? "HBMaster analyseert" : "HBMaster is bezig"}
+          </span>
+          {isAnalysis && (
+            <span className="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+              ANALYSE
+            </span>
+          )}
         </div>
 
         {/* Steps */}
         <div className="space-y-1.5">
-          {thinkingSteps.map((step, i) => {
+          {steps.map((step, i) => {
             const done = i < activeStep;
             const active = i === activeStep;
             return (
@@ -165,8 +204,11 @@ const ThinkingBubble = () => {
         {/* Progress bar */}
         <div className="h-1 w-full rounded-full bg-border overflow-hidden mt-1">
           <div
-            className="h-full rounded-full bg-primary/60 transition-all duration-1000 ease-out"
-            style={{ width: `${((activeStep + 1) / thinkingSteps.length) * 100}%` }}
+            className={cn(
+              "h-full rounded-full transition-all ease-out",
+              isAnalysis ? "bg-amber-400/70 duration-100" : "bg-primary/60 duration-1000"
+            )}
+            style={{ width: `${barWidth}%` }}
           />
         </div>
       </div>
