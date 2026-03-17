@@ -5,6 +5,8 @@ import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import ExecutionPanel from "@/components/control-center/ExecutionPanel";
+import PricingActionPanel from "@/components/control-center/PricingActionPanel";
+import InventoryRiskPanel from "@/components/control-center/InventoryRiskPanel";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import {
   integrations, integrationStatusStyles, type IntegrationStatus,
