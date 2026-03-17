@@ -174,7 +174,7 @@ const ExecutionDetail = ({ intent, actions, readOnly = false }: { intent: Execut
 const statusLaneOrder: ExecutionStatus[] = ["proposed", "approved", "prepared", "in_progress", "completed", "failed", "cancelled", "rejected"];
 
 /* ── Main Panel ── */
-const ExecutionPanel = () => {
+const ExecutionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
   const actions = useExecutionIntents("operations");
   const { intents, loading, patchingId } = actions;
   const [expandedId, setExpandedId] = useState<string | null>(null);
