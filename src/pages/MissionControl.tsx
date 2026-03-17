@@ -7,6 +7,7 @@ import ChatThread from "@/components/mission-control/ChatThread";
 import AIHologram from "@/components/mission-control/AIHologram";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import KanbanBoard from "@/components/mission-control/KanbanBoard";
+import BuildRadarStrip from "@/components/mission-control/BuildRadarStrip";
 import KPIDashboard from "@/components/mission-control/KPIDashboard";
 import MCNotifications from "@/components/mission-control/MCNotifications";
 import MCWeekPlanner from "@/components/mission-control/MCWeekPlanner";
