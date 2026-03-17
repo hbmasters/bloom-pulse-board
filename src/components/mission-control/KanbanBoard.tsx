@@ -22,6 +22,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PageAgentBadges from "./PageAgentBadges";
+import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
+import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
 
 /* ── Types ── */
 
