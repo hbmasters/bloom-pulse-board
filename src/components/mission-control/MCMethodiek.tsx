@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import { FlaskConical } from "lucide-react";
-import PageAgentBadges from "../PageAgentBadges";
-import MethodiekList from "./MethodiekList";
-import MethodiekEditor from "./MethodiekEditor";
-import { initialMethodieken } from "./methodiek-data";
-import type { Methodiek } from "./methodiek-types";
+import PageAgentBadges from "./PageAgentBadges";
+import MethodiekList from "./methodiek/MethodiekList";
+import MethodiekEditor from "./methodiek/MethodiekEditor";
+import { initialMethodieken } from "./methodiek/methodiek-data";
+import type { Methodiek } from "./methodiek/methodiek-types";
 
 const MCMethodiek = () => {
   const [methodieken, setMethodieken] = useState<Methodiek[]>(initialMethodieken);
