@@ -1170,6 +1170,11 @@ const ProductionCockpit = () => {
             </div>
           </Section>
 
+          {/* ── LABOUR TRUTH ── */}
+          <Section title="Labour Truth" icon={Users} badge="NEW" tooltip="Vergelijkt werkelijke productiviteit (W-APU) met doorbelasting (O-APU), planning (P-APU) en benchmark (C-APU) per product.">
+            <LabourTruthPanel />
+          </Section>
+
         </div>
       </div>
     </div>
