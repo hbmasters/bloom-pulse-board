@@ -365,7 +365,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         <ReactMarkdown>{text}</ReactMarkdown>
                       </div>
                     )}
-                    {workflow && <WorkflowPanel workflow={workflow} />}
+                    {workflow && <WorkflowPanel workflow={workflow} defaultOpen={!!analysis} />}
                   </div>
                 )}
 
