@@ -380,8 +380,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis } = isUser
-            ? { text: msg.content, workflow: null, analysis: null }
+          const { text, workflow, analysis, productCard } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null }
             : parseAllBlocks(msg.content);
 
           return (
@@ -405,6 +405,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                     {analysis && <AnalysisTogglePanel analysis={analysis} />}
                   </div>
                 )}
+                {/* Product card - rendered outside the text bubble */}
+                {productCard && <ProductCard data={productCard} />}
               </div>
             </div>
           );
