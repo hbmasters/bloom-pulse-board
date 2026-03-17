@@ -7,6 +7,7 @@ import ChatThread from "@/components/mission-control/ChatThread";
 import AIHologram from "@/components/mission-control/AIHologram";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import KanbanBoard from "@/components/mission-control/KanbanBoard";
+import BuildRadarStrip from "@/components/mission-control/BuildRadarStrip";
 import KPIDashboard from "@/components/mission-control/KPIDashboard";
 import MCNotifications from "@/components/mission-control/MCNotifications";
 import MCWeekPlanner from "@/components/mission-control/MCWeekPlanner";
@@ -160,7 +161,14 @@ const MissionControl = () => {
                 </div>
               </div>
             )}
-            {view === "kanban" && <KanbanBoard />}
+            {view === "kanban" && (
+              <div className="flex flex-col h-full">
+                <BuildRadarStrip />
+                <div className="flex-1 min-h-0">
+                  <KanbanBoard />
+                </div>
+              </div>
+            )}
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
             {view === "planner" && <MCWeekPlanner />}
