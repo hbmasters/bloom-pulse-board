@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3 } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -261,6 +261,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleCardIdx, setVisibleCardIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -403,14 +404,43 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                     )}
                     {workflow && <WorkflowPanel workflow={workflow} />}
                     {analysis && <AnalysisTogglePanel analysis={analysis} />}
+                    {productCard && (
+                      <button
+                        onClick={() => setVisibleCardIdx(visibleCardIdx === i ? null : i)}
+                        className="mt-2 flex items-center gap-1.5 text-[11px] font-mono font-bold text-primary hover:text-primary/80 transition-colors"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Productkaart bekijken</span>
+                      </button>
+                    )}
                   </div>
                 )}
-                {/* Product card - rendered outside the text bubble */}
-                {productCard && <ProductCard data={productCard} />}
               </div>
             </div>
           );
         })}
+
+        {/* Product card slide-in overlay */}
+        {visibleCardIdx !== null && (() => {
+          const { productCard: pc } = parseAllBlocks(messages[visibleCardIdx]?.content || "");
+          if (!pc) return null;
+          return (
+            <>
+              <div className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]" onClick={() => setVisibleCardIdx(null)} />
+              <div className="fixed top-0 right-0 z-50 h-full w-full max-w-sm border-l border-border bg-card shadow-2xl animate-slide-in-right flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <span className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-wider">Productkaart</span>
+                  <button onClick={() => setVisibleCardIdx(null)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted/30 transition-colors">
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <ProductCard data={pc} />
+                </div>
+              </div>
+            </>
+          );
+        })()}
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
           <ThinkingBubble isAnalysis={isAnalysisQuery(messages[messages.length - 1]?.content || "")} />
