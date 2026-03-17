@@ -157,7 +157,7 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
   useEffect(() => {
     const stepInterval = setInterval(() => {
       setActiveStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, isAnalysis ? 2200 : 1800);
+    }, isAnalysis ? 800 : 600);
     return () => clearInterval(stepInterval);
   }, [steps.length, isAnalysis]);
 
