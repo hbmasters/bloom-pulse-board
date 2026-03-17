@@ -388,59 +388,54 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
           return (
             <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
-                {/* Text bubble */}
-                {text && (
-                  <div className={`rounded-2xl px-4 py-3 ${
-                    isUser
-                      ? "bg-gradient-brand text-primary-foreground"
-                      : "bg-card border border-border text-foreground"
-                  }`}>
-                    {isUser ? (
-                      <p className="text-sm">{text}</p>
-                    ) : (
-                      <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                        <ReactMarkdown>{text}</ReactMarkdown>
-                      </div>
-                    )}
-                    {workflow && <WorkflowPanel workflow={workflow} />}
-                    {analysis && <AnalysisTogglePanel analysis={analysis} />}
-                    {productCard && (
-                      <button
-                        onClick={() => setVisibleCardIdx(visibleCardIdx === i ? null : i)}
-                        className="mt-2 flex items-center gap-1.5 text-[11px] font-mono font-bold text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Productkaart bekijken</span>
-                      </button>
-                    )}
+                {/* Text bubble + inline product card */}
+                <div className="flex items-start gap-2">
+                  {/* Text content */}
+                  {text && (
+                    <div className={`rounded-2xl px-4 py-3 flex-1 min-w-0 ${
+                      isUser
+                        ? "bg-gradient-brand text-primary-foreground"
+                        : "bg-card border border-border text-foreground"
+                    }`}>
+                      {isUser ? (
+                        <p className="text-sm">{text}</p>
+                      ) : (
+                        <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                          <ReactMarkdown>{text}</ReactMarkdown>
+                        </div>
+                      )}
+                      {workflow && <WorkflowPanel workflow={workflow} />}
+                      {analysis && <AnalysisTogglePanel analysis={analysis} />}
+                    </div>
+                  )}
+
+                  {/* Product card toggle icon — right side */}
+                  {productCard && (
+                    <button
+                      onClick={() => setVisibleCardIdx(visibleCardIdx === i ? null : i)}
+                      className={cn(
+                        "shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all mt-1",
+                        visibleCardIdx === i
+                          ? "bg-primary/15 text-primary"
+                          : "bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      )}
+                      title="Productkaart"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Inline product card — slides in below the message */}
+                {productCard && visibleCardIdx === i && (
+                  <div className="animate-fade-in">
+                    <ProductCard data={productCard} />
                   </div>
                 )}
               </div>
             </div>
           );
         })}
-
-        {/* Product card slide-in overlay */}
-        {visibleCardIdx !== null && (() => {
-          const { productCard: pc } = parseAllBlocks(messages[visibleCardIdx]?.content || "");
-          if (!pc) return null;
-          return (
-            <>
-              <div className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]" onClick={() => setVisibleCardIdx(null)} />
-              <div className="fixed top-0 right-0 z-50 h-full w-full max-w-sm border-l border-border bg-card shadow-2xl animate-slide-in-right flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <span className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-wider">Productkaart</span>
-                  <button onClick={() => setVisibleCardIdx(null)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted/30 transition-colors">
-                    <X className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <ProductCard data={pc} />
-                </div>
-              </div>
-            </>
-          );
-        })()}
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
           <ThinkingBubble isAnalysis={isAnalysisQuery(messages[messages.length - 1]?.content || "")} />
