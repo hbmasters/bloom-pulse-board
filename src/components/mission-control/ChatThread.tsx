@@ -366,13 +366,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                       </div>
                     )}
                     {workflow && <WorkflowPanel workflow={workflow} defaultOpen={!!analysis} />}
-                  </div>
-                )}
-
-                {/* Analysis presentation — rendered outside the chat bubble for full width */}
-                {analysis && (
-                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                    <AnalysisPresentation data={analysis} />
+                    {analysis && <AnalysisTogglePanel analysis={analysis} />}
                   </div>
                 )}
               </div>
