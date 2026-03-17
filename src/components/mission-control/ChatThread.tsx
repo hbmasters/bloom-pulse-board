@@ -391,23 +391,34 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                 {/* Text bubble + inline product card */}
                 <div className="flex items-start gap-2">
                   {/* Text content */}
-                  {text && (
-                    <div className={`rounded-2xl px-4 py-3 flex-1 min-w-0 ${
-                      isUser
-                        ? "bg-gradient-brand text-primary-foreground"
-                        : "bg-card border border-border text-foreground"
-                    }`}>
-                      {isUser ? (
-                        <p className="text-sm">{text}</p>
-                      ) : (
-                        <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown>{text}</ReactMarkdown>
-                        </div>
-                      )}
-                      {workflow && <WorkflowPanel workflow={workflow} />}
-                      {analysis && <AnalysisTogglePanel analysis={analysis} />}
-                    </div>
-                  )}
+                  <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
+                    {text && (
+                      <div className={cn(
+                        "rounded-2xl px-4 py-3 min-w-0 transition-all duration-300",
+                        isUser
+                          ? "bg-gradient-brand text-primary-foreground"
+                          : "bg-card border border-border text-foreground",
+                        productCard && visibleCardIdx === i ? "flex-shrink" : "flex-1"
+                      )}>
+                        {isUser ? (
+                          <p className="text-sm">{text}</p>
+                        ) : (
+                          <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown>{text}</ReactMarkdown>
+                          </div>
+                        )}
+                        {workflow && <WorkflowPanel workflow={workflow} />}
+                        {analysis && <AnalysisTogglePanel analysis={analysis} />}
+                      </div>
+                    )}
+
+                    {/* Product card — slides in from right within the row */}
+                    {productCard && visibleCardIdx === i && (
+                      <div className="animate-slide-in-right shrink-0 ml-2" style={{ maxWidth: "320px" }}>
+                        <ProductCard data={productCard} />
+                      </div>
+                    )}
+                  </div>
 
                   {/* Product card toggle icon — right side */}
                   {productCard && (
@@ -425,13 +436,6 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                     </button>
                   )}
                 </div>
-
-                {/* Inline product card — slides in below the message */}
-                {productCard && visibleCardIdx === i && (
-                  <div className="animate-fade-in">
-                    <ProductCard data={productCard} />
-                  </div>
-                )}
               </div>
             </div>
           );
