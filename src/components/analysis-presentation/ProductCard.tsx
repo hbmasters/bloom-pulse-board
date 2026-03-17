@@ -48,7 +48,6 @@ export interface ProductCardData {
   product_image_key?: string;
   w_apu: number;
   o_apu: number;
-  p_apu?: number;
   line?: string;
   period?: string;
   verdict?: string;
