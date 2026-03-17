@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import bouquetIcon from "@/assets/bouquet-neon-icon.png";
+import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
+import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -26,6 +27,41 @@ function parseWorkflow(content: string): { text: string; workflow: AIWorkflowDat
   } catch {
     return { text: content, workflow: null };
   }
+}
+
+function parseAnalysis(content: string): { text: string; analysis: AnalysisPresentationData | null } {
+  const match = content.match(/```hbmaster-analysis\n([\s\S]*?)```/);
+  if (!match) return { text: content, analysis: null };
+  try {
+    const raw = JSON.parse(match[1]);
+    const analysis: AnalysisPresentationData = {
+      title: raw.title || "Analyse Resultaat",
+      task_type: "analysis",
+      status: raw.status || "completed",
+      result_ready: raw.result_ready ?? true,
+      updated_at: raw.updated_at,
+      summary: raw.summary,
+      kpis: raw.kpis,
+      table: raw.table,
+      chart: raw.chart,
+      methodiek: raw.methodiek,
+      detail_payload: raw.detail_payload,
+    };
+    const text = content.replace(/```hbmaster-analysis\n[\s\S]*?```/, "").trim();
+    return { text, analysis };
+  } catch {
+    return { text: content, analysis: null };
+  }
+}
+
+function parseAllBlocks(content: string): {
+  text: string;
+  workflow: AIWorkflowData | null;
+  analysis: AnalysisPresentationData | null;
+} {
+  const { text: t1, workflow } = parseWorkflow(content);
+  const { text: t2, analysis } = parseAnalysis(t1);
+  return { text: t2, workflow, analysis };
 }
 
 const WorkflowPanel = ({ workflow }: { workflow: AIWorkflowData }) => {
@@ -249,7 +285,12 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             
             <p className="text-sm font-mono">Start een gesprek met HBMaster</p>
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
-              {["Wat is de huidige productie status?", "Analyseer de APU trends", "Hoeveel orders staan er vandaag?"].map(q => (
+              {[
+                "Wat is de huidige productie status?",
+                "Analyseer de marge per productlijn",
+                "Geef een overzicht van de APU per lijn",
+                "Benchmark inkoopprijzen rozen",
+              ].map(q => (
                 <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
                   className="text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all">
                   {q}
@@ -261,22 +302,37 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow } = isUser ? { text: msg.content, workflow: null } : parseWorkflow(msg.content);
+          const { text, workflow, analysis } = isUser
+            ? { text: msg.content, workflow: null, analysis: null }
+            : parseAllBlocks(msg.content);
+
           return (
             <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                isUser
-                  ? "bg-gradient-brand text-primary-foreground"
-                  : "bg-card border border-border text-foreground"
-              }`}>
-                {isUser ? (
-                  <p className="text-sm">{text}</p>
-                ) : (
-                  <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                    <ReactMarkdown>{text}</ReactMarkdown>
+              <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
+                {/* Text bubble */}
+                {text && (
+                  <div className={`rounded-2xl px-4 py-3 ${
+                    isUser
+                      ? "bg-gradient-brand text-primary-foreground"
+                      : "bg-card border border-border text-foreground"
+                  }`}>
+                    {isUser ? (
+                      <p className="text-sm">{text}</p>
+                    ) : (
+                      <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown>{text}</ReactMarkdown>
+                      </div>
+                    )}
+                    {workflow && <WorkflowPanel workflow={workflow} />}
                   </div>
                 )}
-                {workflow && <WorkflowPanel workflow={workflow} />}
+
+                {/* Analysis presentation — rendered outside the chat bubble for full width */}
+                {analysis && (
+                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                    <AnalysisPresentation data={analysis} />
+                  </div>
+                )}
               </div>
             </div>
           );
