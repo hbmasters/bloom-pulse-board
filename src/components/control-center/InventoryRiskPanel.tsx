@@ -32,7 +32,7 @@ const RiskTypeBadge = ({ riskType }: { riskType: string }) => {
 };
 
 /* ── Detail ── */
-const InventoryDetail = ({ item, actions }: { item: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents> }) => {
+const InventoryDetail = ({ item, actions, readOnly = false }: { item: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents>; readOnly?: boolean }) => {
   const patching = actions.patchingId === item.id;
   const status = item.execution_status as ExecutionStatus;
   return (
