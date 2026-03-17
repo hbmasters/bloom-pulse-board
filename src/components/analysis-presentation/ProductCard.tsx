@@ -104,6 +104,30 @@ const ProductCard = ({ data }: { data: ProductCardData }) => {
           </div>
         )}
 
+        {/* Quantity & Avg Stems */}
+        {(data.quantity !== undefined || data.avg_stems !== undefined) && (
+          <div className="grid grid-cols-2 gap-2">
+            {data.quantity !== undefined && (
+              <div className="p-2.5 rounded-lg bg-muted/10 border border-border/30 flex items-center gap-2">
+                <Package className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider block mb-0.5">Stuks</span>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{data.quantity.toLocaleString("nl-NL")}</span>
+                </div>
+              </div>
+            )}
+            {data.avg_stems !== undefined && (
+              <div className="p-2.5 rounded-lg bg-muted/10 border border-border/30 flex items-center gap-2">
+                <Flower2 className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider block mb-0.5">Gem. stelen</span>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{data.avg_stems}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Delta badge */}
         <div className={`flex items-center gap-2 p-2.5 rounded-lg border ${
           isPositive
