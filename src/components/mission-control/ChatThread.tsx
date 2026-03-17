@@ -56,14 +56,28 @@ function parseAnalysis(content: string): { text: string; analysis: AnalysisPrese
   }
 }
 
+function parseProductCard(content: string): { text: string; productCard: ProductCardData | null } {
+  const match = content.match(/```hbmaster-product-card\n([\s\S]*?)```/);
+  if (!match) return { text: content, productCard: null };
+  try {
+    const productCard = JSON.parse(match[1]) as ProductCardData;
+    const text = content.replace(/```hbmaster-product-card\n[\s\S]*?```/, "").trim();
+    return { text, productCard };
+  } catch {
+    return { text: content, productCard: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
+  productCard: ProductCardData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
-  return { text: t2, workflow, analysis };
+  const { text: t3, productCard } = parseProductCard(t2);
+  return { text: t3, workflow, analysis, productCard };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
