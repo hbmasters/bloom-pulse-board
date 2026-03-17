@@ -234,6 +234,8 @@ const FilterChip = ({ label, active, onClick, icon, color }: FilterChipProps) =>
 
 const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => {
   const isAnalysis = card.task_type === "analysis";
+  const [showHistory, setShowHistory] = useState(false);
+  const [showFullPayload, setShowFullPayload] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -287,30 +289,37 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
         {/* Analysis result section */}
         {isAnalysis && (
           <div className="p-4 space-y-3">
-            {/* Header */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <FileText className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-xs font-bold text-foreground">Analyse Resultaat</span>
-              {card.analysis_kind && (
-                <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                  {analysisKindLabels[card.analysis_kind]}
-                </span>
-              )}
-            </div>
-
-            {/* Methodiek */}
+            {/* Methodiek Linkage Block */}
             {card.methodiek_name && (
-              <div className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/10">
-                <span className="text-[8px] font-mono text-muted-foreground/50 uppercase tracking-wider">Methodiek</span>
-                <p className="text-xs font-bold text-amber-400 mt-0.5">{card.methodiek_name}</p>
+              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <FlaskConical className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[9px] font-mono font-bold text-amber-400 uppercase tracking-wider">Methodiek</span>
+                </div>
+                <p className="text-xs font-bold text-foreground">{card.methodiek_name}</p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  {card.methodiek_id && (
+                    <span className="text-[9px] font-mono text-muted-foreground/50">{card.methodiek_id}</span>
+                  )}
+                  {card.methodiek_version && (
+                    <span className="text-[9px] font-mono text-muted-foreground/40">{card.methodiek_version}</span>
+                  )}
+                  {card.analysis_kind && (
+                    <span className="text-[9px] font-mono text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">
+                      {analysisKindLabels[card.analysis_kind]}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Status bar */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap p-2.5 rounded-lg bg-muted/10 border border-border/40">
               {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
               {card.analysis_status === "stale" && (
-                <span className="text-[8px] font-mono text-yellow-500/80">Resultaat mogelijk verouderd</span>
+                <span className="text-[8px] font-mono text-yellow-500/80 flex items-center gap-1">
+                  <RefreshCw className="w-2.5 h-2.5" /> Resultaat mogelijk verouderd
+                </span>
               )}
               {card.result_ready_flag && (
                 <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-accent">
@@ -318,27 +327,84 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
                 </span>
               )}
               {card.result_updated_at && (
-                <span className="text-[8px] font-mono text-muted-foreground/50 ml-auto">
-                  Bijgewerkt: {card.result_updated_at}
+                <span className="text-[8px] font-mono text-muted-foreground/50 ml-auto flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5" /> {card.result_updated_at}
                 </span>
               )}
             </div>
 
-            {/* Summary */}
+            {/* Latest Result — Summary */}
             {card.result_summary && (
-              <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
-                <span className="text-[9px] font-mono font-bold text-amber-400 uppercase tracking-wider block mb-1">Samenvatting</span>
-                <p className="text-xs text-foreground leading-relaxed">{card.result_summary}</p>
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <FileText className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Laatst Resultaat</span>
+                </div>
+                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                  <p className="text-xs text-foreground leading-relaxed">{card.result_summary}</p>
+                </div>
               </div>
             )}
 
-            {/* Full payload */}
+            {/* Full payload — collapsible */}
             {card.result_payload && (
-              <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Volledig Rapport</span>
-                <div className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap font-mono">
-                  {card.result_payload}
-                </div>
+              <div>
+                <button
+                  onClick={() => setShowFullPayload(!showFullPayload)}
+                  className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground transition-colors mb-1.5"
+                >
+                  {showFullPayload ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  Volledig Rapport
+                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
+                </button>
+                {showFullPayload && (
+                  <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                    <div className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap font-mono">
+                      {card.result_payload}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Analysis Run History */}
+            {card.run_history && card.run_history.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground transition-colors w-full"
+                >
+                  <History className="w-3 h-3" />
+                  Analyse Historie
+                  <span className="text-[8px] font-mono text-muted-foreground/40 ml-1">({card.run_history.length} runs)</span>
+                  {showHistory ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                </button>
+                {showHistory && (
+                  <div className="mt-2 space-y-1.5">
+                    {card.run_history.map((run, idx) => {
+                      const statusCfg = analysisStatusConfig[run.analysis_status];
+                      const StatusIcon = statusCfg.icon;
+                      return (
+                        <div key={run.run_id} className="p-2.5 rounded-lg bg-muted/10 border border-border/40">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`inline-flex items-center gap-0.5 text-[8px] font-mono ${statusCfg.className}`}>
+                              <StatusIcon className="w-2.5 h-2.5" /> {statusCfg.label}
+                            </span>
+                            <span className="text-[8px] font-mono text-muted-foreground/40">{run.methodiek_version}</span>
+                            {run.data_scope && (
+                              <span className="text-[8px] font-mono text-muted-foreground/30">{run.data_scope}</span>
+                            )}
+                            <span className="text-[8px] font-mono text-muted-foreground/40 ml-auto">{run.created_at}</span>
+                            {idx === 0 && (
+                              <span className="text-[7px] font-mono font-bold text-primary px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">LATEST</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-foreground/70 leading-relaxed">{run.result_summary}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
