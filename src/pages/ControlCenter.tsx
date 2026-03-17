@@ -242,6 +242,12 @@ const ControlCenter = () => {
 
         {/* Tab content */}
         <div className="min-h-[60vh]">
+          {activeTab === "execution" && (
+            <IHSectionShell title="Execution Layer" icon={Zap}>
+              <ExecutionPanel />
+            </IHSectionShell>
+          )}
+
           {activeTab === "sentinel" && <Sentinel embedded />}
 
           {activeTab === "scheduler" && (
