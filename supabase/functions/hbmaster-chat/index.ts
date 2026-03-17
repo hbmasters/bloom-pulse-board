@@ -81,7 +81,6 @@ Wanneer een gebruiker specifiek vraagt hoe een product of boeket het doet (prest
   "product_image_key": "lovely",
   "w_apu": 192,
   "o_apu": 185,
-  "p_apu": 188,
   "line": "Lijn 4",
   "period": "Lopende week",
   "quantity": 4800,
@@ -94,7 +93,6 @@ Regels voor product card:
 - Gebruik dit ALLEEN als de vraag specifiek over één product/boeket gaat (bijv. "hoe doet de Lovely het?", "performance van Charme XL")
 - w_apu = werkelijke APU (productieprestatie op de vloer)
 - o_apu = de APU die de klant betaalt (norm)
-- p_apu = de APU waarmee de planning rekent (optioneel)
 - quantity = aantal geproduceerde stuks in de periode
 - avg_stems = gemiddeld aantal stelen per boeket
 - period = de meetperiode (bijv. "Lopende week", "Week 12 — 2026", "Maart 2026")
