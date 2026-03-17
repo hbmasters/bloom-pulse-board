@@ -13,9 +13,10 @@ import {
 } from "@/components/control-center/control-center-data";
 
 /* ── Tab system ── */
-type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review" | "future";
+type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review" | "future" | "execution";
 
 const tabs: { id: CCTab; label: string; icon: typeof Shield }[] = [
+  { id: "execution", label: "Execution", icon: Zap },
   { id: "sentinel", label: "Sentinel", icon: Shield },
   { id: "scheduler", label: "Scheduler", icon: Timer },
   { id: "telemetry", label: "Telemetry", icon: Activity },
