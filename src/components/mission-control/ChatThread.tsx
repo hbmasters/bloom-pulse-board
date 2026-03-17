@@ -4,6 +4,8 @@ import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, 
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
+import ProductCard from "@/components/analysis-presentation/ProductCard";
+import type { ProductCardData } from "@/components/analysis-presentation/ProductCard";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
