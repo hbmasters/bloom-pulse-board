@@ -93,7 +93,7 @@ const DueDateInput = ({ current, onSave, disabled }: { current?: string | null; 
 };
 
 /* ── Detail expansion ── */
-const ExecutionDetail = ({ intent, actions }: { intent: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents> }) => {
+const ExecutionDetail = ({ intent, actions, readOnly = false }: { intent: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents>; readOnly?: boolean }) => {
   const patching = actions.patchingId === intent.id;
   const status = intent.execution_status as ExecutionStatus;
 
