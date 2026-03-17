@@ -4,6 +4,8 @@ import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, 
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
+import ProductCard from "@/components/analysis-presentation/ProductCard";
+import type { ProductCardData } from "@/components/analysis-presentation/ProductCard";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -54,14 +56,28 @@ function parseAnalysis(content: string): { text: string; analysis: AnalysisPrese
   }
 }
 
+function parseProductCard(content: string): { text: string; productCard: ProductCardData | null } {
+  const match = content.match(/```hbmaster-product-card\n([\s\S]*?)```/);
+  if (!match) return { text: content, productCard: null };
+  try {
+    const productCard = JSON.parse(match[1]) as ProductCardData;
+    const text = content.replace(/```hbmaster-product-card\n[\s\S]*?```/, "").trim();
+    return { text, productCard };
+  } catch {
+    return { text: content, productCard: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
+  productCard: ProductCardData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
-  return { text: t2, workflow, analysis };
+  const { text: t3, productCard } = parseProductCard(t2);
+  return { text: t3, workflow, analysis, productCard };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
@@ -364,8 +380,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis } = isUser
-            ? { text: msg.content, workflow: null, analysis: null }
+          const { text, workflow, analysis, productCard } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null }
             : parseAllBlocks(msg.content);
 
           return (
@@ -389,6 +405,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                     {analysis && <AnalysisTogglePanel analysis={analysis} />}
                   </div>
                 )}
+                {/* Product card - rendered outside the text bubble */}
+                {productCard && <ProductCard data={productCard} />}
               </div>
             </div>
           );
