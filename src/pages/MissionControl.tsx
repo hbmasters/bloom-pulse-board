@@ -161,7 +161,14 @@ const MissionControl = () => {
                 </div>
               </div>
             )}
-            {view === "kanban" && <KanbanBoard />}
+            {view === "kanban" && (
+              <div className="flex flex-col h-full">
+                <BuildRadarStrip />
+                <div className="flex-1 min-h-0">
+                  <KanbanBoard />
+                </div>
+              </div>
+            )}
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
             {view === "planner" && <MCWeekPlanner />}
