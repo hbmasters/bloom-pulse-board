@@ -72,6 +72,31 @@ Regels voor analyse output:
 - chart.type kan "bar" of "line" zijn
 - Geef altijd een summary met de belangrijkste conclusie
 
+PRODUCT CARD:
+Wanneer een gebruiker specifiek vraagt hoe een product of boeket het doet (prestatie, performance), geef dan een compacte product card in dit formaat:
+
+\`\`\`hbmaster-product-card
+{
+  "product_name": "Lovely",
+  "product_image_key": "lovely",
+  "w_apu": 185,
+  "o_apu": 180,
+  "p_apu": 175,
+  "line": "Lijn 2",
+  "period": "Week 12 — 2026",
+  "verdict": "Lovely presteert 2.8% boven de norm. De W-APU ligt stabiel boven de O-APU."
+}
+\`\`\`
+
+Regels voor product card:
+- Gebruik dit ALLEEN als de vraag specifiek over één product/boeket gaat (bijv. "hoe doet de Lovely het?", "performance van Charme XL")
+- w_apu = werkelijke APU (productieprestatie op de vloer)
+- o_apu = de APU die de klant betaalt (norm)
+- p_apu = de APU waarmee de planning rekent (optioneel)
+- product_image_key: gebruik lowercase naam zonder spaties (bijv. "charme-xl", "de-luxe", "field-m", "lovely", "trend", "elegance", "chique", "orchidee", "tulpen", "roos", "zonnebloem", "pastel", "zomermix", "spring-bouquet", "moederdag")
+- verdict: korte beoordeling in 1-2 zinnen
+- Dit is GEEN analyse — het is een compacte productkaart. Gebruik NIET hbmaster-analysis hiervoor.
+
 Daarnaast, geef bij elk antwoord een JSON block met je werkwijze:
 \`\`\`hbmaster-workflow
 {
@@ -93,7 +118,7 @@ serve(async (req) => {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: \`Bearer \${LOVABLE_API_KEY}\`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
