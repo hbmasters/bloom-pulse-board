@@ -236,8 +236,16 @@ const ExecutionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
                       <PriorityIndicator priority={intent.priority} />
                       <ConfidenceBar value={Number(intent.confidence)} />
                       <div className="ml-auto flex items-center gap-2 shrink-0">
-                        <OwnerInput current={intent.owner} onSave={(v) => actions.setOwner(intent.id, v)} disabled={patchingId === intent.id} />
-                        <DueDateInput current={intent.due_date} onSave={(v) => actions.setDueDate(intent.id, v)} disabled={patchingId === intent.id} />
+                        {readOnly ? (
+                          <span className="text-[9px] font-mono text-muted-foreground/50">{intent.owner || "—"}</span>
+                        ) : (
+                          <OwnerInput current={intent.owner} onSave={(v) => actions.setOwner(intent.id, v)} disabled={patchingId === intent.id} />
+                        )}
+                        {readOnly ? (
+                          <span className="text-[9px] font-mono text-muted-foreground/40">{intent.due_date || "—"}</span>
+                        ) : (
+                          <DueDateInput current={intent.due_date} onSave={(v) => actions.setDueDate(intent.id, v)} disabled={patchingId === intent.id} />
+                        )}
                         <StatusBadge status={intent.execution_status as ExecutionStatus} />
                       </div>
                     </div>
