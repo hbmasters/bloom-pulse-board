@@ -234,10 +234,32 @@ const FilterChip = ({ label, active, onClick, icon, color }: FilterChipProps) =>
 
 /* ── Detail Panel ── */
 
+const buildPresentationData = (card: KanbanCard): AnalysisPresentationData => ({
+  title: card.title,
+  task_type: card.task_type,
+  status: card.analysis_status,
+  result_ready: card.result_ready_flag,
+  updated_at: card.result_updated_at,
+  summary: card.result_summary,
+  methodiek: card.methodiek_name ? {
+    methodiek_name: card.methodiek_name,
+    methodiek_id: card.methodiek_id,
+    methodiek_version: card.methodiek_version,
+    analysis_kind: card.analysis_kind ? analysisKindLabels[card.analysis_kind] : undefined,
+  } : undefined,
+  detail_payload: card.result_payload,
+  run_history: card.run_history?.map(r => ({
+    run_id: r.run_id,
+    methodiek_version: r.methodiek_version,
+    analysis_status: r.analysis_status,
+    result_summary: r.result_summary,
+    data_scope: r.data_scope,
+    created_at: r.created_at,
+  })),
+});
+
 const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => {
   const isAnalysis = card.task_type === "analysis";
-  const [showHistory, setShowHistory] = useState(false);
-  const [showFullPayload, setShowFullPayload] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -245,7 +267,7 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
         className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Header meta */}
         <div className="p-4 border-b border-border">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
@@ -254,9 +276,13 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
                 <CategoryBadge category={card.category} />
                 <PriorityBadge priority={card.priority} />
               </div>
-              <h3 className="text-sm font-bold text-foreground">{card.title}</h3>
-              {card.description && (
-                <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+              {!isAnalysis && (
+                <>
+                  <h3 className="text-sm font-bold text-foreground">{card.title}</h3>
+                  {card.description && (
+                    <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+                  )}
+                </>
               )}
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
@@ -288,140 +314,17 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
           </div>
         </div>
 
-        {/* Analysis result section */}
+        {/* Analysis result — uses presentation standard */}
         {isAnalysis && (
-          <div className="p-4 space-y-3">
-            {/* Methodiek Linkage Block */}
-            {card.methodiek_name && (
-              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <FlaskConical className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-[9px] font-mono font-bold text-amber-400 uppercase tracking-wider">Methodiek</span>
-                </div>
-                <p className="text-xs font-bold text-foreground">{card.methodiek_name}</p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  {card.methodiek_id && (
-                    <span className="text-[9px] font-mono text-muted-foreground/50">{card.methodiek_id}</span>
-                  )}
-                  {card.methodiek_version && (
-                    <span className="text-[9px] font-mono text-muted-foreground/40">{card.methodiek_version}</span>
-                  )}
-                  {card.analysis_kind && (
-                    <span className="text-[9px] font-mono text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded">
-                      {analysisKindLabels[card.analysis_kind]}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
+          <div className="p-4">
+            <AnalysisPresentation data={buildPresentationData(card)} compact />
+          </div>
+        )}
 
-            {/* Status bar */}
-            <div className="flex items-center gap-3 flex-wrap p-2.5 rounded-lg bg-muted/10 border border-border/40">
-              {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
-              {card.analysis_status === "stale" && (
-                <span className="text-[8px] font-mono text-yellow-500/80 flex items-center gap-1">
-                  <RefreshCw className="w-2.5 h-2.5" /> Resultaat mogelijk verouderd
-                </span>
-              )}
-              {card.result_ready_flag && (
-                <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-accent">
-                  <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
-                </span>
-              )}
-              {card.result_updated_at && (
-                <span className="text-[8px] font-mono text-muted-foreground/50 ml-auto flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5" /> {card.result_updated_at}
-                </span>
-              )}
-            </div>
-
-            {/* Latest Result — Summary */}
-            {card.result_summary && (
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <FileText className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Laatst Resultaat</span>
-                </div>
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                  <p className="text-xs text-foreground leading-relaxed">{card.result_summary}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Full payload — collapsible */}
-            {card.result_payload && (
-              <div>
-                <button
-                  onClick={() => setShowFullPayload(!showFullPayload)}
-                  className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground transition-colors mb-1.5"
-                >
-                  {showFullPayload ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  Volledig Rapport
-                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
-                </button>
-                {showFullPayload && (
-                  <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                    <div className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap font-mono">
-                      {card.result_payload}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Analysis Run History */}
-            {card.run_history && card.run_history.length > 0 && (
-              <div>
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground transition-colors w-full"
-                >
-                  <History className="w-3 h-3" />
-                  Analyse Historie
-                  <span className="text-[8px] font-mono text-muted-foreground/40 ml-1">({card.run_history.length} runs)</span>
-                  {showHistory ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
-                </button>
-                {showHistory && (
-                  <div className="mt-2 space-y-1.5">
-                    {card.run_history.map((run, idx) => {
-                      const statusCfg = analysisStatusConfig[run.analysis_status];
-                      const StatusIcon = statusCfg.icon;
-                      return (
-                        <div key={run.run_id} className="p-2.5 rounded-lg bg-muted/10 border border-border/40">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`inline-flex items-center gap-0.5 text-[8px] font-mono ${statusCfg.className}`}>
-                              <StatusIcon className="w-2.5 h-2.5" /> {statusCfg.label}
-                            </span>
-                            <span className="text-[8px] font-mono text-muted-foreground/40">{run.methodiek_version}</span>
-                            {run.data_scope && (
-                              <span className="text-[8px] font-mono text-muted-foreground/30">{run.data_scope}</span>
-                            )}
-                            <span className="text-[8px] font-mono text-muted-foreground/40 ml-auto">{run.created_at}</span>
-                            {idx === 0 && (
-                              <span className="text-[7px] font-mono font-bold text-primary px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">LATEST</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-foreground/70 leading-relaxed">{run.result_summary}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Empty state */}
-            {!card.result_summary && !card.result_payload && card.analysis_status !== "completed" && (
-              <div className="text-center py-6 text-[10px] font-mono text-muted-foreground/40">
-                {card.analysis_status === "blocked"
-                  ? "Analyse geblokkeerd"
-                  : card.analysis_status === "running"
-                  ? "Analyse wordt uitgevoerd..."
-                  : card.analysis_status === "stale"
-                  ? "Resultaat verouderd — heranalyse nodig"
-                  : "Nog geen resultaten beschikbaar"}
-              </div>
-            )}
+        {/* Dev task description when not analysis */}
+        {!isAnalysis && card.description && (
+          <div className="p-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">{card.description}</p>
           </div>
         )}
       </div>
