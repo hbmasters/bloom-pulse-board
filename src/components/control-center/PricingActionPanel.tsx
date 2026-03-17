@@ -79,30 +79,32 @@ const PricingDetail = ({ item, actions, readOnly = false }: { item: ExecutionInt
       <FailureBlock reason={item.failure_reason || undefined} />
       <TraceabilityRow source_type={item.source_type} source_context={item.source_context || ""} related_task_ids={item.related_task_ids || undefined} />
 
-      <div className="flex items-center gap-2 pt-1 flex-wrap">
-        {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
-        {status === "proposed" && (
-          <>
-            <ActionBtn icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(item.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionBtn icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(item.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
-          </>
-        )}
-        {(status === "approved" || status === "prepared") && (
-          <>
-            <ActionBtn icon={Play} label="Bevestig" disabled={patching} onClick={() => actions.confirm(item.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionBtn icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(item.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
-          </>
-        )}
-        {status === "failed" && (
-          <ActionBtn icon={RotateCcw} label="Opnieuw" disabled={patching} onClick={() => actions.retry(item.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
-        )}
-        {item.execution_mode === "semi-auto" && ["proposed", "approved", "prepared"].includes(status) && (
-          <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-cyan-500/5 border border-cyan-500/10 ml-auto">
-            <Shield className="w-3 h-3 text-cyan-500" />
-            <span className="text-[9px] font-mono text-cyan-500/80">Semi-auto</span>
-          </div>
-        )}
-      </div>
+      {!readOnly && (
+        <div className="flex items-center gap-2 pt-1 flex-wrap">
+          {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+          {status === "proposed" && (
+            <>
+              <ActionBtn icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(item.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionBtn icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(item.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
+            </>
+          )}
+          {(status === "approved" || status === "prepared") && (
+            <>
+              <ActionBtn icon={Play} label="Bevestig" disabled={patching} onClick={() => actions.confirm(item.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionBtn icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(item.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
+            </>
+          )}
+          {status === "failed" && (
+            <ActionBtn icon={RotateCcw} label="Opnieuw" disabled={patching} onClick={() => actions.retry(item.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
+          )}
+          {item.execution_mode === "semi-auto" && ["proposed", "approved", "prepared"].includes(status) && (
+            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-cyan-500/5 border border-cyan-500/10 ml-auto">
+              <Shield className="w-3 h-3 text-cyan-500" />
+              <span className="text-[9px] font-mono text-cyan-500/80">Semi-auto</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
