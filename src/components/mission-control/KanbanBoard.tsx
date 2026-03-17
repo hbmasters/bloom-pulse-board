@@ -234,59 +234,129 @@ const FilterChip = ({ label, active, onClick, icon, color }: FilterChipProps) =>
 
 /* ── Detail Panel ── */
 
-const buildPresentationData = (card: KanbanCard): AnalysisPresentationData => ({
-  title: card.title,
-  task_type: card.task_type,
-  status: card.analysis_status,
-  result_ready: card.result_ready_flag,
-  updated_at: card.result_updated_at,
-  summary: card.result_summary,
-  methodiek: card.methodiek_name ? {
-    methodiek_name: card.methodiek_name,
-    methodiek_id: card.methodiek_id,
-    methodiek_version: card.methodiek_version,
-    analysis_kind: card.analysis_kind ? analysisKindLabels[card.analysis_kind] : undefined,
-  } : undefined,
-  detail_payload: card.result_payload,
-  run_history: card.run_history?.map(r => ({
-    run_id: r.run_id,
-    methodiek_version: r.methodiek_version,
-    analysis_status: r.analysis_status,
-    result_summary: r.result_summary,
-    data_scope: r.data_scope,
-    created_at: r.created_at,
-  })),
-});
+const buildPresentationData = (card: KanbanCard): AnalysisPresentationData => {
+  const base: AnalysisPresentationData = {
+    title: card.title,
+    task_type: card.task_type,
+    status: card.analysis_status,
+    result_ready: card.result_ready_flag,
+    updated_at: card.result_updated_at,
+    summary: card.result_summary,
+    methodiek: card.methodiek_name ? {
+      methodiek_name: card.methodiek_name,
+      methodiek_id: card.methodiek_id,
+      methodiek_version: card.methodiek_version,
+      analysis_kind: card.analysis_kind ? analysisKindLabels[card.analysis_kind] : undefined,
+    } : undefined,
+    detail_payload: card.result_payload,
+    run_history: card.run_history?.map(r => ({
+      run_id: r.run_id,
+      methodiek_version: r.methodiek_version,
+      analysis_status: r.analysis_status,
+      result_summary: r.result_summary,
+      data_scope: r.data_scope,
+      created_at: r.created_at,
+    })),
+  };
+
+  // Enrich completed analysis with structured data based on analysis_kind
+  if (card.result_ready_flag && card.analysis_status === "completed") {
+    if (card.analysis_kind === "quality") {
+      base.kpis = [
+        { label: "Goedgekeurd", value: "90%", trend: "up", delta: "+5%" },
+        { label: "Afwijkingen", value: 2, trend: "down", delta: "-3" },
+        { label: "Steekproef", value: 20, unit: "stuks" },
+        { label: "Bloem kwaliteit", value: "100%", trend: "neutral" },
+      ];
+      base.table = {
+        columns: [
+          { key: "check", label: "Controle" },
+          { key: "result", label: "Resultaat", align: "center" },
+          { key: "score", label: "Score", align: "right" },
+        ],
+        rows: [
+          { check: "Bloem kwaliteit", result: "✓ Goedgekeurd", score: "100%" },
+          { check: "Verpakking integriteit", result: "✓ Goedgekeurd", score: "100%" },
+          { check: "Etikettering", result: "✗ Afwijking", score: "90%" },
+          { check: "Barcode positie", result: "✗ Afwijking", score: "90%" },
+        ],
+      };
+    } else if (card.analysis_kind === "production") {
+      base.kpis = [
+        { label: "Target bereikt", value: "92.7%", trend: "down", delta: "-2.3%" },
+        { label: "Lijn 1", value: "98%", trend: "up" },
+        { label: "Lijn 2", value: "85%", trend: "down", delta: "-15%" },
+        { label: "Lijn 3", value: "95%", trend: "neutral" },
+      ];
+      base.table = {
+        columns: [
+          { key: "lijn", label: "Lijn" },
+          { key: "output", label: "Output", align: "right" },
+          { key: "target", label: "Target", align: "right" },
+          { key: "pct", label: "%", align: "right" },
+        ],
+        rows: [
+          { lijn: "Lijn 1", output: "98", target: "100", pct: "98%" },
+          { lijn: "Lijn 2", output: "85", target: "100", pct: "85%" },
+          { lijn: "Lijn 3", output: "95", target: "100", pct: "95%" },
+        ],
+      };
+      base.chart = {
+        type: "bar",
+        title: "Output vs Target per Lijn",
+        data: [
+          { label: "Lijn 1", value: 98, value2: 100 },
+          { label: "Lijn 2", value: 85, value2: 100 },
+          { label: "Lijn 3", value: 95, value2: 100 },
+        ],
+        valueLabel: "Output",
+        value2Label: "Target",
+        color: "hsl(var(--primary))",
+        color2: "hsl(var(--border))",
+      };
+    } else if (card.analysis_kind === "mapping") {
+      base.kpis = [
+        { label: "Mapping chains", value: 1, trend: "neutral" },
+        { label: "Orphan recipes", value: 3, trend: "down", delta: "+2" },
+        { label: "Dekking", value: "94%", trend: "up" },
+      ];
+    }
+  }
+
+  return base;
+};
 
 const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => {
   const isAnalysis = card.task_type === "analysis";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header meta */}
-        <div className="p-4 border-b border-border">
-          <div className="flex items-start justify-between gap-2">
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]" onClick={onClose} />
+
+      {/* Slide-in panel */}
+      <div className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl border-l border-border bg-card shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+        {/* Header */}
+        <div className="shrink-0 p-5 border-b border-border">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <TaskTypeBadge taskType={card.task_type} />
                 <CategoryBadge category={card.category} />
                 <PriorityBadge priority={card.priority} />
+                {card.labels.map(l => <LabelBadge key={l} label={l} />)}
               </div>
               {!isAnalysis && (
                 <>
-                  <h3 className="text-sm font-bold text-foreground">{card.title}</h3>
+                  <h2 className="text-base font-bold text-foreground">{card.title}</h2>
                   {card.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{card.description}</p>
                   )}
                 </>
               )}
             </div>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
-              <X className="w-4 h-4" />
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted/50 transition-colors shrink-0">
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -307,28 +377,43 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
             )}
             <span className="text-[10px] font-mono text-muted-foreground/50">Aangemaakt: {card.createdAt}</span>
           </div>
-
-          {/* Labels */}
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {card.labels.map(l => <LabelBadge key={l} label={l} />)}
-          </div>
         </div>
 
-        {/* Analysis result — uses presentation standard */}
-        {isAnalysis && (
-          <div className="p-4">
-            <AnalysisPresentation data={buildPresentationData(card)} compact />
-          </div>
-        )}
+        {/* Content — scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-5">
+          {/* Analysis result — full presentation standard */}
+          {isAnalysis && (
+            <AnalysisPresentation data={buildPresentationData(card)} />
+          )}
 
-        {/* Dev task description when not analysis */}
-        {!isAnalysis && card.description && (
-          <div className="p-4">
-            <p className="text-xs text-muted-foreground leading-relaxed">{card.description}</p>
-          </div>
-        )}
+          {/* Dev task */}
+          {!isAnalysis && card.description && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider mb-2">Beschrijving</h3>
+                <p className="text-sm text-foreground leading-relaxed">{card.description}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state for analysis without results */}
+          {isAnalysis && !card.result_summary && !card.result_payload && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <BarChart3 className="w-8 h-8 text-muted-foreground/20 mb-3" />
+              <p className="text-sm text-muted-foreground/50 font-mono">
+                {card.analysis_status === "blocked"
+                  ? "Analyse geblokkeerd"
+                  : card.analysis_status === "running"
+                  ? "Analyse wordt uitgevoerd..."
+                  : card.analysis_status === "stale"
+                  ? "Resultaat verouderd — heranalyse nodig"
+                  : "Nog geen resultaten beschikbaar"}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
