@@ -32,6 +32,15 @@ type TaskType = "development" | "analysis";
 type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
 type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
 
+interface AnalysisRun {
+  run_id: string;
+  methodiek_version: string;
+  analysis_status: AnalysisStatus;
+  result_summary: string;
+  data_scope?: string;
+  created_at: string;
+}
+
 interface KanbanCard {
   id: string;
   title: string;
@@ -49,10 +58,14 @@ interface KanbanCard {
   analysis_kind?: AnalysisKind;
   analysis_status?: AnalysisStatus;
   methodiek_name?: string;
+  methodiek_id?: string;
+  methodiek_version?: string;
   result_ready_flag?: boolean;
   result_summary?: string;
   result_payload?: string;
   result_updated_at?: string;
+  // Analysis run history
+  run_history?: AnalysisRun[];
 }
 
 interface KanbanColumn {
