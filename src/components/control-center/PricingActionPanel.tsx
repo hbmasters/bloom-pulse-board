@@ -153,7 +153,7 @@ const PricingActionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
               </div>
               <p className="text-[11px] text-muted-foreground mt-1.5 ml-5">{item.recommendation || item.recommended_action}</p>
               <SourceTags source_type={item.source_type} execution_mode={item.execution_mode} rule_id={item.source_rule_id || undefined} />
-              {isExpanded && <PricingDetail item={item} actions={actions} />}
+              {isExpanded && <PricingDetail item={item} actions={actions} readOnly={readOnly} />}
             </div>
           );
         })}
