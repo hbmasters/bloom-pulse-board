@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Package, Flower2 } from "lucide-react";
 
 // Product images mapped by key
 import imgCharmeXl from "@/assets/product-charme-xl.jpg";
@@ -52,6 +52,8 @@ export interface ProductCardData {
   line?: string;
   period?: string;
   verdict?: string;
+  quantity?: number;
+  avg_stems?: number;
 }
 
 const ProductCard = ({ data }: { data: ProductCardData }) => {
