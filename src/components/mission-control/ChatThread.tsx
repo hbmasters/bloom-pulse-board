@@ -64,8 +64,8 @@ function parseAllBlocks(content: string): {
   return { text: t2, workflow, analysis };
 }
 
-const WorkflowPanel = ({ workflow }: { workflow: AIWorkflowData }) => {
-  const [open, setOpen] = useState(false);
+const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="mt-2 border border-border rounded-lg overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
@@ -365,7 +365,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         <ReactMarkdown>{text}</ReactMarkdown>
                       </div>
                     )}
-                    {workflow && <WorkflowPanel workflow={workflow} />}
+                    {workflow && <WorkflowPanel workflow={workflow} defaultOpen={!!analysis} />}
                   </div>
                 )}
 
