@@ -263,7 +263,8 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
         {/* Analysis result section */}
         {isAnalysis && (
           <div className="p-4 space-y-3">
-            <div className="flex items-center gap-2">
+            {/* Header */}
+            <div className="flex items-center gap-2 flex-wrap">
               <FileText className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-xs font-bold text-foreground">Analyse Resultaat</span>
               {card.analysis_kind && (
@@ -273,12 +274,23 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
               )}
             </div>
 
+            {/* Methodiek */}
+            {card.methodiek_name && (
+              <div className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                <span className="text-[8px] font-mono text-muted-foreground/50 uppercase tracking-wider">Methodiek</span>
+                <p className="text-xs font-bold text-amber-400 mt-0.5">{card.methodiek_name}</p>
+              </div>
+            )}
+
             {/* Status bar */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
+              {card.analysis_status === "stale" && (
+                <span className="text-[8px] font-mono text-yellow-500/80">Resultaat mogelijk verouderd</span>
+              )}
               {card.result_ready_flag && (
                 <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-accent">
-                  <CheckCircle2 className="w-2.5 h-2.5" /> Resultaat beschikbaar
+                  <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
                 </span>
               )}
               {card.result_updated_at && (
@@ -310,9 +322,11 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
             {!card.result_summary && !card.result_payload && card.analysis_status !== "completed" && (
               <div className="text-center py-6 text-[10px] font-mono text-muted-foreground/40">
                 {card.analysis_status === "blocked"
-                  ? "Analyse geblokkeerd — zie samenvatting"
+                  ? "Analyse geblokkeerd"
                   : card.analysis_status === "running"
                   ? "Analyse wordt uitgevoerd..."
+                  : card.analysis_status === "stale"
+                  ? "Resultaat verouderd — heranalyse nodig"
                   : "Nog geen resultaten beschikbaar"}
               </div>
             )}
