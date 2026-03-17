@@ -93,7 +93,7 @@ const DueDateInput = ({ current, onSave, disabled }: { current?: string | null; 
 };
 
 /* ── Detail expansion ── */
-const ExecutionDetail = ({ intent, actions }: { intent: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents> }) => {
+const ExecutionDetail = ({ intent, actions, readOnly = false }: { intent: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents>; readOnly?: boolean }) => {
   const patching = actions.patchingId === intent.id;
   const status = intent.execution_status as ExecutionStatus;
 
@@ -135,28 +135,30 @@ const ExecutionDetail = ({ intent, actions }: { intent: ExecutionIntentRow; acti
       />
 
       {/* Action buttons */}
-      <div className="flex items-center gap-2 pt-1 flex-wrap">
-        {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+      {!readOnly && (
+        <div className="flex items-center gap-2 pt-1 flex-wrap">
+          {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
 
-        {status === "proposed" && (
-          <>
-            <ActionButton icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionButton icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
-          </>
-        )}
-        {(status === "approved" || status === "prepared") && (
-          <>
-            <ActionButton icon={Play} label="Bevestig Uitvoering" disabled={patching} onClick={() => actions.confirm(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
-          </>
-        )}
-        {status === "in_progress" && (
-          <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
-        )}
-        {status === "failed" && (
-          <ActionButton icon={RotateCcw} label="Opnieuw Proberen" disabled={patching} onClick={() => actions.retry(intent.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
-        )}
-      </div>
+          {status === "proposed" && (
+            <>
+              <ActionButton icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionButton icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
+            </>
+          )}
+          {(status === "approved" || status === "prepared") && (
+            <>
+              <ActionButton icon={Play} label="Bevestig Uitvoering" disabled={patching} onClick={() => actions.confirm(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
+            </>
+          )}
+          {status === "in_progress" && (
+            <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
+          )}
+          {status === "failed" && (
+            <ActionButton icon={RotateCcw} label="Opnieuw Proberen" disabled={patching} onClick={() => actions.retry(intent.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
+          )}
+        </div>
+      )}
 
       {intent.execution_mode === "semi-auto" && ["proposed", "approved", "prepared"].includes(status) && (
         <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-cyan-500/5 border border-cyan-500/10">
@@ -172,7 +174,7 @@ const ExecutionDetail = ({ intent, actions }: { intent: ExecutionIntentRow; acti
 const statusLaneOrder: ExecutionStatus[] = ["proposed", "approved", "prepared", "in_progress", "completed", "failed", "cancelled", "rejected"];
 
 /* ── Main Panel ── */
-const ExecutionPanel = () => {
+const ExecutionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
   const actions = useExecutionIntents("operations");
   const { intents, loading, patchingId } = actions;
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -234,14 +236,22 @@ const ExecutionPanel = () => {
                       <PriorityIndicator priority={intent.priority} />
                       <ConfidenceBar value={Number(intent.confidence)} />
                       <div className="ml-auto flex items-center gap-2 shrink-0">
-                        <OwnerInput current={intent.owner} onSave={(v) => actions.setOwner(intent.id, v)} disabled={patchingId === intent.id} />
-                        <DueDateInput current={intent.due_date} onSave={(v) => actions.setDueDate(intent.id, v)} disabled={patchingId === intent.id} />
+                        {readOnly ? (
+                          <span className="text-[9px] font-mono text-muted-foreground/50">{intent.owner || "—"}</span>
+                        ) : (
+                          <OwnerInput current={intent.owner} onSave={(v) => actions.setOwner(intent.id, v)} disabled={patchingId === intent.id} />
+                        )}
+                        {readOnly ? (
+                          <span className="text-[9px] font-mono text-muted-foreground/40">{intent.due_date || "—"}</span>
+                        ) : (
+                          <DueDateInput current={intent.due_date} onSave={(v) => actions.setDueDate(intent.id, v)} disabled={patchingId === intent.id} />
+                        )}
                         <StatusBadge status={intent.execution_status as ExecutionStatus} />
                       </div>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1.5 ml-5">{intent.recommended_action}</p>
                     <SourceTags source_type={intent.source_type} execution_mode={intent.execution_mode} rule_id={intent.source_rule_id || undefined} />
-                    {isExpanded && <ExecutionDetail intent={intent} actions={actions} />}
+                    {isExpanded && <ExecutionDetail intent={intent} actions={actions} readOnly={readOnly} />}
                   </div>
                 );
               })}

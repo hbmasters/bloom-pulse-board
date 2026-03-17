@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Shield, Timer, Activity, Link2, FileText, Sun, Zap, DollarSign, Package } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
@@ -208,9 +209,18 @@ const execSubTabs: { id: ExecSubTab; label: string; icon: typeof Zap }[] = [
 
 const ExecutionHub = () => {
   const [subTab, setSubTab] = useState<ExecSubTab>("operations");
+  const { canWrite, loading: roleLoading } = useUserRole();
+  const readOnly = !canWrite;
 
   return (
     <div className="space-y-3">
+      {/* Read-only indicator */}
+      {!roleLoading && readOnly && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted/30 border border-border/50 text-[10px] font-mono text-muted-foreground">
+          <Shield className="w-3 h-3" /> Alleen lezen — je hebt geen bewerkingsrechten
+        </div>
+      )}
+
       {/* Sub-tab bar */}
       <div className="flex gap-1 overflow-x-auto">
         {execSubTabs.map(tab => {
@@ -235,17 +245,17 @@ const ExecutionHub = () => {
 
       {subTab === "operations" && (
         <IHSectionShell title="Execution Layer" icon={Zap}>
-          <ExecutionPanel />
+          <ExecutionPanel readOnly={readOnly} />
         </IHSectionShell>
       )}
       {subTab === "pricing" && (
         <IHSectionShell title="Prijsacties" icon={DollarSign}>
-          <PricingActionPanel />
+          <PricingActionPanel readOnly={readOnly} />
         </IHSectionShell>
       )}
       {subTab === "inventory" && (
         <IHSectionShell title="Voorraadrisico" icon={Package}>
-          <InventoryRiskPanel />
+          <InventoryRiskPanel readOnly={readOnly} />
         </IHSectionShell>
       )}
     </div>
