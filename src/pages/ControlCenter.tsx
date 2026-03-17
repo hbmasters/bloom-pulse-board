@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Shield, Timer, Activity, Link2, FileText, Sun, Zap, DollarSign, Package } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
