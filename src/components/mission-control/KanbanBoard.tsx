@@ -508,6 +508,16 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
                 <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
               </span>
             )}
+            {card.analysis_status === "stale" && (
+              <span className="text-[7px] font-mono text-yellow-500/60 flex items-center gap-0.5">
+                <RefreshCw className="w-2 h-2" /> verouderd
+              </span>
+            )}
+            {card.run_history && card.run_history.length > 0 && (
+              <span className="inline-flex items-center gap-0.5 text-[7px] font-mono text-muted-foreground/40 ml-auto">
+                <Archive className="w-2.5 h-2.5" /> {card.run_history.length}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -517,6 +527,9 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
         <div className="mt-1.5 ml-4 p-2 rounded-md bg-amber-500/5 border border-amber-500/10">
           <span className="text-[7px] font-mono font-bold text-muted-foreground/40 uppercase tracking-wider">Result:</span>
           <p className="text-[9px] text-foreground/70 line-clamp-2 leading-relaxed mt-0.5">{card.result_summary}</p>
+          {card.result_updated_at && (
+            <span className="text-[7px] font-mono text-muted-foreground/30 mt-1 block">{card.result_updated_at}</span>
+          )}
         </div>
       )}
 
