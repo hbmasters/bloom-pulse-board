@@ -261,6 +261,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleCardIdx, setVisibleCardIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
