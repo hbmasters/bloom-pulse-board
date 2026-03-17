@@ -97,7 +97,7 @@ const InventoryDetail = ({ item, actions, readOnly = false }: { item: ExecutionI
 };
 
 /* ── Main Panel ── */
-const InventoryRiskPanel = () => {
+const InventoryRiskPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
   const actions = useExecutionIntents("inventory");
   const { intents, loading } = actions;
   const [expandedId, setExpandedId] = useState<string | null>(null);
