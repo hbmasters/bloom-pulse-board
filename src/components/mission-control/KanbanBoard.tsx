@@ -88,6 +88,7 @@ const analysisStatusConfig: Record<AnalysisStatus, { icon: typeof Clock; label: 
   running:   { icon: Loader2,      label: "Running",   className: "text-blue-400" },
   completed: { icon: CheckCircle2, label: "Completed", className: "text-accent" },
   blocked:   { icon: AlertCircle,  label: "Blocked",   className: "text-red-400" },
+  stale:     { icon: Clock,        label: "Stale",     className: "text-yellow-500" },
 };
 
 const analysisKindLabels: Record<AnalysisKind, string> = {
