@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Shield, Timer, Activity, Link2, FileText, Sun, Zap } from "lucide-react";
+import { Shield, Timer, Activity, Link2, FileText, Sun, Zap, DollarSign, Package } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
 import ExecutionPanel from "@/components/control-center/ExecutionPanel";
+import PricingActionPanel from "@/components/control-center/PricingActionPanel";
+import InventoryRiskPanel from "@/components/control-center/InventoryRiskPanel";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import {
   integrations, integrationStatusStyles, type IntegrationStatus,
@@ -195,6 +197,61 @@ const FutureReadinessPanel = () => {
   );
 };
 
+/* ── Execution Hub — sub-tabbed execution area ── */
+type ExecSubTab = "operations" | "pricing" | "inventory";
+
+const execSubTabs: { id: ExecSubTab; label: string; icon: typeof Zap }[] = [
+  { id: "operations", label: "Operationeel", icon: Zap },
+  { id: "pricing", label: "Prijsacties", icon: DollarSign },
+  { id: "inventory", label: "Voorraadrisico", icon: Package },
+];
+
+const ExecutionHub = () => {
+  const [subTab, setSubTab] = useState<ExecSubTab>("operations");
+
+  return (
+    <div className="space-y-3">
+      {/* Sub-tab bar */}
+      <div className="flex gap-1 overflow-x-auto">
+        {execSubTabs.map(tab => {
+          const isActive = subTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setSubTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors border",
+                isActive
+                  ? "bg-primary/10 border-primary/20 text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+              )}
+            >
+              <tab.icon className="w-3 h-3" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {subTab === "operations" && (
+        <IHSectionShell title="Execution Layer" icon={Zap}>
+          <ExecutionPanel />
+        </IHSectionShell>
+      )}
+      {subTab === "pricing" && (
+        <IHSectionShell title="Prijsacties" icon={DollarSign}>
+          <PricingActionPanel />
+        </IHSectionShell>
+      )}
+      {subTab === "inventory" && (
+        <IHSectionShell title="Voorraadrisico" icon={Package}>
+          <InventoryRiskPanel />
+        </IHSectionShell>
+      )}
+    </div>
+  );
+};
+
 /* ── Main Page ── */
 const ControlCenter = () => {
   const [activeTab, setActiveTab] = useState<CCTab>("execution");
@@ -242,11 +299,7 @@ const ControlCenter = () => {
 
         {/* Tab content */}
         <div className="min-h-[60vh]">
-          {activeTab === "execution" && (
-            <IHSectionShell title="Execution Layer" icon={Zap}>
-              <ExecutionPanel />
-            </IHSectionShell>
-          )}
+          {activeTab === "execution" && <ExecutionHub />}
 
           {activeTab === "sentinel" && <Sentinel embedded />}
 
