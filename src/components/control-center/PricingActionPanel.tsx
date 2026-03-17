@@ -48,7 +48,7 @@ const PriceDelta = ({ value, pct }: { value?: number | null; pct?: number | null
   );
 };
 
-const PricingDetail = ({ item, actions }: { item: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents> }) => {
+const PricingDetail = ({ item, actions, readOnly = false }: { item: ExecutionIntentRow; actions: ReturnType<typeof useExecutionIntents>; readOnly?: boolean }) => {
   const patching = actions.patchingId === item.id;
   const status = item.execution_status as ExecutionStatus;
   return (
