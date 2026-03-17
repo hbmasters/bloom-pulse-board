@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Shield, Timer, Activity, Link2, FileText, Radar, Sun } from "lucide-react";
+import { Shield, Timer, Activity, Link2, FileText, Sun, Zap } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
+import ExecutionPanel from "@/components/control-center/ExecutionPanel";
 import TelemetryPanel from "@/components/mission-control/TelemetryPanel";
 import {
   integrations, integrationStatusStyles, type IntegrationStatus,
@@ -12,9 +13,10 @@ import {
 } from "@/components/control-center/control-center-data";
 
 /* ── Tab system ── */
-type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review" | "future";
+type CCTab = "sentinel" | "scheduler" | "telemetry" | "integrations" | "review" | "future" | "execution";
 
 const tabs: { id: CCTab; label: string; icon: typeof Shield }[] = [
+  { id: "execution", label: "Execution", icon: Zap },
   { id: "sentinel", label: "Sentinel", icon: Shield },
   { id: "scheduler", label: "Scheduler", icon: Timer },
   { id: "telemetry", label: "Telemetry", icon: Activity },
@@ -195,7 +197,7 @@ const FutureReadinessPanel = () => {
 
 /* ── Main Page ── */
 const ControlCenter = () => {
-  const [activeTab, setActiveTab] = useState<CCTab>("sentinel");
+  const [activeTab, setActiveTab] = useState<CCTab>("execution");
 
   return (
     <div className="h-full overflow-y-auto">
@@ -240,6 +242,12 @@ const ControlCenter = () => {
 
         {/* Tab content */}
         <div className="min-h-[60vh]">
+          {activeTab === "execution" && (
+            <IHSectionShell title="Execution Layer" icon={Zap}>
+              <ExecutionPanel />
+            </IHSectionShell>
+          )}
+
           {activeTab === "sentinel" && <Sentinel embedded />}
 
           {activeTab === "scheduler" && (
