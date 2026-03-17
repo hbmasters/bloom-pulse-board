@@ -381,7 +381,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
         })}
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
-          <ThinkingBubble />
+          <ThinkingBubble isAnalysis={isAnalysisQuery(messages[messages.length - 1]?.content || "")} />
         )}
         <div ref={bottomRef} />
       </div>
