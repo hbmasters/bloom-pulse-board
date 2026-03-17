@@ -7,4 +7,6 @@ export interface ProductCardData {
   line?: string;
   period?: string;
   verdict?: string;
+  quantity?: number;
+  avg_stems?: number;
 }

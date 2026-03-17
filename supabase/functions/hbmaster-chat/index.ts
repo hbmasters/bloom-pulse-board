@@ -79,12 +79,14 @@ Wanneer een gebruiker specifiek vraagt hoe een product of boeket het doet (prest
 {
   "product_name": "Lovely",
   "product_image_key": "lovely",
-  "w_apu": 185,
-  "o_apu": 180,
-  "p_apu": 175,
-  "line": "Lijn 2",
-  "period": "Week 12 — 2026",
-  "verdict": "Lovely presteert 2.8% boven de norm. De W-APU ligt stabiel boven de O-APU."
+  "w_apu": 192,
+  "o_apu": 185,
+  "p_apu": 188,
+  "line": "Lijn 4",
+  "period": "Lopende week",
+  "quantity": 4800,
+  "avg_stems": 7,
+  "verdict": "De Lovely draait efficiënt met een overperformance van 3,8%. De workflow op Lijn 4 is optimaal ingericht voor dit specifieke boeket-arrangement."
 }
 \`\`\`
 
@@ -93,6 +95,9 @@ Regels voor product card:
 - w_apu = werkelijke APU (productieprestatie op de vloer)
 - o_apu = de APU die de klant betaalt (norm)
 - p_apu = de APU waarmee de planning rekent (optioneel)
+- quantity = aantal geproduceerde stuks in de periode
+- avg_stems = gemiddeld aantal stelen per boeket
+- period = de meetperiode (bijv. "Lopende week", "Week 12 — 2026", "Maart 2026")
 - product_image_key: gebruik lowercase naam zonder spaties (bijv. "charme-xl", "de-luxe", "field-m", "lovely", "trend", "elegance", "chique", "orchidee", "tulpen", "roos", "zonnebloem", "pastel", "zomermix", "spring-bouquet", "moederdag")
 - verdict: korte beoordeling in 1-2 zinnen
 - Dit is GEEN analyse — het is een compacte productkaart. Gebruik NIET hbmaster-analysis hiervoor.

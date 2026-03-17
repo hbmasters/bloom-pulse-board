@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Package, Flower2 } from "lucide-react";
 
 // Product images mapped by key
 import imgCharmeXl from "@/assets/product-charme-xl.jpg";
@@ -52,6 +52,8 @@ export interface ProductCardData {
   line?: string;
   period?: string;
   verdict?: string;
+  quantity?: number;
+  avg_stems?: number;
 }
 
 const ProductCard = ({ data }: { data: ProductCardData }) => {
@@ -99,6 +101,30 @@ const ProductCard = ({ data }: { data: ProductCardData }) => {
           <div className="p-2.5 rounded-lg bg-muted/10 border border-border/30">
             <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider block mb-0.5">P-APU (planning)</span>
             <span className="text-sm font-bold text-foreground tabular-nums">{data.p_apu}</span>
+          </div>
+        )}
+
+        {/* Quantity & Avg Stems */}
+        {(data.quantity !== undefined || data.avg_stems !== undefined) && (
+          <div className="grid grid-cols-2 gap-2">
+            {data.quantity !== undefined && (
+              <div className="p-2.5 rounded-lg bg-muted/10 border border-border/30 flex items-center gap-2">
+                <Package className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider block mb-0.5">Stuks</span>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{data.quantity.toLocaleString("nl-NL")}</span>
+                </div>
+              </div>
+            )}
+            {data.avg_stems !== undefined && (
+              <div className="p-2.5 rounded-lg bg-muted/10 border border-border/30 flex items-center gap-2">
+                <Flower2 className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                <div>
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider block mb-0.5">Gem. stelen</span>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{data.avg_stems}</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
