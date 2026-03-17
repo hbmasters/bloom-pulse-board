@@ -197,7 +197,7 @@ const FutureReadinessPanel = () => {
 
 /* ── Main Page ── */
 const ControlCenter = () => {
-  const [activeTab, setActiveTab] = useState<CCTab>("sentinel");
+  const [activeTab, setActiveTab] = useState<CCTab>("execution");
 
   return (
     <div className="h-full overflow-y-auto">
