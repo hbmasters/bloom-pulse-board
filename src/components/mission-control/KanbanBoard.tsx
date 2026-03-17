@@ -29,7 +29,7 @@ type Category = "productie" | "planning" | "logistiek" | "qc" | "personeel" | "k
 type Status = "todo" | "in_progress" | "review" | "done";
 type TaskType = "development" | "analysis";
 type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
-type AnalysisStatus = "pending" | "running" | "completed" | "blocked";
+type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
 
 interface KanbanCard {
   id: string;
@@ -47,6 +47,7 @@ interface KanbanCard {
   // Analysis-specific fields (only relevant when task_type === "analysis")
   analysis_kind?: AnalysisKind;
   analysis_status?: AnalysisStatus;
+  methodiek_name?: string;
   result_ready_flag?: boolean;
   result_summary?: string;
   result_payload?: string;
