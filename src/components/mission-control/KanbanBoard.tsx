@@ -387,25 +387,32 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
         ))}
       </div>
 
-      {/* Row 3: Analysis-specific compact info */}
+      {/* Row 3: Analysis — methodiek + status + result */}
       {isAnalysis && (
-        <div className="flex items-center gap-2 mt-2 pl-4 flex-wrap">
-          {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
-          {card.analysis_kind && (
-            <span className="text-[8px] font-mono text-muted-foreground/50">{analysisKindLabels[card.analysis_kind]}</span>
+        <div className="mt-2 pl-4 space-y-1">
+          {/* Methodiek label */}
+          {card.methodiek_name && (
+            <div className="text-[8px] font-mono font-bold text-amber-400/80 uppercase tracking-wider">
+              Methodiek: {card.methodiek_name}
+            </div>
           )}
-          {card.result_ready_flag && (
-            <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-accent">
-              <CheckCircle2 className="w-2.5 h-2.5" /> Resultaat
-            </span>
-          )}
+          {/* Status row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
+            {card.result_ready_flag && (
+              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-accent">
+                <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
+              </span>
+            )}
+          </div>
         </div>
       )}
 
       {/* Analysis result preview */}
-      {isAnalysis && card.result_ready_flag && card.result_summary && (
-        <div className="mt-2 ml-4 p-2 rounded-md bg-amber-500/5 border border-amber-500/10">
-          <p className="text-[9px] text-foreground/70 line-clamp-2 leading-relaxed">{card.result_summary}</p>
+      {isAnalysis && card.result_summary && (
+        <div className="mt-1.5 ml-4 p-2 rounded-md bg-amber-500/5 border border-amber-500/10">
+          <span className="text-[7px] font-mono font-bold text-muted-foreground/40 uppercase tracking-wider">Result:</span>
+          <p className="text-[9px] text-foreground/70 line-clamp-2 leading-relaxed mt-0.5">{card.result_summary}</p>
         </div>
       )}
 
