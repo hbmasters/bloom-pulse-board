@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Package, Flower2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Package } from "lucide-react";
 
 // Product images mapped by key
 import imgCharmeXl from "@/assets/product-charme-xl.jpg";
