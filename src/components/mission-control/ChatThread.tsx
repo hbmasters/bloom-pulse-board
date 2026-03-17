@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
