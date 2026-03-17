@@ -109,7 +109,7 @@ const PricingDetail = ({ item, actions, readOnly = false }: { item: ExecutionInt
   );
 };
 
-const PricingActionPanel = () => {
+const PricingActionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
   const actions = useExecutionIntents("pricing");
   const { intents, loading, patchingId } = actions;
   const [expandedId, setExpandedId] = useState<string | null>(null);
