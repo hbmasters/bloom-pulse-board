@@ -107,7 +107,27 @@ const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflow
   );
 };
 
-/* ── Lovable-style thinking bubble ── */
+const AnalysisTogglePanel = ({ analysis }: { analysis: AnalysisPresentationData }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
+          Toon analytisch
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3 animate-fade-in">
+          <AnalysisPresentation data={analysis} compact />
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 const standardSteps = [
   "Context analyseren…",
   "Data ophalen…",
