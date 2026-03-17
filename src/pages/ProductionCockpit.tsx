@@ -12,6 +12,7 @@ import StemsPerHourKPI from "@/components/production/StemsPerHourKPI";
 import RecipeIntelligence from "@/components/production/RecipeIntelligence";
 import OperationalComplexityView from "@/components/production/OperationalComplexityView";
 import LineOperationImpact from "@/components/production/LineOperationImpact";
+import LabourTruthPanel from "@/components/production/LabourTruthPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -1167,6 +1168,11 @@ const ProductionCockpit = () => {
                 De PDI stijgt naar {currentPeriod.pdiTotaal.toFixed(1)} (verhoogd). Aanbevolen wordt om extra capaciteitsmaatregelen te overwegen en de bandleiders te briefen over de focus-lijnen.
               </p>
             </div>
+          </Section>
+
+          {/* ── LABOUR TRUTH ── */}
+          <Section title="Labour Truth" icon={Users} badge="NEW" tooltip="Vergelijkt werkelijke productiviteit (W-APU) met doorbelasting (O-APU), planning (P-APU) en benchmark (C-APU) per product.">
+            <LabourTruthPanel />
           </Section>
 
         </div>
