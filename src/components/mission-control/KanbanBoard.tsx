@@ -29,7 +29,7 @@ type Category = "productie" | "planning" | "logistiek" | "qc" | "personeel" | "k
 type Status = "todo" | "in_progress" | "review" | "done";
 type TaskType = "development" | "analysis";
 type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
-type AnalysisStatus = "pending" | "running" | "completed" | "blocked";
+type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
 
 interface KanbanCard {
   id: string;
@@ -47,6 +47,7 @@ interface KanbanCard {
   // Analysis-specific fields (only relevant when task_type === "analysis")
   analysis_kind?: AnalysisKind;
   analysis_status?: AnalysisStatus;
+  methodiek_name?: string;
   result_ready_flag?: boolean;
   result_summary?: string;
   result_payload?: string;
@@ -87,6 +88,7 @@ const analysisStatusConfig: Record<AnalysisStatus, { icon: typeof Clock; label: 
   running:   { icon: Loader2,      label: "Running",   className: "text-blue-400" },
   completed: { icon: CheckCircle2, label: "Completed", className: "text-accent" },
   blocked:   { icon: AlertCircle,  label: "Blocked",   className: "text-red-400" },
+  stale:     { icon: Clock,        label: "Stale",     className: "text-yellow-500" },
 };
 
 const analysisKindLabels: Record<AnalysisKind, string> = {
@@ -121,12 +123,13 @@ const initialCards: KanbanCard[] = [
   { id: "14", title: "Weekplanning week 10",          description: "Planning voor volgende week afgerond en gecommuniceerd.",                   category: "planning",  priority: "medium", labels: ["planning", "✓"],        status: "done",        task_type: "development", assignee: "Maria",  createdAt: "26 feb" },
 
   // Analysis tasks
-  { id: "4",  title: "BQ Elegance kwaliteitscheck",   description: "Steekproef van 20 boeketten controleren op kwaliteitsnormen.",              category: "qc",        priority: "medium", labels: ["steekproef"],           status: "in_progress", task_type: "analysis", assignee: "Lisa", analysis_kind: "quality", analysis_status: "running", result_ready_flag: false, createdAt: "28 feb" },
-  { id: "9",  title: "BQ Lovely verpakkingcheck",     description: "Verpakking en etikettering controleren voor verzending.",                   category: "qc",        priority: "low",    labels: ["verpakking"],           status: "review",      task_type: "analysis", analysis_kind: "quality", analysis_status: "completed", result_ready_flag: true, result_summary: "18/20 boeketten goedgekeurd. 2 afwijkingen op etikettering geconstateerd.", result_payload: "Steekproef van 20 boeketten uitgevoerd.\n\n**Resultaten:**\n- 18 boeketten voldoen aan alle kwaliteitsnormen\n- 2 boeketten hebben afwijkende etikettering (verkeerde barcode positie)\n- Bloem kwaliteit: 100% goedgekeurd\n- Verpakking integriteit: 100% goedgekeurd\n\n**Aanbeveling:** Etiketteermachine op lijn 3 laten herkalibreren.", result_updated_at: "28 feb 14:30", createdAt: "27 feb" },
-  { id: "13", title: "Productie rapport ochtend",     description: "Samenvatting ochtendproductie verzenden naar management.",                  category: "planning",  priority: "medium", labels: ["rapport"],              status: "review",      task_type: "analysis", assignee: "Lisa", analysis_kind: "production", analysis_status: "completed", result_ready_flag: true, result_summary: "Ochtendproductie 94% van target. Lijn 2 lichte vertraging door materiaal tekort.", result_payload: "**Productie Rapport — Ochtend 28 feb**\n\nLijn 1: 98 stuks (target 100) — 98%\nLijn 2: 85 stuks (target 100) — 85%\nLijn 3: 95 stuks (target 100) — 95%\n\nTotaal: 278/300 = 92.7%\n\n**Issues:**\n- Lijn 2: 15 min vertraging door late levering groenmateriaal\n- Koelcel 3: temperatuurmelding om 09:15, handmatig gecontroleerd\n\n**Acties:**\n- Materiaal leverancier gecontacteerd voor middag\n- Extra koelcel controle ingepland", result_updated_at: "28 feb 12:15", createdAt: "28 feb" },
-  { id: "15", title: "Marge-analyse week 9",          description: "Wekelijkse marge-analyse per productlijn uitvoeren.",                       category: "planning",  priority: "high",   labels: ["financieel"],           status: "todo",        task_type: "analysis", analysis_kind: "margin", analysis_status: "pending", result_ready_flag: false, createdAt: "28 feb" },
-  { id: "16", title: "Inkoopprijs benchmark rozen",   description: "Vergelijking inkoopprijs rozen met marktgemiddelde afgelopen 4 weken.",     category: "logistiek", priority: "medium", labels: ["inkoop"],               status: "in_progress", task_type: "analysis", assignee: "Jan", analysis_kind: "procurement", analysis_status: "running", result_ready_flag: false, createdAt: "27 feb" },
-  { id: "17", title: "Logistieke route optimalisatie", description: "Analyse van huidige routes vs alternatieven voor kostenbesparing.",         category: "logistiek", priority: "low",    labels: ["optimalisatie"],        status: "todo",        task_type: "analysis", analysis_kind: "logistics", analysis_status: "blocked", result_ready_flag: false, result_summary: "Geblokkeerd: wachtend op GPS data export van transporteur.", createdAt: "25 feb" },
+  { id: "4",  title: "BQ Elegance kwaliteitscheck",   description: "Steekproef van 20 boeketten controleren op kwaliteitsnormen.",              category: "qc",        priority: "medium", labels: ["steekproef"],           status: "in_progress", task_type: "analysis", assignee: "Lisa", analysis_kind: "quality", analysis_status: "running", methodiek_name: "HBM Productanalyse", result_ready_flag: false, createdAt: "28 feb" },
+  { id: "9",  title: "BQ Lovely verpakkingcheck",     description: "Verpakking en etikettering controleren voor verzending.",                   category: "qc",        priority: "low",    labels: ["verpakking"],           status: "review",      task_type: "analysis", analysis_kind: "quality", analysis_status: "completed", methodiek_name: "HBM Productanalyse", result_ready_flag: true, result_summary: "18/20 boeketten goedgekeurd. 2 afwijkingen op etikettering geconstateerd.", result_payload: "Steekproef van 20 boeketten uitgevoerd.\n\n**Resultaten:**\n- 18 boeketten voldoen aan alle kwaliteitsnormen\n- 2 boeketten hebben afwijkende etikettering (verkeerde barcode positie)\n- Bloem kwaliteit: 100% goedgekeurd\n- Verpakking integriteit: 100% goedgekeurd\n\n**Aanbeveling:** Etiketteermachine op lijn 3 laten herkalibreren.", result_updated_at: "28 feb 14:30", createdAt: "27 feb" },
+  { id: "13", title: "Productie rapport ochtend",     description: "Samenvatting ochtendproductie verzenden naar management.",                  category: "planning",  priority: "medium", labels: ["rapport"],              status: "review",      task_type: "analysis", assignee: "Lisa", analysis_kind: "production", analysis_status: "completed", methodiek_name: "HBM Productie Rapportage", result_ready_flag: true, result_summary: "Ochtendproductie 94% van target. Lijn 2 lichte vertraging door materiaal tekort.", result_payload: "**Productie Rapport — Ochtend 28 feb**\n\nLijn 1: 98 stuks (target 100) — 98%\nLijn 2: 85 stuks (target 100) — 85%\nLijn 3: 95 stuks (target 100) — 95%\n\nTotaal: 278/300 = 92.7%\n\n**Issues:**\n- Lijn 2: 15 min vertraging door late levering groenmateriaal\n- Koelcel 3: temperatuurmelding om 09:15, handmatig gecontroleerd\n\n**Acties:**\n- Materiaal leverancier gecontacteerd voor middag\n- Extra koelcel controle ingepland", result_updated_at: "28 feb 12:15", createdAt: "28 feb" },
+  { id: "15", title: "Marge-analyse week 9",          description: "Wekelijkse marge-analyse per productlijn uitvoeren.",                       category: "planning",  priority: "high",   labels: ["financieel"],           status: "todo",        task_type: "analysis", analysis_kind: "margin", analysis_status: "pending", methodiek_name: "HBM Marge Intelligence", result_ready_flag: false, createdAt: "28 feb" },
+  { id: "16", title: "Inkoopprijs benchmark rozen",   description: "Vergelijking inkoopprijs rozen met marktgemiddelde afgelopen 4 weken.",     category: "logistiek", priority: "medium", labels: ["inkoop"],               status: "in_progress", task_type: "analysis", assignee: "Jan", analysis_kind: "procurement", analysis_status: "running", methodiek_name: "ERP Mapping Reverse Engineer", result_ready_flag: false, createdAt: "27 feb" },
+  { id: "17", title: "Logistieke route optimalisatie", description: "Analyse van huidige routes vs alternatieven voor kostenbesparing.",         category: "logistiek", priority: "low",    labels: ["optimalisatie"],        status: "todo",        task_type: "analysis", analysis_kind: "logistics", analysis_status: "blocked", methodiek_name: "HBM Logistiek Analyse", result_ready_flag: false, result_summary: "Geblokkeerd: wachtend op GPS data export van transporteur.", createdAt: "25 feb" },
+  { id: "18", title: "Receptuur mapping alle lijnen",  description: "Volledige mapping van recepturen naar ERP structuur.",                      category: "productie", priority: "high",   labels: ["mapping", "erp"],       status: "in_progress", task_type: "analysis", assignee: "Pieter", analysis_kind: "mapping", analysis_status: "stale", methodiek_name: "ERP Mapping Reverse Engineer", result_ready_flag: true, result_summary: "Mapping chain confirmed through SalesOrder → ProductionOrder → Invoice. 3 orphan recipes gevonden.", result_payload: "**ERP Mapping Analyse**\n\nMapping chain: SalesOrder → ProductionOrder → Invoice ✓\n\n**Gevonden orphan recipes:**\n1. RCP-2024-089 (BQ Seasonal Mix)\n2. RCP-2024-112 (BQ Premium Rose)\n3. RCP-2024-145 (BQ Garden Special)\n\n**Status:** Laatste update 5 dagen geleden — mogelijk verouderd.", result_updated_at: "12 mrt 09:00", createdAt: "10 mrt" },
 ];
 
 /* ── Sub-components ── */
@@ -260,7 +263,8 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
         {/* Analysis result section */}
         {isAnalysis && (
           <div className="p-4 space-y-3">
-            <div className="flex items-center gap-2">
+            {/* Header */}
+            <div className="flex items-center gap-2 flex-wrap">
               <FileText className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-xs font-bold text-foreground">Analyse Resultaat</span>
               {card.analysis_kind && (
@@ -270,12 +274,23 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
               )}
             </div>
 
+            {/* Methodiek */}
+            {card.methodiek_name && (
+              <div className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                <span className="text-[8px] font-mono text-muted-foreground/50 uppercase tracking-wider">Methodiek</span>
+                <p className="text-xs font-bold text-amber-400 mt-0.5">{card.methodiek_name}</p>
+              </div>
+            )}
+
             {/* Status bar */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
+              {card.analysis_status === "stale" && (
+                <span className="text-[8px] font-mono text-yellow-500/80">Resultaat mogelijk verouderd</span>
+              )}
               {card.result_ready_flag && (
                 <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-accent">
-                  <CheckCircle2 className="w-2.5 h-2.5" /> Resultaat beschikbaar
+                  <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
                 </span>
               )}
               {card.result_updated_at && (
@@ -307,9 +322,11 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
             {!card.result_summary && !card.result_payload && card.analysis_status !== "completed" && (
               <div className="text-center py-6 text-[10px] font-mono text-muted-foreground/40">
                 {card.analysis_status === "blocked"
-                  ? "Analyse geblokkeerd — zie samenvatting"
+                  ? "Analyse geblokkeerd"
                   : card.analysis_status === "running"
                   ? "Analyse wordt uitgevoerd..."
+                  : card.analysis_status === "stale"
+                  ? "Resultaat verouderd — heranalyse nodig"
                   : "Nog geen resultaten beschikbaar"}
               </div>
             )}
@@ -384,25 +401,32 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
         ))}
       </div>
 
-      {/* Row 3: Analysis-specific compact info */}
+      {/* Row 3: Analysis — methodiek + status + result */}
       {isAnalysis && (
-        <div className="flex items-center gap-2 mt-2 pl-4 flex-wrap">
-          {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
-          {card.analysis_kind && (
-            <span className="text-[8px] font-mono text-muted-foreground/50">{analysisKindLabels[card.analysis_kind]}</span>
+        <div className="mt-2 pl-4 space-y-1">
+          {/* Methodiek label */}
+          {card.methodiek_name && (
+            <div className="text-[8px] font-mono font-bold text-amber-400/80 uppercase tracking-wider">
+              Methodiek: {card.methodiek_name}
+            </div>
           )}
-          {card.result_ready_flag && (
-            <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-accent">
-              <CheckCircle2 className="w-2.5 h-2.5" /> Resultaat
-            </span>
-          )}
+          {/* Status row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {card.analysis_status && <AnalysisStatusIndicator status={card.analysis_status} />}
+            {card.result_ready_flag && (
+              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-accent">
+                <CheckCircle2 className="w-2.5 h-2.5" /> Result Ready
+              </span>
+            )}
+          </div>
         </div>
       )}
 
       {/* Analysis result preview */}
-      {isAnalysis && card.result_ready_flag && card.result_summary && (
-        <div className="mt-2 ml-4 p-2 rounded-md bg-amber-500/5 border border-amber-500/10">
-          <p className="text-[9px] text-foreground/70 line-clamp-2 leading-relaxed">{card.result_summary}</p>
+      {isAnalysis && card.result_summary && (
+        <div className="mt-1.5 ml-4 p-2 rounded-md bg-amber-500/5 border border-amber-500/10">
+          <span className="text-[7px] font-mono font-bold text-muted-foreground/40 uppercase tracking-wider">Result:</span>
+          <p className="text-[9px] text-foreground/70 line-clamp-2 leading-relaxed mt-0.5">{card.result_summary}</p>
         </div>
       )}
 
