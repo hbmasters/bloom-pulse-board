@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      execution_intents: {
+        Row: {
+          action_category: string
+          action_type: string
+          advised_price_action: string | null
+          confidence: number
+          created_at: string
+          current_price: number | null
+          due_date: string | null
+          execution_mode: string
+          execution_payload: Json | null
+          execution_status: string
+          failure_reason: string | null
+          id: string
+          inventory_risk_type: string | null
+          owner: string | null
+          priority: string
+          product_name: string | null
+          proposed_delta_pct: number | null
+          proposed_delta_value: number | null
+          reasoning: string | null
+          recommendation: string | null
+          recommended_action: string
+          related_task_ids: string[] | null
+          risk_level: string
+          risk_type: string | null
+          severity: string | null
+          source_context: string | null
+          source_rule_id: string | null
+          source_type: string
+          updated_at: string
+          urgency_score: number
+        }
+        Insert: {
+          action_category?: string
+          action_type: string
+          advised_price_action?: string | null
+          confidence?: number
+          created_at?: string
+          current_price?: number | null
+          due_date?: string | null
+          execution_mode?: string
+          execution_payload?: Json | null
+          execution_status?: string
+          failure_reason?: string | null
+          id: string
+          inventory_risk_type?: string | null
+          owner?: string | null
+          priority?: string
+          product_name?: string | null
+          proposed_delta_pct?: number | null
+          proposed_delta_value?: number | null
+          reasoning?: string | null
+          recommendation?: string | null
+          recommended_action: string
+          related_task_ids?: string[] | null
+          risk_level?: string
+          risk_type?: string | null
+          severity?: string | null
+          source_context?: string | null
+          source_rule_id?: string | null
+          source_type?: string
+          updated_at?: string
+          urgency_score?: number
+        }
+        Update: {
+          action_category?: string
+          action_type?: string
+          advised_price_action?: string | null
+          confidence?: number
+          created_at?: string
+          current_price?: number | null
+          due_date?: string | null
+          execution_mode?: string
+          execution_payload?: Json | null
+          execution_status?: string
+          failure_reason?: string | null
+          id?: string
+          inventory_risk_type?: string | null
+          owner?: string | null
+          priority?: string
+          product_name?: string | null
+          proposed_delta_pct?: number | null
+          proposed_delta_value?: number | null
+          reasoning?: string | null
+          recommendation?: string | null
+          recommended_action?: string
+          related_task_ids?: string[] | null
+          risk_level?: string
+          risk_type?: string | null
+          severity?: string | null
+          source_context?: string | null
+          source_rule_id?: string | null
+          source_type?: string
+          updated_at?: string
+          urgency_score?: number
+        }
+        Relationships: []
+      }
       line_products: {
         Row: {
           created_at: string
