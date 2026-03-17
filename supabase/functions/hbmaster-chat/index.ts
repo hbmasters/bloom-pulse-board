@@ -95,7 +95,7 @@ Regels voor product card:
 - o_apu = de APU die de klant betaalt (norm)
 - quantity = aantal geproduceerde stuks in de periode
 - avg_stems = gemiddeld aantal stelen per boeket
-- period = de meetperiode (bijv. "Lopende week", "Week 12 — 2026", "Maart 2026")
+- period = de meetperiode. Als het alleen vandaag betreft gebruik "Vandaag", anders een bereik bijv. "12 mrt – 17 mrt 2026" of "Week 12 — 2026"
 - product_image_key: gebruik lowercase naam zonder spaties (bijv. "charme-xl", "de-luxe", "field-m", "lovely", "trend", "elegance", "chique", "orchidee", "tulpen", "roos", "zonnebloem", "pastel", "zomermix", "spring-bouquet", "moederdag")
 - verdict: korte beoordeling in 1-2 zinnen
 - Dit is GEEN analyse — het is een compacte productkaart. Gebruik NIET hbmaster-analysis hiervoor.
