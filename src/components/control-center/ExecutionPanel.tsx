@@ -251,7 +251,7 @@ const ExecutionPanel = ({ readOnly = false }: { readOnly?: boolean }) => {
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1.5 ml-5">{intent.recommended_action}</p>
                     <SourceTags source_type={intent.source_type} execution_mode={intent.execution_mode} rule_id={intent.source_rule_id || undefined} />
-                    {isExpanded && <ExecutionDetail intent={intent} actions={actions} />}
+                    {isExpanded && <ExecutionDetail intent={intent} actions={actions} readOnly={readOnly} />}
                   </div>
                 );
               })}
