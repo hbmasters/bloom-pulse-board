@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Shield, Timer, Activity, Link2, FileText, Radar, Sun, Zap } from "lucide-react";
+import { Shield, Timer, Activity, Link2, FileText, Sun, Zap } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import Sentinel from "@/pages/Sentinel";
 import MCCronJobs from "@/components/mission-control/MCCronJobs";
