@@ -135,28 +135,30 @@ const ExecutionDetail = ({ intent, actions, readOnly = false }: { intent: Execut
       />
 
       {/* Action buttons */}
-      <div className="flex items-center gap-2 pt-1 flex-wrap">
-        {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+      {!readOnly && (
+        <div className="flex items-center gap-2 pt-1 flex-wrap">
+          {patching && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
 
-        {status === "proposed" && (
-          <>
-            <ActionButton icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionButton icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
-          </>
-        )}
-        {(status === "approved" || status === "prepared") && (
-          <>
-            <ActionButton icon={Play} label="Bevestig Uitvoering" disabled={patching} onClick={() => actions.confirm(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
-            <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
-          </>
-        )}
-        {status === "in_progress" && (
-          <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
-        )}
-        {status === "failed" && (
-          <ActionButton icon={RotateCcw} label="Opnieuw Proberen" disabled={patching} onClick={() => actions.retry(intent.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
-        )}
-      </div>
+          {status === "proposed" && (
+            <>
+              <ActionButton icon={CheckCircle2} label="Goedkeuren" disabled={patching} onClick={() => actions.approve(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionButton icon={XCircle} label="Afwijzen" disabled={patching} onClick={() => actions.reject(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
+            </>
+          )}
+          {(status === "approved" || status === "prepared") && (
+            <>
+              <ActionButton icon={Play} label="Bevestig Uitvoering" disabled={patching} onClick={() => actions.confirm(intent.id)} className="bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" />
+              <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" />
+            </>
+          )}
+          {status === "in_progress" && (
+            <ActionButton icon={XCircle} label="Annuleren" disabled={patching} onClick={() => actions.cancel(intent.id)} className="bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20" />
+          )}
+          {status === "failed" && (
+            <ActionButton icon={RotateCcw} label="Opnieuw Proberen" disabled={patching} onClick={() => actions.retry(intent.id)} className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
+          )}
+        </div>
+      )}
 
       {intent.execution_mode === "semi-auto" && ["proposed", "approved", "prepared"].includes(status) && (
         <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-cyan-500/5 border border-cyan-500/10">
