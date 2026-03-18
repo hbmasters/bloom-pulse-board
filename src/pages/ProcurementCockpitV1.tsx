@@ -554,7 +554,7 @@ const ProcurementCockpitV1 = () => {
                                     { label: "Hist. prijs", value: p.historical_price, baseline: true },
                                     { label: "Offerteprijs", value: p.offer_price },
                                     { label: "Adviesprijs", value: p.advised_price },
-                                    ...(market ? [{ label: "Marktprijs", value: market.best_price }] : []),
+                                    ...(p.market_price != null ? [{ label: "Marktprijs", value: p.market_price }] : []),
                                   ].map(pc => {
                                     const diff = p.historical_price > 0 ? ((pc.value - p.historical_price) / p.historical_price * 100) : 0;
                                     return (
