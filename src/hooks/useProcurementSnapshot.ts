@@ -147,6 +147,48 @@ export function useProcurementSnapshot() {
       };
     });
 
+    // ── DEV SEED: removable test rows for impact/priority verification ──
+    const DEV_SEED_ENABLED = true; // Set to false or remove this block to disable
+    if (DEV_SEED_ENABLED) {
+      const seedBase: Omit<ProcurementSnapshotRow, "id" | "product" | "product_family" | "priority_level" | "impact_score" | "risk_score" | "confidence" | "urgency" | "execution_status" | "execution_intent_id" | "status_label"> = {
+        stem_length: "60cm",
+        buyer: "Test Inkoper",
+        required_volume: 500,
+        available_stock: 200,
+        reserved_stock: 100,
+        free_stock: 100,
+        open_buy_need: 300,
+        historical_price: 0.28,
+        offer_price: 0.31,
+        advised_price: 0.29,
+        market_price: 0.30,
+        variance_vs_calculated: 3.5,
+        preferred_supplier: "DevSupplier",
+        supplier_quality: 90,
+        supplier_reliability: 88,
+        supplier_score: 89,
+        external_quality: "A1",
+        internal_quality: 92,
+        ai_advice: "Test advies",
+        procurement_status: "current",
+        action_summary: "Test actie samenvatting",
+        reasoning: "Test reasoning voor verificatie",
+        procurement_rule_id: "RULE-DEV-001",
+        customer_product_lines: [],
+        supplier_offers: [],
+        snapshot_date: new Date().toISOString().slice(0, 10),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      const devRows: ProcurementSnapshotRow[] = [
+        { ...seedBase, id: "__dev-high__", product: "🧪 Roos Premium (HIGH)", product_family: "Roos", priority_level: "high", impact_score: 88, risk_score: "high", confidence: 0.92, urgency: "high", execution_status: "proposed", execution_intent_id: "dev-intent-high", status_label: "actie_nodig" },
+        { ...seedBase, id: "__dev-medium__", product: "🧪 Tulp Standaard (MED)", product_family: "Tulp", priority_level: "medium", impact_score: 55, risk_score: "medium", confidence: 0.74, urgency: "medium", execution_status: "approved", execution_intent_id: "dev-intent-med", status_label: "deels" },
+        { ...seedBase, id: "__dev-low__", product: "🧪 Chrysant Basis (LOW)", product_family: "Chrysant", priority_level: "low", impact_score: 20, risk_score: "low", confidence: 0.45, urgency: "low", execution_status: null, execution_intent_id: null, status_label: "gedekt" },
+      ];
+      mapped.unshift(...devRows);
+    }
+    // ── END DEV SEED ──
+
     setRows(mapped);
     setLoading(false);
   }, []);
