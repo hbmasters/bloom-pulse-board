@@ -28,6 +28,7 @@ export interface FloritrackTransaction {
   destination: string;
   currentLocation: string;
   lastUpdate: string;
+  expectedDeliveryTime?: string;
   timeline: FloritrackTimelineEvent[];
 }
 
