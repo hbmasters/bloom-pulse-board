@@ -456,6 +456,9 @@ const ProcurementCockpitV1 = () => {
                         </span>
                       </th>
                     ))}
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Prioriteit</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Impact</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Risico</th>
                     <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Actie</th>
                     <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort("urgency")}>
                       <span className="inline-flex items-center gap-0.5">
