@@ -159,6 +159,10 @@ export const OPS_MOCK: OpsIntelligenceData = {
           supplier: "Könst Alstroemeria (5540)",
           packaging: "410",
           brief: "LDL-HRV-0318-A",
+          bouquetAllocations: [
+            { bouquetName: "Spring Bouquet", quantity: 12, productionOrder: "PO-2860", departureTime: "16:00", departureDate: "2026-03-18", customer: "Lidl" },
+            { bouquetName: "Field M", quantity: 8, productionOrder: "PO-2861", departureTime: "16:00", departureDate: "2026-03-18", customer: "Lidl" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "06:12:30", location: "FloraHolland Aalsmeer", unit: "Kar-22", vehicle: "" },
             { status: "Inslag", date: "2026-03-18", time: "08:10:00", location: "FloraHolland Aalsmeer – Dock 12", unit: "Kar-22", vehicle: "" },
