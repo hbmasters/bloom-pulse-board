@@ -68,6 +68,20 @@ const urgencyBadge = (u: string) =>
 const scoreColor = (s: number) => s >= 95 ? "text-accent" : s >= 85 ? "text-muted-foreground" : "text-destructive";
 const scoreBg = (s: number) => s >= 95 ? "bg-accent/8 border-accent/15" : s >= 85 ? "bg-muted/50 border-border" : "bg-destructive/8 border-destructive/15";
 
+const priorityConfig: Record<string, { label: string; color: string }> = {
+  critical: { label: "Kritiek", color: "text-destructive bg-destructive/10 border-destructive/20" },
+  high: { label: "Hoog", color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
+  medium: { label: "Medium", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
+  low: { label: "Laag", color: "text-muted-foreground bg-muted/50 border-border/50" },
+};
+
+const riskConfig: Record<string, { label: string; color: string }> = {
+  critical: { label: "Kritiek", color: "text-destructive" },
+  high: { label: "Hoog", color: "text-orange-500" },
+  medium: { label: "Medium", color: "text-yellow-500" },
+  low: { label: "Laag", color: "text-accent" },
+};
+
 const shopIcon = (status: ShopStatus["status"]) => {
   switch (status) {
     case "connected": return <Wifi className="w-3 h-3 text-accent" />;
@@ -147,6 +161,7 @@ const ProcurementCockpitV1 = () => {
   };
 
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+  const prioOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
 
   const filtered = useMemo(() => {
     let list = snapshotRows.filter(p => {
@@ -159,6 +174,15 @@ const ProcurementCockpitV1 = () => {
       return true;
     });
     list = [...list].sort((a, b) => {
+      // Primary: priority_level desc (if available)
+      const pa = prioOrder[a.priority_level ?? ""] ?? 0;
+      const pb = prioOrder[b.priority_level ?? ""] ?? 0;
+      if (pa !== pb) return pb - pa;
+      // Secondary: impact_score desc
+      const ia = a.impact_score ?? 0;
+      const ib = b.impact_score ?? 0;
+      if (ia !== ib) return ib - ia;
+      // Fallback to selected sort
       if (sortKey === "urgency") {
         return sortDir === "asc" ? (urgencyOrder[a.urgency] ?? 0) - (urgencyOrder[b.urgency] ?? 0) : (urgencyOrder[b.urgency] ?? 0) - (urgencyOrder[a.urgency] ?? 0);
       }
@@ -432,6 +456,9 @@ const ProcurementCockpitV1 = () => {
                         </span>
                       </th>
                     ))}
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Prioriteit</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Impact</th>
+                    <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Risico</th>
                     <th className="px-3 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap">Actie</th>
                     <th className="px-3 py-2.5 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap" onClick={() => toggleSort("urgency")}>
                       <span className="inline-flex items-center gap-0.5">
@@ -528,6 +555,33 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </td>
                           )}
+                          {/* Priority */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.priority_level ? (
+                              <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider", priorityConfig[p.priority_level]?.color ?? "text-muted-foreground bg-muted border-border")}>
+                                {priorityConfig[p.priority_level]?.label ?? p.priority_level}
+                              </span>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
+                          {/* Impact score */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.impact_score != null ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-8 h-1.5 rounded-full bg-muted/30 overflow-hidden">
+                                  <div className={cn("h-full rounded-full", p.impact_score >= 75 ? "bg-destructive" : p.impact_score >= 50 ? "bg-yellow-500" : "bg-accent")} style={{ width: `${p.impact_score}%` }} />
+                                </div>
+                                <span className={cn("text-[9px] font-mono font-bold", p.impact_score >= 75 ? "text-destructive" : p.impact_score >= 50 ? "text-yellow-500" : "text-muted-foreground")}>{p.impact_score}</span>
+                              </div>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
+                          {/* Risk score */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.risk_score ? (
+                              <span className={cn("text-[9px] font-bold uppercase", riskConfig[p.risk_score]?.color ?? "text-muted-foreground")}>
+                                {riskConfig[p.risk_score]?.label ?? p.risk_score}
+                              </span>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
                           <td className={cn("px-3", rowPy)}>
                             <div className="flex items-center gap-1.5">
                               <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
@@ -728,6 +782,44 @@ const ProcurementCockpitV1 = () => {
                                     <Activity className="w-3.5 h-3.5 text-primary" />
                                     Traceability & Execution
                                   </h4>
+                                  {/* Impact / Risk / Priority summary */}
+                                  {(p.priority_level || p.impact_score != null || p.risk_score) && (
+                                    <div className="flex items-center gap-4 mb-3 pb-3 border-b border-border/40 flex-wrap">
+                                      {p.priority_level && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Prioriteit</span>
+                                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", priorityConfig[p.priority_level]?.color)}>
+                                            {priorityConfig[p.priority_level]?.label ?? p.priority_level}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {p.impact_score != null && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Impact</span>
+                                          <div className="flex items-center gap-1">
+                                            <div className="w-16 h-2 rounded-full bg-muted/30 overflow-hidden">
+                                              <div className={cn("h-full rounded-full", p.impact_score >= 75 ? "bg-destructive" : p.impact_score >= 50 ? "bg-yellow-500" : "bg-accent")} style={{ width: `${p.impact_score}%` }} />
+                                            </div>
+                                            <span className={cn("text-[10px] font-mono font-bold", p.impact_score >= 75 ? "text-destructive" : p.impact_score >= 50 ? "text-yellow-500" : "text-foreground")}>{p.impact_score}</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {p.risk_score && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Risico</span>
+                                          <span className={cn("text-[10px] font-bold", riskConfig[p.risk_score]?.color)}>
+                                            {riskConfig[p.risk_score]?.label ?? p.risk_score}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {p.confidence != null && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Confidence</span>
+                                          <span className="text-[10px] font-mono font-bold text-foreground">{Math.round(p.confidence * 100)}%</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[10px]">
                                     <div>
                                       <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Reasoning</span>
