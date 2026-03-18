@@ -187,7 +187,8 @@ const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => {
       <Timeline events={tx.timeline} />
     </div>
   </div>
-);
+  );
+};
 
 /* ───── Transaction row ───── */
 const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; isOpen: boolean; onToggle: () => void }) => {
