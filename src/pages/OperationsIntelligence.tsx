@@ -1,10 +1,15 @@
 import { useState, useMemo } from "react";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
 import {
   Package, Truck, CheckCircle2, AlertTriangle, Clock, ChevronDown,
   Search, Filter, Building2, MapPin, Box, Hash, User, Timer,
-  Flower2, RefreshCw, Calendar, XCircle, Eye
+  Flower2, RefreshCw, Calendar as CalendarIcon, XCircle, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OPS_MOCK } from "@/components/operations-intelligence/operations-mock-data";
 import type {
   OpsIntelligenceData, Shipment, OpsTransaction, TrackTraceEvent,
