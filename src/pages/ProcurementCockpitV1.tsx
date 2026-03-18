@@ -161,6 +161,7 @@ const ProcurementCockpitV1 = () => {
   };
 
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+  const prioOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
 
   const filtered = useMemo(() => {
     let list = snapshotRows.filter(p => {
@@ -173,6 +174,15 @@ const ProcurementCockpitV1 = () => {
       return true;
     });
     list = [...list].sort((a, b) => {
+      // Primary: priority_level desc (if available)
+      const pa = prioOrder[a.priority_level ?? ""] ?? 0;
+      const pb = prioOrder[b.priority_level ?? ""] ?? 0;
+      if (pa !== pb) return pb - pa;
+      // Secondary: impact_score desc
+      const ia = a.impact_score ?? 0;
+      const ib = b.impact_score ?? 0;
+      if (ia !== ib) return ib - ia;
+      // Fallback to selected sort
       if (sortKey === "urgency") {
         return sortDir === "asc" ? (urgencyOrder[a.urgency] ?? 0) - (urgencyOrder[b.urgency] ?? 0) : (urgencyOrder[b.urgency] ?? 0) - (urgencyOrder[a.urgency] ?? 0);
       }
