@@ -341,12 +341,18 @@ const ShipmentRow = ({ shipment }: { shipment: Shipment }) => {
 
       {expanded && (
         <div className="px-3 pb-3 space-y-3">
-          {/* Deviation message */}
+          {/* Deviation message + escalation */}
           {shipment.deviationMessage && (
-            <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", dev.bg, `border-${shipment.deviation === "critical" ? "red" : "amber"}-500/20`)}>
-              <AlertTriangle className={cn("w-4 h-4 shrink-0", dev.text)} />
-              <span className={cn("text-xs font-medium", dev.text)}>{shipment.deviationMessage}</span>
+            <div className={cn("flex items-center justify-between gap-2 px-3 py-2 rounded-lg border", dev.bg, shipment.deviation === "critical" ? "border-red-500/20" : "border-amber-500/20")}>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className={cn("w-4 h-4 shrink-0", dev.text)} />
+                <span className={cn("text-xs font-medium", dev.text)}>{shipment.deviationMessage}</span>
+              </div>
+              <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
             </div>
+          )}
+          {shipment.deviation !== "ok" && !shipment.deviationMessage && (
+            <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
           )}
 
           {/* Transactions */}
