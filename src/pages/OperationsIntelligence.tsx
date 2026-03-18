@@ -427,7 +427,7 @@ const OperationsIntelligence = () => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
+                <CalendarWidget
                   mode="single"
                   selected={selectedDate}
                   onSelect={d => d && setSelectedDate(d)}
