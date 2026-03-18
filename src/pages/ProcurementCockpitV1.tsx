@@ -546,6 +546,8 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </div>
                           </td>
+                          <td className={cn("px-3", rowPy)}>
+                            <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", urgencyBadge(p.urgency))}>
                               {p.urgency === "high" ? "Hoog" : p.urgency === "medium" ? "Medium" : "Laag"}
                             </span>
                           </td>
