@@ -7,6 +7,17 @@ export interface FloritrackTimelineEvent {
   vehicle: string;
 }
 
+export interface FloritrackBouquetAllocation {
+  bouquetName: string;
+  quantity: number;
+  departureDate: string;       // ISO date
+  departureTime: string;       // HH:MM
+  transportDestination?: string;
+  customerOrders?: number;
+}
+
+export type InternalPressure = "low" | "medium" | "high";
+
 export interface FloritrackTransaction {
   id: string;
   status: "Aangekocht" | "Onderweg" | "Afgeleverd" | "Onbekend";
@@ -30,6 +41,8 @@ export interface FloritrackTransaction {
   lastUpdate: string;
   expectedDeliveryTime?: string;
   timeline: FloritrackTimelineEvent[];
+  allocations?: FloritrackBouquetAllocation[];
+  internalPressure?: InternalPressure;
 }
 
 export interface FloritrackSummary {

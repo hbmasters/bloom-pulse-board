@@ -31,6 +31,12 @@ export const FLORITRACK_MOCK: FloritrackData = {
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:44:16",
       expectedDeliveryTime: "2026-03-18T11:30:00",
+      internalPressure: "high",
+      allocations: [
+        { bouquetName: "Charme XL", quantity: 15, departureDate: "2026-03-18", departureTime: "14:00", transportDestination: "Albert Heijn DC Zaandam", customerOrders: 3 },
+        { bouquetName: "De Luxe", quantity: 10, departureDate: "2026-03-18", departureTime: "13:30", transportDestination: "Jumbo DC Veghel", customerOrders: 2 },
+        { bouquetName: "Elegance", quantity: 5, departureDate: "2026-03-19", departureTime: "08:00", transportDestination: "PLUS DC Haarlemmermeer", customerOrders: 1 },
+      ],
       timeline: [
         {
           status: "Aangekocht",
@@ -64,6 +70,11 @@ export const FLORITRACK_MOCK: FloritrackData = {
       currentLocation: "In transit - A4 richting Hoorn",
       lastUpdate: "2026-03-18T08:15:00",
       expectedDeliveryTime: "2026-03-18T10:00:00",
+      internalPressure: "medium",
+      allocations: [
+        { bouquetName: "Lovely", quantity: 30, departureDate: "2026-03-18", departureTime: "15:00", transportDestination: "Lidl DC Heerenveen", customerOrders: 4 },
+        { bouquetName: "Trend", quantity: 20, departureDate: "2026-03-19", departureTime: "09:00", transportDestination: "Aldi DC Groenlo", customerOrders: 2 },
+      ],
       timeline: [
         {
           status: "Aangekocht",
@@ -105,6 +116,10 @@ export const FLORITRACK_MOCK: FloritrackData = {
       currentLocation: "Bloommasters Hoorn - Magazijn",
       lastUpdate: "2026-03-18T09:22:00",
       expectedDeliveryTime: "2026-03-18T09:00:00",
+      internalPressure: "low",
+      allocations: [
+        { bouquetName: "Spring Bouquet", quantity: 40, departureDate: "2026-03-19", departureTime: "10:00", transportDestination: "Albert Heijn DC Geldermalsen", customerOrders: 5 },
+      ],
       timeline: [
         {
           status: "Aangekocht",
