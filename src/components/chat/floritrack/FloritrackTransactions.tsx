@@ -210,6 +210,7 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
         {/* Main info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
+            <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
             <span className="text-sm font-semibold text-foreground truncate">{tx.article}</span>
             <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
           </div>
