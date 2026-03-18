@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box } from "lucide-react";
+import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FloritrackData, FloritrackTransaction, FloritrackTimelineEvent } from "./floritrack-types";
 import { FLORITRACK_MOCK } from "./floritrack-mock-data";
@@ -22,6 +22,24 @@ function formatTime(iso: string) {
     const d = new Date(iso);
     return d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
   } catch { return iso; }
+}
+
+function formatDeliveryInfo(tx: FloritrackTransaction): { label: string; accent: string } | null {
+  if (!tx.expectedDeliveryTime) return null;
+  const expected = new Date(tx.expectedDeliveryTime);
+  const time = expected.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+
+  if (tx.status === "Afgeleverd") {
+    const delivered = tx.timeline.find(e => e.status === "Afgeleverd");
+    if (delivered) {
+      const actual = new Date(`${delivered.date}T${delivered.time}`);
+      const diffMin = Math.round((actual.getTime() - expected.getTime()) / 60000);
+      if (diffMin <= 0) return { label: `✓ Op tijd (${time})`, accent: "text-emerald-500" };
+      return { label: `${diffMin} min te laat (verw. ${time})`, accent: "text-amber-500" };
+    }
+    return { label: `Verw. ${time}`, accent: "text-muted-foreground" };
+  }
+  return { label: `Verw. aankomst ${time}`, accent: "text-blue-500" };
 }
 
 /* ───── KPI strip ───── */
@@ -116,8 +134,29 @@ const DetailField = ({ label, value }: { label: string; value: string | number }
   </div>
 );
 
-const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => (
+const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => {
+  const delivery = formatDeliveryInfo(tx);
+  return (
   <div className="animate-fade-in space-y-4 pt-3 border-t border-border/50">
+    {/* Delivery time highlight */}
+    {delivery && (
+      <div className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg border",
+        tx.status === "Afgeleverd"
+          ? "bg-emerald-500/5 border-emerald-500/20"
+          : "bg-blue-500/5 border-blue-500/20"
+      )}>
+        <Timer className={cn("w-4 h-4 shrink-0", delivery.accent)} />
+        <div>
+          <span className={cn("text-xs font-semibold", delivery.accent)}>{delivery.label}</span>
+          {tx.expectedDeliveryTime && (
+            <span className="text-[10px] text-muted-foreground ml-2">
+              Bestemming: {tx.destination}
+            </span>
+          )}
+        </div>
+      </div>
+    )}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
       <div>
         <DetailField label="Artikel" value={tx.article} />
@@ -148,12 +187,14 @@ const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => (
       <Timeline events={tx.timeline} />
     </div>
   </div>
-);
+  );
+};
 
 /* ───── Transaction row ───── */
 const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; isOpen: boolean; onToggle: () => void }) => {
   const cfg = statusCfg(tx.status);
   const Icon = cfg.icon;
+  const delivery = formatDeliveryInfo(tx);
 
   return (
     <div className={cn(
@@ -176,10 +217,14 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
             <span className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><User className="w-3 h-3 shrink-0" />{tx.supplier.split(" (")[0]}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Clock className="w-3 h-3" />{tx.purchaseTime}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Hash className="w-3 h-3" />{tx.quantity.total}</span>
+            {delivery && (
+              <span className={cn("text-[11px] flex items-center gap-1 shrink-0 font-medium", delivery.accent)}>
+                <Timer className="w-3 h-3" />{delivery.label}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Location hint + chevron */}
         <div className="hidden sm:flex items-center gap-2 shrink-0">
           <span className="text-[10px] text-muted-foreground max-w-[140px] truncate">{tx.currentLocation.replace("Vestiging: ", "")}</span>
         </div>

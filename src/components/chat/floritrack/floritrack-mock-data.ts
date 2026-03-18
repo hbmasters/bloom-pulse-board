@@ -30,6 +30,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:44:16",
+      expectedDeliveryTime: "2026-03-18T11:30:00",
       timeline: [
         {
           status: "Aangekocht",
@@ -62,6 +63,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "In transit - A4 richting Hoorn",
       lastUpdate: "2026-03-18T08:15:00",
+      expectedDeliveryTime: "2026-03-18T10:00:00",
       timeline: [
         {
           status: "Aangekocht",
@@ -102,6 +104,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "Bloommasters Hoorn - Magazijn",
       lastUpdate: "2026-03-18T09:22:00",
+      expectedDeliveryTime: "2026-03-18T09:00:00",
       timeline: [
         {
           status: "Aangekocht",
@@ -150,6 +153,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "In transit - vertrokken Aalsmeer",
       lastUpdate: "2026-03-18T07:50:00",
+      expectedDeliveryTime: "2026-03-18T10:30:00",
       timeline: [
         {
           status: "Aangekocht",
@@ -190,6 +194,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:50:02",
+      expectedDeliveryTime: "2026-03-18T12:00:00",
       timeline: [
         {
           status: "Aangekocht",

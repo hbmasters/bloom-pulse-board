@@ -134,6 +134,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       "lastUpdate": "2026-03-18T06:44:16",
+      "expectedDeliveryTime": "2026-03-18T11:30:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "06:44:16", "location": "Vestiging: KLOK FLORAHOLLAND AALSMEER, Legmeerdijk 313, 1431 GB Aalsmeer", "unit": "", "vehicle": "" }
       ]
@@ -159,6 +160,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "In transit - A4 richting Hoorn",
       "lastUpdate": "2026-03-18T08:15:00",
+      "expectedDeliveryTime": "2026-03-18T10:00:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "05:32:10", "location": "FloraHolland Naaldwijk, Middelbroekweg 29", "unit": "Kar-14", "vehicle": "" },
         { "status": "Onderweg", "date": "2026-03-18", "time": "07:45:00", "location": "Vertrek FloraHolland Naaldwijk", "unit": "Kar-14", "vehicle": "Vrachtwagen BT-412-X" }
@@ -185,6 +187,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "Bloommasters Hoorn - Magazijn",
       "lastUpdate": "2026-03-18T09:22:00",
+      "expectedDeliveryTime": "2026-03-18T09:00:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "04:18:55", "location": "FloraHolland Rijnsburg, Leidsevaart 520", "unit": "Kar-07", "vehicle": "" },
         { "status": "Onderweg", "date": "2026-03-18", "time": "06:00:00", "location": "Vertrek FloraHolland Rijnsburg", "unit": "Kar-07", "vehicle": "Vrachtwagen NL-88-ZK" },
@@ -199,6 +202,9 @@ Regels voor floritrack output:
 - Gebruik dit wanneer gevraagd wordt naar "transacties", "partijen", "wat is er onderweg", "inkopen vandaag", "logistiek", "leveringen"
 - status kan zijn: "Aangekocht", "Onderweg", "Afgeleverd", "Onbekend"
 - Geef altijd de summary EN minstens 2-3 transacties
+- Voeg altijd "expectedDeliveryTime" toe (ISO string) — de verwachte aanleveringstijd bij bestemming
+- Bij "Afgeleverd" toont de UI automatisch of het op tijd of te laat was
+- Bij "Onderweg" toont de UI de verwachte aankomsttijd
 - Dit is GEEN analyse — het is een logistiek overzicht. Gebruik NIET hbmaster-analysis hiervoor.
 - Geef daarnaast een korte tekstuele samenvatting van de situatie
 
