@@ -487,7 +487,7 @@ const ProcurementCockpitV1 = () => {
                           {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
                           {visibleColumns.has("market_price") && (
                             <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>
-                              {market ? fmtPrice(market.best_price) : "—"}
+                              {p.market_price != null ? fmtPrice(p.market_price) : "—"}
                             </td>
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
