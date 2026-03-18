@@ -49,10 +49,6 @@ import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyP
 
 
 import {
-  mockDecisionRows, computeKPIs, actionLabels, actionColors,
-  type ProcurementDecisionRow, type ProcurementAction,
-} from "@/components/procurement-decision/procurement-decision-data";
-import {
   tradeRegistry, seasonalityLabels, riskLabels, availabilityLabels,
 } from "@/components/procurement-cockpit-v1/procurement-extended-data";
 
