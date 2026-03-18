@@ -85,16 +85,16 @@ export function useProcurementSnapshot() {
       .map((r: Record<string, unknown>) => r.execution_intent_id as string | null)
       .filter(Boolean) as string[];
 
-    let intentMap: Record<string, { priority: string; urgency_score: number; risk_level: string; confidence: number }> = {};
+    let intentMap: Record<string, { priority: string; urgency_score: number; risk_level: string; confidence: number; execution_status: string; execution_mode: string; reasoning: string | null; recommended_action: string }> = {};
 
     if (intentIds.length > 0) {
       const { data: intents } = await supabase
         .from("execution_intents")
-        .select("id, priority, urgency_score, risk_level, confidence")
+        .select("id, priority, urgency_score, risk_level, confidence, execution_status, execution_mode, reasoning, recommended_action")
         .in("id", intentIds);
 
       if (intents) {
-        for (const i of intents as Array<{ id: string; priority: string; urgency_score: number; risk_level: string; confidence: number }>) {
+        for (const i of intents as Array<{ id: string; priority: string; urgency_score: number; risk_level: string; confidence: number; execution_status: string; execution_mode: string; reasoning: string | null; recommended_action: string }>) {
           intentMap[i.id] = i;
         }
       }
