@@ -6,20 +6,18 @@ import {
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
   ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
-  Layers, Repeat, Shuffle, UserCheck,
+  Layers, Repeat, Shuffle, UserCheck, Loader2, Link2,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
 import DayFilter from "@/components/procurement-cockpit-v1/DayFilter";
 import {
-  procurementRows,
-  supplierOffers,
   statusLabels,
   shopStatuses,
   shopSyncStatusLabels,
-  type ProcurementRow,
   type ShopStatus,
 } from "@/components/procurement-cockpit-v1/procurement-cockpit-v1-data";
+import { useProcurementSnapshot, type ProcurementSnapshotRow, type SnapshotStatusLabel } from "@/hooks/useProcurementSnapshot";
 import {
   designAdvisoryData,
   designAdviceLabels,
