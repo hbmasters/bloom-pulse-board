@@ -194,6 +194,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:50:02",
+      expectedDeliveryTime: "2026-03-18T12:00:00",
       timeline: [
         {
           status: "Aangekocht",
