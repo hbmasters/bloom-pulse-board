@@ -529,12 +529,23 @@ const ProcurementCockpitV1 = () => {
                             </td>
                           )}
                           <td className={cn("px-3", rowPy)}>
-                            <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
-                              <ShoppingBag className="w-2.5 h-2.5" /> Koop
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
+                                <ShoppingBag className="w-2.5 h-2.5" /> Koop
+                              </button>
+                              {p.execution_intent_id && (
+                                <span className={cn(
+                                  "text-[7px] font-medium px-1.5 py-0.5 rounded-full border",
+                                  p.execution_status === "approved" || p.execution_status === "completed" ? "text-accent bg-accent/10 border-accent/20"
+                                  : p.execution_status === "in_progress" ? "text-primary bg-primary/10 border-primary/20"
+                                  : p.execution_status === "rejected" || p.execution_status === "failed" ? "text-destructive bg-destructive/10 border-destructive/20"
+                                  : "text-muted-foreground bg-muted border-border"
+                                )}>
+                                  {p.execution_status || "—"}
+                                </span>
+                              )}
+                            </div>
                           </td>
-                          <td className={cn("px-3", rowPy)}>
-                            <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", urgencyBadge(p.urgency))}>
                               {p.urgency === "high" ? "Hoog" : p.urgency === "medium" ? "Medium" : "Laag"}
                             </span>
                           </td>
