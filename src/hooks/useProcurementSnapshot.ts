@@ -131,20 +131,23 @@ export function useProcurementSnapshot() {
         status_label: (row.status_label as SnapshotStatusLabel) || "onbekend",
         procurement_status: row.procurement_status as string | null,
         execution_intent_id: intentId,
-        execution_status: row.execution_status as string | null,
-        action_summary: row.action_summary as string | null,
-        reasoning: row.reasoning as string | null,
+        // Prefer real intent execution_status over snapshot's stale copy
+        execution_status: intent?.execution_status ?? (row.execution_status as string | null),
+        action_summary: (row.action_summary as string | null) || intent?.recommended_action || null,
+        // Prefer real intent reasoning over snapshot's stale copy
+        reasoning: intent?.reasoning ?? (row.reasoning as string | null),
         procurement_rule_id: row.procurement_rule_id as string | null,
         customer_product_lines: Array.isArray(row.customer_product_lines) ? row.customer_product_lines as CustomerProductLine[] : [],
         supplier_offers: Array.isArray(row.supplier_offers) ? row.supplier_offers as SupplierOffer[] : [],
         snapshot_date: row.snapshot_date as string,
         created_at: row.created_at as string,
         updated_at: row.updated_at as string,
-        // Enriched fields
+        // Enriched fields from real execution intent
         priority_level: intent?.priority ?? null,
         impact_score: intent?.urgency_score ?? null,
         risk_score: intent?.risk_level ?? null,
         confidence: intent?.confidence ?? null,
+        execution_mode: intent?.execution_mode ?? null,
       };
     });
 
