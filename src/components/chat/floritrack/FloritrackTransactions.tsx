@@ -170,7 +170,8 @@ const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => {
       <div>
         <DetailField label="Leverancier" value={tx.supplier} />
         <DetailField label="Koper" value={tx.buyer} />
-        <DetailField label="Locatie" value={tx.location} />
+        <DetailField label="Afleveradres" value={tx.destination} />
+        <DetailField label="Herkomst" value={tx.location} />
         <DetailField label="Plaats" value={tx.place} />
         <DetailField label="Zetel" value={tx.seat} />
         <DetailField label="Klok" value={tx.clock} />
