@@ -270,6 +270,11 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: OpsTransaction; isOpen: 
         <span className="text-[10px] text-muted-foreground shrink-0">{tx.quantity.delivered}/{tx.quantity.total}</span>
         <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">{tx.supplier.split(" (")[0]}</span>
         {tx.deviation && <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+        {tx.productionRisk && tx.productionRisk !== "none" && (
+          <span className={cn("text-[9px] font-medium px-1 py-0.5 rounded border shrink-0", RISK_CONFIG[tx.productionRisk].bg, RISK_CONFIG[tx.productionRisk].color)}>
+            <ShieldAlert className="w-3 h-3 inline mr-0.5" />{RISK_CONFIG[tx.productionRisk].label}
+          </span>
+        )}
         <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform", isOpen && "rotate-180")} />
       </button>
       {isOpen && (
