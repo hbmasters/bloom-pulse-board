@@ -389,8 +389,23 @@ const ProcurementCockpitV1 = () => {
             )}
           </div>
 
+          {/* Loading state */}
+          {snapshotLoading && (
+            <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-[11px] font-medium">Snapshot laden...</span>
+            </div>
+          )}
+
+          {snapshotError && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-[11px] text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Fout bij laden: {snapshotError}
+            </div>
+          )}
+
           {/* Procurement List */}
-          <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Behoefte vs voorraad · Klik op een rij voor detail" badge={`${filtered.length}`}>
+          {!snapshotLoading && <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Live snapshot · Klik op een rij voor detail" badge={`${filtered.length}`}>
             <div className="overflow-x-auto -mx-5">
               <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
                 <thead>
