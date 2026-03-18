@@ -197,6 +197,7 @@ const MissionControl = () => {
             {view === "control-center" && <ControlCenter />}
             {view === "build-radar" && <BuildRadar />}
             {view === "verdelen" && <Verdelen />}
+            {view === "ops-intelligence" && <OperationsIntelligence />}
             {view === "ai-architecture" && <AIArchitecture />}
             {view === "dev-control" && <DevelopmentControl />}
           </div>
