@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -10,6 +10,10 @@ import FloritrackTransactions from "@/components/chat/floritrack/FloritrackTrans
 import type { FloritrackData } from "@/components/chat/floritrack/floritrack-types";
 import TransportRiskPanel from "@/components/chat/transport-risk/TransportRiskPanel";
 import type { TransportRiskData } from "@/components/chat/transport-risk/transport-risk-types";
+import { AnalyticalBlock, parseAnalyticalBlock } from "@/components/chat/analytical-blocks/BlockRegistry";
+import type { AnalyticalBlockData } from "@/components/chat/analytical-blocks/block-types";
+import { BLOCK_LABELS, BLOCK_DOMAIN_MAP } from "@/components/chat/analytical-blocks/block-types";
+import { DOMAIN_COLORS } from "@/components/chat/analytical-blocks/block-domain-colors";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -103,13 +107,15 @@ function parseAllBlocks(content: string): {
   productCard: ProductCardData | null;
   floritrack: FloritrackData | null;
   transportRisk: TransportRiskData | null;
+  analyticalBlock: AnalyticalBlockData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
   const { text: t4, floritrack } = parseFloritrack(t3);
   const { text: t5, transportRisk } = parseTransportRisk(t4);
-  return { text: t5, workflow, analysis, productCard, floritrack, transportRisk };
+  const { text: t6, block: analyticalBlock } = parseAnalyticalBlock(t5);
+  return { text: t6, workflow, analysis, productCard, floritrack, transportRisk, analyticalBlock };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
@@ -454,8 +460,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis, productCard, floritrack, transportRisk } = isUser
-            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null, transportRisk: null }
+          const { text, workflow, analysis, productCard, floritrack, transportRisk, analyticalBlock } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null, transportRisk: null, analyticalBlock: null }
             : parseAllBlocks(msg.content);
 
           return (
@@ -484,6 +490,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
                         {floritrack && <FloritrackTogglePanel data={floritrack} />}
                         {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
+                        {analyticalBlock && <AnalyticalBlock data={analyticalBlock} />}
                       </div>
                     )}
 
