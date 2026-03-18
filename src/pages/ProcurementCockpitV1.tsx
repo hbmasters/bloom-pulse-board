@@ -146,9 +146,6 @@ const ProcurementCockpitV1 = () => {
     });
   };
 
-  const families = useMemo(() => [...new Set(procurementRows.map(p => p.product_family))].sort(), []);
-  const allBuyers = useMemo(() => [...new Set(procurementRows.map(p => p.buyer))].sort(), []);
-
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
   const filtered = useMemo(() => {
