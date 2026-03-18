@@ -415,7 +415,7 @@ const ProcurementCockpitV1 = () => {
                 <tbody>
                   {filtered.map(p => {
                     const isExpanded = expandedId === p.id;
-                    const offers = supplierOffers[p.id] || [];
+                    const offers = (p.supplier_offers || []) as Array<{supplier_name: string; offer_price: number; offer_quantity: number; delivery_timing: string; supplier_quality_score: number; supplier_reliability_score: number; price_stability_index: number; variance_vs_historical: number; variance_vs_offer: number}>;
                     
                     const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
                     const advisory = getDesignAdvice(p.id);
