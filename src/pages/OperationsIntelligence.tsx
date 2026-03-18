@@ -51,6 +51,13 @@ const VEH_COLOR: Record<VehicleStatus, { text: string; bg: string }> = {
 function sCfg(s: string) { return SHIPMENT_STATUS[s] ?? SHIPMENT_STATUS.Gepland; }
 function tCfg(s: string) { return TX_STATUS[s] ?? TX_STATUS.Aangekocht; }
 
+const RISK_CONFIG: Record<ProductionRisk, { label: string; color: string; bg: string; dot: string }> = {
+  none:   { label: "",            color: "",                bg: "",                                      dot: "" },
+  low:    { label: "Laag risico", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-500" },
+  medium: { label: "Middel",     color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20",     dot: "bg-amber-500" },
+  high:   { label: "Hoog risico", color: "text-red-500",    bg: "bg-red-500/10 border-red-500/20",         dot: "bg-red-500" },
+};
+
 /* ═══════════ KPI BAR ═══════════ */
 
 const KPIChip = ({ label, value, icon: Icon, accent }: { label: string; value: number; icon: typeof Package; accent: string }) => (
