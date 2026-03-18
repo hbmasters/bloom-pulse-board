@@ -150,7 +150,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       supplier: "Könst Alstroemeria (5540)",
       packaging: "410",
       batchSequenceNumber: "000289",
-      destination: "Rozenburg / Hoorn Bloommasters",
+      destination: "HBM Rozenburg",
       currentLocation: "In transit - vertrokken Aalsmeer",
       lastUpdate: "2026-03-18T07:50:00",
       expectedDeliveryTime: "2026-03-18T10:30:00",
