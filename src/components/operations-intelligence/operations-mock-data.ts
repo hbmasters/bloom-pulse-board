@@ -100,6 +100,13 @@ export const OPS_MOCK: OpsIntelligenceData = {
             { status: "Inslag", date: "2026-03-18", time: "06:50:00", location: "FloraHolland Naaldwijk – Dock 7", unit: "Kar-14", vehicle: "" },
             { status: "Onderweg", date: "2026-03-18", time: "07:45:00", location: "Vertrek Naaldwijk", unit: "Kar-14", vehicle: "Vrachtwagen BT-412-X" },
           ],
+          productionRisk: "high",
+          productionRiskMessage: "Vertraagd – 50 stelen nodig voor 3 productie-orders die om 12:00 vertrekken",
+          bouquetAllocations: [
+            { bouquetName: "Lovely", quantity: 20, productionOrder: "PO-2841", departureTime: "12:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "De Luxe", quantity: 15, productionOrder: "PO-2843", departureTime: "12:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "Trend", quantity: 15, productionOrder: "PO-2850", departureTime: "14:00", departureDate: "2026-03-18", customer: "Jumbo" },
+          ],
         },
         {
           id: "T-1004",
