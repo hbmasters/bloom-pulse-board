@@ -12,6 +12,8 @@ export const OPS_MOCK: OpsIntelligenceData = {
     activeVehicles: 3,
     delayedShipments: 2,
     deviationCount: 3,
+    productionAtRisk: 3,
+    bouquetsAtRisk: 85,
   },
   shipments: [
     {
@@ -98,6 +100,13 @@ export const OPS_MOCK: OpsIntelligenceData = {
             { status: "Inslag", date: "2026-03-18", time: "06:50:00", location: "FloraHolland Naaldwijk – Dock 7", unit: "Kar-14", vehicle: "" },
             { status: "Onderweg", date: "2026-03-18", time: "07:45:00", location: "Vertrek Naaldwijk", unit: "Kar-14", vehicle: "Vrachtwagen BT-412-X" },
           ],
+          productionRisk: "high",
+          productionRiskMessage: "Vertraagd – 50 stelen nodig voor 3 productie-orders die om 12:00 vertrekken",
+          bouquetAllocations: [
+            { bouquetName: "Lovely", quantity: 20, productionOrder: "PO-2841", departureTime: "12:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "De Luxe", quantity: 15, productionOrder: "PO-2843", departureTime: "12:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "Trend", quantity: 15, productionOrder: "PO-2850", departureTime: "14:00", departureDate: "2026-03-18", customer: "Jumbo" },
+          ],
         },
         {
           id: "T-1004",
@@ -112,6 +121,12 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "544",
           brief: "JMB-VGL-0318-B",
           deviation: { type: "incomplete", message: "24/30 beschikbaar op moment van laden" },
+          productionRisk: "medium",
+          productionRiskMessage: "6 stelen tekort – productie-order PO-2844 kan vertraagd raken",
+          bouquetAllocations: [
+            { bouquetName: "Charme XL", quantity: 20, productionOrder: "PO-2844", departureTime: "14:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "Elegance", quantity: 10, productionOrder: "PO-2846", departureTime: "15:30", departureDate: "2026-03-18", customer: "Jumbo" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "05:48:30", location: "FloraHolland Naaldwijk", unit: "Kar-14", vehicle: "" },
             { status: "Onderweg", date: "2026-03-18", time: "07:45:00", location: "Vertrek Naaldwijk", unit: "Kar-14", vehicle: "Vrachtwagen BT-412-X" },
@@ -144,6 +159,10 @@ export const OPS_MOCK: OpsIntelligenceData = {
           supplier: "Könst Alstroemeria (5540)",
           packaging: "410",
           brief: "LDL-HRV-0318-A",
+          bouquetAllocations: [
+            { bouquetName: "Spring Bouquet", quantity: 12, productionOrder: "PO-2860", departureTime: "16:00", departureDate: "2026-03-18", customer: "Lidl" },
+            { bouquetName: "Field M", quantity: 8, productionOrder: "PO-2861", departureTime: "16:00", departureDate: "2026-03-18", customer: "Lidl" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "06:12:30", location: "FloraHolland Aalsmeer", unit: "Kar-22", vehicle: "" },
             { status: "Inslag", date: "2026-03-18", time: "08:10:00", location: "FloraHolland Aalsmeer – Dock 12", unit: "Kar-22", vehicle: "" },
@@ -162,6 +181,11 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "280",
           brief: "LDL-HRV-0318-B",
           deviation: { type: "missing_scan", message: "Inslag scan ontbreekt" },
+          productionRisk: "high",
+          productionRiskMessage: "Scan ontbreekt – 10 stelen nodig voor PO-2862, vertrek 13:00",
+          bouquetAllocations: [
+            { bouquetName: "Chique", quantity: 10, productionOrder: "PO-2862", departureTime: "13:00", departureDate: "2026-03-18", customer: "Lidl" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "06:50:02", location: "FloraHolland Aalsmeer", unit: "", vehicle: "" },
           ],
@@ -261,6 +285,11 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "200",
           brief: "ALD-GRL-0318-A",
           deviation: { type: "stuck", message: "Status niet veranderd sinds 07:00" },
+          productionRisk: "high",
+          productionRiskMessage: "Geblokkeerd – 20 stelen nodig voor PO-2870, vertrek 11:00 vandaag",
+          bouquetAllocations: [
+            { bouquetName: "Lovely", quantity: 20, productionOrder: "PO-2870", departureTime: "11:00", departureDate: "2026-03-18", customer: "Aldi" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "05:10:00", location: "FloraHolland Naaldwijk", unit: "Kar-09", vehicle: "" },
           ],

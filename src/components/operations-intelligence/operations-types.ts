@@ -14,6 +14,17 @@ export interface TrackTraceEvent {
   vehicle: string;
 }
 
+export interface BouquetAllocation {
+  bouquetName: string;
+  quantity: number;
+  productionOrder: string;
+  departureTime: string;
+  departureDate: string;
+  customer: string;
+}
+
+export type ProductionRisk = "none" | "low" | "medium" | "high";
+
 export interface OpsTransaction {
   id: string;
   status: TransactionStatus;
@@ -28,6 +39,9 @@ export interface OpsTransaction {
   brief: string;
   deviation?: { type: string; message: string };
   timeline: TrackTraceEvent[];
+  bouquetAllocations?: BouquetAllocation[];
+  productionRisk?: ProductionRisk;
+  productionRiskMessage?: string;
 }
 
 export interface Shipment {
@@ -69,6 +83,8 @@ export interface OpsSummary {
   activeVehicles: number;
   delayedShipments: number;
   deviationCount: number;
+  productionAtRisk: number;
+  bouquetsAtRisk: number;
 }
 
 export interface OpsIntelligenceData {

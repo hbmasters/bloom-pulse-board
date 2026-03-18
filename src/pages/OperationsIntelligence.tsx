@@ -3,17 +3,19 @@ import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
   Package, Truck, CheckCircle2, AlertTriangle, Clock, ChevronDown,
-  Search, Filter, Building2, MapPin, Box, Hash, User, Timer,
-  Flower2, RefreshCw, Calendar as CalendarIcon, XCircle, Eye
+  Search, Building2, MapPin, Box, Hash, User, Timer,
+  Flower2, Calendar as CalendarIcon, XCircle, ShieldAlert, PhoneForwarded,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarWidget } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
 import { OPS_MOCK } from "@/components/operations-intelligence/operations-mock-data";
 import type {
   OpsIntelligenceData, Shipment, OpsTransaction, TrackTraceEvent,
-  DeviationLevel, ShipmentStatus, VehicleFlow, VehicleStatus
+  DeviationLevel, ShipmentStatus, VehicleFlow, VehicleStatus, ProductionRisk, BouquetAllocation
 } from "@/components/operations-intelligence/operations-types";
 
 /* ═══════════ HELPERS ═══════════ */
@@ -49,6 +51,13 @@ const VEH_COLOR: Record<VehicleStatus, { text: string; bg: string }> = {
 function sCfg(s: string) { return SHIPMENT_STATUS[s] ?? SHIPMENT_STATUS.Gepland; }
 function tCfg(s: string) { return TX_STATUS[s] ?? TX_STATUS.Aangekocht; }
 
+const RISK_CONFIG: Record<ProductionRisk, { label: string; color: string; bg: string; dot: string }> = {
+  none:   { label: "",            color: "",                bg: "",                                      dot: "" },
+  low:    { label: "Laag risico", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-500" },
+  medium: { label: "Middel",     color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20",     dot: "bg-amber-500" },
+  high:   { label: "Hoog risico", color: "text-red-500",    bg: "bg-red-500/10 border-red-500/20",         dot: "bg-red-500" },
+};
+
 /* ═══════════ KPI BAR ═══════════ */
 
 const KPIChip = ({ label, value, icon: Icon, accent }: { label: string; value: number; icon: typeof Package; accent: string }) => (
@@ -66,10 +75,11 @@ const KPIBar = ({ summary }: { summary: OpsIntelligenceData["summary"] }) => (
     <KPIChip label="Zendingen" value={summary.totalShipments} icon={Package} accent="text-foreground" />
     <KPIChip label="Laadeenheden" value={summary.loadUnits} icon={Box} accent="text-violet-500" />
     <KPIChip label="Transacties" value={summary.totalTransactions} icon={Hash} accent="text-blue-500" />
-    <KPIChip label="Fust" value={summary.packagingUnits} icon={Package} accent="text-muted-foreground" />
     <KPIChip label="Auto's actief" value={summary.activeVehicles} icon={Truck} accent="text-blue-500" />
     <KPIChip label="Vertraagd" value={summary.delayedShipments} icon={Timer} accent="text-amber-500" />
     <KPIChip label="Afwijkingen" value={summary.deviationCount} icon={AlertTriangle} accent="text-red-500" />
+    <KPIChip label="Productie risico" value={summary.productionAtRisk} icon={ShieldAlert} accent="text-red-500" />
+    <KPIChip label="Boeketten risico" value={summary.bouquetsAtRisk} icon={Flower2} accent="text-red-500" />
   </div>
 );
 
@@ -113,6 +123,81 @@ const TrackTrace = ({ events }: { events: TrackTraceEvent[] }) => {
   );
 };
 
+/* ═══════════ BOUQUET ALLOCATION TABLE ═══════════ */
+
+const BouquetAllocationSection = ({ allocations, risk, riskMessage }: { allocations: BouquetAllocation[]; risk?: ProductionRisk; riskMessage?: string }) => {
+  if (!allocations.length) return null;
+  const rCfg = risk ? RISK_CONFIG[risk] : null;
+  return (
+    <div className="space-y-2">
+      <h4 className="text-[11px] font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+        <Flower2 className="w-3.5 h-3.5 text-primary" />Verdeling naar boeketten
+        {rCfg && risk !== "none" && (
+          <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border ml-1", rCfg.bg, rCfg.color)}>
+            <span className={cn("inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle", rCfg.dot)} />
+            {rCfg.label}
+          </span>
+        )}
+      </h4>
+      {riskMessage && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-red-500/5 border-red-500/20">
+          <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
+          <span className="text-xs text-red-500 font-medium">{riskMessage}</span>
+        </div>
+      )}
+      <div className="rounded-lg border border-border overflow-hidden">
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr className="bg-muted/30 border-b border-border">
+              <th className="text-left px-2.5 py-1.5 font-semibold text-muted-foreground uppercase tracking-wider">Boeket</th>
+              <th className="text-right px-2.5 py-1.5 font-semibold text-muted-foreground uppercase tracking-wider">Aantal</th>
+              <th className="text-left px-2.5 py-1.5 font-semibold text-muted-foreground uppercase tracking-wider">PO</th>
+              <th className="text-right px-2.5 py-1.5 font-semibold text-muted-foreground uppercase tracking-wider">Vertrek</th>
+              <th className="text-left px-2.5 py-1.5 font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Klant</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allocations
+              .sort((a, b) => new Date(`${a.departureDate}T${a.departureTime}`).getTime() - new Date(`${b.departureDate}T${b.departureTime}`).getTime())
+              .map((a, i) => {
+                const isToday = a.departureDate === new Date().toISOString().slice(0, 10);
+                const dep = new Date(`${a.departureDate}T${a.departureTime}`);
+                const isUrgent = isToday && dep.getTime() - Date.now() < 4 * 3600000;
+                return (
+                  <tr key={i} className={cn("border-b border-border/50 last:border-0", isUrgent && "bg-red-500/5")}>
+                    <td className="px-2.5 py-2 font-medium text-foreground flex items-center gap-1.5">
+                      <Flower2 className="w-3 h-3 text-primary/60 shrink-0" />{a.bouquetName}
+                    </td>
+                    <td className="px-2.5 py-2 text-right text-foreground font-medium">{a.quantity}</td>
+                    <td className="px-2.5 py-2 text-foreground font-mono text-[10px]">{a.productionOrder}</td>
+                    <td className="px-2.5 py-2 text-right">
+                      <span className={cn("flex items-center justify-end gap-1", isUrgent ? "text-red-500 font-semibold" : "text-foreground")}>
+                        <CalendarIcon className="w-3 h-3 shrink-0" />
+                        {isToday ? a.departureTime : `${a.departureDate.slice(5)} ${a.departureTime}`}
+                      </span>
+                    </td>
+                    <td className="px-2.5 py-2 text-muted-foreground hidden sm:table-cell">{a.customer}</td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════ ESCALATION BUTTON ═══════════ */
+
+const EscalateButton = ({ shipmentLabel, logisticsProvider }: { shipmentLabel: string; logisticsProvider: string }) => (
+  <button
+    onClick={() => toast.success(`Escalatie verstuurd naar ${logisticsProvider} voor zending ${shipmentLabel}`)}
+    className="text-[11px] font-medium px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors flex items-center gap-1.5"
+  >
+    <PhoneForwarded className="w-3.5 h-3.5" />Escaleer naar transporteur
+  </button>
+);
+
 /* ═══════════ TRANSACTION DETAIL ═══════════ */
 
 const DetailField = ({ label, value }: { label: string; value: string | number }) => (
@@ -128,6 +213,14 @@ const TransactionDetail = ({ tx }: { tx: OpsTransaction }) => (
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-red-500/5 border-red-500/20">
         <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
         <span className="text-xs text-red-500 font-medium">{tx.deviation.message}</span>
+      </div>
+    )}
+    {tx.productionRisk && tx.productionRisk !== "none" && (
+      <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", RISK_CONFIG[tx.productionRisk].bg)}>
+        <ShieldAlert className={cn("w-4 h-4 shrink-0", RISK_CONFIG[tx.productionRisk].color)} />
+        <span className={cn("text-xs font-medium", RISK_CONFIG[tx.productionRisk].color)}>
+          Productie risico: {tx.productionRiskMessage || RISK_CONFIG[tx.productionRisk].label}
+        </span>
       </div>
     )}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
@@ -151,6 +244,13 @@ const TransactionDetail = ({ tx }: { tx: OpsTransaction }) => (
       </h4>
       <TrackTrace events={tx.timeline} />
     </div>
+    {tx.bouquetAllocations && tx.bouquetAllocations.length > 0 && (
+      <BouquetAllocationSection
+        allocations={tx.bouquetAllocations}
+        risk={tx.productionRisk}
+        riskMessage={tx.productionRiskMessage}
+      />
+    )}
   </div>
 );
 
@@ -170,6 +270,11 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: OpsTransaction; isOpen: 
         <span className="text-[10px] text-muted-foreground shrink-0">{tx.quantity.delivered}/{tx.quantity.total}</span>
         <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">{tx.supplier.split(" (")[0]}</span>
         {tx.deviation && <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+        {tx.productionRisk && tx.productionRisk !== "none" && (
+          <span className={cn("text-[9px] font-medium px-1 py-0.5 rounded border shrink-0", RISK_CONFIG[tx.productionRisk].bg, RISK_CONFIG[tx.productionRisk].color)}>
+            <ShieldAlert className="w-3 h-3 inline mr-0.5" />{RISK_CONFIG[tx.productionRisk].label}
+          </span>
+        )}
         <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform", isOpen && "rotate-180")} />
       </button>
       {isOpen && (
@@ -241,12 +346,18 @@ const ShipmentRow = ({ shipment }: { shipment: Shipment }) => {
 
       {expanded && (
         <div className="px-3 pb-3 space-y-3">
-          {/* Deviation message */}
+          {/* Deviation message + escalation */}
           {shipment.deviationMessage && (
-            <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", dev.bg, `border-${shipment.deviation === "critical" ? "red" : "amber"}-500/20`)}>
-              <AlertTriangle className={cn("w-4 h-4 shrink-0", dev.text)} />
-              <span className={cn("text-xs font-medium", dev.text)}>{shipment.deviationMessage}</span>
+            <div className={cn("flex items-center justify-between gap-2 px-3 py-2 rounded-lg border", dev.bg, shipment.deviation === "critical" ? "border-red-500/20" : "border-amber-500/20")}>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className={cn("w-4 h-4 shrink-0", dev.text)} />
+                <span className={cn("text-xs font-medium", dev.text)}>{shipment.deviationMessage}</span>
+              </div>
+              <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
             </div>
+          )}
+          {shipment.deviation !== "ok" && !shipment.deviationMessage && (
+            <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
           )}
 
           {/* Transactions */}
