@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, X } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
 import ProductCard from "@/components/analysis-presentation/ProductCard";
 import type { ProductCardData } from "@/components/analysis-presentation/ProductCard";
+import FloritrackTransactions from "@/components/chat/floritrack/FloritrackTransactions";
+import type { FloritrackData } from "@/components/chat/floritrack/floritrack-types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
