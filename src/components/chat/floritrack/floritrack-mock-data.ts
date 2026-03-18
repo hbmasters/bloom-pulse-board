@@ -104,6 +104,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       destination: "Rozenburg / Hoorn Bloommasters",
       currentLocation: "Bloommasters Hoorn - Magazijn",
       lastUpdate: "2026-03-18T09:22:00",
+      expectedDeliveryTime: "2026-03-18T09:00:00",
       timeline: [
         {
           status: "Aangekocht",
