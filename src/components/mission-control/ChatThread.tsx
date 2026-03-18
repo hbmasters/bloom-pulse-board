@@ -439,7 +439,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
               {[
                 "Wat is de huidige productie status?",
-                "Analyseer de marge per productlijn",
+                "Zijn er productie risico's door transport?",
                 "Toon transactie flow",
                 "Benchmark inkoopprijzen rozen",
               ].map(q => (
