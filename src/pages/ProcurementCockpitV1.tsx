@@ -88,6 +88,7 @@ const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const ProcurementCockpitV1 = () => {
+  const { rows: snapshotRows, loading: snapshotLoading, error: snapshotError, families, buyers: allBuyers } = useProcurementSnapshot();
   const [activeTab, setActiveTab] = useState<CockpitTab>("inkooplijst");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -96,6 +97,8 @@ const ProcurementCockpitV1 = () => {
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [urgencyFilter, setUrgencyFilter] = useState<string | null>(null);
   const [buyerFilter, setBuyerFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SnapshotStatusLabel | null>(null);
+  const [actionReadyOnly, setActionReadyOnly] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date());
   const [dateTo, setDateTo] = useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 6); return d; });
   const [shopPopup, setShopPopup] = useState(false);
