@@ -370,6 +370,18 @@ const ProcurementCockpitV1 = () => {
                 </button>
               ))}
             </div>
+            {/* Status filter */}
+            <div className="flex gap-1">
+              {([{ key: "gedekt" as const, label: "Gedekt", cls: "text-accent bg-accent/10 border-accent/20" }, { key: "deels" as const, label: "Deels", cls: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" }, { key: "actie_nodig" as const, label: "Actie nodig", cls: "text-destructive bg-destructive/10 border-destructive/20" }]).map(s => (
+                <button key={s.key} onClick={() => setStatusFilter(statusFilter === s.key ? null : s.key)} className={cn("text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors font-medium", statusFilter === s.key ? s.cls : "border-border text-muted-foreground hover:bg-muted")}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            {/* Action-ready filter */}
+            <button onClick={() => setActionReadyOnly(!actionReadyOnly)} className={cn("text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors font-medium flex items-center gap-1", actionReadyOnly ? "bg-primary/10 text-primary border-primary/30" : "border-border text-muted-foreground hover:bg-muted")}>
+              <Link2 className="w-3 h-3" /> Actie-ready
+            </button>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5">
                 <RotateCcw className="w-3 h-3" /> Reset
