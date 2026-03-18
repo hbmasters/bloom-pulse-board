@@ -6,20 +6,18 @@ import {
   Wifi, WifiOff, AlertCircle, Settings2, RotateCcw,
   ShoppingBag, Ruler, Flower2,
   BarChart3, BookOpen, ShieldCheck, ArrowRight, Activity, ShieldAlert, Warehouse,
-  Layers, Repeat, Shuffle, UserCheck,
+  Layers, Repeat, Shuffle, UserCheck, Loader2, Link2,
 } from "lucide-react";
 import IHSectionShell from "@/components/intelligence-hub/IHSectionShell";
 import { cn } from "@/lib/utils";
 import DayFilter from "@/components/procurement-cockpit-v1/DayFilter";
 import {
-  procurementRows,
-  supplierOffers,
   statusLabels,
   shopStatuses,
   shopSyncStatusLabels,
-  type ProcurementRow,
   type ShopStatus,
 } from "@/components/procurement-cockpit-v1/procurement-cockpit-v1-data";
+import { useProcurementSnapshot, type ProcurementSnapshotRow, type SnapshotStatusLabel } from "@/hooks/useProcurementSnapshot";
 import {
   designAdvisoryData,
   designAdviceLabels,
@@ -49,34 +47,13 @@ import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyP
 
 
 import {
-  mockDecisionRows, computeKPIs, actionLabels, actionColors,
-  type ProcurementDecisionRow, type ProcurementAction,
-} from "@/components/procurement-decision/procurement-decision-data";
-import {
   tradeRegistry, seasonalityLabels, riskLabels, availabilityLabels,
 } from "@/components/procurement-cockpit-v1/procurement-extended-data";
 
 /* ── helpers ── */
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
-
-/* ── Supply Radar signals (from V1.0) ── */
-const computeRadarSignals = (rows: ProcurementDecisionRow[]) => {
-  const signals: { label: string; severity: "info" | "warning" | "critical"; detail: string }[] = [];
-  const highPressure = rows.filter(r => r.inventory_pressure_score > 70);
-  if (highPressure.length > 0) signals.push({ label: "Voorraadveroudering", severity: "critical", detail: `${highPressure.length} producten met hoge voorraaddruk` });
-  const priceUp = rows.filter(r => r.price_deviation_pct > 10);
-  if (priceUp.length > 0) signals.push({ label: "Prijs boven verwacht", severity: "warning", detail: `${priceUp.length} producten boven verwachte prijs` });
-  const lowReliability = rows.filter(r => r.supplier_reliability_score < 65);
-  if (lowReliability.length > 0) signals.push({ label: "Leverancier instabiel", severity: "warning", detail: `${lowReliability.length} leveranciers met lage betrouwbaarheid` });
-  const substitutes = rows.filter(r => r.substitute_candidates.length > 0 && r.procurement_action === "consider_substitute");
-  if (substitutes.length > 0) signals.push({ label: "Substituut aanbevolen", severity: "info", detail: `${substitutes.length} producten met substituut-advies` });
-  const markdown = rows.filter(r => r.markdown_advice);
-  if (markdown.length > 0) signals.push({ label: "Markdown kandidaten", severity: "critical", detail: `${markdown.length} producten met markdown-advies` });
-  const priceDown = rows.filter(r => r.price_deviation_pct < -10);
-  if (priceDown.length > 0) signals.push({ label: "Inkoopkans", severity: "info", detail: `${priceDown.length} producten met prijsdaling` });
-  return signals;
-};
+const safe = (v: number | null | undefined, fallback = "—") => v != null ? v : fallback;
 
 const signalSeverityColors = {
   info: "bg-sky-500/10 text-sky-400 border-sky-500/20",
@@ -101,7 +78,7 @@ const shopIcon = (status: ShopStatus["status"]) => {
   }
 };
 
-type SortKey = keyof ProcurementRow;
+type SortKey = keyof ProcurementSnapshotRow;
 type SortDir = "asc" | "desc";
 type CockpitTab = "inkooplijst" | "marktaanbod";
 
@@ -111,6 +88,7 @@ const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const ProcurementCockpitV1 = () => {
+  const { rows: snapshotRows, loading: snapshotLoading, error: snapshotError, families, buyers: allBuyers } = useProcurementSnapshot();
   const [activeTab, setActiveTab] = useState<CockpitTab>("inkooplijst");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -119,6 +97,8 @@ const ProcurementCockpitV1 = () => {
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [urgencyFilter, setUrgencyFilter] = useState<string | null>(null);
   const [buyerFilter, setBuyerFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SnapshotStatusLabel | null>(null);
+  const [actionReadyOnly, setActionReadyOnly] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date());
   const [dateTo, setDateTo] = useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 6); return d; });
   const [shopPopup, setShopPopup] = useState(false);
@@ -132,7 +112,7 @@ const ProcurementCockpitV1 = () => {
 
   // Compute dekking status per row
   type DekkingStatus = "gedekt" | "deels_gedekt" | "niet_gedekt" | "overschot";
-  const getDekkingStatus = (p: ProcurementRow): DekkingStatus => {
+  const getDekkingStatus = (p: ProcurementSnapshotRow): DekkingStatus => {
     if (p.available_stock >= p.required_volume && p.open_buy_need === 0) return p.free_stock > p.required_volume ? "overschot" : "gedekt";
     if (p.free_stock > 0 && p.open_buy_need > 0) return "deels_gedekt";
     return "niet_gedekt";
@@ -166,29 +146,31 @@ const ProcurementCockpitV1 = () => {
     });
   };
 
-  const families = useMemo(() => [...new Set(procurementRows.map(p => p.product_family))].sort(), []);
-  const allBuyers = useMemo(() => [...new Set(procurementRows.map(p => p.buyer))].sort(), []);
-
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
   const filtered = useMemo(() => {
-    let list = procurementRows.filter(p => {
+    let list = snapshotRows.filter(p => {
       if (search && !p.product.toLowerCase().includes(search.toLowerCase()) && !p.product_family.toLowerCase().includes(search.toLowerCase())) return false;
       if (familyFilter && p.product_family !== familyFilter) return false;
       if (urgencyFilter && p.urgency !== urgencyFilter) return false;
       if (buyerFilter && p.buyer !== buyerFilter) return false;
+      if (statusFilter && p.status_label !== statusFilter) return false;
+      if (actionReadyOnly && !p.execution_intent_id) return false;
       return true;
     });
-    list.sort((a, b) => {
+    list = [...list].sort((a, b) => {
       if (sortKey === "urgency") {
         return sortDir === "asc" ? (urgencyOrder[a.urgency] ?? 0) - (urgencyOrder[b.urgency] ?? 0) : (urgencyOrder[b.urgency] ?? 0) - (urgencyOrder[a.urgency] ?? 0);
       }
+      if (sortKey === "open_buy_need") {
+        return sortDir === "asc" ? a.open_buy_need - b.open_buy_need : b.open_buy_need - a.open_buy_need;
+      }
       const av = a[sortKey], bv = b[sortKey];
       if (typeof av === "number" && typeof bv === "number") return sortDir === "asc" ? av - bv : bv - av;
-      return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+      return sortDir === "asc" ? String(av ?? "").localeCompare(String(bv ?? "")) : String(bv ?? "").localeCompare(String(av ?? ""));
     });
     return list;
-  }, [search, sortKey, sortDir, familyFilter, urgencyFilter, buyerFilter]);
+  }, [snapshotRows, search, sortKey, sortDir, familyFilter, urgencyFilter, buyerFilter, statusFilter, actionReadyOnly]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -200,29 +182,31 @@ const ProcurementCockpitV1 = () => {
     setFamilyFilter(null);
     setUrgencyFilter(null);
     setBuyerFilter(null);
+    setStatusFilter(null);
+    setActionReadyOnly(false);
     setDateFrom(new Date());
     const end = new Date(); end.setDate(end.getDate() + 6);
     setDateTo(end);
   };
 
-  const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter;
+  const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter || statusFilter || actionReadyOnly;
 
   /* ── KPI totals ── */
   const totals = useMemo(() => {
-    const rows = procurementRows;
-    const avgOffer = rows.reduce((s, p) => s + p.offer_price, 0) / rows.length;
-    const avgHistorical = rows.reduce((s, p) => s + p.historical_price, 0) / rows.length;
+    if (snapshotRows.length === 0) return { required: 0, freeStock: 0, reserved: 0, openBuy: 0, avgOfferPrice: 0, avgHistoricalPrice: 0, offerVsHistorical: 0, actionNeeded: 0 };
+    const avgOffer = snapshotRows.reduce((s, p) => s + p.offer_price, 0) / snapshotRows.length;
+    const avgHistorical = snapshotRows.reduce((s, p) => s + p.historical_price, 0) / snapshotRows.length;
     return {
-      required: rows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
-      freeStock: rows.reduce((s, p) => s + p.free_stock, 0),
-      reserved: rows.reduce((s, p) => s + p.reserved_stock, 0),
-      openBuy: rows.reduce((s, p) => s + p.open_buy_need, 0),
+      required: snapshotRows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
+      freeStock: snapshotRows.reduce((s, p) => s + p.free_stock, 0),
+      reserved: snapshotRows.reduce((s, p) => s + p.reserved_stock, 0),
+      openBuy: snapshotRows.reduce((s, p) => s + p.open_buy_need, 0),
       avgOfferPrice: avgOffer,
       avgHistoricalPrice: avgHistorical,
-      offerVsHistorical: ((avgOffer - avgHistorical) / avgHistorical * 100),
-      actionNeeded: rows.filter(p => p.urgency === "high" || (p.open_buy_need > 0 && p.free_stock === 0)).length,
+      offerVsHistorical: avgHistorical > 0 ? ((avgOffer - avgHistorical) / avgHistorical * 100) : 0,
+      actionNeeded: snapshotRows.filter(p => p.urgency === "high" || (p.open_buy_need > 0 && p.free_stock === 0)).length,
     };
-  }, []);
+  }, [snapshotRows]);
 
 
   /* ── Helpers for extended row data ── */
@@ -386,6 +370,18 @@ const ProcurementCockpitV1 = () => {
                 </button>
               ))}
             </div>
+            {/* Status filter */}
+            <div className="flex gap-1">
+              {([{ key: "gedekt" as const, label: "Gedekt", cls: "text-accent bg-accent/10 border-accent/20" }, { key: "deels" as const, label: "Deels", cls: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" }, { key: "actie_nodig" as const, label: "Actie nodig", cls: "text-destructive bg-destructive/10 border-destructive/20" }]).map(s => (
+                <button key={s.key} onClick={() => setStatusFilter(statusFilter === s.key ? null : s.key)} className={cn("text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors font-medium", statusFilter === s.key ? s.cls : "border-border text-muted-foreground hover:bg-muted")}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            {/* Action-ready filter */}
+            <button onClick={() => setActionReadyOnly(!actionReadyOnly)} className={cn("text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors font-medium flex items-center gap-1", actionReadyOnly ? "bg-primary/10 text-primary border-primary/30" : "border-border text-muted-foreground hover:bg-muted")}>
+              <Link2 className="w-3 h-3" /> Actie-ready
+            </button>
             {hasActiveFilters && (
               <button onClick={resetFilters} className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5">
                 <RotateCcw className="w-3 h-3" /> Reset
@@ -393,8 +389,23 @@ const ProcurementCockpitV1 = () => {
             )}
           </div>
 
+          {/* Loading state */}
+          {snapshotLoading && (
+            <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-[11px] font-medium">Snapshot laden...</span>
+            </div>
+          )}
+
+          {snapshotError && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-[11px] text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Fout bij laden: {snapshotError}
+            </div>
+          )}
+
           {/* Procurement List */}
-          <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Behoefte vs voorraad · Klik op een rij voor detail" badge={`${filtered.length}`}>
+          {!snapshotLoading && <IHSectionShell icon={ShoppingCart} title="Inkooplijst" subtitle="Live snapshot · Klik op een rij voor detail" badge={`${filtered.length}`}>
             <div className="overflow-x-auto -mx-5">
               <table className={cn("w-full", largeView ? "text-[14px]" : "text-[11px]")}>
                 <thead>
@@ -433,7 +444,7 @@ const ProcurementCockpitV1 = () => {
                 <tbody>
                   {filtered.map(p => {
                     const isExpanded = expandedId === p.id;
-                    const offers = supplierOffers[p.id] || [];
+                    const offers = (p.supplier_offers || []) as Array<{supplier_name: string; offer_price: number; offer_quantity: number; delivery_timing: string; supplier_quality_score: number; supplier_reliability_score: number; price_stability_index: number; variance_vs_historical: number; variance_vs_offer: number}>;
                     
                     const rowPy = compactView ? "py-2" : largeView ? "py-4" : "py-3";
                     const advisory = getDesignAdvice(p.id);
@@ -503,7 +514,7 @@ const ProcurementCockpitV1 = () => {
                           {visibleColumns.has("advised_price") && <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>{fmtPrice(p.advised_price)}</td>}
                           {visibleColumns.has("market_price") && (
                             <td className={cn("px-3", rowPy, "font-mono text-muted-foreground")}>
-                              {market ? fmtPrice(market.best_price) : "—"}
+                              {p.market_price != null ? fmtPrice(p.market_price) : "—"}
                             </td>
                           )}
                           {visibleColumns.has("variance_vs_calculated") && <td className={cn("px-3", rowPy, "font-mono", pctColor(p.variance_vs_calculated))}>{p.variance_vs_calculated > 0 ? "+" : ""}{p.variance_vs_calculated.toFixed(1)}%</td>}
@@ -518,9 +529,22 @@ const ProcurementCockpitV1 = () => {
                             </td>
                           )}
                           <td className={cn("px-3", rowPy)}>
-                            <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
-                              <ShoppingBag className="w-2.5 h-2.5" /> Koop
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
+                                <ShoppingBag className="w-2.5 h-2.5" /> Koop
+                              </button>
+                              {p.execution_intent_id && (
+                                <span className={cn(
+                                  "text-[7px] font-medium px-1.5 py-0.5 rounded-full border",
+                                  p.execution_status === "approved" || p.execution_status === "completed" ? "text-accent bg-accent/10 border-accent/20"
+                                  : p.execution_status === "in_progress" ? "text-primary bg-primary/10 border-primary/20"
+                                  : p.execution_status === "rejected" || p.execution_status === "failed" ? "text-destructive bg-destructive/10 border-destructive/20"
+                                  : "text-muted-foreground bg-muted border-border"
+                                )}>
+                                  {p.execution_status || "—"}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className={cn("px-3", rowPy)}>
                             <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", urgencyBadge(p.urgency))}>
@@ -570,7 +594,7 @@ const ProcurementCockpitV1 = () => {
                                     { label: "Hist. prijs", value: p.historical_price, baseline: true },
                                     { label: "Offerteprijs", value: p.offer_price },
                                     { label: "Adviesprijs", value: p.advised_price },
-                                    ...(market ? [{ label: "Marktprijs", value: market.best_price }] : []),
+                                    ...(p.market_price != null ? [{ label: "Marktprijs", value: p.market_price }] : []),
                                   ].map(pc => {
                                     const diff = p.historical_price > 0 ? ((pc.value - p.historical_price) / p.historical_price * 100) : 0;
                                     return (
@@ -698,6 +722,47 @@ const ProcurementCockpitV1 = () => {
 
                                 </div>}
 
+                                {/* ── Execution & Traceability ── */}
+                                <div className="rounded-lg border border-border bg-background p-4">
+                                  <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-3">
+                                    <Activity className="w-3.5 h-3.5 text-primary" />
+                                    Traceability & Execution
+                                  </h4>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[10px]">
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Reasoning</span>
+                                      <span className="text-foreground">{p.reasoning || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Actie samenvatting</span>
+                                      <span className="text-foreground">{p.action_summary || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Procurement Rule</span>
+                                      <span className="font-mono text-foreground">{p.procurement_rule_id || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Execution</span>
+                                      {p.execution_intent_id ? (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className={cn(
+                                            "text-[8px] font-medium px-1.5 py-0.5 rounded-full border",
+                                            p.execution_status === "approved" || p.execution_status === "completed" ? "text-accent bg-accent/10 border-accent/20"
+                                            : p.execution_status === "proposed" || p.execution_status === "in_progress" ? "text-primary bg-primary/10 border-primary/20"
+                                            : p.execution_status === "rejected" || p.execution_status === "failed" ? "text-destructive bg-destructive/10 border-destructive/20"
+                                            : "text-muted-foreground bg-muted border-border"
+                                          )}>
+                                            {p.execution_status || "onbekend"}
+                                          </span>
+                                          <span className="font-mono text-muted-foreground">{p.execution_intent_id.slice(0, 8)}</span>
+                                        </div>
+                                      ) : (
+                                        <span className="text-muted-foreground italic">Geen execution intent</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
                               </div>
                             </td>
                           </tr>
@@ -708,7 +773,7 @@ const ProcurementCockpitV1 = () => {
                 </tbody>
               </table>
             </div>
-           </IHSectionShell>
+           </IHSectionShell>}
 
 
 
