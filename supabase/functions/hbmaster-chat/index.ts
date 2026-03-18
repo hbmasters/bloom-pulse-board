@@ -187,6 +187,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "Bloommasters Hoorn - Magazijn",
       "lastUpdate": "2026-03-18T09:22:00",
+      "expectedDeliveryTime": "2026-03-18T09:00:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "04:18:55", "location": "FloraHolland Rijnsburg, Leidsevaart 520", "unit": "Kar-07", "vehicle": "" },
         { "status": "Onderweg", "date": "2026-03-18", "time": "06:00:00", "location": "Vertrek FloraHolland Rijnsburg", "unit": "Kar-07", "vehicle": "Vrachtwagen NL-88-ZK" },
