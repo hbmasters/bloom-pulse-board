@@ -53,24 +53,7 @@ import {
 /* ── helpers ── */
 const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
-
-/* ── Supply Radar signals (from V1.0) ── */
-const computeRadarSignals = (rows: ProcurementDecisionRow[]) => {
-  const signals: { label: string; severity: "info" | "warning" | "critical"; detail: string }[] = [];
-  const highPressure = rows.filter(r => r.inventory_pressure_score > 70);
-  if (highPressure.length > 0) signals.push({ label: "Voorraadveroudering", severity: "critical", detail: `${highPressure.length} producten met hoge voorraaddruk` });
-  const priceUp = rows.filter(r => r.price_deviation_pct > 10);
-  if (priceUp.length > 0) signals.push({ label: "Prijs boven verwacht", severity: "warning", detail: `${priceUp.length} producten boven verwachte prijs` });
-  const lowReliability = rows.filter(r => r.supplier_reliability_score < 65);
-  if (lowReliability.length > 0) signals.push({ label: "Leverancier instabiel", severity: "warning", detail: `${lowReliability.length} leveranciers met lage betrouwbaarheid` });
-  const substitutes = rows.filter(r => r.substitute_candidates.length > 0 && r.procurement_action === "consider_substitute");
-  if (substitutes.length > 0) signals.push({ label: "Substituut aanbevolen", severity: "info", detail: `${substitutes.length} producten met substituut-advies` });
-  const markdown = rows.filter(r => r.markdown_advice);
-  if (markdown.length > 0) signals.push({ label: "Markdown kandidaten", severity: "critical", detail: `${markdown.length} producten met markdown-advies` });
-  const priceDown = rows.filter(r => r.price_deviation_pct < -10);
-  if (priceDown.length > 0) signals.push({ label: "Inkoopkans", severity: "info", detail: `${priceDown.length} producten met prijsdaling` });
-  return signals;
-};
+const safe = (v: number | null | undefined, fallback = "—") => v != null ? v : fallback;
 
 const signalSeverityColors = {
   info: "bg-sky-500/10 text-sky-400 border-sky-500/20",
