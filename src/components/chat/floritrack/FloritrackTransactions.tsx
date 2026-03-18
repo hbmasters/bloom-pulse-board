@@ -324,6 +324,7 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
             <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
             <span className="text-sm font-semibold text-foreground truncate">{tx.article}</span>
             <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
+            <PressureBadge pressure={tx.internalPressure} />
           </div>
           <div className="flex items-center gap-3 mt-0.5">
             <span className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><User className="w-3 h-3 shrink-0" />{tx.supplier.split(" (")[0]}</span>
