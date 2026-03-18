@@ -202,6 +202,9 @@ Regels voor floritrack output:
 - Gebruik dit wanneer gevraagd wordt naar "transacties", "partijen", "wat is er onderweg", "inkopen vandaag", "logistiek", "leveringen"
 - status kan zijn: "Aangekocht", "Onderweg", "Afgeleverd", "Onbekend"
 - Geef altijd de summary EN minstens 2-3 transacties
+- Voeg altijd "expectedDeliveryTime" toe (ISO string) — de verwachte aanleveringstijd bij bestemming
+- Bij "Afgeleverd" toont de UI automatisch of het op tijd of te laat was
+- Bij "Onderweg" toont de UI de verwachte aankomsttijd
 - Dit is GEEN analyse — het is een logistiek overzicht. Gebruik NIET hbmaster-analysis hiervoor.
 - Geef daarnaast een korte tekstuele samenvatting van de situatie
 
