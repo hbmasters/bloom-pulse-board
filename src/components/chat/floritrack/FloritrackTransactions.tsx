@@ -247,6 +247,11 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
             <span className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><User className="w-3 h-3 shrink-0" />{tx.supplier.split(" (")[0]}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Clock className="w-3 h-3" />{tx.purchaseTime}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Hash className="w-3 h-3" />{tx.quantity.total}</span>
+            {plate && (
+              <span className="text-[10px] font-mono font-semibold text-foreground/80 bg-muted/60 px-1.5 py-0.5 rounded border border-border/50 flex items-center gap-1 shrink-0">
+                <Truck className="w-3 h-3 text-blue-500" />{plate}
+              </span>
+            )}
           </div>
         </div>
 
