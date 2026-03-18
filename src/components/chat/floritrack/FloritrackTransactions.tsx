@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box, Timer } from "lucide-react";
+import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box, Timer, Flower2, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FloritrackData, FloritrackTransaction, FloritrackTimelineEvent } from "./floritrack-types";
 import { FLORITRACK_MOCK } from "./floritrack-mock-data";
@@ -170,7 +170,8 @@ const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => {
       <div>
         <DetailField label="Leverancier" value={tx.supplier} />
         <DetailField label="Koper" value={tx.buyer} />
-        <DetailField label="Locatie" value={tx.location} />
+        <DetailField label="Afleveradres" value={tx.destination} />
+        <DetailField label="Herkomst" value={tx.location} />
         <DetailField label="Plaats" value={tx.place} />
         <DetailField label="Zetel" value={tx.seat} />
         <DetailField label="Klok" value={tx.clock} />
@@ -210,6 +211,7 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
         {/* Main info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
+            <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
             <span className="text-sm font-semibold text-foreground truncate">{tx.article}</span>
             <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
           </div>
@@ -225,8 +227,12 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
           </div>
         </div>
 
+        {/* Destination + chevron */}
         <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <span className="text-[10px] text-muted-foreground max-w-[140px] truncate">{tx.currentLocation.replace("Vestiging: ", "")}</span>
+          <span className="text-[10px] font-medium text-foreground/70 bg-muted/50 px-2 py-0.5 rounded flex items-center gap-1 border border-border/50">
+            <Building2 className="w-3 h-3" />
+            {tx.destination.includes("Rozenburg") ? "HBM Rozenburg" : tx.destination.includes("Amstelveen") ? "HBM Amstelveen" : tx.destination.split("/").pop()?.trim() || tx.destination}
+          </span>
         </div>
         <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform", isOpen && "rotate-180")} />
       </button>

@@ -203,6 +203,7 @@ Regels voor floritrack output:
 - status kan zijn: "Aangekocht", "Onderweg", "Afgeleverd", "Onbekend"
 - Geef altijd de summary EN minstens 2-3 transacties
 - Voeg altijd "expectedDeliveryTime" toe (ISO string) — de verwachte aanleveringstijd bij bestemming
+- Voeg altijd "destination" toe — het afleveradres. Gebruik "HBM Rozenburg" of "HBM Amstelveen" als bestemming (varieer tussen beide)
 - Bij "Afgeleverd" toont de UI automatisch of het op tijd of te laat was
 - Bij "Onderweg" toont de UI de verwachte aankomsttijd
 - Dit is GEEN analyse — het is een logistiek overzicht. Gebruik NIET hbmaster-analysis hiervoor.
