@@ -195,6 +195,26 @@ const FloritrackTogglePanel = ({ data }: { data: FloritrackData }) => {
     </div>
   );
 };
+const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+          Toon productie risico's
+          <span className="text-[9px] bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total_at_risk}</span>
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3 animate-fade-in">
+          <TransportRiskPanel data={data} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 
 const standardSteps = [
