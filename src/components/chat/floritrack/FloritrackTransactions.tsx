@@ -74,6 +74,15 @@ const Timeline = ({ events }: { events: FloritrackTimelineEvent[] }) => {
     if (reached.includes(steps[i])) { lastReached = i; break; }
   }
 
+  // Sort chronologically and filter out events without time data
+  const sorted = [...events]
+    .filter(ev => ev.date && ev.time)
+    .sort((a, b) => {
+      const tA = new Date(`${a.date}T${a.time}`).getTime();
+      const tB = new Date(`${b.date}T${b.time}`).getTime();
+      return tA - tB;
+    });
+
   return (
     <div className="space-y-4">
       {/* Progress bar */}
@@ -110,23 +119,29 @@ const Timeline = ({ events }: { events: FloritrackTimelineEvent[] }) => {
         ))}
       </div>
 
-      {/* Event list */}
+      {/* Chronological event list */}
       <div className="relative pl-4 space-y-3 border-l-2 border-border ml-1">
-        {events.map((ev, i) => {
+        {sorted.map((ev, i) => {
           const cfg = statusCfg(ev.status);
+          const plate = ev.vehicle ? ev.vehicle.split(" ").slice(1).join(" ") || ev.vehicle : null;
           return (
             <div key={i} className="relative">
               <div className={cn("absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-card", cfg.dot)} />
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <span className={cn("text-xs font-semibold", cfg.color)}>{ev.status}</span>
-                  <span className="text-[10px] text-muted-foreground">{ev.date} · {ev.time}</span>
+                  <span className="text-[10px] text-muted-foreground">{ev.time.slice(0, 5)}</span>
+                  <span className="text-[10px] text-muted-foreground/50">{ev.date}</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">{ev.location}</p>
-                {(ev.unit || ev.vehicle) && (
+                {(ev.unit || plate) && (
                   <div className="flex items-center gap-3 mt-0.5">
                     {ev.unit && <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1"><Box className="w-3 h-3" />{ev.unit}</span>}
-                    {ev.vehicle && <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1"><Truck className="w-3 h-3" />{ev.vehicle}</span>}
+                    {plate && (
+                      <span className="text-[10px] font-mono font-semibold text-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded border border-border/50 flex items-center gap-1">
+                        <Truck className="w-3 h-3" />{plate}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
