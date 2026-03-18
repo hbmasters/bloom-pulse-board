@@ -160,6 +160,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "In transit - A4 richting Hoorn",
       "lastUpdate": "2026-03-18T08:15:00",
+      "expectedDeliveryTime": "2026-03-18T10:00:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "05:32:10", "location": "FloraHolland Naaldwijk, Middelbroekweg 29", "unit": "Kar-14", "vehicle": "" },
         { "status": "Onderweg", "date": "2026-03-18", "time": "07:45:00", "location": "Vertrek FloraHolland Naaldwijk", "unit": "Kar-14", "vehicle": "Vrachtwagen BT-412-X" }
