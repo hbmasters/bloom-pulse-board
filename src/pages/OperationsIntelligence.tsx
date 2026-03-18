@@ -79,9 +79,20 @@ const KPIBar = ({ summary }: { summary: OpsIntelligenceData["summary"] }) => (
     <KPIChip label="Vertraagd" value={summary.delayedShipments} icon={Timer} accent="text-amber-500" />
     <KPIChip label="Afwijkingen" value={summary.deviationCount} icon={AlertTriangle} accent="text-red-500" />
     <KPIChip label="Productie risico" value={summary.productionAtRisk} icon={ShieldAlert} accent="text-red-500" />
-    <KPIChip label="Boeketten risico" value={summary.bouquetsAtRisk} icon={Flower2} accent="text-red-500" />
   </div>
 );
+
+/* ═══════════ SHIPMENT RISK HELPER ═══════════ */
+
+function getShipmentProductionRisk(shipment: Shipment): ProductionRisk {
+  const risks = shipment.transactions
+    .map(t => t.productionRisk)
+    .filter((r): r is ProductionRisk => !!r && r !== "none");
+  if (risks.includes("high")) return "high";
+  if (risks.includes("medium")) return "medium";
+  if (risks.includes("low")) return "low";
+  return "none";
+}
 
 /* ═══════════ TRACK & TRACE ═══════════ */
 
