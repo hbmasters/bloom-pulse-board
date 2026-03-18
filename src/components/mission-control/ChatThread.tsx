@@ -166,7 +166,7 @@ const FloritrackTogglePanel = ({ data }: { data: FloritrackData }) => {
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
         <span className="flex items-center gap-1.5">
           <Truck className="w-3.5 h-3.5 text-blue-500" />
-          Toon transacties vanuit API
+          Toon transactie flow
           <span className="text-[9px] bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total}</span>
         </span>
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -404,7 +404,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
               {[
                 "Wat is de huidige productie status?",
                 "Analyseer de marge per productlijn",
-                "Toon transacties vanuit API",
+                "Toon transactie flow",
                 "Benchmark inkoopprijzen rozen",
               ].map(q => (
                 <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
