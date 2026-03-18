@@ -83,6 +83,8 @@ export interface OpsSummary {
   activeVehicles: number;
   delayedShipments: number;
   deviationCount: number;
+  productionAtRisk: number;
+  bouquetsAtRisk: number;
 }
 
 export interface OpsIntelligenceData {
