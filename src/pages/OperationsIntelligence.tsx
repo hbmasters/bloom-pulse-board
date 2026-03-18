@@ -561,7 +561,7 @@ const OperationsIntelligence = () => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-4">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-5 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
