@@ -181,6 +181,11 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "280",
           brief: "LDL-HRV-0318-B",
           deviation: { type: "missing_scan", message: "Inslag scan ontbreekt" },
+          productionRisk: "high",
+          productionRiskMessage: "Scan ontbreekt – 10 stelen nodig voor PO-2862, vertrek 13:00",
+          bouquetAllocations: [
+            { bouquetName: "Chique", quantity: 10, productionOrder: "PO-2862", departureTime: "13:00", departureDate: "2026-03-18", customer: "Lidl" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "06:50:02", location: "FloraHolland Aalsmeer", unit: "", vehicle: "" },
           ],
