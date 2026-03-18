@@ -134,6 +134,7 @@ Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderwe
       "destination": "Rozenburg / Hoorn Bloommasters",
       "currentLocation": "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       "lastUpdate": "2026-03-18T06:44:16",
+      "expectedDeliveryTime": "2026-03-18T11:30:00",
       "timeline": [
         { "status": "Aangekocht", "date": "2026-03-18", "time": "06:44:16", "location": "Vestiging: KLOK FLORAHOLLAND AALSMEER, Legmeerdijk 313, 1431 GB Aalsmeer", "unit": "", "vehicle": "" }
       ]
