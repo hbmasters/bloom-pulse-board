@@ -79,9 +79,20 @@ const KPIBar = ({ summary }: { summary: OpsIntelligenceData["summary"] }) => (
     <KPIChip label="Vertraagd" value={summary.delayedShipments} icon={Timer} accent="text-amber-500" />
     <KPIChip label="Afwijkingen" value={summary.deviationCount} icon={AlertTriangle} accent="text-red-500" />
     <KPIChip label="Productie risico" value={summary.productionAtRisk} icon={ShieldAlert} accent="text-red-500" />
-    <KPIChip label="Boeketten risico" value={summary.bouquetsAtRisk} icon={Flower2} accent="text-red-500" />
   </div>
 );
+
+/* ═══════════ SHIPMENT RISK HELPER ═══════════ */
+
+function getShipmentProductionRisk(shipment: Shipment): ProductionRisk {
+  const risks = shipment.transactions
+    .map(t => t.productionRisk)
+    .filter((r): r is ProductionRisk => !!r && r !== "none");
+  if (risks.includes("high")) return "high";
+  if (risks.includes("medium")) return "medium";
+  if (risks.includes("low")) return "low";
+  return "none";
+}
 
 /* ═══════════ TRACK & TRACE ═══════════ */
 
@@ -294,33 +305,50 @@ const ShipmentRow = ({ shipment }: { shipment: Shipment }) => {
   const cfg = sCfg(shipment.status);
   const Icon = cfg.icon;
   const dev = DEV_COLOR[shipment.deviation];
+  const prodRisk = getShipmentProductionRisk(shipment);
+  const hasRisk = prodRisk !== "none";
+  const rCfg = RISK_CONFIG[prodRisk];
+  const showEscalation = shipment.deviation !== "ok" || hasRisk;
+
+  // Border color driven by highest severity
+  const borderColor = shipment.deviation === "critical" || prodRisk === "high"
+    ? "border-red-500/40"
+    : shipment.deviation === "warning" || prodRisk === "medium"
+      ? "border-amber-500/30"
+      : expanded ? "border-primary/20" : "border-border";
 
   return (
     <div className={cn(
       "rounded-xl border transition-all duration-200",
-      expanded ? "border-primary/20 bg-card shadow-sm" : "border-border bg-card/60 hover:bg-card"
+      borderColor,
+      expanded ? "bg-card shadow-sm" : "bg-card/60 hover:bg-card"
     )}>
-      <button onClick={() => setExpanded(!expanded)} className="w-full text-left px-3 py-3 flex items-center gap-3">
-        {/* Deviation dot */}
+      <button onClick={() => setExpanded(!expanded)} className="w-full text-left px-4 py-3.5 flex items-center gap-3">
+        {/* Status icon + deviation dot */}
         <div className="flex flex-col items-center gap-1 shrink-0">
-          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", cfg.bg)}>
-            <Icon className={cn("w-4 h-4", cfg.color)} />
+          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border", cfg.bg)}>
+            <Icon className={cn("w-4.5 h-4.5", cfg.color)} />
           </div>
           <span className={cn("w-2 h-2 rounded-full", dev.dot)} />
         </div>
 
-        {/* Main */}
+        {/* Main info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-foreground">{shipment.label}</span>
+            <span className="text-sm font-bold text-foreground">{shipment.label}</span>
             <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{shipment.status}</span>
             {shipment.deviation !== "ok" && (
               <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0", dev.bg, dev.text)}>
                 {shipment.deviation === "warning" ? "Vertraagd" : "Afwijking"}
               </span>
             )}
+            {hasRisk && (
+              <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 flex items-center gap-1", rCfg.bg, rCfg.color)}>
+                <ShieldAlert className="w-3 h-3" />Productie risico
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+          <div className="flex items-center gap-4 mt-1 flex-wrap">
             <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3 shrink-0" />{shipment.time}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 truncate"><Building2 className="w-3 h-3 shrink-0" />{shipment.client}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><MapPin className="w-3 h-3 shrink-0" />{shipment.location.replace("FloraHolland ", "FH ")}</span>
@@ -329,12 +357,12 @@ const ShipmentRow = ({ shipment }: { shipment: Shipment }) => {
         </div>
 
         {/* Right side */}
-        <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0">
+        <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
           {shipment.plate && (
-            <span className="text-[10px] font-mono font-semibold text-foreground/80 bg-muted/60 px-1.5 py-0.5 rounded border border-border/50 flex items-center gap-1">
+            <span className="text-[10px] font-mono font-semibold text-foreground/80 bg-muted/60 px-2 py-1 rounded border border-border/50 flex items-center gap-1.5">
               <Truck className="w-3 h-3 text-blue-500" />{shipment.plate}
               {shipment.vehicleStatus && (
-                <span className={cn("w-1.5 h-1.5 rounded-full ml-0.5", VEH_COLOR[shipment.vehicleStatus].bg.split(" ")[0].replace("/10", ""))} />
+                <span className={cn("w-1.5 h-1.5 rounded-full", VEH_COLOR[shipment.vehicleStatus].bg.split(" ")[0].replace("/10", ""))} />
               )}
             </span>
           )}
@@ -345,24 +373,35 @@ const ShipmentRow = ({ shipment }: { shipment: Shipment }) => {
       </button>
 
       {expanded && (
-        <div className="px-3 pb-3 space-y-3">
-          {/* Deviation message + escalation */}
+        <div className="px-4 pb-4 space-y-3">
+          {/* Deviation / risk alert + escalation */}
           {shipment.deviationMessage && (
-            <div className={cn("flex items-center justify-between gap-2 px-3 py-2 rounded-lg border", dev.bg, shipment.deviation === "critical" ? "border-red-500/20" : "border-amber-500/20")}>
-              <div className="flex items-center gap-2">
+            <div className={cn("flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border", dev.bg, shipment.deviation === "critical" ? "border-red-500/20" : "border-amber-500/20")}>
+              <div className="flex items-center gap-2 min-w-0">
                 <AlertTriangle className={cn("w-4 h-4 shrink-0", dev.text)} />
                 <span className={cn("text-xs font-medium", dev.text)}>{shipment.deviationMessage}</span>
               </div>
               <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
             </div>
           )}
-          {shipment.deviation !== "ok" && !shipment.deviationMessage && (
+          {!shipment.deviationMessage && hasRisk && (
+            <div className={cn("flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border", rCfg.bg)}>
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldAlert className={cn("w-4 h-4 shrink-0", rCfg.color)} />
+                <span className={cn("text-xs font-medium", rCfg.color)}>
+                  Productie risico — transacties in deze zending raken productie-orders
+                </span>
+              </div>
+              <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
+            </div>
+          )}
+          {showEscalation && !shipment.deviationMessage && !hasRisk && (
             <EscalateButton shipmentLabel={shipment.label} logisticsProvider={shipment.logisticsProvider} />
           )}
 
           {/* Transactions */}
           <div className="space-y-2">
-            <h4 className="text-[11px] font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5 pt-1 border-t border-border/50">
+            <h4 className="text-[11px] font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5 pt-2 border-t border-border/50">
               <Hash className="w-3.5 h-3.5 text-primary" />Transacties ({shipment.transactions.length})
             </h4>
             {shipment.transactions.map(tx => (
@@ -522,7 +561,7 @@ const OperationsIntelligence = () => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-4">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-5 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
