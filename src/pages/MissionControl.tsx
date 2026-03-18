@@ -103,6 +103,7 @@ export const viewToRoute: Record<MCView, string> = {
   "control-center": "/labs/control-center",
   "build-radar": "/labs/build-radar",
   verdelen: "/labs/verdelen",
+  "ops-intelligence": "/labs/ops-intelligence",
   "ai-architecture": "/ai-architecture",
   "dev-control": "/dev-control",
 };
