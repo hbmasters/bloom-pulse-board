@@ -12,6 +12,8 @@ export const OPS_MOCK: OpsIntelligenceData = {
     activeVehicles: 3,
     delayedShipments: 2,
     deviationCount: 3,
+    productionAtRisk: 3,
+    bouquetsAtRisk: 85,
   },
   shipments: [
     {
