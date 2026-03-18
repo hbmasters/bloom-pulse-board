@@ -446,6 +446,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         )}
                         {workflow && <WorkflowPanel workflow={workflow} />}
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
+                        {floritrack && <FloritrackTogglePanel data={floritrack} />}
                       </div>
                     )}
 
