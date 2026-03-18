@@ -231,7 +231,7 @@ const analysisSteps = [
   "Rapport samenstellen…",
 ];
 
-const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend"];
+const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport"];
 
 function isAnalysisQuery(text: string): boolean {
   const lower = text.toLowerCase();
