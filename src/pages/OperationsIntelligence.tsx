@@ -19,7 +19,7 @@ import type {
 /* ═══════════ HELPERS ═══════════ */
 
 const SHIPMENT_STATUS: Record<string, { icon: typeof Package; color: string; bg: string; dot: string }> = {
-  Gepland:    { icon: Calendar,      color: "text-muted-foreground", bg: "bg-muted/40 border-border",             dot: "bg-muted-foreground" },
+  Gepland:    { icon: CalendarIcon,  color: "text-muted-foreground", bg: "bg-muted/40 border-border",             dot: "bg-muted-foreground" },
   Geladen:    { icon: Package,       color: "text-amber-500",       bg: "bg-amber-500/10 border-amber-500/20",   dot: "bg-amber-500" },
   Onderweg:   { icon: Truck,         color: "text-blue-500",        bg: "bg-blue-500/10 border-blue-500/20",     dot: "bg-blue-500" },
   Gelost:     { icon: Box,           color: "text-violet-500",      bg: "bg-violet-500/10 border-violet-500/20", dot: "bg-violet-500" },
