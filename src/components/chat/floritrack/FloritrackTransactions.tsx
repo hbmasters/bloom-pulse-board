@@ -201,8 +201,8 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
               </span>
             )}
           </div>
+        </div>
 
-        {/* Location hint + chevron */}
         <div className="hidden sm:flex items-center gap-2 shrink-0">
           <span className="text-[10px] text-muted-foreground max-w-[140px] truncate">{tx.currentLocation.replace("Vestiging: ", "")}</span>
         </div>
