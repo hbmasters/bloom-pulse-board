@@ -68,6 +68,20 @@ const urgencyBadge = (u: string) =>
 const scoreColor = (s: number) => s >= 95 ? "text-accent" : s >= 85 ? "text-muted-foreground" : "text-destructive";
 const scoreBg = (s: number) => s >= 95 ? "bg-accent/8 border-accent/15" : s >= 85 ? "bg-muted/50 border-border" : "bg-destructive/8 border-destructive/15";
 
+const priorityConfig: Record<string, { label: string; color: string }> = {
+  critical: { label: "Kritiek", color: "text-destructive bg-destructive/10 border-destructive/20" },
+  high: { label: "Hoog", color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
+  medium: { label: "Medium", color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
+  low: { label: "Laag", color: "text-muted-foreground bg-muted/50 border-border/50" },
+};
+
+const riskConfig: Record<string, { label: string; color: string }> = {
+  critical: { label: "Kritiek", color: "text-destructive" },
+  high: { label: "Hoog", color: "text-orange-500" },
+  medium: { label: "Medium", color: "text-yellow-500" },
+  low: { label: "Laag", color: "text-accent" },
+};
+
 const shopIcon = (status: ShopStatus["status"]) => {
   switch (status) {
     case "connected": return <Wifi className="w-3 h-3 text-accent" />;
