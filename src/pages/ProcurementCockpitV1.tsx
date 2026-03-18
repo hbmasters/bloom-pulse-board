@@ -78,7 +78,7 @@ const shopIcon = (status: ShopStatus["status"]) => {
   }
 };
 
-type SortKey = keyof ProcurementRow;
+type SortKey = keyof ProcurementSnapshotRow;
 type SortDir = "asc" | "desc";
 type CockpitTab = "inkooplijst" | "marktaanbod";
 
