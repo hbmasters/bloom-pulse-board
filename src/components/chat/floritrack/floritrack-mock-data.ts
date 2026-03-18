@@ -60,7 +60,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       supplier: "De Ruiter Roses (3421)",
       packaging: "612",
       batchSequenceNumber: "000342",
-      destination: "Rozenburg / Hoorn Bloommasters",
+      destination: "HBM Amstelveen",
       currentLocation: "In transit - A4 richting Hoorn",
       lastUpdate: "2026-03-18T08:15:00",
       expectedDeliveryTime: "2026-03-18T10:00:00",
