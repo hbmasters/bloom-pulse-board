@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -10,6 +10,10 @@ import FloritrackTransactions from "@/components/chat/floritrack/FloritrackTrans
 import type { FloritrackData } from "@/components/chat/floritrack/floritrack-types";
 import TransportRiskPanel from "@/components/chat/transport-risk/TransportRiskPanel";
 import type { TransportRiskData } from "@/components/chat/transport-risk/transport-risk-types";
+import { AnalyticalBlock, parseAnalyticalBlock } from "@/components/chat/analytical-blocks/BlockRegistry";
+import type { AnalyticalBlockData } from "@/components/chat/analytical-blocks/block-types";
+import { BLOCK_LABELS, BLOCK_DOMAIN_MAP } from "@/components/chat/analytical-blocks/block-types";
+import { DOMAIN_COLORS } from "@/components/chat/analytical-blocks/block-domain-colors";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
