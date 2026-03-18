@@ -187,24 +187,24 @@ const ProcurementCockpitV1 = () => {
     setDateTo(end);
   };
 
-  const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter;
+  const hasActiveFilters = search || familyFilter || urgencyFilter || buyerFilter || statusFilter || actionReadyOnly;
 
   /* ── KPI totals ── */
   const totals = useMemo(() => {
-    const rows = procurementRows;
-    const avgOffer = rows.reduce((s, p) => s + p.offer_price, 0) / rows.length;
-    const avgHistorical = rows.reduce((s, p) => s + p.historical_price, 0) / rows.length;
+    if (snapshotRows.length === 0) return { required: 0, freeStock: 0, reserved: 0, openBuy: 0, avgOfferPrice: 0, avgHistoricalPrice: 0, offerVsHistorical: 0, actionNeeded: 0 };
+    const avgOffer = snapshotRows.reduce((s, p) => s + p.offer_price, 0) / snapshotRows.length;
+    const avgHistorical = snapshotRows.reduce((s, p) => s + p.historical_price, 0) / snapshotRows.length;
     return {
-      required: rows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
-      freeStock: rows.reduce((s, p) => s + p.free_stock, 0),
-      reserved: rows.reduce((s, p) => s + p.reserved_stock, 0),
-      openBuy: rows.reduce((s, p) => s + p.open_buy_need, 0),
+      required: snapshotRows.reduce((s, p) => s + (p.required_volume - p.available_stock), 0),
+      freeStock: snapshotRows.reduce((s, p) => s + p.free_stock, 0),
+      reserved: snapshotRows.reduce((s, p) => s + p.reserved_stock, 0),
+      openBuy: snapshotRows.reduce((s, p) => s + p.open_buy_need, 0),
       avgOfferPrice: avgOffer,
       avgHistoricalPrice: avgHistorical,
-      offerVsHistorical: ((avgOffer - avgHistorical) / avgHistorical * 100),
-      actionNeeded: rows.filter(p => p.urgency === "high" || (p.open_buy_need > 0 && p.free_stock === 0)).length,
+      offerVsHistorical: avgHistorical > 0 ? ((avgOffer - avgHistorical) / avgHistorical * 100) : 0,
+      actionNeeded: snapshotRows.filter(p => p.urgency === "high" || (p.open_buy_need > 0 && p.free_stock === 0)).length,
     };
-  }, []);
+  }, [snapshotRows]);
 
 
   /* ── Helpers for extended row data ── */
