@@ -84,18 +84,32 @@ function parseFloritrack(content: string): { text: string; floritrack: Floritrac
   }
 }
 
+function parseTransportRisk(content: string): { text: string; transportRisk: TransportRiskData | null } {
+  const match = content.match(/```hbmaster-transport-risk\n([\s\S]*?)```/);
+  if (!match) return { text: content, transportRisk: null };
+  try {
+    const transportRisk = JSON.parse(match[1]) as TransportRiskData;
+    const text = content.replace(/```hbmaster-transport-risk\n[\s\S]*?```/, "").trim();
+    return { text, transportRisk };
+  } catch {
+    return { text: content, transportRisk: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
   productCard: ProductCardData | null;
   floritrack: FloritrackData | null;
+  transportRisk: TransportRiskData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
   const { text: t4, floritrack } = parseFloritrack(t3);
-  return { text: t4, workflow, analysis, productCard, floritrack };
+  const { text: t5, transportRisk } = parseTransportRisk(t4);
+  return { text: t5, workflow, analysis, productCard, floritrack, transportRisk };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
