@@ -24,6 +24,24 @@ function formatTime(iso: string) {
   } catch { return iso; }
 }
 
+function formatDeliveryInfo(tx: FloritrackTransaction): { label: string; accent: string } | null {
+  if (!tx.expectedDeliveryTime) return null;
+  const expected = new Date(tx.expectedDeliveryTime);
+  const time = expected.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+
+  if (tx.status === "Afgeleverd") {
+    const delivered = tx.timeline.find(e => e.status === "Afgeleverd");
+    if (delivered) {
+      const actual = new Date(`${delivered.date}T${delivered.time}`);
+      const diffMin = Math.round((actual.getTime() - expected.getTime()) / 60000);
+      if (diffMin <= 0) return { label: `✓ Op tijd (${time})`, accent: "text-emerald-500" };
+      return { label: `${diffMin} min te laat (verw. ${time})`, accent: "text-amber-500" };
+    }
+    return { label: `Verw. ${time}`, accent: "text-muted-foreground" };
+  }
+  return { label: `Verw. aankomst ${time}`, accent: "text-blue-500" };
+}
+
 /* ───── KPI strip ───── */
 const KPIChip = ({ label, value, icon: Icon, accent }: { label: string; value: number; icon: typeof Package; accent: string }) => (
   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border min-w-[100px]">
