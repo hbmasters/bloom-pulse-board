@@ -34,12 +34,12 @@ function formatDeliveryInfo(tx: FloritrackTransaction): { label: string; accent:
     if (delivered) {
       const actual = new Date(`${delivered.date}T${delivered.time}`);
       const diffMin = Math.round((actual.getTime() - expected.getTime()) / 60000);
-      if (diffMin <= 0) return { label: `✓ Op tijd (${time})`, accent: "text-emerald-500" };
-      return { label: `${diffMin} min te laat (verw. ${time})`, accent: "text-amber-500" };
+      if (diffMin <= 0) return { label: `✓ ${time}`, accent: "text-emerald-500" };
+      return { label: `+${diffMin}m · ${time}`, accent: "text-amber-500" };
     }
-    return { label: `Verw. ${time}`, accent: "text-muted-foreground" };
+    return { label: time, accent: "text-muted-foreground" };
   }
-  return { label: `Verw. aankomst ${time}`, accent: "text-blue-500" };
+  return { label: time, accent: "text-blue-500" };
 }
 
 /* ───── KPI strip ───── */
