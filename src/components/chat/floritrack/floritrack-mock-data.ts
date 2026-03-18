@@ -191,7 +191,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       supplier: "Vletter & Den Haan (2190)",
       packaging: "280",
       batchSequenceNumber: "000301",
-      destination: "Rozenburg / Hoorn Bloommasters",
+      destination: "HBM Amstelveen",
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:50:02",
       expectedDeliveryTime: "2026-03-18T12:00:00",
