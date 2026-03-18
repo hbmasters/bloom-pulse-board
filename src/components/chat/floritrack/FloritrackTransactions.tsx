@@ -17,6 +17,18 @@ function statusCfg(s: string) {
   return STATUS_CONFIG[s as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.Onbekend;
 }
 
+/** Extract license plate from timeline vehicle strings like "Vrachtwagen BT-412-X" */
+function extractPlate(tx: FloritrackTransaction): string | null {
+  for (const ev of tx.timeline) {
+    if (ev.vehicle) {
+      const parts = ev.vehicle.split(" ");
+      if (parts.length > 1) return parts.slice(1).join(" ");
+      return ev.vehicle;
+    }
+  }
+  return null;
+}
+
 function formatTime(iso: string) {
   try {
     const d = new Date(iso);
