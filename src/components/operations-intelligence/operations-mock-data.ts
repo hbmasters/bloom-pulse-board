@@ -121,6 +121,12 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "544",
           brief: "JMB-VGL-0318-B",
           deviation: { type: "incomplete", message: "24/30 beschikbaar op moment van laden" },
+          productionRisk: "medium",
+          productionRiskMessage: "6 stelen tekort – productie-order PO-2844 kan vertraagd raken",
+          bouquetAllocations: [
+            { bouquetName: "Charme XL", quantity: 20, productionOrder: "PO-2844", departureTime: "14:00", departureDate: "2026-03-18", customer: "Jumbo" },
+            { bouquetName: "Elegance", quantity: 10, productionOrder: "PO-2846", departureTime: "15:30", departureDate: "2026-03-18", customer: "Jumbo" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "05:48:30", location: "FloraHolland Naaldwijk", unit: "Kar-14", vehicle: "" },
             { status: "Onderweg", date: "2026-03-18", time: "07:45:00", location: "Vertrek Naaldwijk", unit: "Kar-14", vehicle: "Vrachtwagen BT-412-X" },
