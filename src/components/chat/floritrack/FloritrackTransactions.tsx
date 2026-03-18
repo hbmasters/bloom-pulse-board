@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box, Timer, Flower2, Building2 } from "lucide-react";
+import { Package, Truck, CheckCircle2, HelpCircle, RefreshCw, ChevronDown, ChevronUp, MapPin, Clock, User, Hash, ArrowRight, Box, Timer, Flower2, Building2, AlertTriangle, Calendar, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { FloritrackData, FloritrackTransaction, FloritrackTimelineEvent } from "./floritrack-types";
+import type { FloritrackData, FloritrackTransaction, FloritrackTimelineEvent, InternalPressure, FloritrackBouquetAllocation } from "./floritrack-types";
 import { FLORITRACK_MOCK } from "./floritrack-mock-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
