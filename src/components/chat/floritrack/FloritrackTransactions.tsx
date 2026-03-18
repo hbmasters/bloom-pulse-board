@@ -195,8 +195,12 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
             <span className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><User className="w-3 h-3 shrink-0" />{tx.supplier.split(" (")[0]}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Clock className="w-3 h-3" />{tx.purchaseTime}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Hash className="w-3 h-3" />{tx.quantity.total}</span>
+            {delivery && (
+              <span className={cn("text-[11px] flex items-center gap-1 shrink-0 font-medium", delivery.accent)}>
+                <Timer className="w-3 h-3" />{delivery.label}
+              </span>
+            )}
           </div>
-        </div>
 
         {/* Location hint + chevron */}
         <div className="hidden sm:flex items-center gap-2 shrink-0">
