@@ -182,6 +182,8 @@ const ProcurementCockpitV1 = () => {
     setFamilyFilter(null);
     setUrgencyFilter(null);
     setBuyerFilter(null);
+    setStatusFilter(null);
+    setActionReadyOnly(false);
     setDateFrom(new Date());
     const end = new Date(); end.setDate(end.getDate() + 6);
     setDateTo(end);
