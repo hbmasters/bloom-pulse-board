@@ -39,7 +39,10 @@ const KPIChip = ({ label, value, icon: Icon, accent }: { label: string; value: n
 const Timeline = ({ events }: { events: FloritrackTimelineEvent[] }) => {
   const steps = ["Aangekocht", "Onderweg", "Afgeleverd"];
   const reached = events.map(e => e.status);
-  const lastReached = steps.findLastIndex(s => reached.includes(s));
+  let lastReached = -1;
+  for (let i = steps.length - 1; i >= 0; i--) {
+    if (reached.includes(steps[i])) { lastReached = i; break; }
+  }
 
   return (
     <div className="space-y-4">
