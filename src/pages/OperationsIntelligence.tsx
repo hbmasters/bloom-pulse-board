@@ -1,10 +1,15 @@
 import { useState, useMemo } from "react";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
 import {
   Package, Truck, CheckCircle2, AlertTriangle, Clock, ChevronDown,
   Search, Filter, Building2, MapPin, Box, Hash, User, Timer,
-  Flower2, RefreshCw, Calendar, XCircle, Eye
+  Flower2, RefreshCw, Calendar as CalendarIcon, XCircle, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarWidget } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OPS_MOCK } from "@/components/operations-intelligence/operations-mock-data";
 import type {
   OpsIntelligenceData, Shipment, OpsTransaction, TrackTraceEvent,
@@ -14,7 +19,7 @@ import type {
 /* ═══════════ HELPERS ═══════════ */
 
 const SHIPMENT_STATUS: Record<string, { icon: typeof Package; color: string; bg: string; dot: string }> = {
-  Gepland:    { icon: Calendar,      color: "text-muted-foreground", bg: "bg-muted/40 border-border",             dot: "bg-muted-foreground" },
+  Gepland:    { icon: CalendarIcon,  color: "text-muted-foreground", bg: "bg-muted/40 border-border",             dot: "bg-muted-foreground" },
   Geladen:    { icon: Package,       color: "text-amber-500",       bg: "bg-amber-500/10 border-amber-500/20",   dot: "bg-amber-500" },
   Onderweg:   { icon: Truck,         color: "text-blue-500",        bg: "bg-blue-500/10 border-blue-500/20",     dot: "bg-blue-500" },
   Gelost:     { icon: Box,           color: "text-violet-500",      bg: "bg-violet-500/10 border-violet-500/20", dot: "bg-violet-500" },
@@ -370,12 +375,16 @@ const FilterBar = ({ filters, onChange, data }: { filters: FiltersState; onChang
   );
 };
 
-/* ═══════════ MAIN PAGE ═══════════ */
+/* ═══════════ TAB VIEW ═══════════ */
+
+type TabId = "zendingen" | "transacties";
 
 const OperationsIntelligence = () => {
   const data = OPS_MOCK;
   const [filters, setFilters] = useState<FiltersState>({ search: "", status: "", location: "", plate: "" });
   const [showAutoFlow, setShowAutoFlow] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(data.date));
+  const [activeTab, setActiveTab] = useState<TabId>("zendingen");
 
   const filtered = useMemo(() => {
     return data.shipments.filter(s => {
@@ -391,28 +400,81 @@ const OperationsIntelligence = () => {
     });
   }, [data.shipments, filters]);
 
+  // Open transactions = not yet Afgeleverd
+  const openTransactions = useMemo(() => {
+    return data.shipments.flatMap(s =>
+      s.transactions
+        .filter(t => t.status !== "Afgeleverd")
+        .map(t => ({ ...t, shipmentLabel: s.label, shipmentId: s.id, shipmentDeviation: s.deviation }))
+    );
+  }, [data.shipments]);
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg font-bold text-foreground">Operations Intelligence</h1>
-            <p className="text-[11px] text-muted-foreground font-mono">{data.date} · Unified Logistics View</p>
+            <h1 className="text-lg font-bold text-foreground">Transport Intelligence</h1>
+            <p className="text-[11px] text-muted-foreground font-mono">{format(selectedDate, "EEEE d MMMM yyyy", { locale: nl })} · Unified Logistics View</p>
           </div>
-          <button
-            onClick={() => setShowAutoFlow(!showAutoFlow)}
-            className={cn(
-              "text-[11px] font-medium px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors",
-              showAutoFlow ? "bg-blue-500/10 border-blue-500/20 text-blue-500" : "bg-card border-border text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Truck className="w-3.5 h-3.5" />Auto Flow
-          </button>
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="text-[11px] h-8 gap-1.5">
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  {format(selectedDate, "dd-MM-yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <CalendarWidget
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={d => d && setSelectedDate(d)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <button
+              onClick={() => setShowAutoFlow(!showAutoFlow)}
+              className={cn(
+                "text-[11px] font-medium px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors h-8",
+                showAutoFlow ? "bg-blue-500/10 border-blue-500/20 text-blue-500" : "bg-card border-border text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Truck className="w-3.5 h-3.5" />Auto Flow
+            </button>
+          </div>
         </div>
 
         {/* KPI */}
         <KPIBar summary={data.summary} />
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 border-b border-border">
+          {([
+            { id: "zendingen" as TabId, label: "Zendingen", count: filtered.length },
+            { id: "transacties" as TabId, label: "Openstaande Transacties", count: openTransactions.length },
+          ]).map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "px-3 py-2 text-xs font-medium border-b-2 transition-colors -mb-px",
+                activeTab === tab.id
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+              <span className={cn(
+                "ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full",
+                activeTab === tab.id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>{tab.count}</span>
+            </button>
+          ))}
+        </div>
 
         {/* Filters */}
         <FilterBar filters={filters} onChange={setFilters} data={data} />
@@ -420,18 +482,76 @@ const OperationsIntelligence = () => {
         {/* Auto Flow */}
         {showAutoFlow && <AutoFlowSection flows={data.vehicleFlows} />}
 
-        {/* Shipments */}
-        <div className="space-y-2">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Package className="w-8 h-8 text-muted-foreground/30 mb-2" />
-              <p className="text-sm text-muted-foreground">Geen zendingen gevonden voor de geselecteerde filters.</p>
-            </div>
-          ) : (
-            filtered.map(s => <ShipmentRow key={s.id} shipment={s} />)
-          )}
-        </div>
+        {/* Tab content */}
+        {activeTab === "zendingen" && (
+          <div className="space-y-2">
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Package className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                <p className="text-sm text-muted-foreground">Geen zendingen gevonden voor de geselecteerde filters.</p>
+              </div>
+            ) : (
+              filtered.map(s => <ShipmentRow key={s.id} shipment={s} />)
+            )}
+          </div>
+        )}
+
+        {activeTab === "transacties" && (
+          <OpenTransactionsView transactions={openTransactions} />
+        )}
       </div>
+    </div>
+  );
+};
+
+/* ═══════════ OPEN TRANSACTIONS VIEW ═══════════ */
+
+interface OpenTx extends OpsTransaction {
+  shipmentLabel: string;
+  shipmentId: string;
+  shipmentDeviation: DeviationLevel;
+}
+
+const OpenTransactionsView = ({ transactions }: { transactions: OpenTx[] }) => {
+  const [openTxId, setOpenTxId] = useState<string | null>(null);
+
+  if (transactions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <CheckCircle2 className="w-8 h-8 text-emerald-500/30 mb-2" />
+        <p className="text-sm text-muted-foreground">Alle transacties zijn afgeleverd.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {transactions.map(tx => {
+        const cfg = tCfg(tx.status);
+        const isOpen = openTxId === tx.id;
+        return (
+          <div key={tx.id} className={cn(
+            "rounded-xl border transition-all duration-200",
+            isOpen ? "border-primary/20 bg-card shadow-sm" : "border-border bg-card/60 hover:bg-card"
+          )}>
+            <button onClick={() => setOpenTxId(isOpen ? null : tx.id)} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5">
+              <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
+              <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+              <span className="text-xs font-semibold text-foreground truncate">{tx.article}</span>
+              <span className="text-[10px] text-muted-foreground shrink-0">{tx.quantity.delivered}/{tx.quantity.total}</span>
+              <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded border border-border/50 shrink-0 hidden sm:inline">{tx.shipmentLabel}</span>
+              <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">{tx.supplier.split(" (")[0]}</span>
+              {tx.deviation && <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+              <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform ml-auto", isOpen && "rotate-180")} />
+            </button>
+            {isOpen && (
+              <div className="px-3 pb-3">
+                <TransactionDetail tx={tx} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
