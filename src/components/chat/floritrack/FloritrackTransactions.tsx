@@ -172,6 +172,7 @@ const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => (
 const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; isOpen: boolean; onToggle: () => void }) => {
   const cfg = statusCfg(tx.status);
   const Icon = cfg.icon;
+  const delivery = formatDeliveryInfo(tx);
 
   return (
     <div className={cn(
