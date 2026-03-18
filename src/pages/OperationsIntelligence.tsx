@@ -75,10 +75,11 @@ const KPIBar = ({ summary }: { summary: OpsIntelligenceData["summary"] }) => (
     <KPIChip label="Zendingen" value={summary.totalShipments} icon={Package} accent="text-foreground" />
     <KPIChip label="Laadeenheden" value={summary.loadUnits} icon={Box} accent="text-violet-500" />
     <KPIChip label="Transacties" value={summary.totalTransactions} icon={Hash} accent="text-blue-500" />
-    <KPIChip label="Fust" value={summary.packagingUnits} icon={Package} accent="text-muted-foreground" />
     <KPIChip label="Auto's actief" value={summary.activeVehicles} icon={Truck} accent="text-blue-500" />
     <KPIChip label="Vertraagd" value={summary.delayedShipments} icon={Timer} accent="text-amber-500" />
     <KPIChip label="Afwijkingen" value={summary.deviationCount} icon={AlertTriangle} accent="text-red-500" />
+    <KPIChip label="Productie risico" value={summary.productionAtRisk} icon={ShieldAlert} accent="text-red-500" />
+    <KPIChip label="Boeketten risico" value={summary.bouquetsAtRisk} icon={Flower2} accent="text-red-500" />
   </div>
 );
 
