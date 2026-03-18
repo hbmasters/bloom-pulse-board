@@ -27,7 +27,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       supplier: "van Helvoort Company (8662)",
       packaging: "544",
       batchSequenceNumber: "000267",
-      destination: "Rozenburg / Hoorn Bloommasters",
+      destination: "HBM Rozenburg",
       currentLocation: "Vestiging: KLOK FLORAHOLLAND AALSMEER",
       lastUpdate: "2026-03-18T06:44:16",
       expectedDeliveryTime: "2026-03-18T11:30:00",

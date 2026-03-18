@@ -227,8 +227,12 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
           </div>
         </div>
 
+        {/* Destination + chevron */}
         <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <span className="text-[10px] text-muted-foreground max-w-[140px] truncate">{tx.currentLocation.replace("Vestiging: ", "")}</span>
+          <span className="text-[10px] font-medium text-foreground/70 bg-muted/50 px-2 py-0.5 rounded flex items-center gap-1 border border-border/50">
+            <Building2 className="w-3 h-3" />
+            {tx.destination.includes("Rozenburg") ? "HBM Rozenburg" : tx.destination.includes("Amstelveen") ? "HBM Amstelveen" : tx.destination.split("/").pop()?.trim() || tx.destination}
+          </span>
         </div>
         <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform", isOpen && "rotate-180")} />
       </button>
