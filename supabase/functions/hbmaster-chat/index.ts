@@ -209,6 +209,61 @@ Regels voor floritrack output:
 - Dit is GEEN analyse — het is een logistiek overzicht. Gebruik NIET hbmaster-analysis hiervoor.
 - Geef daarnaast een korte tekstuele samenvatting van de situatie
 
+TRANSPORT / PRODUCTIE RISICO:
+Wanneer een gebruiker vraagt naar productierisico's door transport, vertragingen die productie raken, of welke boeketten gevaar lopen door logistieke problemen, geef dan een hbmaster-transport-risk blok:
+
+\`\`\`hbmaster-transport-risk
+{
+  "summary": {
+    "total_at_risk": 3,
+    "high": 1,
+    "medium": 1,
+    "low": 1,
+    "bouquets_impacted": 5
+  },
+  "risks": [
+    {
+      "shipment_id": "Z-002",
+      "status": "Onderweg",
+      "risk_level": "high",
+      "article": "ROS R 60 REDNAOMI",
+      "supplier": "De Ruiter Roses",
+      "expected_arrival": "10:00",
+      "delay_minutes": 45,
+      "bouquets_affected": [
+        { "name": "Lovely", "quantity": 240, "departure": "12:30", "customer": "Albert Heijn" },
+        { "name": "De Luxe", "quantity": 120, "departure": "13:00" }
+      ],
+      "risk_message": "Vertraging van 45 min op A4 — dreigt productieorder Lovely (12:30 vertrek) te missen",
+      "escalation_target": "TransFlora BV"
+    },
+    {
+      "shipment_id": "Z-005",
+      "status": "Aangekocht",
+      "risk_level": "medium",
+      "article": "CHR S AAA INSTA",
+      "supplier": "van Helvoort Company",
+      "expected_arrival": "11:30",
+      "delay_minutes": 0,
+      "bouquets_affected": [
+        { "name": "Charme XL", "quantity": 180, "departure": "14:00" }
+      ],
+      "risk_message": "Partij nog niet geladen — krappe marge voor productiestart Charme XL",
+      "escalation_target": "FloraHolland Aalsmeer"
+    }
+  ]
+}
+\`\`\`
+
+Regels voor transport-risk output:
+- Gebruik dit wanneer gevraagd wordt naar "productie risico", "transport risico", "vertragingen die productie raken", "welke boeketten lopen gevaar"
+- risk_level: "high" (productie wordt gemist), "medium" (krappe marge), "low" (minimale impact)
+- bouquets_affected: welke boeketten geraakt worden met aantallen en vertrektijden
+- Geef altijd een summary met totalen per risiconiveau en aantal getroffen boeketten
+- escalation_target: naam van de transporteur of veiling voor escalatie
+- Dit is GEEN analyse — het is een risico-overzicht. Gebruik NIET hbmaster-analysis hiervoor.
+- Geef daarnaast een korte tekstuele samenvatting van de situatie
+
 Daarnaast, geef bij elk antwoord een JSON block met je werkwijze:
 \`\`\`hbmaster-workflow
 {

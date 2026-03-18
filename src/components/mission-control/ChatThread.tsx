@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -8,6 +8,8 @@ import ProductCard from "@/components/analysis-presentation/ProductCard";
 import type { ProductCardData } from "@/components/analysis-presentation/ProductCard";
 import FloritrackTransactions from "@/components/chat/floritrack/FloritrackTransactions";
 import type { FloritrackData } from "@/components/chat/floritrack/floritrack-types";
+import TransportRiskPanel from "@/components/chat/transport-risk/TransportRiskPanel";
+import type { TransportRiskData } from "@/components/chat/transport-risk/transport-risk-types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -82,18 +84,32 @@ function parseFloritrack(content: string): { text: string; floritrack: Floritrac
   }
 }
 
+function parseTransportRisk(content: string): { text: string; transportRisk: TransportRiskData | null } {
+  const match = content.match(/```hbmaster-transport-risk\n([\s\S]*?)```/);
+  if (!match) return { text: content, transportRisk: null };
+  try {
+    const transportRisk = JSON.parse(match[1]) as TransportRiskData;
+    const text = content.replace(/```hbmaster-transport-risk\n[\s\S]*?```/, "").trim();
+    return { text, transportRisk };
+  } catch {
+    return { text: content, transportRisk: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
   productCard: ProductCardData | null;
   floritrack: FloritrackData | null;
+  transportRisk: TransportRiskData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
   const { text: t4, floritrack } = parseFloritrack(t3);
-  return { text: t4, workflow, analysis, productCard, floritrack };
+  const { text: t5, transportRisk } = parseTransportRisk(t4);
+  return { text: t5, workflow, analysis, productCard, floritrack, transportRisk };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
@@ -179,6 +195,26 @@ const FloritrackTogglePanel = ({ data }: { data: FloritrackData }) => {
     </div>
   );
 };
+const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+          Toon productie risico's
+          <span className="text-[9px] bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total_at_risk}</span>
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3 animate-fade-in">
+          <TransportRiskPanel data={data} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 
 const standardSteps = [
@@ -195,7 +231,7 @@ const analysisSteps = [
   "Rapport samenstellen…",
 ];
 
-const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend"];
+const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport"];
 
 function isAnalysisQuery(text: string): boolean {
   const lower = text.toLowerCase();
@@ -403,7 +439,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
               {[
                 "Wat is de huidige productie status?",
-                "Analyseer de marge per productlijn",
+                "Zijn er productie risico's door transport?",
                 "Toon transactie flow",
                 "Benchmark inkoopprijzen rozen",
               ].map(q => (
@@ -418,8 +454,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis, productCard, floritrack } = isUser
-            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null }
+          const { text, workflow, analysis, productCard, floritrack, transportRisk } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null, transportRisk: null }
             : parseAllBlocks(msg.content);
 
           return (
@@ -447,6 +483,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {workflow && <WorkflowPanel workflow={workflow} />}
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
                         {floritrack && <FloritrackTogglePanel data={floritrack} />}
+                        {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
                       </div>
                     )}
 
