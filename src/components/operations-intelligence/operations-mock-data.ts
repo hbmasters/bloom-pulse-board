@@ -285,6 +285,11 @@ export const OPS_MOCK: OpsIntelligenceData = {
           packaging: "200",
           brief: "ALD-GRL-0318-A",
           deviation: { type: "stuck", message: "Status niet veranderd sinds 07:00" },
+          productionRisk: "high",
+          productionRiskMessage: "Geblokkeerd – 20 stelen nodig voor PO-2870, vertrek 11:00 vandaag",
+          bouquetAllocations: [
+            { bouquetName: "Lovely", quantity: 20, productionOrder: "PO-2870", departureTime: "11:00", departureDate: "2026-03-18", customer: "Aldi" },
+          ],
           timeline: [
             { status: "Aangekocht", date: "2026-03-18", time: "05:10:00", location: "FloraHolland Naaldwijk", unit: "Kar-09", vehicle: "" },
           ],
