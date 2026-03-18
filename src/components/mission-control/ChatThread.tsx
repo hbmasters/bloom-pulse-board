@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, X } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
 import ProductCard from "@/components/analysis-presentation/ProductCard";
 import type { ProductCardData } from "@/components/analysis-presentation/ProductCard";
+import FloritrackTransactions from "@/components/chat/floritrack/FloritrackTransactions";
+import type { FloritrackData } from "@/components/chat/floritrack/floritrack-types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -68,16 +70,30 @@ function parseProductCard(content: string): { text: string; productCard: Product
   }
 }
 
+function parseFloritrack(content: string): { text: string; floritrack: FloritrackData | null } {
+  const match = content.match(/```hbmaster-floritrack\n([\s\S]*?)```/);
+  if (!match) return { text: content, floritrack: null };
+  try {
+    const floritrack = JSON.parse(match[1]) as FloritrackData;
+    const text = content.replace(/```hbmaster-floritrack\n[\s\S]*?```/, "").trim();
+    return { text, floritrack };
+  } catch {
+    return { text: content, floritrack: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
   productCard: ProductCardData | null;
+  floritrack: FloritrackData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
-  return { text: t3, workflow, analysis, productCard };
+  const { text: t4, floritrack } = parseFloritrack(t3);
+  return { text: t4, workflow, analysis, productCard, floritrack };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
@@ -137,6 +153,27 @@ const AnalysisTogglePanel = ({ analysis }: { analysis: AnalysisPresentationData 
       {open && (
         <div className="px-3 pb-3 animate-fade-in">
           <AnalysisPresentation data={analysis} compact />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FloritrackTogglePanel = ({ data }: { data: FloritrackData }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <Truck className="w-3.5 h-3.5 text-blue-500" />
+          Toon transacties vanuit API
+          <span className="text-[9px] bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total}</span>
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-3 pb-3 animate-fade-in">
+          <FloritrackTransactions data={data} />
         </div>
       )}
     </div>
@@ -367,7 +404,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
               {[
                 "Wat is de huidige productie status?",
                 "Analyseer de marge per productlijn",
-                "Geef een overzicht van de APU per lijn",
+                "Toon transacties vanuit API",
                 "Benchmark inkoopprijzen rozen",
               ].map(q => (
                 <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
@@ -381,8 +418,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis, productCard } = isUser
-            ? { text: msg.content, workflow: null, analysis: null, productCard: null }
+          const { text, workflow, analysis, productCard, floritrack } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null }
             : parseAllBlocks(msg.content);
 
           return (
@@ -409,6 +446,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         )}
                         {workflow && <WorkflowPanel workflow={workflow} />}
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
+                        {floritrack && <FloritrackTogglePanel data={floritrack} />}
                       </div>
                     )}
 
