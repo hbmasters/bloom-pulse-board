@@ -100,6 +100,108 @@ Regels voor product card:
 - verdict: korte beoordeling in 1-2 zinnen
 - Dit is GEEN analyse — het is een compacte productkaart. Gebruik NIET hbmaster-analysis hiervoor.
 
+FLORITRACK TRANSACTIES:
+Wanneer een gebruiker vraagt naar transacties, partijen, inkopen, wat er onderweg is, of logistieke status, geef dan een hbmaster-floritrack blok met mock data in dit formaat:
+
+\`\`\`hbmaster-floritrack
+{
+  "summary": {
+    "total": 13,
+    "purchased": 9,
+    "inTransit": 3,
+    "delivered": 1,
+    "lastUpdated": "2026-03-18T06:44:16"
+  },
+  "transactions": [
+    {
+      "id": "1619",
+      "status": "Aangekocht",
+      "article": "CHR S AAA INSTA",
+      "articleCode": "126038",
+      "location": "FloraHolland Aalsmeer (Klok)",
+      "purchaseTime": "06:44:16",
+      "transactionNumber": "1619",
+      "content": 75,
+      "quantity": { "delivered": 0, "total": 30 },
+      "remark": "",
+      "seat": "6597",
+      "clock": "11",
+      "buyer": "Bl.grth. Anton van der Hoorn BV (423178)",
+      "place": "647",
+      "supplier": "van Helvoort Company (8662)",
+      "packaging": "544",
+      "batchSequenceNumber": "000267",
+      "destination": "Rozenburg / Hoorn Bloommasters",
+      "currentLocation": "Vestiging: KLOK FLORAHOLLAND AALSMEER",
+      "lastUpdate": "2026-03-18T06:44:16",
+      "timeline": [
+        { "status": "Aangekocht", "date": "2026-03-18", "time": "06:44:16", "location": "Vestiging: KLOK FLORAHOLLAND AALSMEER, Legmeerdijk 313, 1431 GB Aalsmeer", "unit": "", "vehicle": "" }
+      ]
+    },
+    {
+      "id": "1620",
+      "status": "Onderweg",
+      "article": "ROS R 60 REDNAOMI",
+      "articleCode": "204512",
+      "location": "FloraHolland Naaldwijk",
+      "purchaseTime": "05:32:10",
+      "transactionNumber": "1620",
+      "content": 120,
+      "quantity": { "delivered": 0, "total": 50 },
+      "remark": "Spoed levering",
+      "seat": "4210",
+      "clock": "07",
+      "buyer": "Bl.grth. Anton van der Hoorn BV (423178)",
+      "place": "312",
+      "supplier": "De Ruiter Roses (3421)",
+      "packaging": "612",
+      "batchSequenceNumber": "000342",
+      "destination": "Rozenburg / Hoorn Bloommasters",
+      "currentLocation": "In transit - A4 richting Hoorn",
+      "lastUpdate": "2026-03-18T08:15:00",
+      "timeline": [
+        { "status": "Aangekocht", "date": "2026-03-18", "time": "05:32:10", "location": "FloraHolland Naaldwijk, Middelbroekweg 29", "unit": "Kar-14", "vehicle": "" },
+        { "status": "Onderweg", "date": "2026-03-18", "time": "07:45:00", "location": "Vertrek FloraHolland Naaldwijk", "unit": "Kar-14", "vehicle": "Vrachtwagen BT-412-X" }
+      ]
+    },
+    {
+      "id": "1621",
+      "status": "Afgeleverd",
+      "article": "TUL W 40 WHITEPR",
+      "articleCode": "310287",
+      "location": "FloraHolland Rijnsburg",
+      "purchaseTime": "04:18:55",
+      "transactionNumber": "1621",
+      "content": 200,
+      "quantity": { "delivered": 40, "total": 40 },
+      "remark": "",
+      "seat": "1105",
+      "clock": "03",
+      "buyer": "Bl.grth. Anton van der Hoorn BV (423178)",
+      "place": "108",
+      "supplier": "Borst Bloembollen (1287)",
+      "packaging": "320",
+      "batchSequenceNumber": "000118",
+      "destination": "Rozenburg / Hoorn Bloommasters",
+      "currentLocation": "Bloommasters Hoorn - Magazijn",
+      "lastUpdate": "2026-03-18T09:22:00",
+      "timeline": [
+        { "status": "Aangekocht", "date": "2026-03-18", "time": "04:18:55", "location": "FloraHolland Rijnsburg, Leidsevaart 520", "unit": "Kar-07", "vehicle": "" },
+        { "status": "Onderweg", "date": "2026-03-18", "time": "06:00:00", "location": "Vertrek FloraHolland Rijnsburg", "unit": "Kar-07", "vehicle": "Vrachtwagen NL-88-ZK" },
+        { "status": "Afgeleverd", "date": "2026-03-18", "time": "09:22:00", "location": "Bloommasters Hoorn, Industrieweg 12", "unit": "Kar-07", "vehicle": "Vrachtwagen NL-88-ZK" }
+      ]
+    }
+  ]
+}
+\`\`\`
+
+Regels voor floritrack output:
+- Gebruik dit wanneer gevraagd wordt naar "transacties", "partijen", "wat is er onderweg", "inkopen vandaag", "logistiek", "leveringen"
+- status kan zijn: "Aangekocht", "Onderweg", "Afgeleverd", "Onbekend"
+- Geef altijd de summary EN minstens 2-3 transacties
+- Dit is GEEN analyse — het is een logistiek overzicht. Gebruik NIET hbmaster-analysis hiervoor.
+- Geef daarnaast een korte tekstuele samenvatting van de situatie
+
 Daarnaast, geef bij elk antwoord een JSON block met je werkwijze:
 \`\`\`hbmaster-workflow
 {
