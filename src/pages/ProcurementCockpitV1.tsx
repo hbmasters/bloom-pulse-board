@@ -149,23 +149,28 @@ const ProcurementCockpitV1 = () => {
   const urgencyOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
   const filtered = useMemo(() => {
-    let list = procurementRows.filter(p => {
+    let list = snapshotRows.filter(p => {
       if (search && !p.product.toLowerCase().includes(search.toLowerCase()) && !p.product_family.toLowerCase().includes(search.toLowerCase())) return false;
       if (familyFilter && p.product_family !== familyFilter) return false;
       if (urgencyFilter && p.urgency !== urgencyFilter) return false;
       if (buyerFilter && p.buyer !== buyerFilter) return false;
+      if (statusFilter && p.status_label !== statusFilter) return false;
+      if (actionReadyOnly && !p.execution_intent_id) return false;
       return true;
     });
-    list.sort((a, b) => {
+    list = [...list].sort((a, b) => {
       if (sortKey === "urgency") {
         return sortDir === "asc" ? (urgencyOrder[a.urgency] ?? 0) - (urgencyOrder[b.urgency] ?? 0) : (urgencyOrder[b.urgency] ?? 0) - (urgencyOrder[a.urgency] ?? 0);
       }
+      if (sortKey === "open_buy_need") {
+        return sortDir === "asc" ? a.open_buy_need - b.open_buy_need : b.open_buy_need - a.open_buy_need;
+      }
       const av = a[sortKey], bv = b[sortKey];
       if (typeof av === "number" && typeof bv === "number") return sortDir === "asc" ? av - bv : bv - av;
-      return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+      return sortDir === "asc" ? String(av ?? "").localeCompare(String(bv ?? "")) : String(bv ?? "").localeCompare(String(av ?? ""));
     });
     return list;
-  }, [search, sortKey, sortDir, familyFilter, urgencyFilter, buyerFilter]);
+  }, [snapshotRows, search, sortKey, sortDir, familyFilter, urgencyFilter, buyerFilter, statusFilter, actionReadyOnly]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
