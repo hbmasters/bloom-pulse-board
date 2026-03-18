@@ -555,6 +555,33 @@ const ProcurementCockpitV1 = () => {
                               )}
                             </td>
                           )}
+                          {/* Priority */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.priority_level ? (
+                              <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider", priorityConfig[p.priority_level]?.color ?? "text-muted-foreground bg-muted border-border")}>
+                                {priorityConfig[p.priority_level]?.label ?? p.priority_level}
+                              </span>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
+                          {/* Impact score */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.impact_score != null ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-8 h-1.5 rounded-full bg-muted/30 overflow-hidden">
+                                  <div className={cn("h-full rounded-full", p.impact_score >= 75 ? "bg-destructive" : p.impact_score >= 50 ? "bg-yellow-500" : "bg-accent")} style={{ width: `${p.impact_score}%` }} />
+                                </div>
+                                <span className={cn("text-[9px] font-mono font-bold", p.impact_score >= 75 ? "text-destructive" : p.impact_score >= 50 ? "text-yellow-500" : "text-muted-foreground")}>{p.impact_score}</span>
+                              </div>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
+                          {/* Risk score */}
+                          <td className={cn("px-3", rowPy)}>
+                            {p.risk_score ? (
+                              <span className={cn("text-[9px] font-bold uppercase", riskConfig[p.risk_score]?.color ?? "text-muted-foreground")}>
+                                {riskConfig[p.risk_score]?.label ?? p.risk_score}
+                              </span>
+                            ) : <span className="text-[9px] text-muted-foreground/40">—</span>}
+                          </td>
                           <td className={cn("px-3", rowPy)}>
                             <div className="flex items-center gap-1.5">
                               <button disabled className="text-[9px] font-medium px-2.5 py-1 rounded-lg border border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed flex items-center gap-1">
