@@ -709,6 +709,47 @@ const ProcurementCockpitV1 = () => {
 
                                 </div>}
 
+                                {/* ── Execution & Traceability ── */}
+                                <div className="rounded-lg border border-border bg-background p-4">
+                                  <h4 className="text-[11px] font-semibold text-foreground flex items-center gap-1.5 mb-3">
+                                    <Activity className="w-3.5 h-3.5 text-primary" />
+                                    Traceability & Execution
+                                  </h4>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[10px]">
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Reasoning</span>
+                                      <span className="text-foreground">{p.reasoning || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Actie samenvatting</span>
+                                      <span className="text-foreground">{p.action_summary || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Procurement Rule</span>
+                                      <span className="font-mono text-foreground">{p.procurement_rule_id || "—"}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Execution</span>
+                                      {p.execution_intent_id ? (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className={cn(
+                                            "text-[8px] font-medium px-1.5 py-0.5 rounded-full border",
+                                            p.execution_status === "approved" || p.execution_status === "completed" ? "text-accent bg-accent/10 border-accent/20"
+                                            : p.execution_status === "proposed" || p.execution_status === "in_progress" ? "text-primary bg-primary/10 border-primary/20"
+                                            : p.execution_status === "rejected" || p.execution_status === "failed" ? "text-destructive bg-destructive/10 border-destructive/20"
+                                            : "text-muted-foreground bg-muted border-border"
+                                          )}>
+                                            {p.execution_status || "onbekend"}
+                                          </span>
+                                          <span className="font-mono text-muted-foreground">{p.execution_intent_id.slice(0, 8)}</span>
+                                        </div>
+                                      ) : (
+                                        <span className="text-muted-foreground italic">Geen execution intent</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
                               </div>
                             </td>
                           </tr>
