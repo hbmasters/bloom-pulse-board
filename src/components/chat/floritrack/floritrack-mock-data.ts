@@ -101,7 +101,7 @@ export const FLORITRACK_MOCK: FloritrackData = {
       supplier: "Borst Bloembollen (1287)",
       packaging: "320",
       batchSequenceNumber: "000118",
-      destination: "Rozenburg / Hoorn Bloommasters",
+      destination: "HBM Rozenburg",
       currentLocation: "Bloommasters Hoorn - Magazijn",
       lastUpdate: "2026-03-18T09:22:00",
       expectedDeliveryTime: "2026-03-18T09:00:00",
