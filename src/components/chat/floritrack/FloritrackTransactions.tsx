@@ -219,20 +219,20 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
             <span className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><User className="w-3 h-3 shrink-0" />{tx.supplier.split(" (")[0]}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Clock className="w-3 h-3" />{tx.purchaseTime}</span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0"><Hash className="w-3 h-3" />{tx.quantity.total}</span>
-            {delivery && (
-              <span className={cn("text-[11px] flex items-center gap-1 shrink-0 font-medium", delivery.accent)}>
-                <Timer className="w-3 h-3" />{delivery.label}
-              </span>
-            )}
           </div>
         </div>
 
-        {/* Destination + chevron */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
+        {/* Destination + expected delivery */}
+        <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0">
           <span className="text-[10px] font-medium text-foreground/70 bg-muted/50 px-2 py-0.5 rounded flex items-center gap-1 border border-border/50">
             <Building2 className="w-3 h-3" />
             {tx.destination.includes("Rozenburg") ? "HBM Rozenburg" : tx.destination.includes("Amstelveen") ? "HBM Amstelveen" : tx.destination.split("/").pop()?.trim() || tx.destination}
           </span>
+          {delivery && (
+            <span className={cn("text-[10px] flex items-center gap-1 font-medium", delivery.accent)}>
+              <Timer className="w-3 h-3" />{delivery.label}
+            </span>
+          )}
         </div>
         <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform", isOpen && "rotate-180")} />
       </button>
