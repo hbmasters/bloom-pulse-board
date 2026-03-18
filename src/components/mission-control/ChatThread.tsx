@@ -492,6 +492,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
                         {analyticalBlock && <AnalyticalBlock data={analyticalBlock} />}
                       </div>
+                    )}
 
                     {/* Product card — slides in from right within the row */}
                     {productCard && visibleCardIdx === i && (
