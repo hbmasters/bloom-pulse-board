@@ -45,6 +45,7 @@ export interface ProcurementSnapshotRow {
   impact_score: number | null;
   risk_score: string | null;
   confidence: number | null;
+  execution_mode: string | null;
 }
 
 export interface SnapshotFilters {
@@ -84,16 +85,16 @@ export function useProcurementSnapshot() {
       .map((r: Record<string, unknown>) => r.execution_intent_id as string | null)
       .filter(Boolean) as string[];
 
-    let intentMap: Record<string, { priority: string; urgency_score: number; risk_level: string; confidence: number }> = {};
+    let intentMap: Record<string, { priority: string; urgency_score: number; risk_level: string; confidence: number; execution_status: string; execution_mode: string; reasoning: string | null; recommended_action: string }> = {};
 
     if (intentIds.length > 0) {
       const { data: intents } = await supabase
         .from("execution_intents")
-        .select("id, priority, urgency_score, risk_level, confidence")
+        .select("id, priority, urgency_score, risk_level, confidence, execution_status, execution_mode, reasoning, recommended_action")
         .in("id", intentIds);
 
       if (intents) {
-        for (const i of intents as Array<{ id: string; priority: string; urgency_score: number; risk_level: string; confidence: number }>) {
+        for (const i of intents as Array<{ id: string; priority: string; urgency_score: number; risk_level: string; confidence: number; execution_status: string; execution_mode: string; reasoning: string | null; recommended_action: string }>) {
           intentMap[i.id] = i;
         }
       }
@@ -130,20 +131,23 @@ export function useProcurementSnapshot() {
         status_label: (row.status_label as SnapshotStatusLabel) || "onbekend",
         procurement_status: row.procurement_status as string | null,
         execution_intent_id: intentId,
-        execution_status: row.execution_status as string | null,
-        action_summary: row.action_summary as string | null,
-        reasoning: row.reasoning as string | null,
+        // Prefer real intent execution_status over snapshot's stale copy
+        execution_status: intent?.execution_status ?? (row.execution_status as string | null),
+        action_summary: (row.action_summary as string | null) || intent?.recommended_action || null,
+        // Prefer real intent reasoning over snapshot's stale copy
+        reasoning: intent?.reasoning ?? (row.reasoning as string | null),
         procurement_rule_id: row.procurement_rule_id as string | null,
         customer_product_lines: Array.isArray(row.customer_product_lines) ? row.customer_product_lines as CustomerProductLine[] : [],
         supplier_offers: Array.isArray(row.supplier_offers) ? row.supplier_offers as SupplierOffer[] : [],
         snapshot_date: row.snapshot_date as string,
         created_at: row.created_at as string,
         updated_at: row.updated_at as string,
-        // Enriched fields
+        // Enriched fields from real execution intent
         priority_level: intent?.priority ?? null,
         impact_score: intent?.urgency_score ?? null,
         risk_score: intent?.risk_level ?? null,
         confidence: intent?.confidence ?? null,
+        execution_mode: intent?.execution_mode ?? null,
       };
     });
 

@@ -852,6 +852,12 @@ const ProcurementCockpitV1 = () => {
                                         <span className="text-muted-foreground italic">Geen execution intent</span>
                                       )}
                                     </div>
+                                    {p.execution_mode && (
+                                      <div>
+                                        <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Modus</span>
+                                        <span className="font-mono text-foreground">{p.execution_mode === "semi-auto" ? "Semi-Auto" : p.execution_mode === "auto" ? "Auto" : "Manueel"}</span>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 
