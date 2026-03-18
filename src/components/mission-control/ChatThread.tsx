@@ -107,13 +107,15 @@ function parseAllBlocks(content: string): {
   productCard: ProductCardData | null;
   floritrack: FloritrackData | null;
   transportRisk: TransportRiskData | null;
+  analyticalBlock: AnalyticalBlockData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
   const { text: t4, floritrack } = parseFloritrack(t3);
   const { text: t5, transportRisk } = parseTransportRisk(t4);
-  return { text: t5, workflow, analysis, productCard, floritrack, transportRisk };
+  const { text: t6, block: analyticalBlock } = parseAnalyticalBlock(t5);
+  return { text: t6, workflow, analysis, productCard, floritrack, transportRisk, analyticalBlock };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
