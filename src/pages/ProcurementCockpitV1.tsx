@@ -112,7 +112,7 @@ const ProcurementCockpitV1 = () => {
 
   // Compute dekking status per row
   type DekkingStatus = "gedekt" | "deels_gedekt" | "niet_gedekt" | "overschot";
-  const getDekkingStatus = (p: ProcurementRow): DekkingStatus => {
+  const getDekkingStatus = (p: ProcurementSnapshotRow): DekkingStatus => {
     if (p.available_stock >= p.required_volume && p.open_buy_need === 0) return p.free_stock > p.required_volume ? "overschot" : "gedekt";
     if (p.free_stock > 0 && p.open_buy_need > 0) return "deels_gedekt";
     return "niet_gedekt";
