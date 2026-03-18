@@ -782,6 +782,44 @@ const ProcurementCockpitV1 = () => {
                                     <Activity className="w-3.5 h-3.5 text-primary" />
                                     Traceability & Execution
                                   </h4>
+                                  {/* Impact / Risk / Priority summary */}
+                                  {(p.priority_level || p.impact_score != null || p.risk_score) && (
+                                    <div className="flex items-center gap-4 mb-3 pb-3 border-b border-border/40 flex-wrap">
+                                      {p.priority_level && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Prioriteit</span>
+                                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", priorityConfig[p.priority_level]?.color)}>
+                                            {priorityConfig[p.priority_level]?.label ?? p.priority_level}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {p.impact_score != null && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Impact</span>
+                                          <div className="flex items-center gap-1">
+                                            <div className="w-16 h-2 rounded-full bg-muted/30 overflow-hidden">
+                                              <div className={cn("h-full rounded-full", p.impact_score >= 75 ? "bg-destructive" : p.impact_score >= 50 ? "bg-yellow-500" : "bg-accent")} style={{ width: `${p.impact_score}%` }} />
+                                            </div>
+                                            <span className={cn("text-[10px] font-mono font-bold", p.impact_score >= 75 ? "text-destructive" : p.impact_score >= 50 ? "text-yellow-500" : "text-foreground")}>{p.impact_score}</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {p.risk_score && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Risico</span>
+                                          <span className={cn("text-[10px] font-bold", riskConfig[p.risk_score]?.color)}>
+                                            {riskConfig[p.risk_score]?.label ?? p.risk_score}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {p.confidence != null && (
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Confidence</span>
+                                          <span className="text-[10px] font-mono font-bold text-foreground">{Math.round(p.confidence * 100)}%</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[10px]">
                                     <div>
                                       <span className="text-muted-foreground uppercase tracking-wide block mb-0.5">Reasoning</span>
