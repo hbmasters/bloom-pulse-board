@@ -134,8 +134,29 @@ const DetailField = ({ label, value }: { label: string; value: string | number }
   </div>
 );
 
-const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => (
+const TransactionDetail = ({ tx }: { tx: FloritrackTransaction }) => {
+  const delivery = formatDeliveryInfo(tx);
+  return (
   <div className="animate-fade-in space-y-4 pt-3 border-t border-border/50">
+    {/* Delivery time highlight */}
+    {delivery && (
+      <div className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg border",
+        tx.status === "Afgeleverd"
+          ? "bg-emerald-500/5 border-emerald-500/20"
+          : "bg-blue-500/5 border-blue-500/20"
+      )}>
+        <Timer className={cn("w-4 h-4 shrink-0", delivery.accent)} />
+        <div>
+          <span className={cn("text-xs font-semibold", delivery.accent)}>{delivery.label}</span>
+          {tx.expectedDeliveryTime && (
+            <span className="text-[10px] text-muted-foreground ml-2">
+              Bestemming: {tx.destination}
+            </span>
+          )}
+        </div>
+      </div>
+    )}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
       <div>
         <DetailField label="Artikel" value={tx.article} />
