@@ -454,8 +454,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis, productCard, floritrack } = isUser
-            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null }
+          const { text, workflow, analysis, productCard, floritrack, transportRisk } = isUser
+            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null, transportRisk: null }
             : parseAllBlocks(msg.content);
 
           return (
