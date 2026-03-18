@@ -169,6 +169,120 @@ export type Database = {
         }
         Relationships: []
       }
+      procurement_snapshot_rows: {
+        Row: {
+          action_summary: string | null
+          advised_price: number | null
+          ai_advice: string | null
+          available_stock: number
+          buyer: string | null
+          created_at: string | null
+          customer_product_lines: Json | null
+          execution_intent_id: string | null
+          execution_status: string | null
+          external_quality: string | null
+          free_stock: number
+          historical_price: number | null
+          id: string
+          internal_quality: number | null
+          market_price: number | null
+          offer_price: number | null
+          open_buy_need: number
+          preferred_supplier: string | null
+          procurement_rule_id: string | null
+          procurement_status: string | null
+          product: string
+          product_family: string
+          reasoning: string | null
+          required_volume: number
+          reserved_stock: number
+          snapshot_date: string
+          status_label: string
+          stem_length: string | null
+          supplier_offers: Json | null
+          supplier_quality: number | null
+          supplier_reliability: number | null
+          supplier_score: number | null
+          updated_at: string | null
+          urgency: string
+          variance_vs_calculated: number | null
+        }
+        Insert: {
+          action_summary?: string | null
+          advised_price?: number | null
+          ai_advice?: string | null
+          available_stock?: number
+          buyer?: string | null
+          created_at?: string | null
+          customer_product_lines?: Json | null
+          execution_intent_id?: string | null
+          execution_status?: string | null
+          external_quality?: string | null
+          free_stock?: number
+          historical_price?: number | null
+          id: string
+          internal_quality?: number | null
+          market_price?: number | null
+          offer_price?: number | null
+          open_buy_need?: number
+          preferred_supplier?: string | null
+          procurement_rule_id?: string | null
+          procurement_status?: string | null
+          product: string
+          product_family: string
+          reasoning?: string | null
+          required_volume?: number
+          reserved_stock?: number
+          snapshot_date?: string
+          status_label?: string
+          stem_length?: string | null
+          supplier_offers?: Json | null
+          supplier_quality?: number | null
+          supplier_reliability?: number | null
+          supplier_score?: number | null
+          updated_at?: string | null
+          urgency?: string
+          variance_vs_calculated?: number | null
+        }
+        Update: {
+          action_summary?: string | null
+          advised_price?: number | null
+          ai_advice?: string | null
+          available_stock?: number
+          buyer?: string | null
+          created_at?: string | null
+          customer_product_lines?: Json | null
+          execution_intent_id?: string | null
+          execution_status?: string | null
+          external_quality?: string | null
+          free_stock?: number
+          historical_price?: number | null
+          id?: string
+          internal_quality?: number | null
+          market_price?: number | null
+          offer_price?: number | null
+          open_buy_need?: number
+          preferred_supplier?: string | null
+          procurement_rule_id?: string | null
+          procurement_status?: string | null
+          product?: string
+          product_family?: string
+          reasoning?: string | null
+          required_volume?: number
+          reserved_stock?: number
+          snapshot_date?: string
+          status_label?: string
+          stem_length?: string | null
+          supplier_offers?: Json | null
+          supplier_quality?: number | null
+          supplier_reliability?: number | null
+          supplier_score?: number | null
+          updated_at?: string | null
+          urgency?: string
+          variance_vs_calculated?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
