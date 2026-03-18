@@ -679,24 +679,59 @@ const OpenTransactionsView = ({ transactions }: { transactions: OpenTx[] }) => {
       {transactions.map(tx => {
         const cfg = tCfg(tx.status);
         const isOpen = openTxId === tx.id;
+        const hasRisk = tx.productionRisk && tx.productionRisk !== "none";
+        const rCfg = hasRisk ? RISK_CONFIG[tx.productionRisk!] : null;
+        const showEscalation = hasRisk || !!tx.deviation;
+
+        const borderColor = tx.productionRisk === "high" || tx.shipmentDeviation === "critical"
+          ? "border-red-500/40"
+          : tx.productionRisk === "medium" || tx.shipmentDeviation === "warning"
+            ? "border-amber-500/30"
+            : isOpen ? "border-primary/20" : "border-border";
+
+        // Bouquet summary for collapsed view
+        const bouquetSummary = tx.bouquetAllocations?.length
+          ? tx.bouquetAllocations.map(a => `${a.bouquetName} (${a.quantity}st · ${a.departureTime})`).join(", ")
+          : null;
+
         return (
           <div key={tx.id} className={cn(
             "rounded-xl border transition-all duration-200",
-            isOpen ? "border-primary/20 bg-card shadow-sm" : "border-border bg-card/60 hover:bg-card"
+            borderColor,
+            isOpen ? "bg-card shadow-sm" : "bg-card/60 hover:bg-card"
           )}>
-            <button onClick={() => setOpenTxId(isOpen ? null : tx.id)} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5">
-              <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
-              <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
-              <span className="text-xs font-semibold text-foreground truncate">{tx.article}</span>
-              <span className="text-[10px] text-muted-foreground shrink-0">{tx.quantity.delivered}/{tx.quantity.total}</span>
-              <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded border border-border/50 shrink-0 hidden sm:inline">{tx.shipmentLabel}</span>
-              <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">{tx.supplier.split(" (")[0]}</span>
-              {tx.deviation && <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
-              <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform ml-auto", isOpen && "rotate-180")} />
+            <button onClick={() => setOpenTxId(isOpen ? null : tx.id)} className="w-full text-left px-3 py-2.5">
+              <div className="flex items-center gap-2.5">
+                <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0", cfg.bg, cfg.color)}>{tx.status}</span>
+                <Flower2 className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                <span className="text-xs font-semibold text-foreground truncate">{tx.article}</span>
+                <span className="text-[10px] text-muted-foreground shrink-0">{tx.quantity.delivered}/{tx.quantity.total}</span>
+                <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded border border-border/50 shrink-0 hidden sm:inline">{tx.shipmentLabel}</span>
+                <span className="text-[10px] text-muted-foreground shrink-0 hidden sm:inline">{tx.supplier.split(" (")[0]}</span>
+                {tx.deviation && <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+                {rCfg && (
+                  <span className={cn("text-[9px] font-medium px-1 py-0.5 rounded border shrink-0", rCfg.bg, rCfg.color)}>
+                    <ShieldAlert className="w-3 h-3 inline mr-0.5" />{rCfg.label}
+                  </span>
+                )}
+                <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform ml-auto", isOpen && "rotate-180")} />
+              </div>
+              {/* Bouquet summary inline */}
+              {bouquetSummary && !isOpen && (
+                <div className="flex items-center gap-1.5 mt-1.5 ml-0.5">
+                  <Flower2 className="w-3 h-3 text-primary/40 shrink-0" />
+                  <span className="text-[10px] text-muted-foreground truncate">→ {bouquetSummary}</span>
+                </div>
+              )}
             </button>
             {isOpen && (
-              <div className="px-3 pb-3">
+              <div className="px-3 pb-3 space-y-3">
                 <TransactionDetail tx={tx} />
+                {showEscalation && (
+                  <div className="flex items-center justify-end pt-1">
+                    <EscalateButton shipmentLabel={tx.shipmentLabel} logisticsProvider={tx.supplier.split(" (")[0]} />
+                  </div>
+                )}
               </div>
             )}
           </div>
