@@ -13,6 +13,12 @@ const STATUS_CONFIG = {
   Onbekend:   { icon: HelpCircle,   color: "text-muted-foreground", bg: "bg-muted/40 border-border", dot: "bg-muted-foreground" },
 } as const;
 
+const PRESSURE_CONFIG = {
+  low:    { label: "Lage druk",   color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-500" },
+  medium: { label: "Middel druk", color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20",   dot: "bg-amber-500" },
+  high:   { label: "Hoge druk",   color: "text-red-500",     bg: "bg-red-500/10 border-red-500/20",       dot: "bg-red-500" },
+} as const;
+
 function statusCfg(s: string) {
   return STATUS_CONFIG[s as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.Onbekend;
 }
