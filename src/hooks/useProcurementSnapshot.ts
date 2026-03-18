@@ -45,6 +45,7 @@ export interface ProcurementSnapshotRow {
   impact_score: number | null;
   risk_score: string | null;
   confidence: number | null;
+  execution_mode: string | null;
 }
 
 export interface SnapshotFilters {
