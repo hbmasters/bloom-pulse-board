@@ -70,16 +70,30 @@ function parseProductCard(content: string): { text: string; productCard: Product
   }
 }
 
+function parseFloritrack(content: string): { text: string; floritrack: FloritrackData | null } {
+  const match = content.match(/```hbmaster-floritrack\n([\s\S]*?)```/);
+  if (!match) return { text: content, floritrack: null };
+  try {
+    const floritrack = JSON.parse(match[1]) as FloritrackData;
+    const text = content.replace(/```hbmaster-floritrack\n[\s\S]*?```/, "").trim();
+    return { text, floritrack };
+  } catch {
+    return { text: content, floritrack: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
   productCard: ProductCardData | null;
+  floritrack: FloritrackData | null;
 } {
   const { text: t1, workflow } = parseWorkflow(content);
   const { text: t2, analysis } = parseAnalysis(t1);
   const { text: t3, productCard } = parseProductCard(t2);
-  return { text: t3, workflow, analysis, productCard };
+  const { text: t4, floritrack } = parseFloritrack(t3);
+  return { text: t4, workflow, analysis, productCard, floritrack };
 }
 
 const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
