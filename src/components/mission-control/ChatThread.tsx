@@ -404,7 +404,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
               {[
                 "Wat is de huidige productie status?",
                 "Analyseer de marge per productlijn",
-                "Toon transacties vanuit API",
+                "Toon transactie flow",
                 "Benchmark inkoopprijzen rozen",
               ].map(q => (
                 <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
