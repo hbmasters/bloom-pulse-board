@@ -223,6 +223,7 @@ const TransactionRow = ({ tx, isOpen, onToggle }: { tx: FloritrackTransaction; i
   const cfg = statusCfg(tx.status);
   const Icon = cfg.icon;
   const delivery = formatDeliveryInfo(tx);
+  const plate = extractPlate(tx);
 
   return (
     <div className={cn(
