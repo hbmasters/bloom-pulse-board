@@ -772,7 +772,7 @@ const ProcurementCockpitV1 = () => {
         <>
           <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
             <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
-          </IHSectionShell>
+           </IHSectionShell>}
         </>
       )}
 
