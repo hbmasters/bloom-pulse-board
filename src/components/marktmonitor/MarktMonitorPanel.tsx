@@ -264,12 +264,8 @@ const MarktMonitorPanel = () => {
                   <td className="px-2 py-2.5">
                     <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", conf.color)}>{conf.label}</span>
                   </td>
-                  {/* Buy advice */}
-                  <td className="px-2 py-2.5">
-                    <span className={cn("text-[8px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap", advice.color)}>
-                      {advice.emoji} {advice.label}
-                    </span>
-                  </td>
+
+
                   {/* Arrow */}
                   <td className="px-2 py-2.5">
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
