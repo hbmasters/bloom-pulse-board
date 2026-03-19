@@ -525,28 +525,7 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
         </div>
       )}
 
-      {/* Row 4: start/stop time */}
-      {(card.startTime || card.stopTime) && (
-        <div className="flex items-center gap-2 mt-2 pl-4">
-          {card.startTime && (
-            <div className="flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5 text-accent/60" />
-              <span className="text-[8px] font-mono text-accent/80">{card.startTime}</span>
-            </div>
-          )}
-          {card.startTime && card.stopTime && (
-            <span className="text-[8px] text-muted-foreground/30">→</span>
-          )}
-          {card.stopTime && (
-            <div className="flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5 text-muted-foreground/40" />
-              <span className="text-[8px] font-mono text-muted-foreground/60">{card.stopTime}</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Row 5: assignee + due date */}
+      {/* Row 4: assignee + due date + time */}
       <div className="flex items-center justify-between mt-2 pl-4">
         {card.assignee ? (
           <div className="flex items-center gap-1.5">
@@ -556,12 +535,22 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
             <span className="text-[9px] text-muted-foreground font-mono">{card.assignee}</span>
           </div>
         ) : <div />}
-        {card.dueDate && (
-          <div className="flex items-center gap-1">
-            <Calendar className="w-2.5 h-2.5 text-muted-foreground/40" />
-            <span className="text-[8px] font-mono text-muted-foreground/50">{card.dueDate}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {(card.startTime || card.stopTime) && (
+            <div className="flex items-center gap-1">
+              <Clock className="w-2.5 h-2.5 text-accent/50" />
+              <span className="text-[8px] font-mono text-accent/70">
+                {card.startTime}{card.startTime && card.stopTime && "–"}{card.stopTime}
+              </span>
+            </div>
+          )}
+          {card.dueDate && (
+            <div className="flex items-center gap-1">
+              <Calendar className="w-2.5 h-2.5 text-muted-foreground/40" />
+              <span className="text-[8px] font-mono text-muted-foreground/50">{card.dueDate}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
