@@ -86,7 +86,7 @@ export interface ProcurementActionData extends BlockBase {
   kpis?: BlockKPI[];
 }
 
-export interface ProductionEfficiencyData {
+export interface ProductionEfficiencyData extends BlockBase {
   block_type: "production-efficiency";
   title: string;
   summary: string;
