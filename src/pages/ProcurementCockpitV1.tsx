@@ -44,6 +44,7 @@ import {
 } from "@/components/procurement-cockpit-v1/supplier-intelligence-data";
 // Upload functionality removed — dekking computed from static data
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
+import MarktMonitorPanel from "@/components/marktmonitor/MarktMonitorPanel";
 
 
 import {
