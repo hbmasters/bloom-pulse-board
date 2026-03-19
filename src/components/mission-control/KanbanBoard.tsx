@@ -657,6 +657,7 @@ const KanbanBoard = () => {
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [timelineCardId, setTimelineCardId] = useState<string | null>(null);
 
   const allAssignees = useMemo(() => [...new Set(cards.filter(c => c.assignee).map(c => c.assignee!))].sort(), [cards]);
 
