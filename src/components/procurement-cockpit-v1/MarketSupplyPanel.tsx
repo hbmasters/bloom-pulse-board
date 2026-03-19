@@ -256,7 +256,7 @@ const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
                             <table className="w-full text-[10px]">
                               <thead>
                                 <tr className="border-b border-border bg-muted/30">
-                                  {["Week", "Beschikbaarheid", "Prijs range", "Leveranciers", "Seizoen", "Risico", "Design"].map(h => (
+                                  {["Week", "Type", "Beschikbaarheid", "Prijs range", "Realisatie", "Volume", "Lev.", "Seizoen", "Risico", "Design"].map(h => (
                                     <th key={h} className="px-2 py-1.5 text-left font-medium text-muted-foreground">{h}</th>
                                   ))}
                                 </tr>
@@ -268,12 +268,23 @@ const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
                                   const risk = riskLabels[w.risk_level];
                                   const stability = getDesignStability(w.expected_availability, w.risk_level);
                                   const stabilityLabel = designStabilityLabels[stability];
-                                  const isCurrentWeek = i === 0 && weekYearFilter.week === null;
+                                  const isCurrentWeek = !w.historical && i > 0 && weeks[i - 1]?.historical;
+                                  const isHist = !!w.historical;
                                   return (
-                                    <tr key={`${w.week}-${w.year}`} className={cn("border-b border-border/30 transition-colors", isCurrentWeek ? "bg-primary/5" : "hover:bg-muted/10")}>
+                                    <tr key={`${w.week}-${w.year}`} className={cn(
+                                      "border-b border-border/30 transition-colors",
+                                      isCurrentWeek ? "bg-primary/5 border-l-2 border-l-primary" : isHist ? "bg-muted/5 opacity-75" : "hover:bg-muted/10"
+                                    )}>
                                       <td className="px-2 py-1.5 font-mono font-semibold text-foreground whitespace-nowrap">
                                         W{w.week}
                                         {isCurrentWeek && <span className="ml-1.5 text-[8px] text-primary font-medium">NU</span>}
+                                      </td>
+                                      <td className="px-2 py-1.5">
+                                        <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border",
+                                          isHist ? "text-muted-foreground bg-muted/30 border-border" : "text-primary bg-primary/10 border-primary/20"
+                                        )}>
+                                          {isHist ? "Historie" : "Forecast"}
+                                        </span>
                                       </td>
                                       <td className="px-2 py-1.5">
                                         <div className="flex items-center gap-1.5">
@@ -283,6 +294,20 @@ const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
                                       </td>
                                       <td className="px-2 py-1.5 font-mono text-muted-foreground">
                                         {fmtPrice(w.expected_price_low)} – {fmtPrice(w.expected_price_high)}
+                                      </td>
+                                      <td className="px-2 py-1.5 font-mono">
+                                        {w.actual_price ? (
+                                          <span className="font-semibold text-foreground">{fmtPrice(w.actual_price)}</span>
+                                        ) : (
+                                          <span className="text-muted-foreground/30">—</span>
+                                        )}
+                                      </td>
+                                      <td className="px-2 py-1.5 font-mono">
+                                        {w.actual_volume ? (
+                                          <span className="text-foreground">{w.actual_volume.toLocaleString("nl-NL")}</span>
+                                        ) : (
+                                          <span className="text-muted-foreground/30">—</span>
+                                        )}
                                       </td>
                                       <td className="px-2 py-1.5 font-mono text-muted-foreground">{w.supplier_count}</td>
                                       <td className="px-2 py-1.5">
