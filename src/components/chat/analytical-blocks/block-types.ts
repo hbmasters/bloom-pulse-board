@@ -53,7 +53,11 @@ export interface BlockChart {
 
 // ── Block variant data types ──
 
-export interface ExecutiveSummaryData {
+export interface BlockBase {
+  period?: BlockPeriod;
+}
+
+export interface ExecutiveSummaryData extends BlockBase {
   block_type: "executive-summary";
   title: string;
   summary: string;
