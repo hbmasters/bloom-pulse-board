@@ -16,6 +16,7 @@ export const ProcurementActionBlock = ({ data }: { data: ProcurementActionData }
       title={data.title}
       icon={<ShoppingCart className="w-3.5 h-3.5" />}
       badge={data.items.length}
+      period={data.period}
     >
       <p className="text-[11px] text-muted-foreground leading-relaxed">{data.summary}</p>
 
