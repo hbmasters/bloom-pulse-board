@@ -906,7 +906,7 @@ const KanbanBoard = () => {
                       </div>
                     )}
                     {colCards.map(card => (
-                      <DraggableKanbanCard key={card.id} card={card} onOpen={() => setExpandedCardId(card.id)} />
+                      <DraggableKanbanCard key={card.id} card={card} onOpen={() => setExpandedCardId(card.id)} onShowTimeline={() => setTimelineCardId(card.id)} />
                     ))}
                   </div>
                 </SortableContext>
