@@ -460,9 +460,40 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const { text, workflow, analysis, productCard, floritrack, transportRisk, analyticalBlock } = isUser
-            ? { text: msg.content, workflow: null, analysis: null, productCard: null, floritrack: null, transportRisk: null, analyticalBlock: null }
-            : parseAllBlocks(msg.content);
+          const isStreaming = isLoading && !isUser && i === messages.length - 1;
+
+          // During streaming, strip any partial/complete block markers from visible text
+          // and only parse blocks once streaming is done
+          let text: string;
+          let workflow: AIWorkflowData | null = null;
+          let analysis: AnalysisPresentationData | null = null;
+          let productCard: ProductCardData | null = null;
+          let floritrack: FloritrackData | null = null;
+          let transportRisk: TransportRiskData | null = null;
+          let analyticalBlock: AnalyticalBlockData | null = null;
+
+          if (isUser) {
+            text = msg.content;
+          } else if (isStreaming) {
+            // While streaming: strip any block markers (complete or partial) from display
+            text = msg.content
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block)\n[\s\S]*?```/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block)[\s\S]*$/g, "")
+              .trim();
+          } else {
+            // Streaming complete: parse all blocks
+            const parsed = parseAllBlocks(msg.content);
+            text = parsed.text;
+            workflow = parsed.workflow;
+            analysis = parsed.analysis;
+            productCard = parsed.productCard;
+            floritrack = parsed.floritrack;
+            transportRisk = parsed.transportRisk;
+            analyticalBlock = parsed.analyticalBlock;
+          }
+
+          // Detect if there's a partial block being streamed (show loader)
+          const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
 
           return (
             <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -471,7 +502,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                 <div className="flex items-start gap-2">
                   {/* Text content */}
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
-                    {text && (
+                    {(text || hasPartialBlock || workflow || analysis || floritrack || transportRisk || analyticalBlock) && (
                       <div className={cn(
                         "rounded-2xl px-4 py-3 min-w-0 transition-all duration-300",
                         isUser
@@ -482,9 +513,20 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {isUser ? (
                           <p className="text-sm">{text}</p>
                         ) : (
-                          <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <ReactMarkdown>{text}</ReactMarkdown>
-                          </div>
+                          <>
+                            {text && (
+                              <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{text}</ReactMarkdown>
+                              </div>
+                            )}
+                            {/* Partial block loading indicator */}
+                            {hasPartialBlock && (
+                              <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
+                                <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                                <span>Analytisch blok wordt opgebouwd…</span>
+                              </div>
+                            )}
+                          </>
                         )}
                         {workflow && <WorkflowPanel workflow={workflow} />}
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
