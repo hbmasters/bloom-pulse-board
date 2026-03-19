@@ -187,7 +187,7 @@ const MarktMonitorPanel = () => {
                 { key: null, label: "Ingekocht", w: "" },
                 { key: "delta_vs_advice" as SortKey, label: "Δ Advies", w: "" },
                 { key: null, label: "Confidence", w: "" },
-                { key: null, label: "Actie", w: "" },
+                
                 { key: null, label: "", w: "w-6" },
               ].map((h, i) => (
                 <th key={i} className={cn("px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap", h.w)}
