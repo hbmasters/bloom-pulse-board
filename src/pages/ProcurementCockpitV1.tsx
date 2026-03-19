@@ -879,11 +879,11 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
-      {/* ── TAB: Marktaanbod ── */}
+      {/* ── TAB: Marktmonitor ── */}
       {activeTab === "marktaanbod" && (
         <>
-          <IHSectionShell icon={BarChart3} title="Marktmonitor" subtitle="Historie & forecast — marktaanbod, prijzen, aanbodsdruk en trends per product" badge={`${marketSupplyData.length} producten`}>
-            <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
+          <IHSectionShell icon={BarChart3} title="Marktmonitor" subtitle="Stelenbehoefte, prijsintelligentie & inkoopadvies per product" badge={`${marktMonitorData.length} producten`}>
+            <MarktMonitorPanel />
           </IHSectionShell>
         </>
       )}
