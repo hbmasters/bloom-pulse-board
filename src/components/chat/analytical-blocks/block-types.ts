@@ -137,7 +137,7 @@ export interface FloritrackLogisticsData extends BlockBase {
   }[];
 }
 
-export interface AlertExceptionData {
+export interface AlertExceptionData extends BlockBase {
   block_type: "alert-exception";
   title: string;
   summary: string;
