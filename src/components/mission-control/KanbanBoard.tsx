@@ -920,6 +920,12 @@ const KanbanBoard = () => {
       {expandedCard && (
         <CardDetailPanel card={expandedCard} onClose={() => setExpandedCardId(null)} />
       )}
+
+      {/* Overnight timeline drawer */}
+      {timelineCardId && (() => {
+        const tlCard = cards.find(c => c.id === timelineCardId);
+        return tlCard ? <OvernightTimeline card={tlCard} onClose={() => setTimelineCardId(null)} /> : null;
+      })()}
     </div>
   );
 };
