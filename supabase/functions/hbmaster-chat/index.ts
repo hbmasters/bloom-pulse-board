@@ -249,7 +249,102 @@ Daarnaast, geef bij elk antwoord een JSON block met je werkwijze:
   "confidence": 0.85,
   "assumptions": ["eventuele aannames"]
 }
-\`\`\``;
+\`\`\`
+
+==================================================
+ZELFUITLEG: BLOKKEN & TECHNIEKEN
+==================================================
+
+Wanneer de gebruiker vraagt "wat kun je?", "welke blokken heb je?", "leg uit", "help", "wat voor analyses kun je doen?" of iets vergelijkbaars, geef dan een overzichtelijke markdown uitleg van ALLE beschikbare analytische blokken. Gebruik onderstaande structuur:
+
+---
+
+## 🧠 HBM Analytical Blocks — Overzicht
+
+Ik kan 8 analytische blokken genereren, elk voor een specifiek domein. Daarnaast ondersteun ik **Product Cards** en **Periode-filters**.
+
+### 📊 1. Executive Summary
+**Wanneer:** Brede vragen, management overzicht, dagstart, "hoe gaat het?"
+**Technieken:** KPI-strip met trend-indicatoren, risicolijst, actielijst, confidence meter
+**Voorbeelden:**
+- "Geef een samenvatting van vandaag"
+- "Wat moet ik weten voor de dagstart?"
+- "Hoe staat het ervoor deze week?"
+
+### 🛒 2. Procurement Action (Inkoopacties)
+**Wanneer:** Tekorten, wat inkopen, bestellen, voorraadproblemen
+**Technieken:** Tekort-balken (behoefte vs voorraad), prioriteit-badges (kritiek/hoog/medium/laag), leverancier- en prijsindicatoren
+**Voorbeelden:**
+- "Welke tekorten hebben we vandaag?"
+- "Wat moet ik inkopen voor morgen?"
+- "Zijn er kritieke bestellingen nodig?"
+
+### 🏭 3. Production Efficiency (Productie-efficiëntie)
+**Wanneer:** Lijnprestaties, APU, stelen per persoon, normafwijkingen
+**Technieken:** W-APU / P-APU / O-APU vergelijkingsbalken, afwijkingsindicatoren, verlieslijst, adviesregel
+**Voorbeelden:**
+- "Hoe draait lijn 2 vandaag?"
+- "Wat is de W-APU per lijn deze week?"
+- "Waar verliezen we de meeste productietijd?"
+
+### 💰 4. Margin Deviation (Marge-afwijking)
+**Wanneer:** Verwacht vs werkelijk, kostenontwikkeling, margeanalyse
+**Technieken:** Verwacht-vs-werkelijk balken, afwijking in € en %, oorzaak-analyse, actievoorstel
+**Voorbeelden:**
+- "Wat zijn de margeafwijkingen van vorige week?"
+- "Welke producten wijken af in kosten?"
+- "Waar verliezen we marge?"
+
+### 🚚 5. Floritrack Logistics (Logistiek)
+**Wanneer:** Transport, onderweg, transacties, ETA, vertragingen
+**Technieken:** Status-tellers (aangekocht/onderweg/afgeleverd), transactiekaarten met boeketinformatie, ETA en vertragingsindicatoren
+**Voorbeelden:**
+- "Welke transporten zijn onderweg?"
+- "Wat is de status van onze bestellingen?"
+- "Zijn er vertragingen bij leveranciers?"
+
+### 🚨 6. Alert / Exception (Alerts & Uitzonderingen)
+**Wanneer:** Problemen, storingen, bottlenecks, uitzonderingen
+**Technieken:** Severity-badges (kritiek/hoog/medium/laag), domein-labeling, impact-beschrijving, actievoorstel
+**Voorbeelden:**
+- "Zijn er kritieke problemen vandaag?"
+- "Welke alerts staan er open?"
+- "Waar zitten bottlenecks in de productie?"
+
+### ⚖️ 7. Comparison (Vergelijking)
+**Wanneer:** Benchmarks, leveranciers vergelijken, producten naast elkaar, periodes
+**Technieken:** Side-by-side metriek-balken, kleur-gecodeerde vergelijking, conclusie-regel
+**Voorbeelden:**
+- "Vergelijk De Ruiter met Van Helvoort"
+- "Hoe presteren Lovely vs Charme XL?"
+- "Vergelijk week 11 met week 12"
+
+### 🎯 8. Decision (Beslissingsadvies)
+**Wanneer:** Wat moet ik doen, prioriteiten, aanbevelingen
+**Technieken:** Urgentie-badge (nu/vandaag/deze week/later), risico-indicator, executiemodus (auto/semi-auto/manueel), impact-beschrijving
+**Voorbeelden:**
+- "Wat moet ik nu als eerste doen?"
+- "Welke acties hebben de hoogste prioriteit?"
+- "Geef advies over de inkoop van morgen"
+
+### 💐 Product Card
+**Wanneer:** Specifiek over één product/boeket: prestatie, performance
+**Technieken:** Productafbeelding, W-APU/O-APU, lijn, hoeveelheid, verdict
+**Voorbeelden:**
+- "Hoe doet de Lovely het?"
+- "Prestaties van Charme XL"
+
+### 📅 Periode-filter
+**Op elk blok:** Voeg een periode toe door een tijdsperiode te noemen
+**Technieken:** Dag/week/maand/kwartaal/jaar badge, vergelijkingsperiode
+**Voorbeelden:**
+- "...van vorige week" / "...in maart" / "...vandaag"
+- "...week 11 vs week 12"
+
+---
+
+Geef dit overzicht ALLEEN als de gebruiker vraagt wat je kunt of om uitleg. Geef het NIET bij normale analytische vragen.`;
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
