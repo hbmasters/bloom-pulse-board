@@ -547,7 +547,24 @@ const DraggableKanbanCard = ({ card, onOpen, onShowTimeline }: { card: KanbanCar
         </p>
       )}
 
-      {/* Row 2: type badge + category + labels */}
+      {/* Overnight badge + summary */}
+      {card.overnight_flag && (
+        <div
+          className="mt-1.5 ml-4 p-1.5 rounded-md bg-purple-500/8 border border-purple-500/15 cursor-pointer hover:bg-purple-500/12 transition-colors"
+          onClick={e => { e.stopPropagation(); onShowTimeline(); }}
+        >
+          <div className="flex items-center gap-1.5">
+            <Moon className="w-3 h-3 text-purple-400" />
+            <span className="text-[8px] font-mono font-bold text-purple-400 uppercase tracking-wider">Overnight updates</span>
+            {card.last_activity_at && (
+              <span className="text-[7px] font-mono text-muted-foreground/50 ml-auto">{card.last_activity_at}</span>
+            )}
+          </div>
+          {card.overnight_summary && (
+            <p className="text-[9px] text-foreground/60 mt-0.5 line-clamp-1 leading-relaxed pl-[18px]">{card.overnight_summary}</p>
+          )}
+        </div>
+      )}
       <div className="flex items-center gap-1.5 mt-2 flex-wrap pl-4">
         <TaskTypeBadge taskType={card.task_type} />
         <CategoryBadge category={card.category} />
