@@ -56,7 +56,16 @@ export interface TradeWeek {
   supplier_count: number;
   seasonality: Seasonality;
   risk_level: RiskLevel;
+  /** true = realized historic data, false/undefined = forecast */
+  historical?: boolean;
+  /** Actual realized price (only for historical weeks) */
+  actual_price?: number;
+  /** Actual realized volume (only for historical weeks) */
+  actual_volume?: number;
 }
+
+const CURRENT_WEEK = 11; // week 11 of 2026
+const HISTORY_WEEKS = 12; // show 12 weeks of history
 
 const generateWeeks = (
   basePrice: number,
@@ -65,22 +74,30 @@ const generateWeeks = (
   riskPattern: RiskLevel[],
   supplierBase: number
 ): TradeWeek[] => {
-  const currentWeek = 11; // week 11 of 2026
-  return Array.from({ length: 52 }, (_, i) => {
-    const week = ((currentWeek + i - 1) % 52) + 1;
-    const year = currentWeek + i > 52 ? 2027 : 2026;
-    const idx = i % seasonPattern.length;
+  const totalWeeks = HISTORY_WEEKS + 52; // 12 past + 52 future
+  return Array.from({ length: totalWeeks }, (_, i) => {
+    const offset = i - HISTORY_WEEKS; // negative = past, 0 = current week, positive = future
+    const rawWeek = CURRENT_WEEK + offset;
+    const week = ((rawWeek - 1 + 520) % 52) + 1; // normalize to 1-52
+    const year = rawWeek <= 0 ? 2025 : rawWeek > 52 ? 2027 : 2026;
+    const idx = ((i % seasonPattern.length) + seasonPattern.length) % seasonPattern.length;
     const priceMultiplier = seasonPattern[idx];
     const seasonality: Seasonality = priceMultiplier > 1.15 ? "off_season" : priceMultiplier < 0.9 ? "in_season" : "shoulder";
+    const isHistorical = offset < 0;
+    const priceLow = +(basePrice * priceMultiplier * 0.85).toFixed(3);
+    const priceHigh = +(basePrice * priceMultiplier * 1.15).toFixed(3);
     return {
       week,
       year,
       expected_availability: availPattern[idx % availPattern.length],
-      expected_price_low: +(basePrice * priceMultiplier * 0.85).toFixed(3),
-      expected_price_high: +(basePrice * priceMultiplier * 1.15).toFixed(3),
+      expected_price_low: priceLow,
+      expected_price_high: priceHigh,
       supplier_count: Math.max(1, supplierBase + (availPattern[idx % availPattern.length] === "high" ? 2 : availPattern[idx % availPattern.length] === "low" ? -1 : 0)),
       seasonality,
       risk_level: riskPattern[idx % riskPattern.length],
+      historical: isHistorical || undefined,
+      actual_price: isHistorical ? +(basePrice * priceMultiplier * (0.92 + Math.random() * 0.16)).toFixed(3) : undefined,
+      actual_volume: isHistorical ? Math.round(800 + Math.random() * 4000) : undefined,
     };
   });
 };

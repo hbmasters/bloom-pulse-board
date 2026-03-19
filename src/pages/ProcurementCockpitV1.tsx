@@ -98,7 +98,7 @@ type CockpitTab = "inkooplijst" | "marktaanbod";
 
 const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-  { id: "marktaanbod", label: "Marktaanbod", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+  { id: "marktaanbod", label: "Marktmonitor", icon: <BarChart3 className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
@@ -881,7 +881,7 @@ const ProcurementCockpitV1 = () => {
       {/* ── TAB: Marktaanbod ── */}
       {activeTab === "marktaanbod" && (
         <>
-          <IHSectionShell icon={BarChart3} title="Marktaanbod Monitor" subtitle="Actueel marktaanbod, prijzen, aanbodsdruk en 52-weken overzicht per product" badge={`${marketSupplyData.length} producten`}>
+          <IHSectionShell icon={BarChart3} title="Marktmonitor" subtitle="Historie & forecast — marktaanbod, prijzen, aanbodsdruk en trends per product" badge={`${marketSupplyData.length} producten`}>
             <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
           </IHSectionShell>
         </>
