@@ -53,6 +53,8 @@ interface KanbanCard {
   assignee?: string;
   status: Status;
   dueDate?: string;
+  startTime?: string;
+  stopTime?: string;
   createdAt: string;
   // Task type
   task_type: TaskType;
