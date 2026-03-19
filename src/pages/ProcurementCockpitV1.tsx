@@ -44,6 +44,8 @@ import {
 } from "@/components/procurement-cockpit-v1/supplier-intelligence-data";
 // Upload functionality removed — dekking computed from static data
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
+import MarktMonitorPanel from "@/components/marktmonitor/MarktMonitorPanel";
+import { marktMonitorData } from "@/components/marktmonitor/marktmonitor-data";
 
 
 import {
@@ -878,11 +880,11 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
-      {/* ── TAB: Marktaanbod ── */}
+      {/* ── TAB: Marktmonitor ── */}
       {activeTab === "marktaanbod" && (
         <>
-          <IHSectionShell icon={BarChart3} title="Marktmonitor" subtitle="Historie & forecast — marktaanbod, prijzen, aanbodsdruk en trends per product" badge={`${marketSupplyData.length} producten`}>
-            <MarketSupplyPanel familyFilter={familyFilter} onFamilyFilterChange={setFamilyFilter} families={families} />
+          <IHSectionShell icon={BarChart3} title="Marktmonitor" subtitle="Stelenbehoefte, prijsintelligentie & inkoopadvies per product" badge={`${marktMonitorData.length} producten`}>
+            <MarktMonitorPanel />
           </IHSectionShell>
         </>
       )}
