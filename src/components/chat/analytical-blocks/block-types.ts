@@ -104,7 +104,7 @@ export interface ProductionEfficiencyData extends BlockBase {
   kpis?: BlockKPI[];
 }
 
-export interface MarginDeviationData {
+export interface MarginDeviationData extends BlockBase {
   block_type: "margin-deviation";
   title: string;
   summary: string;
