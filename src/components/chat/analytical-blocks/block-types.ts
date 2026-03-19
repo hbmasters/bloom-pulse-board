@@ -69,7 +69,7 @@ export interface ExecutiveSummaryData extends BlockBase {
   status?: string;
 }
 
-export interface ProcurementActionData {
+export interface ProcurementActionData extends BlockBase {
   block_type: "procurement-action";
   title: string;
   summary: string;
