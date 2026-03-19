@@ -13,6 +13,7 @@ export const MarginDeviationBlock = ({ data }: { data: MarginDeviationData }) =>
       title={data.title}
       icon={<TrendingUp className="w-3.5 h-3.5" />}
       badge={data.items.length}
+      period={data.period}
     >
       <p className="text-[11px] text-muted-foreground leading-relaxed">{data.summary}</p>
 
