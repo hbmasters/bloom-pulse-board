@@ -15,6 +15,7 @@ export const AlertExceptionBlock = ({ data }: { data: AlertExceptionData }) => {
       title={data.title}
       icon={<AlertTriangle className="w-3.5 h-3.5" />}
       badge={data.alerts.length}
+      period={data.period}
     >
       <p className="text-[11px] text-muted-foreground leading-relaxed">{data.summary}</p>
 

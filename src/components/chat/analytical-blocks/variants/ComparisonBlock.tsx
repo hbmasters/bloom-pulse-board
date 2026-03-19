@@ -20,6 +20,7 @@ export const ComparisonBlock = ({ data }: { data: ComparisonData }) => {
       title={data.title}
       icon={<ArrowLeftRight className="w-3.5 h-3.5" />}
       badge={`${data.items.length} ${data.dimension}`}
+      period={data.period}
     >
       <p className="text-[11px] text-muted-foreground leading-relaxed">{data.summary}</p>
 

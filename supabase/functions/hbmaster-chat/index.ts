@@ -183,6 +183,24 @@ BESCHIKBARE BLOCK TYPES:
 }
 \`\`\`
 
+PERIODE CONTEXT:
+Wanneer de gebruiker een specifieke periode noemt (dag, week, maand, kwartaal, jaar), voeg dan een "period" object toe aan het block:
+\`\`\`json
+"period": {
+  "granularity": "week",       // "day" | "week" | "month" | "quarter" | "year" | "custom"
+  "label": "Week 12 2026",     // Leesbaar label
+  "start": "2026-03-16",       // Optioneel: ISO startdatum
+  "end": "2026-03-22",         // Optioneel: ISO einddatum  
+  "comparison": "vs Week 11"   // Optioneel: vergelijking met andere periode
+}
+\`\`\`
+Voorbeelden:
+- "vorige week" → granularity: "week", label: "Week 11 2026", comparison: "vs Week 12"
+- "vandaag" → granularity: "day", label: "Ma 17 mrt 2026"
+- "maart" → granularity: "month", label: "Maart 2026"
+- "deze week vs vorige week" → granularity: "week", label: "Week 12 2026", comparison: "vs Week 11"
+- Als GEEN periode genoemd wordt, laat "period" weg uit het block.
+
 REGELS:
 - Kies ALTIJD het meest passende block_type voor de vraag
 - Geef ALTIJD eerst een korte markdown tekst, dan het block

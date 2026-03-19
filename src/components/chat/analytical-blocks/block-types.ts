@@ -8,6 +8,16 @@ import type { AnalyticalDomain } from "./block-domain-colors";
 
 // ── Shared sub-types ──
 
+export type BlockPeriodGranularity = "day" | "week" | "month" | "quarter" | "year" | "custom";
+
+export interface BlockPeriod {
+  granularity: BlockPeriodGranularity;
+  label: string;           // e.g. "Week 12", "Maart 2026", "Ma 17 mrt"
+  start?: string;          // ISO date
+  end?: string;            // ISO date
+  comparison?: string;     // e.g. "vs Week 11", "vs Vorig Jaar"
+}
+
 export interface BlockKPI {
   label: string;
   value: string | number;
@@ -43,7 +53,11 @@ export interface BlockChart {
 
 // ── Block variant data types ──
 
-export interface ExecutiveSummaryData {
+export interface BlockBase {
+  period?: BlockPeriod;
+}
+
+export interface ExecutiveSummaryData extends BlockBase {
   block_type: "executive-summary";
   title: string;
   summary: string;
@@ -55,7 +69,7 @@ export interface ExecutiveSummaryData {
   status?: string;
 }
 
-export interface ProcurementActionData {
+export interface ProcurementActionData extends BlockBase {
   block_type: "procurement-action";
   title: string;
   summary: string;
@@ -72,7 +86,7 @@ export interface ProcurementActionData {
   kpis?: BlockKPI[];
 }
 
-export interface ProductionEfficiencyData {
+export interface ProductionEfficiencyData extends BlockBase {
   block_type: "production-efficiency";
   title: string;
   summary: string;
@@ -90,7 +104,7 @@ export interface ProductionEfficiencyData {
   kpis?: BlockKPI[];
 }
 
-export interface MarginDeviationData {
+export interface MarginDeviationData extends BlockBase {
   block_type: "margin-deviation";
   title: string;
   summary: string;
@@ -106,7 +120,7 @@ export interface MarginDeviationData {
   kpis?: BlockKPI[];
 }
 
-export interface FloritrackLogisticsData {
+export interface FloritrackLogisticsData extends BlockBase {
   block_type: "floritrack-logistics";
   title: string;
   summary: string;
@@ -123,7 +137,7 @@ export interface FloritrackLogisticsData {
   }[];
 }
 
-export interface AlertExceptionData {
+export interface AlertExceptionData extends BlockBase {
   block_type: "alert-exception";
   title: string;
   summary: string;
@@ -137,7 +151,7 @@ export interface AlertExceptionData {
   kpis?: BlockKPI[];
 }
 
-export interface ComparisonData {
+export interface ComparisonData extends BlockBase {
   block_type: "comparison";
   title: string;
   summary: string;
@@ -149,7 +163,7 @@ export interface ComparisonData {
   conclusion?: string;
 }
 
-export interface DecisionData {
+export interface DecisionData extends BlockBase {
   block_type: "decision";
   title: string;
   summary: string;

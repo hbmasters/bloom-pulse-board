@@ -4,7 +4,7 @@ import { BlockShell, KPIStrip, SeverityBadge } from "../BlockShell";
 import type { ExecutiveSummaryData } from "../block-types";
 
 export const ExecutiveSummaryBlock = ({ data }: { data: ExecutiveSummaryData }) => (
-  <BlockShell domain="executive" title={data.title} icon={<LayoutDashboard className="w-3.5 h-3.5" />}>
+  <BlockShell domain="executive" title={data.title} icon={<LayoutDashboard className="w-3.5 h-3.5" />} period={data.period}>
     {/* Summary */}
     <p className="text-[11px] text-muted-foreground leading-relaxed">{data.summary}</p>
 
