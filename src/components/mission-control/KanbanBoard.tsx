@@ -75,6 +75,11 @@ interface KanbanCard {
   result_updated_at?: string;
   // Analysis run history
   run_history?: AnalysisRun[];
+  // Overnight activity tracking
+  overnight_flag?: boolean;
+  overnight_summary?: string;
+  overnight_activity_log?: OvernightActivity[];
+  last_activity_at?: string;
 }
 
 interface KanbanColumn {
