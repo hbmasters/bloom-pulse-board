@@ -14,30 +14,14 @@ import { AnalyticalBlock, parseAnalyticalBlock } from "@/components/chat/analyti
 import type { AnalyticalBlockData } from "@/components/chat/analytical-blocks/block-types";
 import { BLOCK_LABELS, BLOCK_DOMAIN_MAP } from "@/components/chat/analytical-blocks/block-types";
 import { DOMAIN_COLORS } from "@/components/chat/analytical-blocks/block-domain-colors";
+import VerifiedResponseCard from "@/components/chat/verified-response/VerifiedResponseCard";
+import type { VerifiedResponseData } from "@/components/chat/verified-response/verified-response-types";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-interface AIWorkflowData {
-  plan?: string[];
-  input_used?: string[];
-  actions?: string[];
-  confidence?: number;
-  assumptions?: string[];
-}
-
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hbmaster-chat`;
 
-function parseWorkflow(content: string): { text: string; workflow: AIWorkflowData | null } {
-  const match = content.match(/```hbmaster-workflow\n([\s\S]*?)```/);
-  if (!match) return { text: content, workflow: null };
-  try {
-    const workflow = JSON.parse(match[1]);
-    const text = content.replace(/```hbmaster-workflow\n[\s\S]*?```/, "").trim();
-    return { text, workflow };
-  } catch {
-    return { text: content, workflow: null };
-  }
-}
+/* ── Parsers ── */
 
 function parseAnalysis(content: string): { text: string; analysis: AnalysisPresentationData | null } {
   const match = content.match(/```hbmaster-analysis\n([\s\S]*?)```/);
@@ -100,66 +84,39 @@ function parseTransportRisk(content: string): { text: string; transportRisk: Tra
   }
 }
 
+function parseVerifiedResponse(content: string): { text: string; verified: VerifiedResponseData | null } {
+  const match = content.match(/```hbmaster-verified\n([\s\S]*?)```/);
+  if (!match) return { text: content, verified: null };
+  try {
+    const verified = JSON.parse(match[1]) as VerifiedResponseData;
+    const text = content.replace(/```hbmaster-verified\n[\s\S]*?```/, "").trim();
+    return { text, verified };
+  } catch {
+    return { text: content, verified: null };
+  }
+}
+
 function parseAllBlocks(content: string): {
   text: string;
-  workflow: AIWorkflowData | null;
   analysis: AnalysisPresentationData | null;
   productCard: ProductCardData | null;
   floritrack: FloritrackData | null;
   transportRisk: TransportRiskData | null;
   analyticalBlock: AnalyticalBlockData | null;
+  verified: VerifiedResponseData | null;
 } {
-  const { text: t1, workflow } = parseWorkflow(content);
-  const { text: t2, analysis } = parseAnalysis(t1);
-  const { text: t3, productCard } = parseProductCard(t2);
-  const { text: t4, floritrack } = parseFloritrack(t3);
-  const { text: t5, transportRisk } = parseTransportRisk(t4);
-  const { text: t6, block: analyticalBlock } = parseAnalyticalBlock(t5);
-  return { text: t6, workflow, analysis, productCard, floritrack, transportRisk, analyticalBlock };
+  // Strip old workflow blocks silently (no longer rendered)
+  let cleaned = content.replace(/```hbmaster-workflow\n[\s\S]*?```/g, "").trim();
+  const { text: t1, analysis } = parseAnalysis(cleaned);
+  const { text: t2, productCard } = parseProductCard(t1);
+  const { text: t3, floritrack } = parseFloritrack(t2);
+  const { text: t4, transportRisk } = parseTransportRisk(t3);
+  const { text: t5, block: analyticalBlock } = parseAnalyticalBlock(t4);
+  const { text: t6, verified } = parseVerifiedResponse(t5);
+  return { text: t6, analysis, productCard, floritrack, transportRisk, analyticalBlock, verified };
 }
 
-const WorkflowPanel = ({ workflow, defaultOpen = false }: { workflow: AIWorkflowData; defaultOpen?: boolean }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="mt-2 border border-border rounded-lg overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
-        <span>🧠 AI Werkwijze</span>
-        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-      </button>
-      {open && (
-        <div className="px-3 pb-3 space-y-2 text-[11px] text-muted-foreground font-mono animate-fade-in">
-          {workflow.plan && (
-            <div>
-              <div className="text-muted-foreground/60 uppercase text-[9px] tracking-wider mb-1">Plan</div>
-              {workflow.plan.map((p, i) => <div key={i}>• {p}</div>)}
-            </div>
-          )}
-          {workflow.input_used && (
-            <div>
-              <div className="text-muted-foreground/60 uppercase text-[9px] tracking-wider mb-1">Input</div>
-              {workflow.input_used.map((p, i) => <div key={i}>• {p}</div>)}
-            </div>
-          )}
-          {workflow.confidence !== undefined && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground/60 uppercase text-[9px] tracking-wider">Confidence</span>
-              <div className="flex-1 h-1 rounded-full bg-border overflow-hidden">
-                <div className="h-full rounded-full bg-accent/60" style={{ width: `${workflow.confidence * 100}%` }} />
-              </div>
-              <span>{Math.round(workflow.confidence * 100)}%</span>
-            </div>
-          )}
-          {workflow.assumptions && workflow.assumptions.length > 0 && (
-            <div>
-              <div className="text-muted-foreground/60 uppercase text-[9px] tracking-wider mb-1">Aannames</div>
-              {workflow.assumptions.map((a, i) => <div key={i}>⚠ {a}</div>)}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
+/* ── Toggle panels ── */
 
 const AnalysisTogglePanel = ({ analysis }: { analysis: AnalysisPresentationData }) => {
   const [open, setOpen] = useState(false);
@@ -167,7 +124,7 @@ const AnalysisTogglePanel = ({ analysis }: { analysis: AnalysisPresentationData 
     <div className="mt-2 border border-border rounded-lg overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
         <span className="flex items-center gap-1.5">
-          <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
+          <BarChart3 className="w-3.5 h-3.5 text-yellow-500" />
           Toon analytisch
         </span>
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -201,15 +158,16 @@ const FloritrackTogglePanel = ({ data }: { data: FloritrackData }) => {
     </div>
   );
 };
+
 const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-2 border border-border rounded-lg overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
         <span className="flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+          <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
           Toon productie risico's
-          <span className="text-[9px] bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total_at_risk}</span>
+          <span className="text-[9px] bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0.5 rounded font-semibold">{data.summary.total_at_risk}</span>
         </span>
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
@@ -222,18 +180,19 @@ const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
   );
 };
 
+/* ── Thinking bubble ── */
 
 const standardSteps = [
-  "Context analyseren…",
   "Data ophalen…",
-  "Antwoord formuleren…",
+  "Bronnen verifiëren…",
+  "Antwoord samenstellen…",
 ];
 
 const analysisSteps = [
-  "Context analyseren…",
   "Data ophalen…",
+  "Bronnen verifiëren…",
   "Analyse uitvoeren…",
-  "Resultaten verwerken…",
+  "Resultaten valideren…",
   "Rapport samenstellen…",
 ];
 
@@ -256,7 +215,6 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
     return () => clearInterval(stepInterval);
   }, [steps.length, isAnalysis]);
 
-  // Smooth progress bar for analysis
   useEffect(() => {
     if (!isAnalysis) return;
     const timer = setInterval(() => {
@@ -274,41 +232,35 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
   return (
     <div className="flex justify-start">
       <div className="bg-card border border-border rounded-2xl px-4 py-3 min-w-[220px] space-y-2">
-        {/* Header */}
         <div className="flex items-center gap-2">
           <div className="relative">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <div className="absolute inset-0 w-4 h-4 rounded-full bg-primary/20 animate-ping" />
           </div>
           <span className="text-xs font-semibold text-foreground">
-            {isAnalysis ? "HBMaster analyseert" : "HBMaster is bezig"}
+            {isAnalysis ? "HBMaster verifieert" : "HBMaster zoekt bronnen"}
           </span>
           {isAnalysis && (
-            <span className="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+            <span className="text-[9px] font-mono text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">
               ANALYSE
             </span>
           )}
         </div>
 
-        {/* Steps */}
         <div className="space-y-1.5">
           {steps.map((step, i) => {
             const done = i < activeStep;
             const active = i === activeStep;
             return (
-              <div key={i} className={cn(
-                "flex items-center gap-2 transition-all duration-500",
-                i > activeStep && "opacity-30"
-              )}>
+              <div key={i} className={cn("flex items-center gap-2 transition-all duration-500", i > activeStep && "opacity-30")}>
                 {done ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
                 ) : active ? (
                   <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
                 ) : (
                   <Circle className="w-3.5 h-3.5 text-muted-foreground/30 shrink-0" />
                 )}
-                <span className={cn(
-                  "text-[11px] font-mono transition-colors duration-300",
+                <span className={cn("text-[11px] font-mono transition-colors duration-300",
                   done ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground/40"
                 )}>{step}</span>
               </div>
@@ -316,12 +268,10 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
           })}
         </div>
 
-        {/* Progress bar */}
         <div className="h-1 w-full rounded-full bg-border overflow-hidden mt-1">
           <div
-            className={cn(
-              "h-full rounded-full transition-all ease-out",
-              isAnalysis ? "bg-amber-400/70 duration-100" : "bg-primary/60 duration-1000"
+            className={cn("h-full rounded-full transition-all ease-out",
+              isAnalysis ? "bg-yellow-500/70 duration-100" : "bg-primary/60 duration-1000"
             )}
             style={{ width: `${barWidth}%` }}
           />
@@ -330,6 +280,8 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
     </div>
   );
 };
+
+/* ── Main component ── */
 
 interface ChatThreadProps {
   onStateChange: (state: "idle" | "thinking" | "responding") => void;
@@ -440,7 +392,6 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
-            
             <p className="text-sm font-mono">Start een gesprek met HBMaster</p>
             <div className="flex flex-wrap gap-2 mt-2 max-w-md justify-center">
               {[
@@ -462,47 +413,41 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
           const isUser = msg.role === "user";
           const isStreaming = isLoading && !isUser && i === messages.length - 1;
 
-          // During streaming, strip any partial/complete block markers from visible text
-          // and only parse blocks once streaming is done
           let text: string;
-          let workflow: AIWorkflowData | null = null;
           let analysis: AnalysisPresentationData | null = null;
           let productCard: ProductCardData | null = null;
           let floritrack: FloritrackData | null = null;
           let transportRisk: TransportRiskData | null = null;
           let analyticalBlock: AnalyticalBlockData | null = null;
+          let verified: VerifiedResponseData | null = null;
 
           if (isUser) {
             text = msg.content;
           } else if (isStreaming) {
-            // While streaming: strip any block markers (complete or partial) from display
+            // Strip block markers while streaming
             text = msg.content
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block)\n[\s\S]*?```/g, "")
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block)[\s\S]*$/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)\n[\s\S]*?```/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)[\s\S]*$/g, "")
               .trim();
           } else {
-            // Streaming complete: parse all blocks
             const parsed = parseAllBlocks(msg.content);
             text = parsed.text;
-            workflow = parsed.workflow;
             analysis = parsed.analysis;
             productCard = parsed.productCard;
             floritrack = parsed.floritrack;
             transportRisk = parsed.transportRisk;
             analyticalBlock = parsed.analyticalBlock;
+            verified = parsed.verified;
           }
 
-          // Detect if there's a partial block being streamed (show loader)
           const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
 
           return (
             <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
-                {/* Text bubble + inline product card */}
                 <div className="flex items-start gap-2">
-                  {/* Text content */}
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
-                    {(text || hasPartialBlock || workflow || analysis || floritrack || transportRisk || analyticalBlock) && (
+                    {(text || hasPartialBlock || analysis || floritrack || transportRisk || analyticalBlock || verified) && (
                       <div className={cn(
                         "rounded-2xl px-4 py-3 min-w-0 transition-all duration-300",
                         isUser
@@ -514,21 +459,31 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                           <p className="text-sm">{text}</p>
                         ) : (
                           <>
-                            {text && (
+                            {/* Verified response card (replaces old workflow) */}
+                            {verified && <VerifiedResponseCard data={verified} />}
+
+                            {/* Plain text (only if no verified card, or as supplement) */}
+                            {text && !verified && (
                               <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                 <ReactMarkdown>{text}</ReactMarkdown>
                               </div>
                             )}
-                            {/* Partial block loading indicator */}
+
+                            {/* Supplementary text below verified card */}
+                            {text && verified && (
+                              <div className="mt-2 pt-2 border-t border-border prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{text}</ReactMarkdown>
+                              </div>
+                            )}
+
                             {hasPartialBlock && (
                               <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
                                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
-                                <span>Analytisch blok wordt opgebouwd…</span>
+                                <span>Bronnen worden geverifieerd…</span>
                               </div>
                             )}
                           </>
                         )}
-                        {workflow && <WorkflowPanel workflow={workflow} />}
                         {analysis && <AnalysisTogglePanel analysis={analysis} />}
                         {floritrack && <FloritrackTogglePanel data={floritrack} />}
                         {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
@@ -536,7 +491,6 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                       </div>
                     )}
 
-                    {/* Product card — slides in from right within the row */}
                     {productCard && visibleCardIdx === i && (
                       <div className="animate-slide-in-right shrink-0 ml-2" style={{ maxWidth: "320px" }}>
                         <ProductCard data={productCard} />
@@ -544,7 +498,6 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                     )}
                   </div>
 
-                  {/* Product card toggle icon — right side */}
                   {productCard && (
                     <button
                       onClick={() => setVisibleCardIdx(visibleCardIdx === i ? null : i)}
