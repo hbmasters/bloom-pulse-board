@@ -1,6 +1,6 @@
-import { X, TrendingUp, TrendingDown, Minus, Package, BarChart3, Target, AlertTriangle, Info } from "lucide-react";
+import { X, TrendingUp, TrendingDown, Minus, Package, BarChart3, Target, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid, Legend } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from "recharts";
 import { type MarktMonitorProduct, trendLabels, confidenceLabels, buyAdviceLabels, DEFAULT_WEIGHTS } from "./marktmonitor-data";
 
 const fmt = (n: number) => n.toLocaleString("nl-NL");
@@ -15,9 +15,7 @@ interface Props {
 const MarktMonitorDetailDrawer = ({ product: p, onClose }: Props) => {
   const trend = trendLabels[p.market_trend];
   const conf = confidenceLabels[p.confidence];
-  const advice = buyAdviceLabels[p.buy_advice];
 
-  /* Combine price history + forecast for chart */
   const priceChartData = [
     ...p.price_history.map(h => ({ week: `W${h.week}`, prijs: h.price, type: "historie" })),
     ...p.price_forecast.map(f => ({ week: `W${f.week}`, forecast: f.price, type: "forecast" })),
@@ -41,16 +39,14 @@ const MarktMonitorDetailDrawer = ({ product: p, onClose }: Props) => {
       </div>
 
       <div className="p-5 space-y-5">
-        {/* Advice badge + summary */}
-        <div className={cn("rounded-xl border p-4 space-y-2", advice.color.replace("text-", "border-").split(" ").pop())}>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{advice.emoji}</span>
-            <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", advice.color)}>{advice.label}</span>
-            <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border ml-auto", conf.color)}>
-              Confidence: {conf.label}
-            </span>
-          </div>
-          <p className="text-[11px] text-foreground/80 leading-relaxed">{p.summary}</p>
+        {/* Confidence badge */}
+        <div className="flex items-center gap-2">
+          <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full border", conf.color)}>
+            Confidence: {conf.label}
+          </span>
+          <span className={cn("flex items-center gap-1 text-[10px] font-medium", trend.color)}>
+            {trend.icon} {trend.label}
+          </span>
         </div>
 
         {/* Key metrics row */}
@@ -130,16 +126,10 @@ const MarktMonitorDetailDrawer = ({ product: p, onClose }: Props) => {
           </div>
 
           {/* Combined result */}
-          <div className="rounded-lg border border-border bg-muted/20 p-3 space-y-2">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[11px]">
-              <div className="flex justify-between"><span className="text-muted-foreground">Gewogen advies</span><span className="font-bold font-mono text-foreground">{fmt(p.weighted_advice)} stelen</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Huidig ingekocht</span><span className="font-mono text-foreground">{fmt(p.current_purchased)} stelen</span></div>
-              <div className="flex justify-between col-span-2 pt-1 border-t border-border">
-                <span className="font-semibold text-foreground">Verschil</span>
-                <span className={cn("font-bold font-mono", p.delta_vs_advice > 0 ? "text-destructive" : p.delta_vs_advice < 0 ? "text-accent" : "text-foreground")}>
-                  {p.delta_vs_advice > 0 ? `+${fmt(p.delta_vs_advice)} tekort` : p.delta_vs_advice < 0 ? `${fmt(Math.abs(p.delta_vs_advice))} overschot` : "In balans"}
-                </span>
-              </div>
+          <div className="rounded-lg border border-border bg-muted/20 p-3">
+            <div className="flex justify-between text-[11px]">
+              <span className="text-muted-foreground">Gewogen advies</span>
+              <span className="font-bold font-mono text-foreground">{fmt(p.weighted_advice)} stelen</span>
             </div>
           </div>
         </div>
@@ -184,9 +174,9 @@ const MarktMonitorDetailDrawer = ({ product: p, onClose }: Props) => {
           </div>
         </div>
 
-        {/* Recommended action */}
-        <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
-          <span className="text-[10px] font-semibold text-primary uppercase tracking-wide block mb-1">Aanbevolen actie</span>
+        {/* Summary */}
+        <div className="rounded-xl border border-border bg-muted/10 p-4">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide block mb-1">Samenvatting</span>
           <span className="text-[11px] text-foreground leading-relaxed block">{p.summary}</span>
         </div>
       </div>
