@@ -34,6 +34,11 @@ type TaskType = "development" | "analysis";
 type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
 type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
 
+interface OvernightActivity {
+  timestamp: string;
+  description: string;
+}
+
 interface AnalysisRun {
   run_id: string;
   methodiek_version: string;
