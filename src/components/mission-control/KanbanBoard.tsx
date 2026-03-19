@@ -440,9 +440,61 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
   );
 };
 
+/* ── Overnight Activity Timeline Drawer ── */
+
+const OvernightTimeline = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => (
+  <>
+    <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]" onClick={onClose} />
+    <div className="fixed top-0 right-0 z-50 h-full w-full max-w-md border-l border-border bg-card shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+      <div className="shrink-0 p-4 border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Moon className="w-4 h-4 text-purple-400" />
+            <h3 className="text-sm font-bold text-foreground">Overnight Activiteit</h3>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted/50 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1 font-mono">{card.title}</p>
+        {card.overnight_summary && (
+          <p className="text-[11px] text-foreground/80 mt-2 leading-relaxed">{card.overnight_summary}</p>
+        )}
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+        {card.overnight_activity_log && card.overnight_activity_log.length > 0 ? (
+          <div className="space-y-0">
+            {card.overnight_activity_log.map((entry, i) => (
+              <div key={i} className="flex gap-3 relative">
+                {/* Timeline line */}
+                {i < card.overnight_activity_log!.length - 1 && (
+                  <div className="absolute left-[7px] top-5 bottom-0 w-px bg-border" />
+                )}
+                {/* Dot */}
+                <div className="w-[15px] shrink-0 flex justify-center pt-1.5">
+                  <div className="w-2 h-2 rounded-full bg-purple-400 ring-2 ring-purple-400/20" />
+                </div>
+                {/* Content */}
+                <div className="pb-4 flex-1 min-w-0">
+                  <span className="text-[10px] font-mono font-bold text-purple-400">{entry.timestamp}</span>
+                  <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{entry.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-12 text-xs font-mono text-muted-foreground/40">
+            Geen overnight activiteit gelogd
+          </div>
+        )}
+      </div>
+    </div>
+  </>
+);
+
 /* ── Draggable Card ── */
 
-const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () => void }) => {
+const DraggableKanbanCard = ({ card, onOpen, onShowTimeline }: { card: KanbanCard; onOpen: () => void; onShowTimeline: () => void }) => {
   const {
     attributes,
     listeners,
