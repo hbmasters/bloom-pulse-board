@@ -23,7 +23,7 @@ const fmt = (n: number) => n.toLocaleString("nl-NL");
 const fmtPrice = (n: number) => `€${n.toFixed(3)}`;
 const fmtPct = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(1)}%`;
 
-type SortKey = "product" | "current_price" | "price_vs_last_week" | "weighted_advice" | "delta_vs_advice" | "availability";
+type SortKey = "product" | "current_price" | "price_vs_last_week" | "weighted_advice" | "availability";
 type SortDir = "asc" | "desc";
 
 const TrendIcon = ({ trend }: { trend: PriceTrend }) => {
@@ -37,8 +37,7 @@ const MarktMonitorPanel = () => {
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [trendFilter, setTrendFilter] = useState<PriceTrend | null>(null);
   const [adviceFilter, setAdviceFilter] = useState<BuyAdvice | null>(null);
-  const [shortageOnly, setShortageOnly] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>("delta_vs_advice");
+  const [sortKey, setSortKey] = useState<SortKey>("weighted_advice");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedProduct, setSelectedProduct] = useState<MarktMonitorProduct | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -49,7 +48,6 @@ const MarktMonitorPanel = () => {
       if (familyFilter && m.product_family !== familyFilter) return false;
       if (trendFilter && m.market_trend !== trendFilter) return false;
       if (adviceFilter && m.buy_advice !== adviceFilter) return false;
-      if (shortageOnly && m.delta_vs_advice <= 0) return false;
       return true;
     });
     list = [...list].sort((a, b) => {
@@ -58,39 +56,36 @@ const MarktMonitorPanel = () => {
       return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
     return list;
-  }, [search, familyFilter, trendFilter, adviceFilter, shortageOnly, sortKey, sortDir]);
+  }, [search, familyFilter, trendFilter, adviceFilter, sortKey, sortDir]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("desc"); }
   };
 
-  /* Dashboard KPIs */
   const kpis = useMemo(() => {
     const data = marktMonitorData;
     return {
       totalProducts: data.length,
-      totalShortage: data.reduce((s, m) => s + Math.max(0, m.delta_vs_advice), 0),
       avgPriceTrend: +(data.reduce((s, m) => s + m.price_vs_last_week, 0) / data.length).toFixed(1),
       criticalCount: data.filter(m => m.buy_advice === "risk_shortage" || m.buy_advice === "risk_expensive").length,
       buyNowCount: data.filter(m => m.buy_advice === "buy_now").length,
       chanceCount: data.filter(m => m.buy_advice === "chance_drop").length,
       totalAdvised: data.reduce((s, m) => s + m.weighted_advice, 0),
-      totalPurchased: data.reduce((s, m) => s + m.current_purchased, 0),
+      totalAvailability: data.reduce((s, m) => s + m.availability, 0),
     };
   }, []);
 
-  const hasActiveFilters = search || familyFilter || trendFilter || adviceFilter || shortageOnly;
+  const hasActiveFilters = search || familyFilter || trendFilter || adviceFilter;
 
   return (
     <div className="space-y-4">
       {/* Dashboard KPI cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {[
           { label: "Producten", value: `${kpis.totalProducts}`, sub: "in monitor", variant: "default" as const },
-          { label: "Totaal advies", value: fmt(kpis.totalAdvised), sub: "stelen", variant: "default" as const },
-          { label: "Ingekocht", value: fmt(kpis.totalPurchased), sub: "stelen", variant: "default" as const },
-          { label: "Tekort", value: fmt(kpis.totalShortage), sub: "stelen", variant: kpis.totalShortage > 0 ? "critical" as const : "ok" as const },
+          { label: "Totaal advies", value: fmt(kpis.totalAdvised), sub: "stelen verwacht", variant: "default" as const },
+          { label: "Beschikbaar", value: fmt(kpis.totalAvailability), sub: "stelen aanbod", variant: "default" as const },
           { label: "Gem. trend", value: fmtPct(kpis.avgPriceTrend), sub: "WoW", variant: kpis.avgPriceTrend > 3 ? "critical" as const : kpis.avgPriceTrend < -1 ? "ok" as const : "warning" as const },
           { label: "Risico", value: `${kpis.criticalCount}`, sub: "producten", variant: kpis.criticalCount > 0 ? "critical" as const : "ok" as const },
           { label: "Koop nu", value: `${kpis.buyNowCount}`, sub: "producten", variant: kpis.buyNowCount > 0 ? "critical" as const : "default" as const },
@@ -126,7 +121,7 @@ const MarktMonitorPanel = () => {
         </button>
 
         {hasActiveFilters && (
-          <button onClick={() => { setSearch(""); setFamilyFilter(null); setTrendFilter(null); setAdviceFilter(null); setShortageOnly(false); }}
+          <button onClick={() => { setSearch(""); setFamilyFilter(null); setTrendFilter(null); setAdviceFilter(null); }}
             className="text-[10px] font-medium px-2 py-1 rounded-lg border border-border text-muted-foreground hover:text-foreground">
             Reset
           </button>
@@ -157,13 +152,6 @@ const MarktMonitorPanel = () => {
               {buyAdviceLabels[a].label}
             </button>
           ))}
-
-          <div className="w-px h-4 bg-border mx-1" />
-
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input type="checkbox" checked={shortageOnly} onChange={e => setShortageOnly(e.target.checked)} className="rounded border-border w-3 h-3" />
-            <span className="text-[10px] font-medium text-muted-foreground">Alleen tekorten</span>
-          </label>
         </div>
       )}
 
@@ -180,14 +168,12 @@ const MarktMonitorPanel = () => {
                 { key: null, label: "7d gem.", w: "" },
                 { key: null, label: "30d gem.", w: "" },
                 { key: null, label: "Trend", w: "" },
+                { key: "availability" as SortKey, label: "Beschikbaar", w: "" },
                 { key: null, label: "Hist. stelen", w: "" },
                 { key: null, label: "Progn. stelen", w: "" },
                 { key: null, label: "Markt stelen", w: "" },
                 { key: "weighted_advice" as SortKey, label: "Advies", w: "" },
-                { key: null, label: "Ingekocht", w: "" },
-                { key: "delta_vs_advice" as SortKey, label: "Δ Advies", w: "" },
                 { key: null, label: "Confidence", w: "" },
-                
                 { key: null, label: "", w: "w-6" },
               ].map((h, i) => (
                 <th key={i} className={cn("px-2 py-2.5 text-left font-medium text-muted-foreground whitespace-nowrap", h.w)}
@@ -205,68 +191,40 @@ const MarktMonitorPanel = () => {
             {filtered.map(m => {
               const trend = trendLabels[m.market_trend];
               const conf = confidenceLabels[m.confidence];
-              const advice = buyAdviceLabels[m.buy_advice];
-              const isShortage = m.delta_vs_advice > 0;
-              const isOverstock = m.delta_vs_advice < 0;
 
               return (
                 <tr key={m.id}
                   className="border-b border-border/30 hover:bg-muted/10 transition-colors cursor-pointer"
                   onClick={() => setSelectedProduct(m)}>
-                  {/* Product */}
                   <td className="px-2 py-2.5">
                     <div className="flex flex-col">
                       <span className="font-medium text-foreground whitespace-nowrap">{m.product}</span>
                       <span className="text-[9px] text-muted-foreground">{m.product_family}{m.quality ? ` · ${m.quality}` : ""}</span>
                     </div>
                   </td>
-                  {/* Current price */}
                   <td className="px-2 py-2.5 font-mono font-semibold text-foreground">{fmtPrice(m.current_price)}</td>
-                  {/* Δ day */}
                   <td className={cn("px-2 py-2.5 font-mono text-[10px]", m.price_vs_yesterday > 1 ? "text-destructive" : m.price_vs_yesterday < -1 ? "text-accent" : "text-muted-foreground")}>
                     {fmtPct(m.price_vs_yesterday)}
                   </td>
-                  {/* Δ week */}
                   <td className={cn("px-2 py-2.5 font-mono text-[10px]", m.price_vs_last_week > 3 ? "text-destructive" : m.price_vs_last_week < -1 ? "text-accent" : "text-muted-foreground")}>
                     {fmtPct(m.price_vs_last_week)}
                   </td>
-                  {/* 7d avg */}
                   <td className="px-2 py-2.5 font-mono text-muted-foreground">{fmtPrice(m.avg_price_7d)}</td>
-                  {/* 30d avg */}
                   <td className="px-2 py-2.5 font-mono text-muted-foreground">{fmtPrice(m.avg_price_30d)}</td>
-                  {/* Trend */}
                   <td className="px-2 py-2.5">
                     <span className={cn("flex items-center gap-1 font-medium", trend.color)}>
                       <TrendIcon trend={m.market_trend} />
                       <span className="text-[9px]">{trend.label}</span>
                     </span>
                   </td>
-                  {/* History stems */}
+                  <td className="px-2 py-2.5 font-mono text-foreground/80">{fmt(m.availability)}</td>
                   <td className="px-2 py-2.5 font-mono text-foreground/80">{fmt(m.expected_history)}</td>
-                  {/* Forecast stems */}
                   <td className="px-2 py-2.5 font-mono text-foreground/80">{fmt(m.expected_forecast)}</td>
-                  {/* Market stems */}
                   <td className="px-2 py-2.5 font-mono text-foreground/80">{fmt(m.expected_market)}</td>
-                  {/* Weighted advice */}
                   <td className="px-2 py-2.5 font-mono font-bold text-foreground">{fmt(m.weighted_advice)}</td>
-                  {/* Current purchased */}
-                  <td className="px-2 py-2.5 font-mono text-muted-foreground">{fmt(m.current_purchased)}</td>
-                  {/* Delta */}
-                  <td className="px-2 py-2.5">
-                    <span className={cn("font-mono font-semibold text-[10px]",
-                      isShortage ? "text-destructive" : isOverstock ? "text-accent" : "text-foreground"
-                    )}>
-                      {isShortage ? `+${fmt(m.delta_vs_advice)}` : isOverstock ? fmt(m.delta_vs_advice) : "0"}
-                    </span>
-                    {isShortage && <span className="text-[8px] text-destructive ml-1">tekort</span>}
-                  </td>
-                  {/* Confidence */}
                   <td className="px-2 py-2.5">
                     <span className={cn("text-[8px] font-medium px-1.5 py-0.5 rounded-full border", conf.color)}>{conf.label}</span>
                   </td>
-
-
-                  {/* Arrow */}
                   <td className="px-2 py-2.5">
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                   </td>
@@ -279,8 +237,6 @@ const MarktMonitorPanel = () => {
           </tbody>
         </table>
       </div>
-
-
 
       {/* Weights info */}
       <div className="flex items-center gap-4 text-[9px] text-muted-foreground px-1">
