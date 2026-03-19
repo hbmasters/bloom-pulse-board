@@ -8,6 +8,16 @@ import type { AnalyticalDomain } from "./block-domain-colors";
 
 // ── Shared sub-types ──
 
+export type BlockPeriodGranularity = "day" | "week" | "month" | "quarter" | "year" | "custom";
+
+export interface BlockPeriod {
+  granularity: BlockPeriodGranularity;
+  label: string;           // e.g. "Week 12", "Maart 2026", "Ma 17 mrt"
+  start?: string;          // ISO date
+  end?: string;            // ISO date
+  comparison?: string;     // e.g. "vs Week 11", "vs Vorig Jaar"
+}
+
 export interface BlockKPI {
   label: string;
   value: string | number;
