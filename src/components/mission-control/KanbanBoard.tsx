@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import {
   LayoutGrid, MoreHorizontal, ArrowUp, ArrowRight, ArrowDown,
   Flower2, Truck, ClipboardCheck, Users, Snowflake, PackageCheck,
   Filter, X, Search, Calendar, User, GripVertical,
   Code2, BarChart3, CheckCircle2, Clock, Loader2, AlertCircle, ChevronDown, ChevronUp, FileText,
-  History, FlaskConical, ExternalLink, RefreshCw, Archive
+  History, FlaskConical, ExternalLink, RefreshCw, Archive, Moon
 } from "lucide-react";
 import {
   DndContext,
@@ -33,6 +33,11 @@ type Status = "todo" | "in_progress" | "review" | "done";
 type TaskType = "development" | "analysis";
 type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
 type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
+
+interface OvernightActivity {
+  timestamp: string;
+  description: string;
+}
 
 interface AnalysisRun {
   run_id: string;
@@ -70,6 +75,11 @@ interface KanbanCard {
   result_updated_at?: string;
   // Analysis run history
   run_history?: AnalysisRun[];
+  // Overnight activity tracking
+  overnight_flag?: boolean;
+  overnight_summary?: string;
+  overnight_activity_log?: OvernightActivity[];
+  last_activity_at?: string;
 }
 
 interface KanbanColumn {
@@ -132,8 +142,15 @@ const initialCards: KanbanCard[] = [
   { id: "2",  title: "Bezetting middag plannen",      description: "Shift 2 bezetting afstemmen met beschikbare medewerkers.",                  category: "planning",  priority: "medium", labels: ["shift-2"],              status: "todo",        task_type: "development", startTime: "12:00", stopTime: "13:00", createdAt: "27 feb" },
   { id: "8",  title: "Nieuwe medewerker inwerken",    description: "Onboarding programma doorlopen met nieuwe medewerker op lijn 2.",           category: "personeel", priority: "low",    labels: ["onboarding"],           status: "todo",        task_type: "development", assignee: "Maria", startTime: "09:00", stopTime: "17:00", createdAt: "25 feb" },
   { id: "11", title: "Verpakkingsmateriaal bestellen", description: "Voorraad dozen en sleeves aanvullen voor volgende week.",                  category: "logistiek", priority: "medium", labels: ["voorraad"],             status: "todo",        task_type: "development", createdAt: "27 feb" },
-  { id: "3",  title: "BQ Field L produceren",         description: "Lopende productie op lijn 2, target 180 stuks.",                            category: "productie", priority: "high",   labels: ["lijn-2", "actief"],     status: "in_progress", task_type: "development", assignee: "Jan",    dueDate: "28 feb", startTime: "06:30", stopTime: "14:00", createdAt: "28 feb" },
-  { id: "5",  title: "Koelcel voorraad tellen",       description: "Inventarisatie koelcel 1 en 2 voor planning morgen.",                       category: "koelcel",   priority: "medium", labels: ["inventaris"],           status: "in_progress", task_type: "development", startTime: "15:00", stopTime: "16:00", createdAt: "28 feb" },
+  { id: "3",  title: "BQ Field L produceren",         description: "Lopende productie op lijn 2, target 180 stuks.",                            category: "productie", priority: "high",   labels: ["lijn-2", "actief"],     status: "in_progress", task_type: "development", assignee: "Jan",    dueDate: "28 feb", startTime: "06:30", stopTime: "14:00", createdAt: "28 feb", overnight_flag: true, last_activity_at: "Vandaag 06:12", overnight_summary: "Forecast engine afgerond, wacht op Axerrio feed", overnight_activity_log: [
+    { timestamp: "06:12", description: "Completed forecast engine integration" },
+    { timestamp: "04:48", description: "Updated Marktmonitor adapter" },
+    { timestamp: "02:15", description: "Detected missing Axerrio feed" },
+  ] },
+  { id: "5",  title: "Koelcel voorraad tellen",       description: "Inventarisatie koelcel 1 en 2 voor planning morgen.",                       category: "koelcel",   priority: "medium", labels: ["inventaris"],           status: "in_progress", task_type: "development", startTime: "15:00", stopTime: "16:00", createdAt: "28 feb", overnight_flag: true, last_activity_at: "Vandaag 03:30", overnight_summary: "Temperatuurlog bijgewerkt vanuit sensor data", overnight_activity_log: [
+    { timestamp: "03:30", description: "Temperatuurlog koelcel 1 & 2 automatisch bijgewerkt" },
+    { timestamp: "01:10", description: "Sensor calibratie check uitgevoerd" },
+  ] },
   { id: "12", title: "Temperatuur koelcel 3 checken", description: "Melding ontvangen van temperatuurafwijking, handmatige controle nodig.",    category: "koelcel",   priority: "high",   labels: ["urgent", "melding"],    status: "in_progress", task_type: "development", assignee: "Pieter", startTime: "09:15", createdAt: "28 feb" },
   { id: "10", title: "Transport schema bevestigen",   description: "Ochtendroute bevestigen met transporteur en laadtijden doorgeven.",         category: "logistiek", priority: "high",   labels: ["ochtend"],              status: "review",      task_type: "development", assignee: "Pieter", dueDate: "28 feb", startTime: "05:30", stopTime: "06:00", createdAt: "27 feb" },
   { id: "6",  title: "BQ de Luxe afgerond",           description: "Productie succesvol afgerond. 195/200 boeketten goedgekeurd.",              category: "productie", priority: "medium", labels: ["lijn-1", "✓"],          status: "done",        task_type: "development", assignee: "Jan", startTime: "06:30", stopTime: "12:00", createdAt: "27 feb" },
@@ -141,7 +158,11 @@ const initialCards: KanbanCard[] = [
   { id: "14", title: "Weekplanning week 10",          description: "Planning voor volgende week afgerond en gecommuniceerd.",                   category: "planning",  priority: "medium", labels: ["planning", "✓"],        status: "done",        task_type: "development", assignee: "Maria", startTime: "08:00", stopTime: "10:00", createdAt: "26 feb" },
 
   // Analysis tasks
-  { id: "4",  title: "BQ Elegance kwaliteitscheck",   description: "Steekproef van 20 boeketten controleren op kwaliteitsnormen.",              category: "qc",        priority: "medium", labels: ["steekproef"],           status: "in_progress", task_type: "analysis", assignee: "Lisa", analysis_kind: "quality", analysis_status: "running", methodiek_name: "HBM Productanalyse", methodiek_id: "prod-efficiency", methodiek_version: "v3.2", result_ready_flag: false, createdAt: "28 feb" },
+  { id: "4",  title: "BQ Elegance kwaliteitscheck",   description: "Steekproef van 20 boeketten controleren op kwaliteitsnormen.",              category: "qc",        priority: "medium", labels: ["steekproef"],           status: "in_progress", task_type: "analysis", assignee: "Lisa", analysis_kind: "quality", analysis_status: "running", methodiek_name: "HBM Productanalyse", methodiek_id: "prod-efficiency", methodiek_version: "v3.2", result_ready_flag: false, createdAt: "28 feb", overnight_flag: true, last_activity_at: "Vandaag 05:44", overnight_summary: "Steekproef data automatisch verwerkt, 3 resultaten klaar", overnight_activity_log: [
+    { timestamp: "05:44", description: "Steekproef resultaten van lijn 1 verwerkt" },
+    { timestamp: "04:12", description: "Automatische kwaliteitsscan afgerond" },
+    { timestamp: "03:00", description: "Nachtelijke batch controle gestart" },
+  ] },
   { id: "9",  title: "BQ Lovely verpakkingcheck",     description: "Verpakking en etikettering controleren voor verzending.",                   category: "qc",        priority: "low",    labels: ["verpakking"],           status: "review",      task_type: "analysis", analysis_kind: "quality", analysis_status: "completed", methodiek_name: "HBM Productanalyse", methodiek_id: "prod-efficiency", methodiek_version: "v3.2", result_ready_flag: true, result_summary: "18/20 boeketten goedgekeurd. 2 afwijkingen op etikettering geconstateerd.", result_payload: "Steekproef van 20 boeketten uitgevoerd.\n\n**Resultaten:**\n- 18 boeketten voldoen aan alle kwaliteitsnormen\n- 2 boeketten hebben afwijkende etikettering (verkeerde barcode positie)\n- Bloem kwaliteit: 100% goedgekeurd\n- Verpakking integriteit: 100% goedgekeurd\n\n**Aanbeveling:** Etiketteermachine op lijn 3 laten herkalibreren.", result_updated_at: "28 feb 14:30", createdAt: "27 feb", run_history: [
     { run_id: "run-9a", methodiek_version: "v3.2", analysis_status: "completed", result_summary: "18/20 boeketten goedgekeurd. 2 afwijkingen op etikettering.", data_scope: "Batch BQ-Lovely-2802", created_at: "28 feb 14:30" },
     { run_id: "run-9b", methodiek_version: "v3.1", analysis_status: "completed", result_summary: "15/20 boeketten goedgekeurd. 5 afwijkingen (3 etikettering, 2 verpakking).", data_scope: "Batch BQ-Lovely-2702", created_at: "27 feb 11:00" },
@@ -419,9 +440,61 @@ const CardDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => v
   );
 };
 
+/* ── Overnight Activity Timeline Drawer ── */
+
+const OvernightTimeline = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => (
+  <>
+    <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]" onClick={onClose} />
+    <div className="fixed top-0 right-0 z-50 h-full w-full max-w-md border-l border-border bg-card shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+      <div className="shrink-0 p-4 border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Moon className="w-4 h-4 text-purple-400" />
+            <h3 className="text-sm font-bold text-foreground">Overnight Activiteit</h3>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted/50 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1 font-mono">{card.title}</p>
+        {card.overnight_summary && (
+          <p className="text-[11px] text-foreground/80 mt-2 leading-relaxed">{card.overnight_summary}</p>
+        )}
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+        {card.overnight_activity_log && card.overnight_activity_log.length > 0 ? (
+          <div className="space-y-0">
+            {card.overnight_activity_log.map((entry, i) => (
+              <div key={i} className="flex gap-3 relative">
+                {/* Timeline line */}
+                {i < card.overnight_activity_log!.length - 1 && (
+                  <div className="absolute left-[7px] top-5 bottom-0 w-px bg-border" />
+                )}
+                {/* Dot */}
+                <div className="w-[15px] shrink-0 flex justify-center pt-1.5">
+                  <div className="w-2 h-2 rounded-full bg-purple-400 ring-2 ring-purple-400/20" />
+                </div>
+                {/* Content */}
+                <div className="pb-4 flex-1 min-w-0">
+                  <span className="text-[10px] font-mono font-bold text-purple-400">{entry.timestamp}</span>
+                  <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{entry.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-12 text-xs font-mono text-muted-foreground/40">
+            Geen overnight activiteit gelogd
+          </div>
+        )}
+      </div>
+    </div>
+  </>
+);
+
 /* ── Draggable Card ── */
 
-const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () => void }) => {
+const DraggableKanbanCard = ({ card, onOpen, onShowTimeline }: { card: KanbanCard; onOpen: () => void; onShowTimeline: () => void }) => {
   const {
     attributes,
     listeners,
@@ -474,7 +547,24 @@ const DraggableKanbanCard = ({ card, onOpen }: { card: KanbanCard; onOpen: () =>
         </p>
       )}
 
-      {/* Row 2: type badge + category + labels */}
+      {/* Overnight badge + summary */}
+      {card.overnight_flag && (
+        <div
+          className="mt-1.5 ml-4 p-1.5 rounded-md bg-purple-500/8 border border-purple-500/15 cursor-pointer hover:bg-purple-500/12 transition-colors"
+          onClick={e => { e.stopPropagation(); onShowTimeline(); }}
+        >
+          <div className="flex items-center gap-1.5">
+            <Moon className="w-3 h-3 text-purple-400" />
+            <span className="text-[8px] font-mono font-bold text-purple-400 uppercase tracking-wider">Overnight updates</span>
+            {card.last_activity_at && (
+              <span className="text-[7px] font-mono text-muted-foreground/50 ml-auto">{card.last_activity_at}</span>
+            )}
+          </div>
+          {card.overnight_summary && (
+            <p className="text-[9px] text-foreground/60 mt-0.5 line-clamp-1 leading-relaxed pl-[18px]">{card.overnight_summary}</p>
+          )}
+        </div>
+      )}
       <div className="flex items-center gap-1.5 mt-2 flex-wrap pl-4">
         <TaskTypeBadge taskType={card.task_type} />
         <CategoryBadge category={card.category} />
@@ -567,6 +657,7 @@ const KanbanBoard = () => {
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [timelineCardId, setTimelineCardId] = useState<string | null>(null);
 
   const allAssignees = useMemo(() => [...new Set(cards.filter(c => c.assignee).map(c => c.assignee!))].sort(), [cards]);
 
@@ -815,7 +906,7 @@ const KanbanBoard = () => {
                       </div>
                     )}
                     {colCards.map(card => (
-                      <DraggableKanbanCard key={card.id} card={card} onOpen={() => setExpandedCardId(card.id)} />
+                      <DraggableKanbanCard key={card.id} card={card} onOpen={() => setExpandedCardId(card.id)} onShowTimeline={() => setTimelineCardId(card.id)} />
                     ))}
                   </div>
                 </SortableContext>
@@ -829,6 +920,12 @@ const KanbanBoard = () => {
       {expandedCard && (
         <CardDetailPanel card={expandedCard} onClose={() => setExpandedCardId(null)} />
       )}
+
+      {/* Overnight timeline drawer */}
+      {timelineCardId && (() => {
+        const tlCard = cards.find(c => c.id === timelineCardId);
+        return tlCard ? <OvernightTimeline card={tlCard} onClose={() => setTimelineCardId(null)} /> : null;
+      })()}
     </div>
   );
 };
