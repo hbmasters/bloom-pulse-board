@@ -120,7 +120,7 @@ export interface MarginDeviationData extends BlockBase {
   kpis?: BlockKPI[];
 }
 
-export interface FloritrackLogisticsData {
+export interface FloritrackLogisticsData extends BlockBase {
   block_type: "floritrack-logistics";
   title: string;
   summary: string;
