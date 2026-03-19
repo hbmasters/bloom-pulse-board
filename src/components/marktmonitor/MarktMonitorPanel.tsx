@@ -284,32 +284,7 @@ const MarktMonitorPanel = () => {
         </table>
       </div>
 
-      {/* Advice summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {filtered.filter(m => m.delta_vs_advice > 500 || m.buy_advice === "risk_shortage" || m.buy_advice === "buy_now").map(m => {
-          const advice = buyAdviceLabels[m.buy_advice];
-          return (
-            <div key={m.id}
-              className="rounded-xl border border-border bg-card p-4 space-y-2 cursor-pointer hover:border-primary/30 transition-colors"
-              onClick={() => setSelectedProduct(m)}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">{m.product}</span>
-                <span className={cn("text-[8px] font-medium px-2 py-0.5 rounded-full border", advice.color)}>
-                  {advice.emoji} {advice.label}
-                </span>
-              </div>
-              <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{m.summary}</p>
-              <div className="flex items-center gap-3 text-[10px] font-mono">
-                <span className="text-muted-foreground">Advies: <span className="font-semibold text-foreground">{fmt(m.weighted_advice)}</span></span>
-                <span className="text-muted-foreground">|</span>
-                <span className={cn(m.delta_vs_advice > 0 ? "text-destructive font-semibold" : "text-accent")}>
-                  {m.delta_vs_advice > 0 ? `+${fmt(m.delta_vs_advice)} tekort` : "Gedekt"}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+
 
       {/* Weights info */}
       <div className="flex items-center gap-4 text-[9px] text-muted-foreground px-1">
