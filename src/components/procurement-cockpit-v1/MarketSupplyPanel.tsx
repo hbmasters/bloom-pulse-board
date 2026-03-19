@@ -205,7 +205,15 @@ const MarketSupplyPanel = ({ familyFilter, onFamilyFilterChange, families }: {
                           <div className="flex items-center justify-between flex-wrap gap-3">
                             <div className="flex items-center gap-3">
                               <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                                52-weken overzicht
+                                Historie & Forecast
+                              </span>
+                              <span className="flex items-center gap-1.5 text-[9px]">
+                                <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                                <span className="text-muted-foreground">Historie</span>
+                              </span>
+                              <span className="flex items-center gap-1.5 text-[9px]">
+                                <span className="w-2 h-2 rounded-full bg-primary/50" />
+                                <span className="text-muted-foreground">Forecast</span>
                               </span>
                               {stabilityEntry && (() => {
                                 const stabLabel = supplierStabilityLabels[stabilityEntry.stability];
