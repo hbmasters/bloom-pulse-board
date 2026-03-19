@@ -151,7 +151,7 @@ export interface AlertExceptionData extends BlockBase {
   kpis?: BlockKPI[];
 }
 
-export interface ComparisonData {
+export interface ComparisonData extends BlockBase {
   block_type: "comparison";
   title: string;
   summary: string;
