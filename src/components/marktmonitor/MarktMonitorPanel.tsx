@@ -278,7 +278,7 @@ const MarktMonitorPanel = () => {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={16} className="px-4 py-8 text-center text-muted-foreground text-[11px]">Geen producten gevonden</td></tr>
+              <tr><td colSpan={14} className="px-4 py-8 text-center text-muted-foreground text-[11px]">Geen producten gevonden</td></tr>
             )}
           </tbody>
         </table>
