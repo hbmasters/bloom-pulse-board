@@ -163,7 +163,7 @@ export interface ComparisonData extends BlockBase {
   conclusion?: string;
 }
 
-export interface DecisionData {
+export interface DecisionData extends BlockBase {
   block_type: "decision";
   title: string;
   summary: string;

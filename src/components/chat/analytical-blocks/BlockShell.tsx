@@ -6,21 +6,36 @@
  */
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DOMAIN_COLORS, type AnalyticalDomain } from "./block-domain-colors";
-import type { BlockKPI } from "./block-types";
+import type { BlockKPI, BlockPeriod } from "./block-types";
 
 interface BlockShellProps {
   domain: AnalyticalDomain;
   title: string;
   icon: React.ReactNode;
   badge?: string | number;
+  period?: BlockPeriod;
   defaultOpen?: boolean;
   children: React.ReactNode;
 }
 
-export const BlockShell = ({ domain, title, icon, badge, defaultOpen = false, children }: BlockShellProps) => {
+const GRANULARITY_ICON: Record<string, string> = {
+  day: "📅", week: "📆", month: "🗓️", quarter: "📊", year: "📈", custom: "🔍",
+};
+
+export const PeriodBadge = ({ period }: { period: BlockPeriod }) => (
+  <span className="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border border-border/60 bg-muted/40 text-muted-foreground">
+    <Calendar className="w-2.5 h-2.5" />
+    <span>{period.label}</span>
+    {period.comparison && (
+      <span className="text-primary/70 font-semibold">{period.comparison}</span>
+    )}
+  </span>
+);
+
+export const BlockShell = ({ domain, title, icon, badge, period, defaultOpen = false, children }: BlockShellProps) => {
   const [open, setOpen] = useState(defaultOpen);
   const colors = DOMAIN_COLORS[domain];
 
@@ -30,7 +45,7 @@ export const BlockShell = ({ domain, title, icon, badge, defaultOpen = false, ch
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
       >
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 flex-wrap">
           <span className={colors.iconClass}>{icon}</span>
           <span className="font-medium">{title}</span>
           {badge !== undefined && (
@@ -38,6 +53,7 @@ export const BlockShell = ({ domain, title, icon, badge, defaultOpen = false, ch
               {badge}
             </span>
           )}
+          {period && <PeriodBadge period={period} />}
         </span>
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
