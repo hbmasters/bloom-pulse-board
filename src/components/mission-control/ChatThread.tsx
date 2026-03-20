@@ -226,7 +226,13 @@ const analysisSteps = [
   "Rapport samenstellen…",
 ];
 
-const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport"];
+const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport", "commerci"];
+
+const COMMERCIAL_KEYWORDS = ["commerciële productanalyse", "commerciele productanalyse", "productanalyse", "commercieel"];
+
+function isCommercialQuery(text: string): boolean {
+  return COMMERCIAL_KEYWORDS.some(k => text.toLowerCase().includes(k));
+}
 
 function isAnalysisQuery(text: string): boolean {
   const lower = text.toLowerCase();
