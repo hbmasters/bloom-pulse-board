@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import {
   ChevronLeft, ChevronRight, X, Calendar, RefreshCw, Clock,
   ArrowUp, ArrowRight, ArrowDown, Flower2, Truck, ClipboardCheck,
-  Users, Snowflake, PackageCheck, Code2, BarChart3, User, Bot, Filter
+  Users, Snowflake, PackageCheck, Code2, BarChart3, User, Bot, Filter, Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, startOfWeek, addDays, addWeeks, isToday } from "date-fns";
@@ -46,6 +46,23 @@ const recurrenceLabels: Record<string, string> = {
   monthly: "Maandelijks",
 };
 
+/** Calculate duration in minutes from HH:MM strings */
+const calcDuration = (start?: string, stop?: string): number | null => {
+  if (!start || !stop) return null;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = stop.split(":").map(Number);
+  if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return null;
+  const mins = (eh * 60 + em) - (sh * 60 + sm);
+  return mins > 0 ? mins : null;
+};
+
+const formatDuration = (mins: number): string => {
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}u ${m}m` : `${h}u`;
+};
+
 /* ── Detail Panel (right side — mirrors Kanban) ── */
 
 const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => {
@@ -53,6 +70,7 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
   const CategoryIcon = categoryConfig[card.category].icon;
   const TypeIcon = taskTypeConfig[card.task_type].icon;
   const statusCfg = statusLabels[card.status];
+  const duration = calcDuration(card.startTime, card.stopTime);
 
   return (
     <>
@@ -111,6 +129,22 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
             </div>
           )}
 
+          {/* Planning / Time block */}
+          {(card.startTime || card.stopTime || card.dueDate) && (
+            <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Planning</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {card.startTime && <InfoRow label="Start" value={card.startTime} />}
+                {card.stopTime && <InfoRow label="Einde" value={card.stopTime} />}
+                {duration && <InfoRow label="Duur" value={formatDuration(duration)} valueClass="text-primary" />}
+                {card.dueDate && <InfoRow label="Deadline" value={card.dueDate} />}
+              </div>
+            </div>
+          )}
+
           {/* Recurring info */}
           {card.recurring && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
@@ -127,18 +161,37 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
             </div>
           )}
 
-          {/* Time info */}
-          {(card.startTime || card.stopTime || card.dueDate) && (
-            <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+          {/* Overnight */}
+          {card.overnight_flag && (
+            <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Planning</span>
+                <Moon className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Overnight activiteit</span>
+                {card.last_activity_at && (
+                  <span className="text-[9px] font-mono text-purple-400/60 ml-auto">{card.last_activity_at}</span>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {card.startTime && <InfoRow label="Start" value={card.startTime} />}
-                {card.stopTime && <InfoRow label="Stop" value={card.stopTime} />}
-                {card.dueDate && <InfoRow label="Deadline" value={card.dueDate} />}
-              </div>
+              {card.overnight_summary && (
+                <p className="text-xs text-foreground/80 leading-relaxed">{card.overnight_summary}</p>
+              )}
+              {card.overnight_activity_log && card.overnight_activity_log.length > 0 && (
+                <div className="space-y-0 mt-2">
+                  {card.overnight_activity_log.map((entry, i) => (
+                    <div key={i} className="flex gap-3 relative">
+                      {i < card.overnight_activity_log!.length - 1 && (
+                        <div className="absolute left-[7px] top-5 bottom-0 w-px bg-purple-500/20" />
+                      )}
+                      <div className="w-[15px] shrink-0 flex justify-center pt-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-400 ring-2 ring-purple-400/20" />
+                      </div>
+                      <div className="pb-3 flex-1 min-w-0">
+                        <span className="text-[9px] font-mono font-bold text-purple-400">{entry.timestamp}</span>
+                        <p className="text-[11px] text-foreground/70 mt-0.5 leading-relaxed">{entry.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -174,7 +227,7 @@ const InfoRow = ({ label, value, valueClass }: { label: string; value: string; v
   </div>
 );
 
-/* ── Day Card (compact agenda item with labels + agent) ── */
+/* ── Day Card (compact agenda item) ── */
 
 const AgendaDayCard = ({ card, onClick }: { card: KanbanCard; onClick: () => void }) => {
   const catCfg = categoryConfig[card.category];
@@ -183,30 +236,48 @@ const AgendaDayCard = ({ card, onClick }: { card: KanbanCard; onClick: () => voi
   const statusCfg = statusLabels[card.status];
   const visibleLabels = card.labels.slice(0, 2);
   const extraCount = card.labels.length - 2;
+  const duration = calcDuration(card.startTime, card.stopTime);
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-2.5 rounded-lg border border-border bg-card transition-all group hover:border-primary/20 hover:shadow-sm"
+      className={cn(
+        "w-full text-left p-2.5 rounded-lg border border-border bg-card transition-all group hover:border-primary/20 hover:shadow-sm",
+        card.overnight_flag && "border-l-2 border-l-purple-500/40"
+      )}
     >
       <div className="flex items-start gap-2">
         <CatIcon className={cn("w-3.5 h-3.5 mt-0.5 shrink-0", catCfg.className.split(" ")[1])} />
         <div className="flex-1 min-w-0">
+          {/* Row 1: title + priority */}
           <div className="flex items-center gap-1.5">
             <h4 className="text-xs font-semibold text-foreground truncate flex-1">{card.title}</h4>
             <PriIcon className={cn("w-3 h-3 shrink-0", priorityConfig[card.priority].className)} />
           </div>
 
-          {/* Row 2: status + recurring + time */}
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {/* Row 2: status + recurring + time + duration */}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             {card.recurring && (
-              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-primary">
+              <span className="inline-flex items-center text-[8px] font-mono font-bold text-primary">
                 <RefreshCw className="w-2.5 h-2.5" />
+              </span>
+            )}
+            {card.overnight_flag && (
+              <span className="inline-flex items-center gap-0.5 text-[7px] font-mono font-bold text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded">
+                <Moon className="w-2 h-2" />
+                Overnight
               </span>
             )}
             <span className={cn("text-[8px] font-mono font-medium", statusCfg.className)}>{statusCfg.label}</span>
             {card.startTime && (
-              <span className="text-[8px] font-mono text-muted-foreground">{card.startTime}{card.stopTime ? `–${card.stopTime}` : ""}</span>
+              <span className="text-[8px] font-mono text-muted-foreground">
+                {card.startTime}{card.stopTime ? `–${card.stopTime}` : ""}
+              </span>
+            )}
+            {duration && (
+              <span className="text-[7px] font-mono text-primary/60 bg-primary/5 px-1 py-0.5 rounded">
+                {formatDuration(duration)}
+              </span>
             )}
           </div>
 
@@ -246,14 +317,12 @@ const MCAgenda = () => {
 
   const allCards = useMemo(() => getKanbanCards(), []);
 
-  // Derive unique agents from cards
   const agentOptions = useMemo(() => {
     const set = new Set<string>();
     allCards.forEach(c => { if (c.agent) set.add(c.agent); });
     return Array.from(set).sort();
   }, [allCards]);
 
-  // Filter
   const agendaCards = useMemo(() => {
     return allCards.filter(c => {
       if (filterRecurring && !c.recurring) return false;
@@ -283,11 +352,26 @@ const MCAgenda = () => {
         map[days[dayIdx].key].push(card);
       }
     });
+    // Sort each day by startTime
+    Object.values(map).forEach(cards => {
+      cards.sort((a, b) => (a.startTime || "99:99").localeCompare(b.startTime || "99:99"));
+    });
     return map;
   }, [agendaCards, days]);
 
   const recurringCount = allCards.filter(c => c.recurring).length;
+  const overnightCount = agendaCards.filter(c => c.overnight_flag).length;
   const totalAgenda = agendaCards.length;
+
+  // Compute total planned hours for stats
+  const totalMinutes = useMemo(() => {
+    let total = 0;
+    agendaCards.forEach(c => {
+      const d = calcDuration(c.startTime, c.stopTime);
+      if (d) total += d;
+    });
+    return total;
+  }, [agendaCards]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -313,19 +397,29 @@ const MCAgenda = () => {
         </div>
 
         {/* Stats row */}
-        <div className="flex gap-4 md:gap-6 items-center flex-wrap">
+        <div className="flex gap-3 md:gap-5 items-center flex-wrap">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{totalAgenda} items</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <RefreshCw className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs text-primary font-medium">{recurringCount} terugkerend</span>
+            <Clock className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs text-primary font-medium">{formatDuration(totalMinutes)} gepland</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <RefreshCw className="w-3.5 h-3.5 text-primary/60" />
+            <span className="text-xs text-muted-foreground">{recurringCount} terugkerend</span>
+          </div>
+          {overnightCount > 0 && (
+            <div className="flex items-center gap-1.5">
+              <Moon className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-xs text-purple-400">{overnightCount} overnight</span>
+            </div>
+          )}
           <button
             onClick={() => setFilterRecurring(!filterRecurring)}
             className={cn(
-              "px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
+              "ml-auto px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
               filterRecurring
                 ? "bg-primary/15 text-primary border-primary/30"
                 : "border-border text-muted-foreground/40 hover:border-muted-foreground/30"
@@ -372,6 +466,7 @@ const MCAgenda = () => {
             const dayCards = cardsByDay[day.key] || [];
             const today = isToday(day.date);
             const hasRecurring = dayCards.some(c => c.recurring);
+            const dayMinutes = dayCards.reduce((s, c) => s + (calcDuration(c.startTime, c.stopTime) || 0), 0);
 
             return (
               <div
@@ -389,6 +484,7 @@ const MCAgenda = () => {
                   <div className={cn("text-[11px]", today ? "text-primary/80 font-medium" : "text-muted-foreground/60")}>{day.label}</div>
                   <div className="flex items-center justify-center gap-2 mt-1">
                     <span className="text-[9px] font-mono text-muted-foreground/50">{dayCards.length} items</span>
+                    {dayMinutes > 0 && <span className="text-[9px] font-mono text-primary/50">{formatDuration(dayMinutes)}</span>}
                     {hasRecurring && <RefreshCw className="w-2.5 h-2.5 text-primary/50" />}
                   </div>
                 </div>
