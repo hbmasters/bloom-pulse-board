@@ -19,6 +19,7 @@ import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
 import IntelligenceHub from "@/pages/IntelligenceHub";
+import MCAgenda from "@/components/mission-control/MCAgenda";
 import RiskRadar from "@/pages/RiskRadar";
 import ChanceRadar from "@/pages/ChanceRadar";
 import ProfitEngine from "@/pages/ProfitEngine";
@@ -40,7 +41,7 @@ import Verdelen from "@/pages/Verdelen";
 import OperationsIntelligence from "@/pages/OperationsIntelligence";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "agenda" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
@@ -48,6 +49,7 @@ const routeToView: Record<string, MCView> = {
   "/kpi": "kpis",
   "/notificaties": "notifications",
   "/weekplanner": "planner",
+  "/agenda": "agenda",
   "/system-status": "status",
   "/cron-jobs": "cronjobs",
   "/methodiek": "methodiek",
@@ -81,6 +83,7 @@ export const viewToRoute: Record<MCView, string> = {
   kpis: "/kpi",
   notifications: "/notificaties",
   planner: "/weekplanner",
+  agenda: "/agenda",
   status: "/system-status",
   cronjobs: "/cron-jobs",
   methodiek: "/methodiek",
@@ -175,6 +178,7 @@ const MissionControl = () => {
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
             {view === "planner" && <MCWeekPlanner />}
+            {view === "agenda" && <MCAgenda />}
             {view === "status" && <MCStatusPanel />}
             {view === "cronjobs" && <MCCronJobs />}
             {view === "methodiek" && <MCMethodiek />}

@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight, DollarSign, Cpu, Shield, ShieldCheck, Monitor, Compass, Radar, Package } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, CalendarCheck, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight, DollarSign, Cpu, Shield, ShieldCheck, Monitor, Compass, Radar, Package } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
@@ -45,6 +45,7 @@ const navSections: NavSection[] = [
       { id: "kpis", icon: BarChart3, label: "KPI's" },
       { id: "notifications", icon: Bell, label: "Notificaties" },
       { id: "planner", icon: CalendarDays, label: "Weekplanner" },
+      { id: "agenda", icon: CalendarCheck, label: "Agenda" },
       { id: "cronjobs", icon: Timer, label: "Cron Jobs" },
       { id: "methodiek", icon: Brain, label: "Methodiek" },
       { id: "agents", icon: Bot, label: "Agents" },
