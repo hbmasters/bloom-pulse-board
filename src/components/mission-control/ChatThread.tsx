@@ -450,14 +450,15 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
           let transportRisk: TransportRiskData | null = null;
           let analyticalBlock: AnalyticalBlockData | null = null;
           let verified: VerifiedResponseData | null = null;
+          let hasCommercial = false;
 
           if (isUser) {
             text = msg.content;
           } else if (isStreaming) {
             // Strip block markers while streaming
             text = msg.content
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)\n[\s\S]*?```/g, "")
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)[\s\S]*$/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified|commercial)\n[\s\S]*?```/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified|commercial)[\s\S]*$/g, "")
               .trim();
           } else {
             const parsed = parseAllBlocks(msg.content);
@@ -468,6 +469,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             transportRisk = parsed.transportRisk;
             analyticalBlock = parsed.analyticalBlock;
             verified = parsed.verified;
+            hasCommercial = parsed.hasCommercial;
           }
 
           const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
