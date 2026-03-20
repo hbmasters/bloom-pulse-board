@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight, DollarSign, Cpu, Shield, ShieldCheck, Monitor, Compass, Radar, Package } from "lucide-react";
+import { MessageSquare, LayoutGrid, Clock, Settings, X, BarChart3, Bell, CalendarDays, CalendarCheck, Timer, Brain, Bot, Crosshair, Zap, ShoppingCart, Factory, Briefcase, ChevronRight, DollarSign, Cpu, Shield, ShieldCheck, Monitor, Compass, Radar, Package } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import HBMasterLogo from "./HBMasterLogo";
