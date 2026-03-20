@@ -10,7 +10,7 @@ import KanbanBoard from "@/components/mission-control/KanbanBoard";
 import BuildRadarStrip from "@/components/mission-control/BuildRadarStrip";
 import KPIDashboard from "@/components/mission-control/KPIDashboard";
 import MCNotifications from "@/components/mission-control/MCNotifications";
-import MCWeekPlanner from "@/components/mission-control/MCWeekPlanner";
+
 import ChatHistory from "@/components/mission-control/ChatHistory";
 import MCMobileMenu from "@/components/mission-control/MCMobileMenu";
 import MCStatusPanel from "@/components/mission-control/MCStatusPanel";
@@ -41,14 +41,14 @@ import Verdelen from "@/pages/Verdelen";
 import OperationsIntelligence from "@/pages/OperationsIntelligence";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "agenda" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "agenda" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
   "/kanban": "kanban",
   "/kpi": "kpis",
   "/notificaties": "notifications",
-  "/weekplanner": "planner",
+  
   "/agenda": "agenda",
   "/system-status": "status",
   "/cron-jobs": "cronjobs",
@@ -82,7 +82,7 @@ export const viewToRoute: Record<MCView, string> = {
   kanban: "/kanban",
   kpis: "/kpi",
   notifications: "/notificaties",
-  planner: "/weekplanner",
+  
   agenda: "/agenda",
   status: "/system-status",
   cronjobs: "/cron-jobs",
@@ -177,7 +177,7 @@ const MissionControl = () => {
             )}
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
-            {view === "planner" && <MCWeekPlanner />}
+            
             {view === "agenda" && <MCAgenda />}
             {view === "status" && <MCStatusPanel />}
             {view === "cronjobs" && <MCCronJobs />}
