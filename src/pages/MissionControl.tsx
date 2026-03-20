@@ -19,6 +19,7 @@ import MCMethodiek from "@/components/mission-control/MCMethodiek";
 import MCAgents from "@/components/mission-control/MCAgents";
 import MCSettings from "@/components/mission-control/MCSettings";
 import IntelligenceHub from "@/pages/IntelligenceHub";
+import MCAgenda from "@/components/mission-control/MCAgenda";
 import RiskRadar from "@/pages/RiskRadar";
 import ChanceRadar from "@/pages/ChanceRadar";
 import ProfitEngine from "@/pages/ProfitEngine";
