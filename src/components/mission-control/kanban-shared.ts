@@ -55,4 +55,6 @@ export interface KanbanCard {
   recurrence_label?: string;
   next_run_at?: string;
   last_run_at?: string;
+  // Agent assignment
+  agent?: string;
 }
