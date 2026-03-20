@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -16,6 +16,7 @@ import { BLOCK_LABELS, BLOCK_DOMAIN_MAP } from "@/components/chat/analytical-blo
 import { DOMAIN_COLORS } from "@/components/chat/analytical-blocks/block-domain-colors";
 import VerifiedResponseCard from "@/components/chat/verified-response/VerifiedResponseCard";
 import type { VerifiedResponseData } from "@/components/chat/verified-response/verified-response-types";
+import { CommercialProductBlock } from "@/components/chat/analytical-blocks/variants/CommercialProductBlock";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -96,6 +97,13 @@ function parseVerifiedResponse(content: string): { text: string; verified: Verif
   }
 }
 
+function parseCommercialProduct(content: string): { text: string; hasCommercial: boolean } {
+  const match = content.match(/```hbmaster-commercial\n[\s\S]*?```/);
+  if (!match) return { text: content, hasCommercial: false };
+  const text = content.replace(/```hbmaster-commercial\n[\s\S]*?```/, "").trim();
+  return { text, hasCommercial: true };
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   analysis: AnalysisPresentationData | null;
@@ -104,6 +112,7 @@ function parseAllBlocks(content: string): {
   transportRisk: TransportRiskData | null;
   analyticalBlock: AnalyticalBlockData | null;
   verified: VerifiedResponseData | null;
+  hasCommercial: boolean;
 } {
   // Strip old workflow blocks silently (no longer rendered)
   let cleaned = content.replace(/```hbmaster-workflow\n[\s\S]*?```/g, "").trim();
@@ -113,7 +122,8 @@ function parseAllBlocks(content: string): {
   const { text: t4, transportRisk } = parseTransportRisk(t3);
   const { text: t5, block: analyticalBlock } = parseAnalyticalBlock(t4);
   const { text: t6, verified } = parseVerifiedResponse(t5);
-  return { text: t6, analysis, productCard, floritrack, transportRisk, analyticalBlock, verified };
+  const { text: t7, hasCommercial } = parseCommercialProduct(t6);
+  return { text: t7, analysis, productCard, floritrack, transportRisk, analyticalBlock, verified, hasCommercial };
 }
 
 /* ── Toggle panels ── */
@@ -180,6 +190,26 @@ const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
   );
 };
 
+const CommercialProductTogglePanel = () => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <Euro className="w-3.5 h-3.5 text-purple-500" />
+          Commerciële Productanalyse
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-1 pb-3 animate-fade-in">
+          <CommercialProductBlock />
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ── Thinking bubble ── */
 
 const standardSteps = [
@@ -196,7 +226,13 @@ const analysisSteps = [
   "Rapport samenstellen…",
 ];
 
-const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport"];
+const ANALYSIS_KEYWORDS = ["analyseer", "analyse", "benchmark", "vergelijk", "rapport", "overzicht", "marge", "apu", "inkoop", "productie status", "trend", "risico", "vertraging", "transport", "commerci"];
+
+const COMMERCIAL_KEYWORDS = ["commerciële productanalyse", "commerciele productanalyse", "productanalyse", "commercieel"];
+
+function isCommercialQuery(text: string): boolean {
+  return COMMERCIAL_KEYWORDS.some(k => text.toLowerCase().includes(k));
+}
 
 function isAnalysisQuery(text: string): boolean {
   const lower = text.toLowerCase();
@@ -353,6 +389,20 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
     setInput("");
     const userMsg: Msg = { role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
+
+    // Local intercept for commercial product analysis
+    if (isCommercialQuery(text)) {
+      setIsLoading(true);
+      onStateChange("thinking");
+      await new Promise(r => setTimeout(r, 1200));
+      onStateChange("responding");
+      const response = `Hier is de commerciële productanalyse op basis van de beschikbare data:\n\n\`\`\`hbmaster-commercial\n{}\n\`\`\``;
+      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      setIsLoading(false);
+      onStateChange("idle");
+      return;
+    }
+
     setIsLoading(true);
     onStateChange("thinking");
 
@@ -398,7 +448,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                 "Wat is de huidige productie status?",
                 "Zijn er productie risico's door transport?",
                 "Toon transactie flow",
-                "Benchmark inkoopprijzen rozen",
+                "Commerciële productanalyse",
               ].map(q => (
                 <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
                   className="text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all">
@@ -420,14 +470,15 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
           let transportRisk: TransportRiskData | null = null;
           let analyticalBlock: AnalyticalBlockData | null = null;
           let verified: VerifiedResponseData | null = null;
+          let hasCommercial = false;
 
           if (isUser) {
             text = msg.content;
           } else if (isStreaming) {
             // Strip block markers while streaming
             text = msg.content
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)\n[\s\S]*?```/g, "")
-              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified)[\s\S]*$/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified|commercial)\n[\s\S]*?```/g, "")
+              .replace(/```hbmaster-(?:workflow|analysis|product-card|floritrack|transport-risk|block|verified|commercial)[\s\S]*$/g, "")
               .trim();
           } else {
             const parsed = parseAllBlocks(msg.content);
@@ -438,6 +489,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             transportRisk = parsed.transportRisk;
             analyticalBlock = parsed.analyticalBlock;
             verified = parsed.verified;
+            hasCommercial = parsed.hasCommercial;
           }
 
           const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
@@ -447,7 +499,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
-                    {(text || hasPartialBlock || analysis || floritrack || transportRisk || analyticalBlock || verified) && (
+                    {(text || hasPartialBlock || analysis || floritrack || transportRisk || analyticalBlock || verified || hasCommercial) && (
                       <div className={cn(
                         "rounded-2xl px-4 py-3 min-w-0 transition-all duration-300",
                         isUser
@@ -488,6 +540,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {floritrack && <FloritrackTogglePanel data={floritrack} />}
                         {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
                         {analyticalBlock && <AnalyticalBlock data={analyticalBlock} />}
+                        {hasCommercial && <CommercialProductTogglePanel />}
                       </div>
                     )}
 
