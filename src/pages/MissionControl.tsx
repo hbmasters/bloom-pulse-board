@@ -83,6 +83,7 @@ export const viewToRoute: Record<MCView, string> = {
   kpis: "/kpi",
   notifications: "/notificaties",
   planner: "/weekplanner",
+  agenda: "/agenda",
   status: "/system-status",
   cronjobs: "/cron-jobs",
   methodiek: "/methodiek",
