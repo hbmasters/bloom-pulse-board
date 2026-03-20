@@ -178,6 +178,7 @@ const MissionControl = () => {
             {view === "kpis" && <KPIDashboard />}
             {view === "notifications" && <MCNotifications />}
             {view === "planner" && <MCWeekPlanner />}
+            {view === "agenda" && <MCAgenda />}
             {view === "status" && <MCStatusPanel />}
             {view === "cronjobs" && <MCCronJobs />}
             {view === "methodiek" && <MCMethodiek />}
