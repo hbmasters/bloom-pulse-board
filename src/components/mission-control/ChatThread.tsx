@@ -479,7 +479,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
-                    {(text || hasPartialBlock || analysis || floritrack || transportRisk || analyticalBlock || verified) && (
+                    {(text || hasPartialBlock || analysis || floritrack || transportRisk || analyticalBlock || verified || hasCommercial) && (
                       <div className={cn(
                         "rounded-2xl px-4 py-3 min-w-0 transition-all duration-300",
                         isUser
@@ -520,6 +520,7 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
                         {floritrack && <FloritrackTogglePanel data={floritrack} />}
                         {transportRisk && <TransportRiskTogglePanel data={transportRisk} />}
                         {analyticalBlock && <AnalyticalBlock data={analyticalBlock} />}
+                        {hasCommercial && <CommercialProductTogglePanel />}
                       </div>
                     )}
 
