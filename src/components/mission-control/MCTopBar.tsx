@@ -16,7 +16,7 @@ const viewTitles: Record<MCView, string> = {
   kanban: "Kanban Board",
   kpis: "KPI Dashboard",
   notifications: "Notificaties",
-  planner: "Weekplanner",
+  
   agenda: "Agenda",
   status: "Systeem Status",
   cronjobs: "Cron Jobs",
