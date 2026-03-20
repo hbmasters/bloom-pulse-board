@@ -41,7 +41,7 @@ import Verdelen from "@/pages/Verdelen";
 import OperationsIntelligence from "@/pages/OperationsIntelligence";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "planner" | "agenda" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
+export type MCView = "chat" | "kanban" | "history" | "kpis" | "notifications" | "agenda" | "status" | "cronjobs" | "methodiek" | "agents" | "settings" | "intelligence" | "risk-radar" | "chance-radar" | "profit-engine" | "command-radar" | "action-engine" | "procurement" | "production-cockpit" | "commercial" | "procurement-cockpit-v1" | "ai-architecture" | "dev-control" | "strategic-insight" | "sentinel" | "control-center" | "build-radar" | "verdelen" | "ops-intelligence";
 
 const routeToView: Record<string, MCView> = {
   "/": "chat",
