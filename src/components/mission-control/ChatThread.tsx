@@ -181,6 +181,26 @@ const TransportRiskTogglePanel = ({ data }: { data: TransportRiskData }) => {
   );
 };
 
+const CommercialProductTogglePanel = () => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="mt-2 border border-border rounded-lg overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors">
+        <span className="flex items-center gap-1.5">
+          <Euro className="w-3.5 h-3.5 text-purple-500" />
+          Commerciële Productanalyse
+        </span>
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="px-1 pb-3 animate-fade-in">
+          <CommercialProductBlock />
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ── Thinking bubble ── */
 
 const standardSteps = [
