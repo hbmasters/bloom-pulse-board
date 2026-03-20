@@ -25,62 +25,13 @@ import PageAgentBadges from "./PageAgentBadges";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
 
-/* ── Types ── */
+/* ── Types — re-export from shared ── */
 
-type Priority = "high" | "medium" | "low";
-type Category = "productie" | "planning" | "logistiek" | "qc" | "personeel" | "koelcel";
-type Status = "todo" | "in_progress" | "review" | "done";
-type TaskType = "development" | "analysis";
-type AnalysisKind = "mapping" | "margin" | "procurement" | "production" | "logistics" | "quality" | "general";
-type AnalysisStatus = "pending" | "running" | "completed" | "blocked" | "stale";
-
-interface OvernightActivity {
-  timestamp: string;
-  description: string;
-}
-
-interface AnalysisRun {
-  run_id: string;
-  methodiek_version: string;
-  analysis_status: AnalysisStatus;
-  result_summary: string;
-  data_scope?: string;
-  created_at: string;
-}
-
-interface KanbanCard {
-  id: string;
-  title: string;
-  description?: string;
-  category: Category;
-  priority: Priority;
-  labels: string[];
-  assignee?: string;
-  status: Status;
-  dueDate?: string;
-  startTime?: string;
-  stopTime?: string;
-  createdAt: string;
-  // Task type
-  task_type: TaskType;
-  // Analysis-specific fields (only relevant when task_type === "analysis")
-  analysis_kind?: AnalysisKind;
-  analysis_status?: AnalysisStatus;
-  methodiek_name?: string;
-  methodiek_id?: string;
-  methodiek_version?: string;
-  result_ready_flag?: boolean;
-  result_summary?: string;
-  result_payload?: string;
-  result_updated_at?: string;
-  // Analysis run history
-  run_history?: AnalysisRun[];
-  // Overnight activity tracking
-  overnight_flag?: boolean;
-  overnight_summary?: string;
-  overnight_activity_log?: OvernightActivity[];
-  last_activity_at?: string;
-}
+import type {
+  Priority, Category, Status, TaskType, AnalysisKind, AnalysisStatus,
+  OvernightActivity, AnalysisRun, KanbanCard,
+} from "./kanban-shared";
+import { getKanbanCards } from "./kanban-data";
 
 interface KanbanColumn {
   title: string;
