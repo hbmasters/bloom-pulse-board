@@ -10,7 +10,7 @@ import KanbanBoard from "@/components/mission-control/KanbanBoard";
 import BuildRadarStrip from "@/components/mission-control/BuildRadarStrip";
 import KPIDashboard from "@/components/mission-control/KPIDashboard";
 import MCNotifications from "@/components/mission-control/MCNotifications";
-import MCWeekPlanner from "@/components/mission-control/MCWeekPlanner";
+
 import ChatHistory from "@/components/mission-control/ChatHistory";
 import MCMobileMenu from "@/components/mission-control/MCMobileMenu";
 import MCStatusPanel from "@/components/mission-control/MCStatusPanel";
