@@ -22,6 +22,7 @@ const App = () => (
           <Route path="/kpi" element={<MissionControl />} />
           <Route path="/notificaties" element={<MissionControl />} />
           <Route path="/weekplanner" element={<MissionControl />} />
+          <Route path="/agenda" element={<MissionControl />} />
           <Route path="/system-status" element={<MissionControl />} />
           <Route path="/cron-jobs" element={<MissionControl />} />
           <Route path="/methodiek" element={<MissionControl />} />
