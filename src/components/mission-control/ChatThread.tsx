@@ -97,6 +97,13 @@ function parseVerifiedResponse(content: string): { text: string; verified: Verif
   }
 }
 
+function parseCommercialProduct(content: string): { text: string; hasCommercial: boolean } {
+  const match = content.match(/```hbmaster-commercial\n[\s\S]*?```/);
+  if (!match) return { text: content, hasCommercial: false };
+  const text = content.replace(/```hbmaster-commercial\n[\s\S]*?```/, "").trim();
+  return { text, hasCommercial: true };
+}
+
 function parseAllBlocks(content: string): {
   text: string;
   analysis: AnalysisPresentationData | null;
@@ -105,6 +112,7 @@ function parseAllBlocks(content: string): {
   transportRisk: TransportRiskData | null;
   analyticalBlock: AnalyticalBlockData | null;
   verified: VerifiedResponseData | null;
+  hasCommercial: boolean;
 } {
   // Strip old workflow blocks silently (no longer rendered)
   let cleaned = content.replace(/```hbmaster-workflow\n[\s\S]*?```/g, "").trim();
@@ -114,7 +122,8 @@ function parseAllBlocks(content: string): {
   const { text: t4, transportRisk } = parseTransportRisk(t3);
   const { text: t5, block: analyticalBlock } = parseAnalyticalBlock(t4);
   const { text: t6, verified } = parseVerifiedResponse(t5);
-  return { text: t6, analysis, productCard, floritrack, transportRisk, analyticalBlock, verified };
+  const { text: t7, hasCommercial } = parseCommercialProduct(t6);
+  return { text: t7, analysis, productCard, floritrack, transportRisk, analyticalBlock, verified, hasCommercial };
 }
 
 /* ── Toggle panels ── */
