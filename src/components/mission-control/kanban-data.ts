@@ -13,7 +13,7 @@ const initialCards: KanbanCard[] = [
     { timestamp: "04:48", description: "Updated Marktmonitor adapter" },
     { timestamp: "02:15", description: "Detected missing Axerrio feed" },
   ] },
-  { id: "5",  title: "Koelcel voorraad tellen",       description: "Inventarisatie koelcel 1 en 2 voor planning morgen.",                       category: "koelcel",   priority: "medium", labels: ["inventaris"],           status: "in_progress", task_type: "development", startTime: "15:00", stopTime: "16:00", createdAt: "28 feb", overnight_flag: true, last_activity_at: "Vandaag 03:30", overnight_summary: "Temperatuurlog bijgewerkt vanuit sensor data", overnight_activity_log: [
+  { id: "5",  title: "Koelcel voorraad tellen",       description: "Inventarisatie koelcel 1 en 2 voor planning morgen.",                       category: "koelcel",   priority: "medium", labels: ["inventaris"],           status: "in_progress", task_type: "development", startTime: "15:00", stopTime: "16:00", createdAt: "28 feb", agent: "DataAgent", overnight_flag: true, last_activity_at: "Vandaag 03:30", overnight_summary: "Temperatuurlog bijgewerkt vanuit sensor data", overnight_activity_log: [
     { timestamp: "03:30", description: "Temperatuurlog koelcel 1 & 2 automatisch bijgewerkt" },
     { timestamp: "01:10", description: "Sensor calibratie check uitgevoerd" },
   ], recurring: true, recurrence_pattern: "daily", recurrence_label: "Dagelijkse inventarisatie", next_run_at: "Morgen 15:00", last_run_at: "Vandaag 15:00" },
