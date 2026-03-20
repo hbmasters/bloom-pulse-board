@@ -76,6 +76,13 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
     <>
       <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]" onClick={onClose} />
       <div className="fixed top-0 right-0 z-50 h-full w-full max-w-xl border-l border-border bg-card shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+        {/* Mobile close bar */}
+        <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-border md:hidden">
+          <button onClick={onClose} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Terug
+          </button>
+        </div>
         {/* Header */}
         <div className="shrink-0 p-5 border-b border-border">
           <div className="flex items-start justify-between gap-3">
