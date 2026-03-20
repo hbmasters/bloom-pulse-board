@@ -49,6 +49,7 @@ const routeToView: Record<string, MCView> = {
   "/kpi": "kpis",
   "/notificaties": "notifications",
   "/weekplanner": "planner",
+  "/agenda": "agenda",
   "/system-status": "status",
   "/cron-jobs": "cronjobs",
   "/methodiek": "methodiek",
