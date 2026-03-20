@@ -389,6 +389,20 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
     setInput("");
     const userMsg: Msg = { role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
+
+    // Local intercept for commercial product analysis
+    if (isCommercialQuery(text)) {
+      setIsLoading(true);
+      onStateChange("thinking");
+      await new Promise(r => setTimeout(r, 1200));
+      onStateChange("responding");
+      const response = `Hier is de commerciële productanalyse op basis van de beschikbare data:\n\n\`\`\`hbmaster-commercial\n{}\n\`\`\``;
+      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      setIsLoading(false);
+      onStateChange("idle");
+      return;
+    }
+
     setIsLoading(true);
     onStateChange("thinking");
 
