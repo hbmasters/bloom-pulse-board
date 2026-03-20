@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -16,6 +16,7 @@ import { BLOCK_LABELS, BLOCK_DOMAIN_MAP } from "@/components/chat/analytical-blo
 import { DOMAIN_COLORS } from "@/components/chat/analytical-blocks/block-domain-colors";
 import VerifiedResponseCard from "@/components/chat/verified-response/VerifiedResponseCard";
 import type { VerifiedResponseData } from "@/components/chat/verified-response/verified-response-types";
+import { CommercialProductBlock } from "@/components/chat/analytical-blocks/variants/CommercialProductBlock";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
