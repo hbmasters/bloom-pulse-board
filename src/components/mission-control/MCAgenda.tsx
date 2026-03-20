@@ -2,18 +2,15 @@ import { useState, useMemo } from "react";
 import {
   ChevronLeft, ChevronRight, X, Calendar, RefreshCw, Clock,
   ArrowUp, ArrowRight, ArrowDown, Flower2, Truck, ClipboardCheck,
-  Users, Snowflake, PackageCheck, Code2, BarChart3, User
+  Users, Snowflake, PackageCheck, Code2, BarChart3, User, Bot, Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, startOfWeek, addDays, addWeeks, isToday, isSameDay } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, isToday } from "date-fns";
 import { nl } from "date-fns/locale";
-import PageAgentBadges from "./PageAgentBadges";
 import type { KanbanCard, Priority, Category, TaskType, Status } from "./kanban-shared";
-
-/* ── Kanban source data (single source of truth) ── */
 import { getKanbanCards } from "./kanban-data";
 
-/* ── Config (reused from Kanban) ── */
+/* ── Config (identical to Kanban) ── */
 
 const priorityConfig: Record<Priority, { icon: typeof ArrowUp; label: string; className: string }> = {
   high:   { icon: ArrowUp,    label: "Hoog",   className: "text-red-400" },
@@ -49,7 +46,7 @@ const recurrenceLabels: Record<string, string> = {
   monthly: "Maandelijks",
 };
 
-/* ── Detail Panel (right side, reuses Kanban pattern) ── */
+/* ── Detail Panel (right side — mirrors Kanban) ── */
 
 const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () => void }) => {
   const PriorityIcon = priorityConfig[card.priority].icon;
@@ -78,6 +75,9 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
                   <PriorityIcon className="w-3 h-3" />
                   <span className="text-[9px] font-mono">{priorityConfig[card.priority].label}</span>
                 </span>
+                {card.labels.map(l => (
+                  <span key={l} className="text-[8px] font-mono px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">{l}</span>
+                ))}
               </div>
               <h2 className="text-base font-bold text-foreground">{card.title}</h2>
               {card.description && (
@@ -99,6 +99,17 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
             <InfoRow label="Owner" value={card.assignee || "—"} />
             <InfoRow label="Prioriteit" value={priorityConfig[card.priority].label} valueClass={priorityConfig[card.priority].className} />
           </div>
+
+          {/* Agent */}
+          {card.agent && (
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
+              <div className="flex items-center gap-2">
+                <Bot className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Agent</span>
+              </div>
+              <p className="text-sm text-foreground mt-1 font-medium">{card.agent}</p>
+            </div>
+          )}
 
           {/* Recurring info */}
           {card.recurring && (
@@ -142,6 +153,14 @@ const AgendaDetailPanel = ({ card, onClose }: { card: KanbanCard; onClose: () =>
               </div>
             </div>
           )}
+
+          {/* Analysis output */}
+          {card.task_type === "analysis" && card.result_summary && (
+            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+              <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">Laatste output</span>
+              <p className="text-xs text-foreground/80 mt-1 leading-relaxed">{card.result_summary}</p>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -155,22 +174,20 @@ const InfoRow = ({ label, value, valueClass }: { label: string; value: string; v
   </div>
 );
 
-/* ── Day Card (compact agenda item) ── */
+/* ── Day Card (compact agenda item with labels + agent) ── */
 
 const AgendaDayCard = ({ card, onClick }: { card: KanbanCard; onClick: () => void }) => {
   const catCfg = categoryConfig[card.category];
   const CatIcon = catCfg.icon;
   const PriIcon = priorityConfig[card.priority].icon;
   const statusCfg = statusLabels[card.status];
+  const visibleLabels = card.labels.slice(0, 2);
+  const extraCount = card.labels.length - 2;
 
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "w-full text-left p-2.5 rounded-lg border transition-all group hover:border-primary/20 hover:shadow-sm",
-        catCfg.className.replace("text-", "border-").replace("/10", "/15"),
-        "bg-card border-border"
-      )}
+      className="w-full text-left p-2.5 rounded-lg border border-border bg-card transition-all group hover:border-primary/20 hover:shadow-sm"
     >
       <div className="flex items-start gap-2">
         <CatIcon className={cn("w-3.5 h-3.5 mt-0.5 shrink-0", catCfg.className.split(" ")[1])} />
@@ -179,21 +196,32 @@ const AgendaDayCard = ({ card, onClick }: { card: KanbanCard; onClick: () => voi
             <h4 className="text-xs font-semibold text-foreground truncate flex-1">{card.title}</h4>
             <PriIcon className={cn("w-3 h-3 shrink-0", priorityConfig[card.priority].className)} />
           </div>
+
+          {/* Row 2: status + recurring + time */}
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             {card.recurring && (
               <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-primary">
                 <RefreshCw className="w-2.5 h-2.5" />
-                {card.recurrence_pattern ? recurrenceLabels[card.recurrence_pattern] : "Terugkerend"}
               </span>
             )}
             <span className={cn("text-[8px] font-mono font-medium", statusCfg.className)}>{statusCfg.label}</span>
             {card.startTime && (
               <span className="text-[8px] font-mono text-muted-foreground">{card.startTime}{card.stopTime ? `–${card.stopTime}` : ""}</span>
             )}
-            {card.assignee && (
-              <span className="text-[8px] font-mono text-muted-foreground/50 ml-auto flex items-center gap-0.5">
-                <User className="w-2.5 h-2.5" />
-                {card.assignee}
+          </div>
+
+          {/* Row 3: labels + agent */}
+          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+            {visibleLabels.map(l => (
+              <span key={l} className="text-[7px] font-mono px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border leading-none">{l}</span>
+            ))}
+            {extraCount > 0 && (
+              <span className="text-[7px] font-mono text-muted-foreground/40">+{extraCount}</span>
+            )}
+            {card.agent && (
+              <span className="ml-auto inline-flex items-center gap-0.5 text-[7px] font-mono text-blue-400/70">
+                <Bot className="w-2.5 h-2.5" />
+                {card.agent}
               </span>
             )}
           </div>
@@ -209,6 +237,7 @@ const MCAgenda = () => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
   const [filterRecurring, setFilterRecurring] = useState(false);
+  const [filterAgent, setFilterAgent] = useState<string | null>(null);
 
   const weekStart = useMemo(() => {
     const base = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -217,14 +246,21 @@ const MCAgenda = () => {
 
   const allCards = useMemo(() => getKanbanCards(), []);
 
-  // Filter: recurring OR future-planned tasks
+  // Derive unique agents from cards
+  const agentOptions = useMemo(() => {
+    const set = new Set<string>();
+    allCards.forEach(c => { if (c.agent) set.add(c.agent); });
+    return Array.from(set).sort();
+  }, [allCards]);
+
+  // Filter
   const agendaCards = useMemo(() => {
     return allCards.filter(c => {
       if (filterRecurring && !c.recurring) return false;
-      // Show recurring tasks + any task with a due date or start time
+      if (filterAgent && c.agent !== filterAgent) return false;
       return c.recurring || c.dueDate || c.startTime;
     });
-  }, [allCards, filterRecurring]);
+  }, [allCards, filterRecurring, filterAgent]);
 
   const days = useMemo(() =>
     Array.from({ length: 5 }, (_, i) => {
@@ -232,27 +268,21 @@ const MCAgenda = () => {
       return { date, key: format(date, "yyyy-MM-dd"), name: ["Ma", "Di", "Wo", "Do", "Vr"][i], label: format(date, "d MMM", { locale: nl }) };
     }), [weekStart]);
 
-  // Simple day-assignment: recurring → show every day; non-recurring → assign to a pseudo day
   const cardsByDay = useMemo(() => {
     const map: Record<string, KanbanCard[]> = {};
     days.forEach(d => { map[d.key] = []; });
-
     agendaCards.forEach(card => {
       if (card.recurring) {
-        // daily → all days; weekly → monday; biweekly → monday; monthly → first day of week
         if (card.recurrence_pattern === "daily") {
           days.forEach(d => map[d.key].push(card));
         } else {
-          // weekly/biweekly/monthly → show on first day
           if (days.length > 0) map[days[0].key].push(card);
         }
       } else {
-        // Non-recurring: distribute across days based on hash for demo
         const dayIdx = parseInt(card.id, 36) % days.length;
         map[days[dayIdx].key].push(card);
       }
     });
-
     return map;
   }, [agendaCards, days]);
 
@@ -282,8 +312,8 @@ const MCAgenda = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-4 md:gap-6 items-center">
+        {/* Stats row */}
+        <div className="flex gap-4 md:gap-6 items-center flex-wrap">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{totalAgenda} items</span>
@@ -295,7 +325,7 @@ const MCAgenda = () => {
           <button
             onClick={() => setFilterRecurring(!filterRecurring)}
             className={cn(
-              "ml-auto px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
+              "px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors",
               filterRecurring
                 ? "bg-primary/15 text-primary border-primary/30"
                 : "border-border text-muted-foreground/40 hover:border-muted-foreground/30"
@@ -305,7 +335,34 @@ const MCAgenda = () => {
             Alleen terugkerend
           </button>
         </div>
-        <PageAgentBadges pageId="agenda" className="mt-2" />
+
+        {/* Agent filter */}
+        <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+          <Filter className="w-3 h-3 text-muted-foreground/50" />
+          <span className="text-[10px] font-mono text-muted-foreground/50 mr-1">Agent:</span>
+          <button
+            onClick={() => setFilterAgent(null)}
+            className={cn(
+              "px-2 py-0.5 rounded-full text-[10px] font-medium border transition-colors",
+              !filterAgent ? "bg-blue-500/15 text-blue-400 border-blue-500/30" : "border-border text-muted-foreground/40 hover:border-muted-foreground/30"
+            )}
+          >
+            Alle
+          </button>
+          {agentOptions.map(agent => (
+            <button
+              key={agent}
+              onClick={() => setFilterAgent(filterAgent === agent ? null : agent)}
+              className={cn(
+                "px-2 py-0.5 rounded-full text-[10px] font-medium border transition-colors inline-flex items-center gap-1",
+                filterAgent === agent ? "bg-blue-500/15 text-blue-400 border-blue-500/30" : "border-border text-muted-foreground/40 hover:border-muted-foreground/30"
+              )}
+            >
+              <Bot className="w-2.5 h-2.5" />
+              {agent}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Day columns */}
@@ -324,7 +381,6 @@ const MCAgenda = () => {
                   today && "bg-primary/[0.03]"
                 )}
               >
-                {/* Day header */}
                 <div className={cn(
                   "flex-shrink-0 px-3 py-2.5 border-b border-border text-center",
                   today && "bg-primary/10"
@@ -337,7 +393,6 @@ const MCAgenda = () => {
                   </div>
                 </div>
 
-                {/* Cards */}
                 <div className="flex-1 p-2 space-y-1.5 overflow-y-auto">
                   {dayCards.map(card => (
                     <AgendaDayCard key={card.id} card={card} onClick={() => setSelectedCard(card)} />
