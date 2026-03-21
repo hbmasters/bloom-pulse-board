@@ -897,6 +897,34 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
+      {/* ── TAB: Prijscheck ── */}
+      {activeTab === "prijscheck" && (
+        <IHSectionShell icon={ShieldAlert} title="Prijscheck" subtitle="Prijsvergelijking en margerisico per product">
+          <PriceCheckPanel />
+        </IHSectionShell>
+      )}
+
+      {/* ── TAB: Handelsregister ── */}
+      {activeTab === "handelsregister" && (
+        <IHSectionShell icon={BookOpen} title="Handelsregister" subtitle="Leveranciers, beschikbaarheid & seizoenspatronen">
+          <TradeRegistryPanel />
+        </IHSectionShell>
+      )}
+
+      {/* ── TAB: Connecties / Bronnen ── */}
+      {activeTab === "connecties" && (
+        <IHSectionShell icon={Wifi} title="Connecties & Bronnen" subtitle="Live databronnen en integratiesatus">
+          <ConnectiesBronnenPanel />
+        </IHSectionShell>
+      )}
+
+      {/* ── TAB: Auto-Inkoop / Ordervoorstellen ── */}
+      {activeTab === "auto_inkoop" && (
+        <IHSectionShell icon={Zap} title="Auto-Inkoop / Ordervoorstellen" subtitle="Ordervoorstellen op basis van execution intents">
+          <AutoInkoopPanel />
+        </IHSectionShell>
+      )}
+
     </div>
   );
 };
