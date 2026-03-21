@@ -100,11 +100,15 @@ const shopIcon = (status: ShopStatus["status"]) => {
 
 type SortKey = keyof ProcurementSnapshotRow;
 type SortDir = "asc" | "desc";
-type CockpitTab = "inkooplijst" | "marktaanbod";
+type CockpitTab = "inkooplijst" | "marktaanbod" | "prijscheck" | "handelsregister" | "connecties" | "auto_inkoop";
 
 const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: "marktaanbod", label: "Marktmonitor", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+  { id: "prijscheck", label: "Prijscheck", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
+  { id: "handelsregister", label: "Handelsregister", icon: <BookOpen className="w-3.5 h-3.5" /> },
+  { id: "connecties", label: "Connecties", icon: <Wifi className="w-3.5 h-3.5" /> },
+  { id: "auto_inkoop", label: "Auto-Inkoop", icon: <Zap className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
