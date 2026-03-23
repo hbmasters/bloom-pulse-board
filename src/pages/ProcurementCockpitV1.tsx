@@ -46,10 +46,7 @@ import {
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import MarktMonitorPanel from "@/components/marktmonitor/MarktMonitorPanel";
 import { marktMonitorData } from "@/components/marktmonitor/marktmonitor-data";
-import PriceCheckPanel from "@/components/procurement-cockpit-v1/PriceCheckPanel";
-import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
 import ConnectiesBronnenPanel from "@/components/procurement-cockpit-v1/ConnectiesBronnenPanel";
-import AutoInkoopPanel from "@/components/procurement-cockpit-v1/AutoInkoopPanel";
 
 
 import {
