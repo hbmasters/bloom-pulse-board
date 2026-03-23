@@ -46,10 +46,7 @@ import {
 import MarketSupplyPanel from "@/components/procurement-cockpit-v1/MarketSupplyPanel";
 import MarktMonitorPanel from "@/components/marktmonitor/MarktMonitorPanel";
 import { marktMonitorData } from "@/components/marktmonitor/marktmonitor-data";
-import PriceCheckPanel from "@/components/procurement-cockpit-v1/PriceCheckPanel";
-import TradeRegistryPanel from "@/components/procurement-cockpit-v1/TradeRegistryPanel";
 import ConnectiesBronnenPanel from "@/components/procurement-cockpit-v1/ConnectiesBronnenPanel";
-import AutoInkoopPanel from "@/components/procurement-cockpit-v1/AutoInkoopPanel";
 
 
 import {
@@ -100,15 +97,12 @@ const shopIcon = (status: ShopStatus["status"]) => {
 
 type SortKey = keyof ProcurementSnapshotRow;
 type SortDir = "asc" | "desc";
-type CockpitTab = "inkooplijst" | "marktaanbod" | "prijscheck" | "handelsregister" | "connecties" | "auto_inkoop";
+type CockpitTab = "inkooplijst" | "marktaanbod" | "connecties";
 
 const tabItems: { id: CockpitTab; label: string; icon: React.ReactNode }[] = [
   { id: "inkooplijst", label: "Inkooplijst", icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: "marktaanbod", label: "Marktmonitor", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-  { id: "prijscheck", label: "Prijscheck", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
-  { id: "handelsregister", label: "Handelsregister", icon: <BookOpen className="w-3.5 h-3.5" /> },
   { id: "connecties", label: "Connecties", icon: <Wifi className="w-3.5 h-3.5" /> },
-  { id: "auto_inkoop", label: "Auto-Inkoop", icon: <Zap className="w-3.5 h-3.5" /> },
 ];
 
 const ProcurementCockpitV1 = () => {
@@ -897,31 +891,10 @@ const ProcurementCockpitV1 = () => {
         </>
       )}
 
-      {/* ── TAB: Prijscheck ── */}
-      {activeTab === "prijscheck" && (
-        <IHSectionShell icon={ShieldAlert} title="Prijscheck" subtitle="Prijsvergelijking en margerisico per product">
-          <PriceCheckPanel />
-        </IHSectionShell>
-      )}
-
-      {/* ── TAB: Handelsregister ── */}
-      {activeTab === "handelsregister" && (
-        <IHSectionShell icon={BookOpen} title="Handelsregister" subtitle="Leveranciers, beschikbaarheid & seizoenspatronen">
-          <TradeRegistryPanel />
-        </IHSectionShell>
-      )}
-
       {/* ── TAB: Connecties / Bronnen ── */}
       {activeTab === "connecties" && (
         <IHSectionShell icon={Wifi} title="Connecties & Bronnen" subtitle="Live databronnen en integratiesatus">
           <ConnectiesBronnenPanel />
-        </IHSectionShell>
-      )}
-
-      {/* ── TAB: Auto-Inkoop / Ordervoorstellen ── */}
-      {activeTab === "auto_inkoop" && (
-        <IHSectionShell icon={Zap} title="Auto-Inkoop / Ordervoorstellen" subtitle="Ordervoorstellen op basis van execution intents">
-          <AutoInkoopPanel />
         </IHSectionShell>
       )}
 
