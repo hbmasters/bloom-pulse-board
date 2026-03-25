@@ -329,6 +329,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCardIdx, setVisibleCardIdx] = useState<number | null>(null);
+  const [queue, setQueue] = useState<string[]>([]);
+  const processingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -383,12 +385,19 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
     onDone();
   }, []);
 
-  const send = async () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
-    setInput("");
+  /* ── Validate message before sending ── */
+  const validateMessage = useCallback((text: string): { valid: boolean; reason?: string } => {
+    if (!text.trim()) return { valid: false, reason: "Leeg bericht" };
+    if (text.trim().length < 2) return { valid: false, reason: "Bericht te kort" };
+    if (text.trim().length > 2000) return { valid: false, reason: "Bericht te lang (max 2000 tekens)" };
+    return { valid: true };
+  }, []);
+
+  /* ── Process a single message (internal) ── */
+  const processMessage = useCallback(async (text: string, currentMessages: Msg[]): Promise<Msg[]> => {
     const userMsg: Msg = { role: "user", content: text };
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMsgs = [...currentMessages, userMsg];
+    setMessages(updatedMsgs);
 
     // Local intercept for commercial product analysis
     if (isCommercialQuery(text)) {
@@ -397,10 +406,11 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
       await new Promise(r => setTimeout(r, 1200));
       onStateChange("responding");
       const response = `Hier is de commerciële productanalyse op basis van de beschikbare data:\n\n\`\`\`hbmaster-commercial\n{}\n\`\`\``;
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      const finalMsgs = [...updatedMsgs, { role: "assistant" as const, content: response }];
+      setMessages(finalMsgs);
       setIsLoading(false);
       onStateChange("idle");
-      return;
+      return finalMsgs;
     }
 
     setIsLoading(true);
@@ -408,29 +418,119 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
     let assistantSoFar = "";
     let firstToken = true;
+    let finalMsgs = updatedMsgs;
 
     try {
-      await streamChat(
-        [...messages, userMsg],
-        (chunk) => {
-          if (firstToken) { onStateChange("responding"); firstToken = false; }
-          assistantSoFar += chunk;
-          setMessages(prev => {
-            const last = prev[prev.length - 1];
-            if (last?.role === "assistant") {
-              return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-            }
-            return [...prev, { role: "assistant", content: assistantSoFar }];
-          });
-        },
-        () => { setIsLoading(false); onStateChange("idle"); }
-      );
+      await new Promise<void>((resolve, reject) => {
+        streamChat(
+          updatedMsgs,
+          (chunk) => {
+            if (firstToken) { onStateChange("responding"); firstToken = false; }
+            assistantSoFar += chunk;
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant") {
+                const result = prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+                finalMsgs = result;
+                return result;
+              }
+              const result = [...prev, { role: "assistant" as const, content: assistantSoFar }];
+              finalMsgs = result;
+              return result;
+            });
+          },
+          () => { setIsLoading(false); onStateChange("idle"); resolve(); }
+        ).catch(reject);
+      });
     } catch (e) {
       setIsLoading(false);
       onStateChange("idle");
-      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${e instanceof Error ? e.message : "Onbekende fout"}` }]);
+      const errMsg: Msg = { role: "assistant", content: `⚠️ ${e instanceof Error ? e.message : "Onbekende fout"}` };
+      finalMsgs = [...updatedMsgs, errMsg];
+      setMessages(finalMsgs);
     }
-  };
+
+    return finalMsgs;
+  }, [streamChat, onStateChange]);
+
+  /* ── Process queue sequentially ── */
+  const processQueue = useCallback(async () => {
+    if (processingRef.current) return;
+    processingRef.current = true;
+
+    let currentMessages: Msg[] = [];
+    setMessages(prev => { currentMessages = prev; return prev; });
+
+    while (true) {
+      let nextText: string | undefined;
+      setQueue(prev => {
+        if (prev.length === 0) { nextText = undefined; return prev; }
+        nextText = prev[0];
+        return prev.slice(1);
+      });
+
+      // Small delay to let state settle
+      await new Promise(r => setTimeout(r, 50));
+
+      // Re-read queue length
+      let queueEmpty = false;
+      setQueue(prev => { queueEmpty = prev.length === 0 && !nextText; return prev; });
+
+      if (!nextText) break;
+
+      currentMessages = await processMessage(nextText, currentMessages);
+    }
+
+    processingRef.current = false;
+  }, [processMessage]);
+
+  /* ── Send: validate immediately, queue if busy ── */
+  const send = useCallback(async () => {
+    const text = input.trim();
+    if (!text) return;
+
+    const check = validateMessage(text);
+    if (!check.valid) {
+      // Show inline validation feedback
+      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${check.reason}` }]);
+      return;
+    }
+
+    setInput("");
+
+    if (isLoading || processingRef.current) {
+      // Queue the message
+      setQueue(prev => [...prev, text]);
+      return;
+    }
+
+    // Process directly
+    processingRef.current = true;
+    let currentMessages: Msg[] = [];
+    setMessages(prev => { currentMessages = prev; return prev; });
+
+    currentMessages = await processMessage(text, currentMessages);
+
+    // Drain any messages that were queued during processing
+    while (true) {
+      let nextText: string | undefined;
+      setQueue(prev => {
+        if (prev.length === 0) return prev;
+        nextText = prev[0];
+        return prev.slice(1);
+      });
+      await new Promise(r => setTimeout(r, 50));
+      if (!nextText) break;
+      currentMessages = await processMessage(nextText, currentMessages);
+    }
+
+    processingRef.current = false;
+  }, [input, isLoading, validateMessage, processMessage]);
+
+  /* ── Remove item from queue ── */
+  const removeFromQueue = useCallback((idx: number) => {
+    setQueue(prev => prev.filter((_, i) => i !== idx));
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
