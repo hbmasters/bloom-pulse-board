@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MCSidebar from "@/components/mission-control/MCSidebar";
 import MCTopBar from "@/components/mission-control/MCTopBar";
