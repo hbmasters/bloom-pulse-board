@@ -1,14 +1,18 @@
-import { Search, Zap, Menu } from "lucide-react";
+import { Search, Zap, Menu, MessageCircle, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import HBMasterLogo from "./HBMasterLogo";
 import MCNotificationBell from "./MCNotificationBell";
 import type { MCView } from "@/pages/MissionControl";
+
+export type ChatMode = "local" | "telegram";
 
 interface MCTopBarProps {
   view: MCView;
   onNewChat?: () => void;
   onMenuOpen?: () => void;
   onNavigate?: (view: MCView) => void;
+  chatMode?: ChatMode;
+  onChatModeChange?: (mode: ChatMode) => void;
 }
 
 const viewTitles: Record<MCView, string> = {
