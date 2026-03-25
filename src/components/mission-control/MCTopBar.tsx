@@ -66,6 +66,33 @@ const MCTopBar = ({ view, onNewChat, onMenuOpen, onNavigate, chatMode = "local",
       </div>
 
       <div className="flex items-center gap-2">
+        {view === "chat" && onChatModeChange && (
+          <div className="flex items-center bg-secondary/50 rounded-lg border border-border p-0.5">
+            <button
+              onClick={() => onChatModeChange("local")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                chatMode === "local"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Local</span>
+            </button>
+            <button
+              onClick={() => onChatModeChange("telegram")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                chatMode === "telegram"
+                  ? "bg-[hsl(200,80%,50%)] text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Telegram</span>
+            </button>
+          </div>
+        )}
+
         <div className="relative hidden sm:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Zoeken..." className="w-56 pl-9 h-9 text-sm bg-secondary/50 border-border" />
