@@ -124,6 +124,7 @@ const MissionControl = () => {
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [workingMode, setWorkingMode] = useState(true);
+  const [chatMode, setChatMode] = useState<ChatMode>("local");
 
   return (
     <div className={`${workingMode ? "" : "mc-dark"} flex h-[100dvh] w-full overflow-hidden transition-colors duration-500`}>
