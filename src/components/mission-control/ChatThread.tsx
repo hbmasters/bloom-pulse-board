@@ -322,6 +322,7 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
 interface ChatThreadProps {
   onStateChange: (state: "idle" | "thinking" | "responding") => void;
   onMessageCount?: (count: number) => void;
+  chatMode?: "local" | "telegram";
 }
 
 const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
