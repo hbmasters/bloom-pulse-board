@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MCSidebar from "@/components/mission-control/MCSidebar";
 import MCTopBar from "@/components/mission-control/MCTopBar";
+import type { ChatMode } from "@/components/mission-control/MCTopBar";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import ChatThread from "@/components/mission-control/ChatThread";
 import AIHologram from "@/components/mission-control/AIHologram";
@@ -123,6 +124,7 @@ const MissionControl = () => {
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [workingMode, setWorkingMode] = useState(true);
+  const [chatMode, setChatMode] = useState<ChatMode>("local");
 
   return (
     <div className={`${workingMode ? "" : "mc-dark"} flex h-[100dvh] w-full overflow-hidden transition-colors duration-500`}>
@@ -134,7 +136,7 @@ const MissionControl = () => {
 
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {view !== "chat" && <MCHologramBackground />}
-        <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} onNavigate={handleNavigate} />
+        <MCTopBar view={view} onMenuOpen={() => setMenuOpen(true)} onNavigate={handleNavigate} chatMode={chatMode} onChatModeChange={setChatMode} />
 
         <main className="flex-1 min-h-0 flex flex-col md:flex-row relative z-10">
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
@@ -148,7 +150,7 @@ const MissionControl = () => {
                   <AIHologram state={aiState} compact={messageCount > 0} />
                 </div>
                 <div className={`flex-1 min-h-0 ${messageCount > 0 ? "relative z-10" : ""}`}>
-                  <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} />
+                  <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} chatMode={chatMode} />
                 </div>
 
                 <div className="md:hidden xl:hidden">
