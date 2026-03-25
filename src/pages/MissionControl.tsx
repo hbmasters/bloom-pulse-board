@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MCSidebar from "@/components/mission-control/MCSidebar";
 import MCTopBar from "@/components/mission-control/MCTopBar";
+import type { ChatMode } from "@/components/mission-control/MCTopBar";
 import { MCHologramBackground } from "@/components/mission-control/MCHologramBackground";
 import ChatThread from "@/components/mission-control/ChatThread";
 import AIHologram from "@/components/mission-control/AIHologram";
