@@ -677,6 +677,31 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
         <div ref={bottomRef} />
       </div>
 
+      {/* Queue indicator */}
+      {queue.length > 0 && (
+        <div className="shrink-0 px-4 pt-2">
+          <div className="bg-muted/50 border border-border rounded-lg px-3 py-2 space-y-1.5">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+              <ListOrdered className="w-3.5 h-3.5 text-primary" />
+              <span className="font-semibold text-foreground">{queue.length} bericht{queue.length > 1 ? "en" : ""} in wachtrij</span>
+            </div>
+            {queue.map((q, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-[11px] text-muted-foreground pl-5">
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate flex-1">{q}</span>
+                <button
+                  onClick={() => removeFromQueue(idx)}
+                  className="text-[10px] text-destructive/60 hover:text-destructive transition-colors shrink-0"
+                  title="Verwijder uit wachtrij"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="shrink-0 p-4 border-t border-border">
         <div className="flex items-end gap-2 bg-card rounded-xl border border-border px-3 py-2 focus-within:border-primary/40 transition-colors shadow-sm">
@@ -685,17 +710,36 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Stel een vraag aan HBMaster..."
+            placeholder={isLoading ? "Typ alvast — wordt in wachtrij geplaatst…" : "Stel een vraag aan HBMaster..."}
             rows={1}
             className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground resize-none outline-none max-h-32 min-h-[36px]"
             style={{ height: "auto" }}
             onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
           />
-          <button onClick={send} disabled={isLoading || !input.trim()}
-            className="w-8 h-8 rounded-lg bg-gradient-brand hover:opacity-90 disabled:opacity-30 flex items-center justify-center transition-all shrink-0">
-            <Send className="w-4 h-4 text-primary-foreground" />
+          <button onClick={send} disabled={!input.trim()}
+            className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0",
+              isLoading && input.trim()
+                ? "bg-muted border border-primary/30 hover:bg-primary/10"
+                : "bg-gradient-brand hover:opacity-90 disabled:opacity-30"
+            )}>
+            {isLoading && input.trim() ? (
+              <ListOrdered className="w-4 h-4 text-primary" />
+            ) : (
+              <Send className="w-4 h-4 text-primary-foreground" />
+            )}
           </button>
         </div>
+        {/* Validation check indicator */}
+        {input.trim().length > 0 && (
+          <div className="flex items-center gap-1.5 mt-1.5 px-1">
+            {validateMessage(input.trim()).valid ? (
+              <><Check className="w-3 h-3 text-accent" /><span className="text-[10px] text-accent font-mono">Klaar om te verzenden</span></>
+            ) : (
+              <><AlertTriangle className="w-3 h-3 text-destructive" /><span className="text-[10px] text-destructive font-mono">{validateMessage(input.trim()).reason}</span></>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
