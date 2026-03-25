@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro, ListOrdered, Check, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -329,6 +329,8 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCardIdx, setVisibleCardIdx] = useState<number | null>(null);
+  const [queue, setQueue] = useState<string[]>([]);
+  const processingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -383,12 +385,19 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
     onDone();
   }, []);
 
-  const send = async () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
-    setInput("");
+  /* ── Validate message before sending ── */
+  const validateMessage = useCallback((text: string): { valid: boolean; reason?: string } => {
+    if (!text.trim()) return { valid: false, reason: "Leeg bericht" };
+    if (text.trim().length < 2) return { valid: false, reason: "Bericht te kort" };
+    if (text.trim().length > 2000) return { valid: false, reason: "Bericht te lang (max 2000 tekens)" };
+    return { valid: true };
+  }, []);
+
+  /* ── Process a single message (internal) ── */
+  const processMessage = useCallback(async (text: string, currentMessages: Msg[]): Promise<Msg[]> => {
     const userMsg: Msg = { role: "user", content: text };
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMsgs = [...currentMessages, userMsg];
+    setMessages(updatedMsgs);
 
     // Local intercept for commercial product analysis
     if (isCommercialQuery(text)) {
@@ -397,10 +406,11 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
       await new Promise(r => setTimeout(r, 1200));
       onStateChange("responding");
       const response = `Hier is de commerciële productanalyse op basis van de beschikbare data:\n\n\`\`\`hbmaster-commercial\n{}\n\`\`\``;
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      const finalMsgs = [...updatedMsgs, { role: "assistant" as const, content: response }];
+      setMessages(finalMsgs);
       setIsLoading(false);
       onStateChange("idle");
-      return;
+      return finalMsgs;
     }
 
     setIsLoading(true);
@@ -408,29 +418,119 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
 
     let assistantSoFar = "";
     let firstToken = true;
+    let finalMsgs = updatedMsgs;
 
     try {
-      await streamChat(
-        [...messages, userMsg],
-        (chunk) => {
-          if (firstToken) { onStateChange("responding"); firstToken = false; }
-          assistantSoFar += chunk;
-          setMessages(prev => {
-            const last = prev[prev.length - 1];
-            if (last?.role === "assistant") {
-              return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-            }
-            return [...prev, { role: "assistant", content: assistantSoFar }];
-          });
-        },
-        () => { setIsLoading(false); onStateChange("idle"); }
-      );
+      await new Promise<void>((resolve, reject) => {
+        streamChat(
+          updatedMsgs,
+          (chunk) => {
+            if (firstToken) { onStateChange("responding"); firstToken = false; }
+            assistantSoFar += chunk;
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant") {
+                const result = prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+                finalMsgs = result;
+                return result;
+              }
+              const result = [...prev, { role: "assistant" as const, content: assistantSoFar }];
+              finalMsgs = result;
+              return result;
+            });
+          },
+          () => { setIsLoading(false); onStateChange("idle"); resolve(); }
+        ).catch(reject);
+      });
     } catch (e) {
       setIsLoading(false);
       onStateChange("idle");
-      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${e instanceof Error ? e.message : "Onbekende fout"}` }]);
+      const errMsg: Msg = { role: "assistant", content: `⚠️ ${e instanceof Error ? e.message : "Onbekende fout"}` };
+      finalMsgs = [...updatedMsgs, errMsg];
+      setMessages(finalMsgs);
     }
-  };
+
+    return finalMsgs;
+  }, [streamChat, onStateChange]);
+
+  /* ── Process queue sequentially ── */
+  const processQueue = useCallback(async () => {
+    if (processingRef.current) return;
+    processingRef.current = true;
+
+    let currentMessages: Msg[] = [];
+    setMessages(prev => { currentMessages = prev; return prev; });
+
+    while (true) {
+      let nextText: string | undefined;
+      setQueue(prev => {
+        if (prev.length === 0) { nextText = undefined; return prev; }
+        nextText = prev[0];
+        return prev.slice(1);
+      });
+
+      // Small delay to let state settle
+      await new Promise(r => setTimeout(r, 50));
+
+      // Re-read queue length
+      let queueEmpty = false;
+      setQueue(prev => { queueEmpty = prev.length === 0 && !nextText; return prev; });
+
+      if (!nextText) break;
+
+      currentMessages = await processMessage(nextText, currentMessages);
+    }
+
+    processingRef.current = false;
+  }, [processMessage]);
+
+  /* ── Send: validate immediately, queue if busy ── */
+  const send = useCallback(async () => {
+    const text = input.trim();
+    if (!text) return;
+
+    const check = validateMessage(text);
+    if (!check.valid) {
+      // Show inline validation feedback
+      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${check.reason}` }]);
+      return;
+    }
+
+    setInput("");
+
+    if (isLoading || processingRef.current) {
+      // Queue the message
+      setQueue(prev => [...prev, text]);
+      return;
+    }
+
+    // Process directly
+    processingRef.current = true;
+    let currentMessages: Msg[] = [];
+    setMessages(prev => { currentMessages = prev; return prev; });
+
+    currentMessages = await processMessage(text, currentMessages);
+
+    // Drain any messages that were queued during processing
+    while (true) {
+      let nextText: string | undefined;
+      setQueue(prev => {
+        if (prev.length === 0) return prev;
+        nextText = prev[0];
+        return prev.slice(1);
+      });
+      await new Promise(r => setTimeout(r, 50));
+      if (!nextText) break;
+      currentMessages = await processMessage(nextText, currentMessages);
+    }
+
+    processingRef.current = false;
+  }, [input, isLoading, validateMessage, processMessage]);
+
+  /* ── Remove item from queue ── */
+  const removeFromQueue = useCallback((idx: number) => {
+    setQueue(prev => prev.filter((_, i) => i !== idx));
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
@@ -577,6 +677,31 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
         <div ref={bottomRef} />
       </div>
 
+      {/* Queue indicator */}
+      {queue.length > 0 && (
+        <div className="shrink-0 px-4 pt-2">
+          <div className="bg-muted/50 border border-border rounded-lg px-3 py-2 space-y-1.5">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+              <ListOrdered className="w-3.5 h-3.5 text-primary" />
+              <span className="font-semibold text-foreground">{queue.length} bericht{queue.length > 1 ? "en" : ""} in wachtrij</span>
+            </div>
+            {queue.map((q, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-[11px] text-muted-foreground pl-5">
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate flex-1">{q}</span>
+                <button
+                  onClick={() => removeFromQueue(idx)}
+                  className="text-[10px] text-destructive/60 hover:text-destructive transition-colors shrink-0"
+                  title="Verwijder uit wachtrij"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="shrink-0 p-4 border-t border-border">
         <div className="flex items-end gap-2 bg-card rounded-xl border border-border px-3 py-2 focus-within:border-primary/40 transition-colors shadow-sm">
@@ -585,17 +710,36 @@ const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Stel een vraag aan HBMaster..."
+            placeholder={isLoading ? "Typ alvast — wordt in wachtrij geplaatst…" : "Stel een vraag aan HBMaster..."}
             rows={1}
             className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground resize-none outline-none max-h-32 min-h-[36px]"
             style={{ height: "auto" }}
             onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
           />
-          <button onClick={send} disabled={isLoading || !input.trim()}
-            className="w-8 h-8 rounded-lg bg-gradient-brand hover:opacity-90 disabled:opacity-30 flex items-center justify-center transition-all shrink-0">
-            <Send className="w-4 h-4 text-primary-foreground" />
+          <button onClick={send} disabled={!input.trim()}
+            className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0",
+              isLoading && input.trim()
+                ? "bg-muted border border-primary/30 hover:bg-primary/10"
+                : "bg-gradient-brand hover:opacity-90 disabled:opacity-30"
+            )}>
+            {isLoading && input.trim() ? (
+              <ListOrdered className="w-4 h-4 text-primary" />
+            ) : (
+              <Send className="w-4 h-4 text-primary-foreground" />
+            )}
           </button>
         </div>
+        {/* Validation check indicator */}
+        {input.trim().length > 0 && (
+          <div className="flex items-center gap-1.5 mt-1.5 px-1">
+            {validateMessage(input.trim()).valid ? (
+              <><Check className="w-3 h-3 text-accent" /><span className="text-[10px] text-accent font-mono">Klaar om te verzenden</span></>
+            ) : (
+              <><AlertTriangle className="w-3 h-3 text-destructive" /><span className="text-[10px] text-destructive font-mono">{validateMessage(input.trim()).reason}</span></>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
