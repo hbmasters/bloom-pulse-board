@@ -150,7 +150,7 @@ const MissionControl = () => {
                   <AIHologram state={aiState} compact={messageCount > 0} />
                 </div>
                 <div className={`flex-1 min-h-0 ${messageCount > 0 ? "relative z-10" : ""}`}>
-                  <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} />
+                  <ChatThread onStateChange={setAiState} onMessageCount={setMessageCount} chatMode={chatMode} />
                 </div>
 
                 <div className="md:hidden xl:hidden">
