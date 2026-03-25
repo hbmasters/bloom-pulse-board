@@ -325,7 +325,7 @@ interface ChatThreadProps {
   chatMode?: "local" | "telegram";
 }
 
-const ChatThread = ({ onStateChange, onMessageCount }: ChatThreadProps) => {
+const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatThreadProps) => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
