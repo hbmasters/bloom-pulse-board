@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro, ListOrdered, Check, Clock } from "lucide-react";
+import { Send, ChevronDown, ChevronUp, Loader2, CheckCircle2, Circle, Sparkles, BarChart3, CreditCard, Truck, AlertTriangle, Blocks, Euro, ListOrdered, Check, Clock, Copy, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AnalysisPresentation from "@/components/analysis-presentation/AnalysisPresentation";
 import type { AnalysisPresentationData } from "@/components/analysis-presentation/types";
@@ -317,6 +317,35 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
   );
 };
 
+/* ── Copy button ── */
+
+const CopyButton = ({ content }: { content: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* fallback silent */ }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={cn(
+        "shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all mt-1 opacity-0 group-hover/msg:opacity-100",
+        copied
+          ? "bg-accent/15 text-accent"
+          : "bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+      )}
+      title={copied ? "Gekopieerd!" : "Kopieer tekst"}
+    >
+      {copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
+};
+
 /* ── Main component ── */
 
 interface ChatThreadProps {
@@ -596,7 +625,7 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
           const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
 
           return (
-            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"} group/msg`}>
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
@@ -612,23 +641,17 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
                           <p className="text-sm">{text}</p>
                         ) : (
                           <>
-                            {/* Verified response card (replaces old workflow) */}
                             {verified && <VerifiedResponseCard data={verified} />}
-
-                            {/* Plain text (only if no verified card, or as supplement) */}
                             {text && !verified && (
                               <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                 <ReactMarkdown>{text}</ReactMarkdown>
                               </div>
                             )}
-
-                            {/* Supplementary text below verified card */}
                             {text && verified && (
                               <div className="mt-2 pt-2 border-t border-border prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                 <ReactMarkdown>{text}</ReactMarkdown>
                               </div>
                             )}
-
                             {hasPartialBlock && (
                               <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
                                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
@@ -651,6 +674,11 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
                       </div>
                     )}
                   </div>
+
+                  {/* Copy button for assistant messages */}
+                  {!isUser && !isStreaming && text && (
+                    <CopyButton content={text} />
+                  )}
 
                   {productCard && (
                     <button
