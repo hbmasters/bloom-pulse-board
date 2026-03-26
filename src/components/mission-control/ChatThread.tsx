@@ -596,7 +596,7 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
           const hasPartialBlock = isStreaming && /```hbmaster-\w+/.test(msg.content) && !/```hbmaster-\w+\n[\s\S]*?```/.test(msg.content.slice(msg.content.lastIndexOf("```hbmaster-")));
 
           return (
-            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"} group/msg`}>
               <div className={`${isUser ? "max-w-[85%]" : "max-w-[92%] w-full"} space-y-3`}>
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0 flex items-start gap-0 overflow-hidden">
@@ -612,23 +612,17 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
                           <p className="text-sm">{text}</p>
                         ) : (
                           <>
-                            {/* Verified response card (replaces old workflow) */}
                             {verified && <VerifiedResponseCard data={verified} />}
-
-                            {/* Plain text (only if no verified card, or as supplement) */}
                             {text && !verified && (
                               <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                 <ReactMarkdown>{text}</ReactMarkdown>
                               </div>
                             )}
-
-                            {/* Supplementary text below verified card */}
                             {text && verified && (
                               <div className="mt-2 pt-2 border-t border-border prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                 <ReactMarkdown>{text}</ReactMarkdown>
                               </div>
                             )}
-
                             {hasPartialBlock && (
                               <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
                                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
@@ -651,6 +645,11 @@ const ChatThread = ({ onStateChange, onMessageCount, chatMode = "local" }: ChatT
                       </div>
                     )}
                   </div>
+
+                  {/* Copy button for assistant messages */}
+                  {!isUser && !isStreaming && text && (
+                    <CopyButton content={text} />
+                  )}
 
                   {productCard && (
                     <button
