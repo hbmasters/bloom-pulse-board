@@ -317,6 +317,35 @@ const ThinkingBubble = ({ isAnalysis = false }: { isAnalysis?: boolean }) => {
   );
 };
 
+/* ── Copy button ── */
+
+const CopyButton = ({ content }: { content: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* fallback silent */ }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={cn(
+        "shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all mt-1 opacity-0 group-hover/msg:opacity-100",
+        copied
+          ? "bg-accent/15 text-accent"
+          : "bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+      )}
+      title={copied ? "Gekopieerd!" : "Kopieer tekst"}
+    >
+      {copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
+};
+
 /* ── Main component ── */
 
 interface ChatThreadProps {
